@@ -6,6 +6,11 @@ import { useSessao } from '../lib/contexto'
 import { CredencialInvalida } from '../data/api'
 import { Marca } from '../shell/Marca'
 
+function modoDemo() {
+  if (import.meta.env.VITE_DEMO === '1') return true
+  try { return sessionStorage.getItem('hiadv-modo-demo') === '1' } catch { return false }
+}
+
 export function Login() {
   const sessao = useSessao()
   const nav = useNavigate()
@@ -36,6 +41,7 @@ export function Login() {
       <div className="login-caixa">
         <Marca />
         <h1>Entrar no HiAdv</h1>
+        {modoDemo() && <p className="login-demo">Prévia com dados fictícios. Use qualquer e-mail e a senha <b>demo</b>.</p>}
         {sessao.aviso && <p className="login-aviso" role="status">{sessao.aviso}</p>}
         <form onSubmit={enviar} noValidate className="login-form">
           <Field label="E-mail" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />

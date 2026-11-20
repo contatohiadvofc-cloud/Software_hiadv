@@ -20,8 +20,11 @@ function dia(n: number): string {
   return diaSP(new Date(Date.now() + n * 86400000))
 }
 
+function ler(): boolean { try { return sessionStorage.getItem('hiadv-demo') === '1' } catch { return false } }
+function gravar(v: boolean) { try { if (v) sessionStorage.setItem('hiadv-demo', '1'); else sessionStorage.removeItem('hiadv-demo') } catch { /* sem armazenamento */ } }
+
 export function criarApiDemo(): Api {
-  let logado = sessionStorage.getItem('hiadv-demo') === '1'
+  let logado = ler()
   let atual = 'demo-sp'
   const ouvintes = new Set<(v: boolean) => void>()
   const avisar = () => ouvintes.forEach((f) => f(logado))
@@ -30,9 +33,9 @@ export function criarApiDemo(): Api {
     async temSessao() { return logado },
     async entrar(_email, senha) {
       if (senha !== 'demo') throw new CredencialInvalida()
-      logado = true; sessionStorage.setItem('hiadv-demo', '1'); avisar()
+      logado = true; gravar(true); avisar()
     },
-    async sair() { logado = false; sessionStorage.removeItem('hiadv-demo'); avisar() },
+    async sair() { logado = false; gravar(false); avisar() },
     aoMudarSessao(fn) { ouvintes.add(fn); return () => ouvintes.delete(fn) },
     async perfil(): Promise<Perfil> {
       return { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: 'code', escritorioId: atual, escritorioNome: ESCRITORIOS.find((e) => e.id === atual)!.nome }

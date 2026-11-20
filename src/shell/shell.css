@@ -98,6 +98,7 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
 .login-caixa h1 { font-size: var(--fs-xl); }
 .login-form { display: flex; flex-direction: column; gap: var(--s-4); }
 .login-aviso { padding: var(--s-3); border-radius: var(--r); background: var(--warning-soft); color: var(--warning); font-weight: 500; font-size: var(--fs-sm); }
+.login-demo { padding: var(--s-3); border-radius: var(--r); background: var(--accent-soft); color: var(--accent-soft-ink); font-size: var(--fs-sm); }
 .login-rodape { font-size: var(--fs-sm); }
 
 /* ---------- catálogo ---------- */

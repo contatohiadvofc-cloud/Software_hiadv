@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createRootRoute, createRoute, createRouter, Outlet, redirect, RouterProvider } from '@tanstack/react-router'
+import { createHashHistory, createRootRoute, createRoute, createRouter, Outlet, redirect, RouterProvider } from '@tanstack/react-router'
 import type { Api } from './data/api'
 import { SessaoExpirada } from './data/api'
 import { ApiProvider, SessaoProvider } from './lib/contexto'
@@ -27,7 +27,9 @@ const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', befor
 const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
-  return createRouter({ routeTree: arvore, defaultPreload: false })
+  // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.
+  const previa = import.meta.env.VITE_PREVIA === '1'
+  return createRouter({ routeTree: arvore, defaultPreload: false, ...(previa ? { history: createHashHistory() } : {}) })
 }
 
 declare module '@tanstack/react-router' {
