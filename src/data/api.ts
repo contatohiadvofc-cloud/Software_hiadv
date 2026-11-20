@@ -1,4 +1,5 @@
 import type { ItemDia } from './seuDia'
+import type { Quadro } from './quadro'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
 export type Perfil = { email: string; nome: string; papel: Papel | null; escritorioId: string | null; escritorioNome: string }
@@ -25,4 +26,7 @@ export interface Api {
   areas(): Promise<Area[]>
   busca(q: string): Promise<Achado[]>
   itensDoDia(email: string): Promise<ItemDia[]>
+  quadro(area: string): Promise<Quadro>
+  /** Muda o caso de etapa. Fica no histórico do caso (registro do servidor). */
+  moverCaso(id: string, status: string, motivo?: string): Promise<void>
 }

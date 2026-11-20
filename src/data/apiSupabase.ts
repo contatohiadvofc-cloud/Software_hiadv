@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient, type PostgrestError } from '@supabas
 import type { Api, Achado, Area, Escritorio, Papel, Perfil } from './api'
 import { CredencialInvalida, SessaoExpirada } from './api'
 import { diaSP, horaSP, type ItemDia } from './seuDia'
+import type { Quadro } from './quadro'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
   if (r.error) {
@@ -91,6 +92,22 @@ export function criarApiSupabase(url: string, chave: string): Api {
         itens.push({ id: `a:${a.id}`, tipo: 'audiencia', titulo: `Audiência ${a.tipo ?? ''}`.trim(), sub: (a.local as string) ?? '', dia: diaSP(d), hora: horaSP(d), quem: (a.responsavel as string) ?? '' })
       }
       return itens
+    },
+    async quadro(area): Promise<Quadro> {
+      const [et, cs] = await Promise.all([
+        sb.from('fluxo_status').select('status, ordem, final, pede_motivo').eq('area', area).order('ordem'),
+        sb.rpc('casos_quadro', { p_via: area }),
+      ])
+      const etapas = (verificar(et) ?? []).map((e) => ({ status: e.status as string, ordem: e.ordem as number, final: !!e.final, pedeMotivo: !!e.pede_motivo }))
+      const casos = ((verificar(cs) as Array<Record<string, unknown>> | null) ?? []).map((c) => ({
+        id: c.id as string, cliente: (c.cliente as string) ?? '', status: c.status as string, dias: Number(c.dias ?? 0),
+        produto: (c.produto as string) ?? null, numeroCnj: (c.numero_cnj as string) ?? null,
+        gateOk: Number(c.gate_ok ?? 0), gateTotal: Number(c.gate_total ?? 0),
+      }))
+      return { etapas, casos }
+    },
+    async moverCaso(id, status, motivo) {
+      verificar(await sb.rpc('caso_status', { p_caso: id, p_status: status, p_motivo: motivo ?? null }))
     },
   }
 }
