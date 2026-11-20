@@ -1,0 +1,89 @@
+/* HiAdv · tokens do design system (direção A · Registro).
+   Trocar a identidade visual = mudar só este arquivo. */
+:root,
+[data-theme='light'] {
+  --font: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  /* superfícies */
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #eef2f5;
+  --line: #e1e5ea;
+  --line-strong: #c9d0d8;
+
+  /* texto */
+  --ink: #16202e;
+  --ink-2: #4f5a68;
+  --ink-3: #6b7480;
+
+  /* marca e ação */
+  --accent: #1d5c4d;
+  --accent-hover: #164a3e;
+  --accent-ink: #ffffff;
+  --accent-soft: #e6f0ec;
+  --accent-soft-ink: #174d40;
+  --brand-mark: #16202e;
+  --brand-mark-ink: #ffffff;
+
+  /* estados (diferem também em claridade, não só em matiz) */
+  --info: #1f5fbf;    --info-soft: #e8f0fc;
+  --success: #1f7a4d; --success-soft: #e5f4ec;
+  --warning: #a8530a; --warning-soft: #fcefe1;
+  --danger: #b42318;  --danger-soft: #fdecea; --danger-solid: #b42318;
+
+  /* tipos de item */
+  --t-prazo: #c4620f;
+  --t-audiencia: #2f6fd6;
+  --t-pericia: #7a4cd9;
+  --t-tarefa: #8a94a3;
+
+  /* forma e ritmo */
+  --r-sm: 6px;
+  --r: 8px;
+  --r-lg: 12px;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px;
+  --shadow-pop: 0 12px 32px -12px rgb(22 32 46 / 0.28);
+  --focus: 0 0 0 3px rgb(29 92 77 / 0.35);
+  --sidebar-w: 248px;
+  --touch: 44px;
+
+  /* escala tipográfica (razão ~1.2) */
+  --fs-xs: 12px; --fs-sm: 13px; --fs-md: 15px; --fs-lg: 17px; --fs-xl: 22px; --fs-2xl: 28px;
+
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --dur: 160ms;
+  color-scheme: light;
+}
+
+[data-theme='dark'] {
+  --bg: #0f1419;
+  --surface: #161c23;
+  --surface-2: #1d242d;
+  --line: #27303a;
+  --line-strong: #36414d;
+  --ink: #e8ecf0;
+  --ink-2: #b2bbc5;
+  --ink-3: #8f99a4;
+  --accent: #4fae93;
+  --accent-hover: #63c1a6;
+  --accent-ink: #0b1a15;
+  --accent-soft: #1b2e29;
+  --accent-soft-ink: #8fd6c0;
+  --brand-mark: #e8ecf0;
+  --brand-mark-ink: #0f1419;
+  --info: #79a9f2;    --info-soft: #1a2638;
+  --success: #6cc89a; --success-soft: #16291f;
+  --warning: #eda25e; --warning-soft: #33240f;
+  --danger: #f2887e;  --danger-soft: #361a17; --danger-solid: #b8382c;
+  --t-prazo: #eb9450;
+  --t-audiencia: #7aa8f5;
+  --t-pericia: #ad8df0;
+  --t-tarefa: #8f99a4;
+  --shadow-pop: 0 12px 32px -12px rgb(0 0 0 / 0.6);
+  --focus: 0 0 0 3px rgb(79 174 147 / 0.45);
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur: 0ms; }
+}
