@@ -45,6 +45,7 @@ export function Areas() {
       </Panel>
       <Panel title="Do escritório" labelId="areas-mais">
         <ul className="areas-lista">
+          <li><Link to="/atendimentos" className="areas-item">Atendimentos (novos contatos)<span aria-hidden="true">›</span></Link></li>
           <li><Link to="/publicacoes" className="areas-item">Publicações e intimações<span aria-hidden="true">›</span></Link></li>
           {gestor && <li><Link to="/relatorios" className="areas-item">Relatórios<span aria-hidden="true">›</span></Link></li>}
           {gestor && <li><Link to="/financeiro" className="areas-item">Financeiro<span aria-hidden="true">›</span></Link></li>}

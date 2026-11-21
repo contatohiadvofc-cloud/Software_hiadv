@@ -41,6 +41,10 @@ export type Cenario = {
   /** login da equipe: 'primeiro_acesso' simula quem ainda não criou a senha pessoal */
   loginEquipe?: 'ok' | 'primeiro_acesso' | 'bloqueado' | 'fora'
   pacotes?: Array<Record<string, unknown>>
+  leads?: Array<Record<string, unknown>>
+  horas?: Array<Record<string, unknown>>
+  portal?: Record<string, unknown> | null
+  portalAtivo?: boolean
 }
 
 function b64url(o: object) {
@@ -157,6 +161,39 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
         const erros = linhas.filter((l) => l.resultado === 'erro').length
         return json(r, { ok: true, simulado: b.p_simular, novos: linhas.length - erros, existentes: 0, erros, linhas })
       }
+      if (nome === 'hiadv_leads') return json(r, c.leads ?? [])
+      if (nome === 'hiadv_lead_salvar') {
+        const b = registrar() as { p_id: string | null; p: Record<string, unknown> }
+        const lista = c.leads ?? (c.leads = [])
+        if (b.p_id) Object.assign(lista.find((x) => x.id === b.p_id) ?? {}, b.p)
+        else lista.unshift({ id: `ld-${lista.length + 1}`, ...b.p, telefone: String(b.p.telefone ?? '').replace(/\D/g, '') || null, etapa: 'novo', criado_em: '2026-11-21T12:00:00Z' })
+        return json(r, { ok: true, id: b.p_id ?? 'ld-novo' })
+      }
+      if (nome === 'hiadv_lead_etapa') {
+        const b = registrar() as { p_id: string; p_etapa: string; p_motivo: string | null }
+        const l = (c.leads ?? []).find((x) => x.id === b.p_id); if (l) { l.etapa = b.p_etapa; l.motivo_perda = b.p_motivo }
+        return json(r, { ok: true })
+      }
+      if (nome === 'hiadv_lead_converter') {
+        const b = registrar() as { p_id: string }
+        const l = (c.leads ?? []).find((x) => x.id === b.p_id); if (l) l.etapa = 'contratou'
+        return json(r, { ok: true, cliente: 'c1', caso: 'k-novo' })
+      }
+      if (nome === 'hiadv_horas_cliente') return json(r, c.horas ?? [])
+      if (nome === 'hiadv_horas_lancar') {
+        const b = registrar() as { p: { minutos: number; descricao: string; dia: string } }
+        ;(c.horas ?? (c.horas = [])).unshift({ id: `h${(c.horas ?? []).length + 1}`, email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', descricao: b.p.descricao || null, dia: b.p.dia, minutos: b.p.minutos, minha: true })
+        return json(r, { ok: true, id: 'h-novo' })
+      }
+      if (nome === 'hiadv_horas_remover') { const b = registrar() as { p_id: string }; c.horas = (c.horas ?? []).filter((h) => h.id !== b.p_id); return json(r, { ok: true }) }
+      if (nome === 'hiadv_portal_gerar') { registrar(); c.portalAtivo = true; return json(r, { ok: true, token: 'f'.repeat(64), expira_em: '2027-02-19T12:00:00Z' }) }
+      if (nome === 'hiadv_portal_situacao') return json(r, c.portalAtivo ? { ativo: true, expira_em: '2027-02-19T12:00:00Z', acessos: 2, ultimo_acesso: null } : { ativo: false })
+      if (nome === 'hiadv_portal_revogar') { registrar(); c.portalAtivo = false; return json(r, { ok: true }) }
+      if (nome === 'hiadv_portal') { const b = registrar() as { p_token: string }; return json(r, c.portal && b.p_token === 'f'.repeat(64) ? { ok: true, ...c.portal } : { ok: false }) }
+      if (nome === 'hiadv_escritorio_contato') return json(r, { nome: 'Silva & Prado Advocacia', cidade: 'Joinville', whatsapp: '4733330000' })
+      if (nome === 'hiadv_escritorio_contato_salvar') { registrar(); return json(r, { ok: true }) }
+      if (nome === 'hiadv_agenda_link_existe') return json(r, false)
+      if (nome === 'hiadv_agenda_link_gerar') { registrar(); return json(r, { ok: true, token: 'e'.repeat(64) }) }
       if (nome === 'caso_detalhe') return json(r, c.detalhe ?? null)
       if (nome === 'caso_campos_salvar') {
         const corpo = req.postDataJSON() as Record<string, unknown>

@@ -7,6 +7,7 @@ import { textoFalha, validarRegras, type RegrasAtencao } from '../data/atencao'
 import { useAreas } from '../data/consultas'
 import { FichaCaso } from './FichaCaso'
 import { Panel } from '../design/components/Panel'
+import { AgendaNoGoogle, ContatoEscritorio } from './ConfigContatoAgenda'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
 import { Button } from '../design/components/Button'
@@ -321,7 +322,10 @@ export function Configuracoes() {
   const ag = useQuery({ queryKey: ['agentes', perfil?.escritorioId], queryFn: () => api.agentes(), enabled: !!perfil && gestor })
   const atualizar = () => { qc.invalidateQueries({ queryKey: ['integracoes'] }); qc.invalidateQueries({ queryKey: ['agentes'] }) }
 
-  const aparelho = <Panel title="Este aparelho" labelId="cfg-aparelho"><DesbloqueioNesteAparelho /></Panel>
+  const aparelho = <>
+    <Panel title="Este aparelho" labelId="cfg-aparelho"><DesbloqueioNesteAparelho /></Panel>
+    <section id="agenda-google"><Panel title="Agenda no Google" labelId="cfg-agenda"><AgendaNoGoogle /></Panel></section>
+  </>
   if (perfil && !gestor) return (
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Configurações</h1></div></div>
@@ -335,6 +339,8 @@ export function Configuracoes() {
       <div className="pagina-cabeca"><div><h1>Configurações</h1><p className="muted">{perfil?.escritorioNome}. Cada escritório tem as suas chaves, os seus custos e os seus agentes.</p></div></div>
 
       {aparelho}
+
+      <section id="contato"><Panel title="Contato do escritório" labelId="cfg-contato"><ContatoEscritorio /></Panel></section>
 
       <section id="oabs"><Panel title="OABs acompanhadas" labelId="cfg-oabs"><OabsAcompanhadas /></Panel></section>
 

@@ -10,6 +10,9 @@ import type { DadosCliente, DadosDocumento } from './modelos'
 import type { Honorario, Lancamento, NovoHonorario, NovoLancamento } from './financeiro'
 import type { Oabs, PedidoPrazo, Publicacao, ResultadoPrazo } from './publicacoes'
 import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
+import type { EtapaLead, Lead, NovoLead } from './atendimentos'
+import type { NovasHoras, RegistroHoras } from './horas'
+import type { Portal, SituacaoPortal } from './portal'
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
@@ -140,4 +143,27 @@ export interface Api {
   criarCaso(c: NovoCaso): Promise<string>
   /** Só o gestor. Com simular = true nada é gravado. */
   importarClientes(itens: NovoCliente[], simular: boolean): Promise<ResultadoImportacao>
+  /** Atendimentos (pessoas interessadas que ainda não são clientes): abertos e os fechados nos últimos 60 dias. */
+  leads(): Promise<Lead[]>
+  /** Inclui (id null) ou edita. Devolve o id. */
+  salvarLead(id: string | null, l: NovoLead): Promise<string>
+  /** Muda a etapa; "perdido" pede o motivo. Para "contratou", use converterLead. */
+  etapaLead(id: string, etapa: Exclude<EtapaLead, 'contratou'>, motivo?: string): Promise<void>
+  /** Virou cliente: cria (ou reaproveita) o cliente e abre o caso na área. */
+  converterLead(id: string, area: string, produto: string | null): Promise<{ cliente: string; caso: string | null }>
+  horasCliente(clienteId: string): Promise<RegistroHoras[]>
+  lancarHoras(h: NovasHoras): Promise<void>
+  removerHoras(id: string): Promise<void>
+  /** Gera um link novo de acompanhamento (o anterior deixa de valer). O token só aparece aqui. */
+  portalGerar(clienteId: string): Promise<{ token: string; expiraEm: string }>
+  portalSituacao(clienteId: string): Promise<SituacaoPortal>
+  portalRevogar(clienteId: string): Promise<void>
+  /** Página pública do cliente (sem login); null se o link não vale mais. */
+  portal(token: string): Promise<Portal | null>
+  contatoEscritorio(): Promise<{ nome: string; cidade: string | null; whatsapp: string | null }>
+  /** Só o Gestor Master. */
+  salvarContatoEscritorio(cidade: string, whatsapp: string): Promise<void>
+  /** Gera (ou troca) o link pessoal da agenda; o anterior deixa de funcionar. Devolve o endereço para o Google Agenda. */
+  agendaLinkGerar(): Promise<string>
+  agendaLinkExiste(): Promise<boolean>
 }

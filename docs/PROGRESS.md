@@ -55,7 +55,16 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [ ] Google Drive: pasta compartilhada, mapa de nomes, relacionar pasta ao cliente com aprovação, importar só ativos com aprovação.
 - [ ] Documentos, publicações virando tarefa, novo cliente/novo caso.
 
-Testes: 94 de lógica e 163 de tela, todos passando.
+- [x] Atendimentos (21/11, sem custo): quadro Novo contato → Em conversa → Proposta enviada, com próximo contato (avisa quando atrasa), WhatsApp pronto, "Não fechou" com motivo e "Virou cliente" (cadastra o cliente, abre o caso na área e leva para a página dele). Celular: abas por etapa.
+- [x] Acompanhamento pelo cliente (21/11, sem custo): link pessoal de 90 dias, sem senha, gerado na página do cliente; mostra só a fase em linguagem simples e os próximos compromissos, com botão para o WhatsApp do escritório. O envio é sempre pelo advogado (WhatsApp pronto). Gerar outro ou "Desativar link" invalida o anterior. O servidor guarda só o resumo (hash) do link.
+- [x] Horas trabalhadas (21/11): cronômetro (continua mesmo se fechar a tela) ou lançamento manual ("1h30", "45", "1:15"); o colaborador vê as dele, o Gestor Master vê todas.
+- [x] Agenda no Google (21/11, sem custo): cada pessoa gera um link pessoal (Configurações) e o Google Agenda assina; prazos, perícias e audiências com lembrete. Função `agenda` (servidor) sem login, só com o token.
+- [x] Produtividade nos Relatórios: % de tarefas feitas no prazo, horas por pessoa e funil dos atendimentos (taxa de conversão e motivos de não fechar).
+- [x] Contato do escritório (Gestor Master): WhatsApp e cidade, usados na página do cliente.
+- Correção: o aviso "sem sessão" do início não apaga mais consultas públicas em andamento (só limpa a memória de quem esteve logado).
+- SQL `hiadv2-leva2.sql` + `hiadv2-relatorios.sql` (nova versão) e função `funcao-agenda.ts` no TESTE, conferidos por papel (gestor/colaborador/visitante sem login).
+
+Testes: 106 de lógica e 186 de tela, todos passando.
 
 ## Para os gestores aprovarem / fazerem
 

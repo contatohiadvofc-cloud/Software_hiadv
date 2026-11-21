@@ -3,7 +3,8 @@ export type Relatorio = {
   casos: { abertos: number; novos: number; encerrados: number }
   etapas: { area: string; etapa: string; casos: number; media_dias: number; maior_dias: number }[]
   ciclo: { area: string; casos: number; media_dias: number }[]
-  pessoas: { email: string; nome: string; abertas: number; atrasadas: number; feitas: number; casos: number }[]
+  pessoas: { email: string; nome: string; abertas: number; atrasadas: number; feitas: number; no_prazo?: number; minutos?: number; casos: number }[]
+  atendimentos?: { novos: number; contratou: number; perdido: number; em_aberto: number; motivos: { motivo: string; n: number }[] }
   clientes: { total: number; novos: number; origens: { origem: string; n: number }[] }
   prazos: { publicacoes: number; cumpridos: number; em_aberto: number; vencidos: number }
   financeiro: { meses: { mes: string; recebido: number; pago: number }[]; em_atraso: number; a_receber: number; clientes_em_atraso: number }
@@ -21,3 +22,8 @@ export function gargalos(r: Relatorio, minimo = 7): Relatorio['etapas'] {
 }
 
 export const mesCurto = (m: string) => ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][Number(m.slice(5, 7)) - 1] + '/' + m.slice(2, 4)
+
+/** % das tarefas feitas no período que foram concluídas até o prazo; null sem tarefas. */
+export function noPrazo(p: { feitas: number; no_prazo?: number }): number | null {
+  return p.feitas ? Math.round(((p.no_prazo ?? 0) / p.feitas) * 100) : null
+}

@@ -15,6 +15,8 @@ import { FichaCaso } from './FichaCaso'
 import { NovoCasoDialog } from './Cadastro'
 import { HonorariosCliente } from './HonorariosCliente'
 import { DadosCliente } from './DadosCliente'
+import { AcompanhamentoCliente } from './AcompanhamentoCliente'
+import { HorasCliente } from './HorasCliente'
 import { GerarDocumentoDialog } from './GerarDocumento'
 import { Button } from '../design/components/Button'
 
@@ -89,6 +91,8 @@ export function Cliente() {
 
         <DadosCliente clienteId={c.id} />
         {gestor && <HonorariosCliente cliente={{ id: c.id, nome: c.nome }} />}
+        <AcompanhamentoCliente cliente={{ id: c.id, nome: c.nome, telefone: c.telefone }} />
+        <HorasCliente clienteId={c.id} />
         <Panel title="Tarefas abertas" labelId="cli-tar">
           {tarefas.length === 0 ? <Empty title="Nenhuma tarefa aberta para este cliente." /> : (
             <ul className="seu-dia-lista">

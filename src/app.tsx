@@ -18,6 +18,8 @@ const LBiblioteca = lazyRouteComponent(() => import('./routes/Biblioteca'), 'Bib
 const LPublicacoes = lazyRouteComponent(() => import('./routes/Publicacoes'), 'Publicacoes')
 const LFinanceiro = lazyRouteComponent(() => import('./routes/Financeiro'), 'Financeiro')
 const LRelatorios = lazyRouteComponent(() => import('./routes/Relatorios'), 'Relatorios')
+const LAtendimentos = lazyRouteComponent(() => import('./routes/Atendimentos'), 'Atendimentos')
+const LAcompanhar = lazyRouteComponent(() => import('./routes/Acompanhar'), 'Acompanhar')
 const LConfiguracoes = lazyRouteComponent(() => import('./routes/Configuracoes'), 'Configuracoes')
 const LAppShell = lazyRouteComponent(() => import('./shell/AppShell'), 'AppShellRota')
 
@@ -50,9 +52,12 @@ const publicacoes = createRoute({ getParentRoute: () => dentro, path: '/publicac
 const financeiro = createRoute({ getParentRoute: () => dentro, path: '/financeiro', component: LFinanceiro, head: () => ({ meta: [{ title: 'Financeiro · HiAdv' }] }) })
 const relatorios = createRoute({ getParentRoute: () => dentro, path: '/relatorios', component: LRelatorios, head: () => ({ meta: [{ title: 'Relatórios · HiAdv' }] }) })
 const configuracoes = createRoute({ getParentRoute: () => dentro, path: '/configuracoes', component: LConfiguracoes, head: () => ({ meta: [{ title: 'Configurações · HiAdv' }] }) })
+const atendimentos = createRoute({ getParentRoute: () => dentro, path: '/atendimentos', component: LAtendimentos, head: () => ({ meta: [{ title: 'Atendimentos · HiAdv' }] }) })
+// Página pública do cliente: fora da casca do app, sem login.
+const acompanhar = createRoute({ getParentRoute: () => raiz, path: '/acompanhar/$token', component: LAcompanhar, head: () => ({ meta: [{ title: 'Acompanhamento do seu caso' }, { name: 'robots', content: 'noindex' }, { name: 'referrer', content: 'no-referrer' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, configuracoes, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, dentro.addChildren([seuDia, atendimentos, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, configuracoes, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

@@ -13,6 +13,9 @@ import { nomeArquivoSeguro, type PacoteBiblioteca, type Agente, type EtapaEscrit
 import { lerValor } from './financeiro'
 import type { DadosDocumento } from './modelos'
 import type { Relatorio } from './relatorios'
+import type { Lead } from './atendimentos'
+import type { RegistroHoras } from './horas'
+import type { Portal } from './portal'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -448,6 +451,73 @@ export function criarApiSupabase(url: string, chave: string): Api {
         simulado: r.simulado === true, novos: Number(r.novos ?? 0), existentes: Number(r.existentes ?? 0), erros: Number(r.erros ?? 0),
         linhas: ((r.linhas as Record<string, unknown>[]) ?? []).map((l) => ({ linha: Number(l.linha), nome: String(l.nome ?? ''), resultado: l.resultado as 'novo' | 'ja' | 'erro', motivo: (l.motivo as string) ?? null })),
       }
+    },
+    async leads() {
+      const d = (verificar(await sb.rpc('hiadv_leads')) ?? []) as Record<string, unknown>[]
+      return d.map((x): Lead => ({
+        id: String(x.id), nome: String(x.nome), telefone: (x.telefone as string) ?? null, origem: (x.origem as string) ?? null, area: (x.area as string) ?? null,
+        assunto: (x.assunto as string) ?? null, etapa: x.etapa as Lead['etapa'], motivoPerda: (x.motivo_perda as string) ?? null, responsavel: (x.responsavel as string) ?? null,
+        proximoContato: (x.proximo_contato as string) ?? null, clienteId: (x.cliente_id as string) ?? null, criadoEm: String(x.criado_em),
+      }))
+    },
+    async salvarLead(id, l) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_lead_salvar', { p_id: id, p: {
+        nome: l.nome.trim(), telefone: l.telefone, origem: l.origem, area: l.area || null, assunto: l.assunto, responsavel: l.responsavel || null, proximo_contato: l.proximoContato || null,
+      } })))
+      return String(r.id)
+    },
+    async etapaLead(id, etapa, motivo) {
+      okOuErro(verificar(await sb.rpc('hiadv_lead_etapa', { p_id: id, p_etapa: etapa, p_motivo: motivo ?? null })))
+    },
+    async converterLead(id, area, produto) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_lead_converter', { p_id: id, p_area: area, p_produto: produto })))
+      return { cliente: String(r.cliente), caso: (r.caso as string) ?? null }
+    },
+    async horasCliente(clienteId) {
+      const d = (verificar(await sb.rpc('hiadv_horas_cliente', { p_cliente: clienteId })) ?? []) as Record<string, unknown>[]
+      return d.map((x): RegistroHoras => ({ id: String(x.id), email: String(x.email), nome: (x.nome as string) ?? null, descricao: (x.descricao as string) ?? null,
+        dia: String(x.dia), minutos: Number(x.minutos), minha: x.minha === true }))
+    },
+    async lancarHoras(h) {
+      okOuErro(verificar(await sb.rpc('hiadv_horas_lancar', { p: { cliente: h.cliente, caso: h.caso, descricao: h.descricao, dia: h.dia, minutos: h.minutos } })))
+    },
+    async removerHoras(id) {
+      okOuErro(verificar(await sb.rpc('hiadv_horas_remover', { p_id: id })))
+    },
+    async portalGerar(clienteId) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_portal_gerar', { p_cliente: clienteId })))
+      return { token: String(r.token), expiraEm: String(r.expira_em) }
+    },
+    async portalSituacao(clienteId) {
+      const r = (verificar(await sb.rpc('hiadv_portal_situacao', { p_cliente: clienteId })) ?? {}) as Record<string, unknown>
+      return { ativo: r.ativo === true, expiraEm: (r.expira_em as string) ?? null, acessos: Number(r.acessos ?? 0), ultimoAcesso: (r.ultimo_acesso as string) ?? null }
+    },
+    async portalRevogar(clienteId) {
+      okOuErro(verificar(await sb.rpc('hiadv_portal_revogar', { p_cliente: clienteId })))
+    },
+    async portal(token) {
+      const r = (verificar(await sb.rpc('hiadv_portal', { p_token: token })) ?? {}) as Record<string, unknown>
+      if (r.ok !== true) return null
+      const e = (r.escritorio ?? {}) as Record<string, unknown>
+      return {
+        escritorio: { nome: String(e.nome ?? ''), whatsapp: (e.whatsapp as string) ?? null }, cliente: String(r.cliente ?? ''), expiraEm: String(r.expira_em ?? ''),
+        casos: ((r.casos as Record<string, unknown>[]) ?? []).map((c) => ({ area: String(c.area), fase: String(c.fase), desde: (c.desde as string) ?? null, concluido: c.concluido === true })),
+        compromissos: ((r.compromissos as Record<string, unknown>[]) ?? []).map((c) => ({ tipo: String(c.tipo), quando: String(c.quando), local: (c.local as string) ?? null })),
+      } satisfies Portal
+    },
+    async contatoEscritorio() {
+      const r = (verificar(await sb.rpc('hiadv_escritorio_contato')) ?? {}) as Record<string, unknown>
+      return { nome: String(r.nome ?? ''), cidade: (r.cidade as string) ?? null, whatsapp: (r.whatsapp as string) ?? null }
+    },
+    async salvarContatoEscritorio(cidade, whatsapp) {
+      okOuErro(verificar(await sb.rpc('hiadv_escritorio_contato_salvar', { p_cidade: cidade, p_whatsapp: whatsapp })))
+    },
+    async agendaLinkGerar() {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_agenda_link_gerar')))
+      return `${url}/functions/v1/agenda?t=${String(r.token)}`
+    },
+    async agendaLinkExiste() {
+      return verificar(await sb.rpc('hiadv_agenda_link_existe')) === true
     },
     async falhas() {
       const r = await sb.rpc('falhas_listar')

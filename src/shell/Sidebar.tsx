@@ -23,6 +23,9 @@ export function Sidebar() {
         <Link to="/seu-dia" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />Seu dia
         </Link>
+        <Link to="/atendimentos" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+          <Icone d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 9h8M8 13h5" />Atendimentos
+        </Link>
         <Link to="/tarefas" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" />Tarefas
         </Link>

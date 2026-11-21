@@ -13,6 +13,21 @@ import type { Pessoa, Tarefa } from './tarefas'
 import type { ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
 import type { Agente, Integracao, ItemBiblioteca } from './escritorio'
+import { validarLead, type Lead } from './atendimentos'
+import type { RegistroHoras } from './horas'
+
+const hojeDemo = () => new Date().toISOString().slice(0, 10)
+const LEADS: Lead[] = [
+  { id: 'ld1', nome: 'Marcos Antunes', telefone: '49999220001', origem: 'Instagram', area: 'administrativo', assunto: 'Fraturou o punho no trabalho em 2023, voltou a trabalhar com dor.', etapa: 'novo', motivoPerda: null, responsavel: 'ana@silvaprado.exemplo.br', proximoContato: hojeDemo(), clienteId: null, criadoEm: new Date().toISOString() },
+  { id: 'ld2', nome: 'Paula Rech', telefone: '49999220002', origem: 'Indicação', area: 'trabalhista', assunto: 'Horas extras sem pagamento.', etapa: 'conversa', motivoPerda: null, responsavel: 'ana@silvaprado.exemplo.br', proximoContato: new Date(Date.now() - 2 * 864e5).toISOString().slice(0, 10), clienteId: null, criadoEm: new Date(Date.now() - 5 * 864e5).toISOString() },
+  { id: 'ld3', nome: 'Sérgio Batista', telefone: null, origem: 'Site', area: 'judicial', assunto: 'Auxílio-doença negado.', etapa: 'proposta', motivoPerda: null, responsavel: null, proximoContato: null, clienteId: null, criadoEm: new Date(Date.now() - 9 * 864e5).toISOString() },
+]
+const HORAS: (RegistroHoras & { cliente: string })[] = [
+  { id: 'hr1', email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', descricao: 'Reunião inicial e análise do CNIS', dia: hojeDemo(), minutos: 75, minha: true, cliente: 'c1' },
+]
+const PORTAIS = new Map<string, { cliente: string; expira: string; acessos: number }>()
+let contatoDemo = { cidade: 'Capinzal' as string | null, whatsapp: '49999990000' as string | null }
+let agendaDemo = false
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
 const ESCRITORIOS: Escritorio[] = [
@@ -573,9 +588,11 @@ export function criarApiDemo(): Api {
         ],
         ciclo: [{ area: 'administrativo', casos: 2, media_dias: 48 }],
         pessoas: [
-          { email: 'ana@demo.hiadv', nome: 'Ana Prado', abertas: 6, atrasadas: 1, feitas: 14, casos: 5 },
-          { email: 'julia@demo.hiadv', nome: 'Júlia Costa', abertas: 9, atrasadas: 3, feitas: 21, casos: 7 },
+          { email: 'ana@demo.hiadv', nome: 'Ana Prado', abertas: 6, atrasadas: 1, feitas: 14, no_prazo: 13, minutos: 1260, casos: 5 },
+          { email: 'julia@demo.hiadv', nome: 'Júlia Costa', abertas: 9, atrasadas: 3, feitas: 21, no_prazo: 16, minutos: 2140, casos: 7 },
         ],
+        atendimentos: { novos: LEADS.length + 9, contratou: 4, perdido: 3, em_aberto: LEADS.filter((l) => ['novo', 'conversa', 'proposta'].includes(l.etapa)).length,
+          motivos: [{ motivo: 'Sem direito ao benefício', n: 2 }, { motivo: 'Parou de responder', n: 1 }] },
         clientes: { total: CLIENTES.length, novos: 4, origens: [{ origem: 'whatsapp', n: 3 }, { origem: 'indicação', n: 1 }] },
         prazos: { publicacoes: 12, cumpridos: 9, em_aberto: 3, vencidos: 0 },
         financeiro: { meses: [5, 4, 3, 2, 1, 0].map((n, i) => ({ mes: mes(n), recebido: 1500 + i * 400, pago: 600 + i * 50 })), em_atraso: 800, a_receber: 1300, clientes_em_atraso: 1 },
@@ -623,6 +640,66 @@ export function criarApiDemo(): Api {
       if (!simular) for (const [i, l] of linhas.entries()) if (l.resultado === 'novo') await this.criarCliente(itens[i])
       return { simulado: simular, novos, existentes, erros, linhas }
     },
+    async leads() { return LEADS.map((l) => ({ ...l })) },
+    async salvarLead(id, l) {
+      const m = validarLead(l); if (m) throw new Error(m)
+      const dados = { nome: l.nome.trim(), telefone: l.telefone.replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, '') || null, origem: l.origem || null, area: l.area || null,
+        assunto: l.assunto.trim() || null, responsavel: l.responsavel || null, proximoContato: l.proximoContato || null }
+      if (id) { const x = LEADS.find((y) => y.id === id); if (!x) throw new Error('Atendimento não encontrado.'); Object.assign(x, dados); return id }
+      const novoId = `ld${Date.now()}`
+      LEADS.unshift({ id: novoId, ...dados, responsavel: dados.responsavel ?? 'ana@silvaprado.exemplo.br', etapa: 'novo', motivoPerda: null, clienteId: null, criadoEm: new Date().toISOString() })
+      return novoId
+    },
+    async etapaLead(id, etapa, motivo) {
+      const x = LEADS.find((y) => y.id === id); if (!x || x.etapa === 'contratou') throw new Error('Atendimento não encontrado ou já contratado.')
+      if (etapa === 'perdido' && (motivo ?? '').trim().length < 2) throw new Error('Diga o motivo.')
+      x.etapa = etapa; x.motivoPerda = etapa === 'perdido' ? motivo!.trim() : null
+    },
+    async converterLead(id, area, produto) {
+      const x = LEADS.find((y) => y.id === id); if (!x) throw new Error('Atendimento não encontrado.')
+      const cli = await this.criarCliente({ nome: x.nome, telefone: x.telefone ?? undefined })
+      const caso = await this.criarCaso({ cliente: cli.id, area, produto, relato: x.assunto ?? '', responsavel: x.responsavel })
+      x.etapa = 'contratou'; x.clienteId = cli.id
+      return { cliente: cli.id, caso }
+    },
+    async horasCliente(clienteId) { return HORAS.filter((h) => h.cliente === clienteId).map(({ cliente: _c, ...h }) => ({ ...h })) },
+    async lancarHoras(h) {
+      if (!h.minutos || h.minutos < 1 || h.minutos > 1440) throw new Error('Informe de 1 minuto a 24 horas.')
+      if (h.dia > hojeDemo()) throw new Error('Data no futuro.')
+      HORAS.unshift({ id: `hr${Date.now()}`, email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', descricao: h.descricao.trim() || null, dia: h.dia, minutos: h.minutos, minha: true, cliente: h.cliente ?? '' })
+    },
+    async removerHoras(id) { const i = HORAS.findIndex((h) => h.id === id); if (i < 0) throw new Error('Registro não encontrado.'); HORAS.splice(i, 1) },
+    async portalGerar(clienteId) {
+      for (const [t, p] of PORTAIS) if (p.cliente === clienteId) PORTAIS.delete(t)
+      const token = Array.from({ length: 64 }, () => '0123456789abcdef'[Math.floor(Math.random() * 16)]).join('')
+      const expira = new Date(Date.now() + 90 * 864e5).toISOString()
+      PORTAIS.set(token, { cliente: clienteId, expira, acessos: 0 })
+      return { token, expiraEm: expira }
+    },
+    async portalSituacao(clienteId) {
+      const p = [...PORTAIS.values()].find((x) => x.cliente === clienteId)
+      return p ? { ativo: true, expiraEm: p.expira, acessos: p.acessos, ultimoAcesso: null } : { ativo: false, expiraEm: null, acessos: 0, ultimoAcesso: null }
+    },
+    async portalRevogar(clienteId) { for (const [t, p] of PORTAIS) if (p.cliente === clienteId) PORTAIS.delete(t) },
+    async portal(token) {
+      const p = PORTAIS.get(token)
+      if (!p) return null
+      p.acessos++
+      const cli = CLIENTES.find((c) => c.id === p.cliente)
+      return {
+        escritorio: { nome: 'Silva & Prado Advocacia', whatsapp: contatoDemo.whatsapp }, cliente: (cli?.nome ?? '').split(' ')[0], expiraEm: p.expira,
+        casos: [{ area: 'Previdenciário administrativo', fase: 'Aguardando os seus documentos', desde: hojeDemo(), concluido: false }],
+        compromissos: [{ tipo: 'Perícia', quando: new Date(Date.now() + 6 * 864e5).toISOString(), local: 'Agência do INSS de Joaçaba' }],
+      }
+    },
+    async contatoEscritorio() { return { nome: 'Silva & Prado Advocacia', ...contatoDemo } },
+    async salvarContatoEscritorio(cidade, whatsapp) {
+      let w = whatsapp.replace(/\D/g, ''); if (w.length >= 12 && w.startsWith('55')) w = w.slice(2)
+      if (w && !/^\d{10,11}$/.test(w)) throw new Error('WhatsApp com DDD e número.')
+      contatoDemo = { cidade: cidade.trim() || null, whatsapp: w || null }
+    },
+    async agendaLinkGerar() { agendaDemo = true; return `https://exemplo.supabase.co/functions/v1/agenda?t=${'d'.repeat(64)}` },
+    async agendaLinkExiste() { return agendaDemo },
     async falhas() { return FALHAS.filter((f) => !RESOLVIDAS.has(f.id)).map((f) => ({ ...f })) },
     async resolverFalha(id) { RESOLVIDAS.add(id) },
     async pacotes() {

@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
-import { gargalos, largura, mesCurto } from '../data/relatorios'
+import { gargalos, largura, mesCurto, noPrazo } from '../data/relatorios'
+import { duracaoTela } from '../data/horas'
+import { taxaConversao } from '../data/atendimentos'
 import { nomeDaArea } from '../data/areas'
 import { moeda } from '../data/financeiro'
 import { rotuloEtapa } from '../data/quadro'
@@ -76,15 +78,29 @@ export function Relatorios() {
           <Panel title="Equipe" labelId="rel-equipe">
             <div className="hv-panel-body rel-tabela-rolagem" tabIndex={0} role="region" aria-label="Tabela da equipe">
               <table className="rel-tabela">
-                <thead><tr><th scope="col">Pessoa</th><th scope="col">Tarefas abertas</th><th scope="col">Atrasadas</th><th scope="col">Feitas no período</th><th scope="col">Casos</th></tr></thead>
+                <thead><tr><th scope="col">Pessoa</th><th scope="col">Tarefas abertas</th><th scope="col">Atrasadas</th><th scope="col">Feitas no período</th><th scope="col">No prazo</th><th scope="col">Horas</th><th scope="col">Casos</th></tr></thead>
                 <tbody>{r.pessoas.map((p) => (
                   <tr key={p.email}><th scope="row">{p.nome}</th>
                     <td><span className="rel-mini" style={{ width: `${largura(p.abertas, maxPessoa)}%` }} aria-hidden="true" />{p.abertas}</td>
-                    <td data-alerta={p.atrasadas > 0 ? 'true' : undefined}>{p.atrasadas}</td><td>{p.feitas}</td><td>{p.casos}</td></tr>
+                    <td data-alerta={p.atrasadas > 0 ? 'true' : undefined}>{p.atrasadas}</td><td>{p.feitas}</td>
+                    <td data-alerta={(noPrazo(p) ?? 100) < 80 ? 'true' : undefined}>{noPrazo(p) === null ? '–' : `${noPrazo(p)}%`}</td>
+                    <td>{p.minutos ? duracaoTela(p.minutos) : '–'}</td><td>{p.casos}</td></tr>
                 ))}</tbody>
               </table>
             </div>
           </Panel>
+
+          {r.atendimentos && (
+            <Panel title="Atendimentos (novos contatos)" labelId="rel-atend">
+              <div className="hv-panel-body">
+                <p className="rel-linha"><span>Novos no período</span><strong>{r.atendimentos.novos}</strong></p>
+                <p className="rel-linha"><span>Viraram clientes</span><strong>{r.atendimentos.contratou}{taxaConversao(r.atendimentos.contratou, r.atendimentos.perdido) !== null ? ` (${taxaConversao(r.atendimentos.contratou, r.atendimentos.perdido)}% dos encerrados)` : ''}</strong></p>
+                <p className="rel-linha"><span>Não fecharam</span><strong>{r.atendimentos.perdido}</strong></p>
+                <p className="rel-linha"><span>Em andamento agora</span><strong>{r.atendimentos.em_aberto}</strong></p>
+                {r.atendimentos.motivos.length > 0 && <p className="hv-hint">Por que não fecharam: {r.atendimentos.motivos.map((m) => `${m.motivo} (${m.n})`).join('; ')}.</p>}
+              </div>
+            </Panel>
+          )}
 
           <Panel title="Dinheiro (últimos 6 meses)" labelId="rel-fin">
             <div className="hv-panel-body">

@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { Api, Perfil } from '../data/api'
 import { marcarLiberado } from './desbloqueio'
@@ -34,9 +34,13 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
   const [estado, setEstado] = useState<Estado>('carregando')
   const [perfil, setPerfil] = useState<Perfil | null>(null)
   const [aviso, setAviso] = useState<string | null>(null)
+  // Só limpa a memória quando alguém esteve logado: sem isso, o aviso "sem sessão" do início apagaria
+  // consultas públicas em andamento (como a página de acompanhamento do cliente).
+  const esteveDentro = useRef(false)
 
   const carregarPerfil = useCallback(async () => {
     const p = await api.perfil()
+    esteveDentro.current = true
     setPerfil(p)
     setEstado('dentro')
   }, [api])
@@ -49,7 +53,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       else setEstado('fora')
     })
     const parar = api.aoMudarSessao((logado) => {
-      if (!logado) { setPerfil(null); setEstado('fora'); qc.clear() }
+      if (!logado) { setPerfil(null); setEstado('fora'); if (esteveDentro.current) { esteveDentro.current = false; qc.clear() } }
     })
     return () => { vivo = false; parar() }
   }, [api, carregarPerfil, qc])

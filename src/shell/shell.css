@@ -422,3 +422,28 @@ a.hv-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 .rel-tabela td[data-alerta] { color: var(--danger); font-weight: 700; }
 .rel-mini { display: inline-block; height: 8px; background: var(--accent); border-radius: 4px; margin-right: 6px; max-width: 60px; vertical-align: middle; }
 @media (max-width: 720px) { .rel-barra { grid-template-columns: 1fr auto; } .rel-trilho { grid-column: 1 / -1; grid-row: 2; } }
+
+/* Atendimentos */
+.quadro-3 { grid-auto-columns: minmax(260px, 1fr); }
+.lead-assunto { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.lead-acoes { display: flex; gap: var(--s-2); align-items: end; }
+.lead-acoes .cartao-mover { flex: 1; }
+.lead-acoes .hv-btn { margin-top: var(--s-1); text-decoration: none; }
+
+/* Acompanhamento do cliente (página pública) */
+.acomp { min-height: 100dvh; background: var(--surface-2); padding: var(--s-5) var(--s-3) var(--s-6); }
+.acomp-caixa { max-width: 560px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--s-4); }
+.acomp-cabeca { padding: 0 var(--s-1); }
+.acomp-escritorio { margin: 0 0 var(--s-1); font-weight: 600; color: var(--ink-2); }
+.acomp-titulo { margin: 0 0 var(--s-1); font-size: var(--fs-xl, 1.5rem); }
+.acomp-lista { list-style: none; margin: 0; padding: 0; }
+.acomp-caso { display: flex; flex-direction: column; gap: 2px; padding: var(--s-3) var(--s-4); border-top: 1px solid var(--line); }
+.acomp-caso:first-child { border-top: 0; }
+.acomp-caso[data-concluido='true'] .acomp-fase { color: var(--ink-2); }
+.acomp-area { font-size: var(--fs-sm); color: var(--ink-2); }
+.acomp-fase { font-size: var(--fs-lg, 1.125rem); }
+.acomp-wa { width: 100%; min-height: 48px; text-decoration: none; }
+.acomp-rodape { font-size: var(--fs-sm); text-align: center; }
+
+.passos { margin: 0; padding-left: 1.25rem; display: flex; flex-direction: column; gap: var(--s-1); color: var(--ink-2); font-size: var(--fs-sm); }
+.horas-crono { font-weight: 600; }

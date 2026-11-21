@@ -69,6 +69,7 @@ test('no computador não aparece a oferta; colaborador vê "Este aparelho" em Co
   test.skip(info.project.name !== 'computador', 'só no computador')
   await simularSupabase(page, { papel: 'colaborador' })
   await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
   await expect(page.getByRole('button', { name: 'Usar a senha do celular' })).toHaveCount(0)
   await page.goto('/configuracoes')
   await expect(page.getByRole('heading', { name: 'Este aparelho' })).toBeVisible()
