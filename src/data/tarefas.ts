@@ -10,7 +10,7 @@ export type Tarefa = {
   fatal: boolean
   responsavel: string | null
 }
-export type NovaTarefa = { titulo: string; responsavel: string; prazo: string; detalhe: string }
+export type NovaTarefa = { titulo: string; responsavel: string; prazo: string; detalhe: string; processoId?: string | null }
 export type GruposTarefas = { atrasadas: Tarefa[]; hoje: Tarefa[]; semana: Tarefa[]; depois: Tarefa[]; semData: Tarefa[] }
 
 function somaDias(dia: string, n: number): string {

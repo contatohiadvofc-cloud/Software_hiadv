@@ -344,3 +344,31 @@ li.hv-row.cliente-caso { cursor: default; }
 .area-catalogo-item .muted { font-size: var(--fs-sm); }
 .areas-ligar { color: var(--accent); font-weight: 600; text-decoration: none; }
 .areas-ligar:hover { text-decoration: underline; }
+
+/* Publicações e prazos */
+.pub-filtros { display: flex; flex-wrap: wrap; gap: var(--s-2); margin-bottom: var(--s-3); }
+.pub-lista { list-style: none; margin: 0; padding: 0; }
+.pub-item { padding: var(--s-3) var(--s-4); border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.pub-cabeca { display: flex; align-items: baseline; gap: var(--s-2); flex-wrap: wrap; }
+.pub-tipo { font-size: var(--fs-xs, .75rem); font-weight: 600; color: var(--ink-2); background: var(--surface-2); border-radius: 6px; padding: 1px 8px; }
+.pub-item[data-tipo="publicacao"] .pub-tipo { color: var(--accent-soft-ink); background: var(--accent-soft); }
+.pub-titulo { font-weight: 600; }
+.pub-meta { margin: 0; display: flex; flex-wrap: wrap; gap: 4px var(--s-3); font-size: var(--fs-sm); color: var(--ink-2); }
+.pub-meta a { color: var(--ink); font-weight: 600; }
+.pub-cnj { font-variant-numeric: tabular-nums; }
+.pub-texto { margin: 0; color: var(--ink-2); font-size: var(--fs-sm); line-height: 1.5; overflow-wrap: anywhere; }
+.pub-mais { background: none; border: 0; padding: 0 0 0 6px; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
+.pub-acoes { display: flex; gap: var(--s-2); }
+.pub-tarefa { font-size: var(--fs-sm); font-weight: 600; color: var(--accent); text-decoration: none; }
+.pub-tarefa[data-feita] { color: var(--ink-3); }
+.pub-rodape { margin-top: var(--s-2); }
+.prazo-resultado { background: var(--surface-2); border-radius: 10px; padding: var(--s-3); display: grid; gap: 6px; }
+.prazo-resultado p { margin: 0; }
+.prazo-fim { font-size: 1.15rem; }
+.prazo-resultado ul { margin: 6px 0 0; padding-left: 1.2em; font-size: var(--fs-sm); }
+.hv-check { display: flex; gap: var(--s-2); align-items: flex-start; font-size: var(--fs-sm); }
+.hv-check input { margin-top: 3px; width: 18px; height: 18px; accent-color: var(--accent); }
+.oab-lista { list-style: none; margin: var(--s-3) 0; padding: 0; display: grid; gap: 2px; }
+.oab-lista li { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--line); padding: 6px 0; font-variant-numeric: tabular-nums; }
+.oab-nova { display: flex; gap: var(--s-2); align-items: flex-end; flex-wrap: wrap; }
+.oab-nova .hv-field { flex: 1 1 180px; margin: 0; }

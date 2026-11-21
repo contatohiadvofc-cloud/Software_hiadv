@@ -1,0 +1,115 @@
+import { useState } from 'react'
+import { Link } from '@tanstack/react-router'
+import { useQuery } from '@tanstack/react-query'
+import { useApi, useSessao } from '../lib/contexto'
+import { cnjTela, dataTela, porDia, prazoNoTexto, type Publicacao } from '../data/publicacoes'
+import { diaSP } from '../data/seuDia'
+import { Panel } from '../design/components/Panel'
+import { Empty } from '../design/components/Empty'
+import { ErrorState } from '../design/components/ErrorState'
+import { Button } from '../design/components/Button'
+import { PrazoDialog, type PrazoInicial } from './Prazo'
+
+const PERIODOS = [{ dias: 7, nome: '7 dias' }, { dias: 30, nome: '30 dias' }, { dias: 90, nome: '90 dias' }]
+
+function rotuloDia(dia: string, hoje: string) {
+  const ontem = new Date(Date.parse(hoje + 'T12:00:00Z') - 864e5).toISOString().slice(0, 10)
+  if (dia === hoje) return 'Hoje'
+  if (dia === ontem) return 'Ontem'
+  return dataTela(dia)
+}
+
+function Item({ p, aoPrazo }: { p: Publicacao; aoPrazo: (p: Publicacao) => void }) {
+  const [aberto, setAberto] = useState(false)
+  const longo = (p.texto?.length ?? 0) > 220
+  return (
+    <li className="pub-item" data-tipo={p.publicacao ? 'publicacao' : 'andamento'}>
+      <div className="pub-cabeca">
+        <span className="pub-tipo">{p.publicacao ? 'Publicação' : 'Andamento'}</span>
+        <strong className="pub-titulo">{p.titulo}</strong>
+      </div>
+      <p className="pub-meta">
+        {p.clienteId ? <Link to="/clientes/$id" params={{ id: p.clienteId }}>{p.cliente}</Link> : <span>Processo sem cliente vinculado</span>}
+        {p.numeroCnj && <span className="pub-cnj">{cnjTela(p.numeroCnj)}</span>}
+      </p>
+      {p.texto && (
+        <p className="pub-texto">{longo && !aberto ? `${p.texto.slice(0, 220).trimEnd()}…` : p.texto}
+          {longo && <button type="button" className="pub-mais" aria-expanded={aberto} onClick={() => setAberto(!aberto)}>{aberto ? 'Mostrar menos' : 'Ler tudo'}</button>}
+        </p>
+      )}
+      <div className="pub-acoes">
+        {p.tarefa
+          ? <Link to="/tarefas" className="pub-tarefa" data-feita={p.tarefa.feita ? 'true' : undefined}>
+              {p.tarefa.feita ? 'Tarefa concluída' : p.tarefa.prazo ? `Virou tarefa · prazo ${dataTela(p.tarefa.prazo)}` : 'Virou tarefa'}
+            </Link>
+          : p.publicacao && <Button size="sm" variant="secondary" onClick={() => aoPrazo(p)}>Calcular prazo e criar tarefa</Button>}
+      </div>
+    </li>
+  )
+}
+
+/** Publicações do DJEN e andamentos dos tribunais dos processos do escritório (captura automática pelas OABs). */
+export function Publicacoes() {
+  const api = useApi()
+  const { perfil } = useSessao()
+  const [dias, setDias] = useState(30)
+  const [so, setSo] = useState(true)
+  const [prazo, setPrazo] = useState<PrazoInicial | null>(null)
+  const q = useQuery({ queryKey: ['publicacoes', perfil?.escritorioId, dias, so], queryFn: () => api.publicacoes(dias, so), enabled: !!perfil })
+  const oabs = useQuery({ queryKey: ['oabs', perfil?.escritorioId], queryFn: () => api.oabs(), enabled: !!perfil, staleTime: 10 * 60_000 })
+  const hoje = diaSP(new Date())
+  const grupos = porDia(q.data ?? [])
+  const semTarefa = (q.data ?? []).filter((p) => p.publicacao && !p.tarefa).length
+  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+
+  function abrirPrazo(p: Publicacao) {
+    setPrazo({ inicio: diaSP(new Date(p.quando)), dias: prazoNoTexto(p.texto), disponibilizacao: true, titulo: `${p.titulo}${p.cliente ? ` · ${p.cliente}` : ''}`.slice(0, 160), detalhe: (p.texto ?? '').slice(0, 900), processoId: p.processoId })
+  }
+
+  return (
+    <div className="pagina">
+      <div className="pagina-cabeca">
+        <div>
+          <h1>Publicações</h1>
+          {q.isSuccess && <p className="muted">{q.data.length} {q.data.length === 1 ? 'item' : 'itens'}{so && semTarefa > 0 ? ` · ${semTarefa} sem tarefa` : ''}</p>}
+        </div>
+        <div className="pagina-acoes">
+          <Button variant="secondary" onClick={() => setPrazo({})}>Calcular prazo</Button>
+        </div>
+      </div>
+
+      <div className="pub-filtros" role="group" aria-label="Filtros">
+        <div className="segmentos" role="group" aria-label="Mostrar">
+          <button type="button" aria-pressed={so} onClick={() => setSo(true)}>Publicações</button>
+          <button type="button" aria-pressed={!so} onClick={() => setSo(false)}>Tudo (com andamentos)</button>
+        </div>
+        <div className="segmentos" role="group" aria-label="Período">
+          {PERIODOS.map((x) => <button key={x.dias} type="button" aria-pressed={dias === x.dias} onClick={() => setDias(x.dias)}>{x.nome}</button>)}
+        </div>
+      </div>
+
+      {oabs.isSuccess && oabs.data.oabs.length === 0 && (
+        <Panel>
+          <Empty title="Nenhuma OAB acompanhada ainda.">
+            {gestor ? <>Cadastre as OABs do escritório em <Link to="/configuracoes" hash="oabs">Configurações › OABs acompanhadas</Link>. O HiAdv busca as publicações uma vez por dia.</> : 'Peça ao Gestor Master para cadastrar as OABs do escritório em Configurações.'}
+          </Empty>
+        </Panel>
+      )}
+
+      <Panel>
+        {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+        {q.isError && <ErrorState onRetry={() => q.refetch()} />}
+        {q.isSuccess && q.data.length === 0 && <Empty title={`Nada nos últimos ${dias} dias.`}>As publicações chegam sozinhas, uma vez por dia, pelas OABs do escritório.</Empty>}
+        {grupos.map((g) => (
+          <div key={g.dia}>
+            <h3 className="hv-group-title"><span>{rotuloDia(g.dia, hoje)}</span><span>{g.itens.length}</span></h3>
+            <ul className="pub-lista">{g.itens.map((p) => <Item key={p.id} p={p} aoPrazo={abrirPrazo} />)}</ul>
+          </div>
+        ))}
+      </Panel>
+      {oabs.isSuccess && oabs.data.oabs.length > 0 && <p className="hv-hint pub-rodape">Acompanhando: {oabs.data.oabs.join(', ')}. Fonte: DJEN e DataJud (CNJ), consultados automaticamente.</p>}
+
+      <PrazoDialog aberto={!!prazo} aoFechar={() => setPrazo(null)} inicial={prazo ?? undefined} />
+    </div>
+  )
+}

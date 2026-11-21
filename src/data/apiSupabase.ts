@@ -227,7 +227,7 @@ export function criarApiSupabase(url: string, chave: string): Api {
       }))
     },
     async criarTarefa(n) {
-      verificar(await sb.rpc('tarefa_criar', { p_titulo: n.titulo.trim(), p_responsavel: n.responsavel || null, p_prazo: n.prazo || null, p_detalhe: n.detalhe.trim() || null }))
+      verificar(await sb.rpc('tarefa_criar', { p_titulo: n.titulo.trim(), p_responsavel: n.responsavel || null, p_prazo: n.prazo || null, p_detalhe: n.detalhe.trim() || null, p_processo: n.processoId ?? null }))
     },
     async mudarTarefa(id, status) {
       verificar(await sb.rpc('tarefa_atualizar', { p_id: id, p_status: status }))
@@ -358,6 +358,26 @@ export function criarApiSupabase(url: string, chave: string): Api {
       const r = await sb.rpc('carga_equipe')
       if (r.error) return []
       return ((r.data as Record<string, unknown>[] | null) ?? []).map((x) => ({ email: String(x.email), nome: String(x.nome ?? x.email), tarefas: Number(x.tarefas ?? 0), casos: Number(x.casos ?? 0), total: Number(x.total ?? 0) }))
+    },
+    async publicacoes(dias, soPublicacoes) {
+      const d = verificar(await sb.rpc('hiadv_publicacoes', { p_dias: dias, p_so_publicacoes: soPublicacoes })) as Record<string, unknown>[] | null
+      return (d ?? []).map((x) => ({
+        id: Number(x.id), quando: String(x.data_hora), publicacao: x.publicacao === true, titulo: String(x.titulo ?? ''), texto: (x.texto as string) ?? null,
+        processoId: String(x.processo_id), numeroCnj: (x.numero_cnj as string) ?? null, clienteId: (x.cliente_id as string) ?? null, cliente: (x.cliente as string) ?? null,
+        tarefa: x.tarefa_id ? { id: String(x.tarefa_id), prazo: (x.tarefa_prazo as string) ?? null, feita: x.tarefa_status !== 'aberta' } : null,
+      }))
+    },
+    async oabs() {
+      const d = (verificar(await sb.rpc('hiadv_oabs')) ?? {}) as { oabs?: string[]; da_equipe?: { nome: string; oab: string }[] }
+      return { oabs: d.oabs ?? [], daEquipe: d.da_equipe ?? [] }
+    },
+    async salvarOabs(oabs) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_oabs_salvar', { p_oabs: oabs })))
+      return (r.oabs as string[]) ?? []
+    },
+    async calcularPrazo(p) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_prazo', { p_inicio: p.inicio, p_dias: p.dias, p_contagem: p.contagem, p_justica: p.justica, p_disponibilizacao: p.disponibilizacao })))
+      return { publicacao: String(r.publicacao), fim: String(r.fim), coberturaAte: (r.cobertura_ate as string) ?? null, pulados: (r.pulados as { dia: string; nome: string }[]) ?? [] }
     },
     async ativarArea(area, ativa) {
       okOuErro(verificar(await sb.rpc('area_ativar', { p_area: area, p_ativa: ativa })))

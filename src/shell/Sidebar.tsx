@@ -45,6 +45,9 @@ export function Sidebar() {
       </div>
       <div className="lateral-grupo lateral-rodape">
         <span className="lateral-item lateral-breve" aria-disabled="true">Sara<small>em breve</small></span>
+        <Link to="/publicacoes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+          <Icone d="M4 4h12l4 4v12H4zM8 10h8M8 14h8M8 18h5" />Publicações
+        </Link>
         <Link to="/biblioteca" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />Biblioteca
         </Link>

@@ -1,4 +1,5 @@
 import type { Api, Area, Escritorio, Perfil } from './api'
+import { oabTela, validarPrazo, type Publicacao } from './publicacoes'
 import { nomeDaArea } from './areas'
 import { PRODUTOS_PREV, areaPrevidenciaria, soDigitos, validarCliente } from './cadastro'
 import { CredencialInvalida } from './api'
@@ -88,6 +89,14 @@ const CHECK = ['Procuração assinada', 'Documento com foto', 'CTPS digital', 'H
 
 const CLIENTE_DO_CASO: Record<string, string> = { k1: 'c2', k2: 'c4', k3: 'c5', k4: 'c6', k5: 'c7', k6: 'c1', k7: 'c8', k8: 'c3' }
 const CPFS: Record<string, string> = { c1: '52998224725' }
+const OABS_DEMO: string[] = ['OAB/SP 123.456']
+const haDias = (n: number, h = 13) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10) + `T${String(h).padStart(2, '0')}:00:00Z`
+const PUBLICACOES: Publicacao[] = [
+  { id: 1, quando: haDias(0), publicacao: true, titulo: 'Intimação', texto: 'Fica a parte autora intimada para, no prazo de 15 (quinze) dias, manifestar-se sobre o laudo pericial juntado no evento 32.', processoId: 'p1', numeroCnj: '50012345620264047212', clienteId: 'c1', cliente: 'Rita Moura', tarefa: { id: 'tp1', prazo: null, feita: false } },
+  { id: 2, quando: haDias(1), publicacao: false, titulo: 'Juntada de laudo pericial', texto: null, processoId: 'p1', numeroCnj: '50012345620264047212', clienteId: 'c1', cliente: 'Rita Moura', tarefa: null },
+  { id: 3, quando: haDias(2, 15), publicacao: true, titulo: 'Despacho', texto: 'Designo audiência de conciliação para 10/12, às 14h, por videoconferência. Intimem-se.', processoId: 'p2', numeroCnj: '00004567820265120001', clienteId: 'c2', cliente: 'Bruno Teixeira', tarefa: null },
+  { id: 4, quando: haDias(6), publicacao: true, titulo: 'Sentença', texto: 'Julgo procedente o pedido para condenar o INSS a conceder o auxílio-acidente desde a cessação do auxílio-doença.', processoId: 'p3', numeroCnj: '50098765420254047212', clienteId: 'c3', cliente: 'José Lima', tarefa: { id: 'tp2', prazo: null, feita: true } },
+]
 const CLIENTES: ClienteResumo[] = [
   { id: 'c1', nome: 'Rita Moura', telefone: '49999110001', origem: 'site', desde: '2026-08-02T12:00:00Z' },
   { id: 'c2', nome: 'Bruno Teixeira', telefone: '49999110002', origem: 'whatsapp', desde: '2026-09-10T12:00:00Z' },
@@ -344,6 +353,8 @@ export function criarApiDemo(): Api {
     },
     async criarTarefa(n) {
       if (n.titulo.trim().length < 2) throw new Error('Escreva o que precisa ser feito.')
+      const pub = n.processoId ? PUBLICACOES.find((p) => p.processoId === n.processoId && !p.tarefa) : undefined
+      if (pub) pub.tarefa = { id: `t${Date.now()}`, prazo: n.prazo || null, feita: false }
       tarefasDemo().push({ id: `t${Date.now()}`, titulo: n.titulo.trim(), detalhe: n.detalhe.trim() || null, prazo: n.prazo || null, fatal: false, responsavel: n.responsavel || null, status: 'aberta' })
     },
     async mudarTarefa(id, status) {
@@ -460,6 +471,30 @@ export function criarApiDemo(): Api {
         const tarefas = tarefasDemo().filter((t) => t.status === 'aberta' && t.responsavel === p.email).length
         return { email: p.email, nome: p.nome, tarefas, casos: 0, total: tarefas }
       }).sort((a, b) => a.total - b.total || a.email.localeCompare(b.email))
+    },
+    async publicacoes(dias, soPublicacoes) {
+      const desde = Date.now() - dias * 864e5
+      return PUBLICACOES.filter((p) => Date.parse(p.quando) >= desde && (!soPublicacoes || p.publicacao)).map((p) => ({ ...p }))
+    },
+    async oabs() { return { oabs: [...OABS_DEMO], daEquipe: [{ nome: 'Ana Prado', oab: 'OAB/SP 123.456' }] } },
+    async salvarOabs(oabs) {
+      const lista: string[] = []
+      for (const o of oabs.filter((x) => x.trim())) {
+        const n = oabTela(o); if (!n) throw new Error(`OAB "${o.slice(0, 30)}" não entendida. Use número e estado, por exemplo 12.345/SC.`)
+        if (!lista.includes(n)) lista.push(n)
+      }
+      OABS_DEMO.splice(0, OABS_DEMO.length, ...lista)
+      return lista
+    },
+    async calcularPrazo(p) {
+      const erro = validarPrazo(p); if (erro) throw new Error(erro)
+      const util = (d: Date) => d.getUTCDay() !== 0 && d.getUTCDay() !== 6
+      const d = new Date(p.inicio + 'T12:00:00Z')
+      if (p.disponibilizacao) { do d.setUTCDate(d.getUTCDate() + 1); while (!util(d)) }
+      const publicacao = d.toISOString().slice(0, 10)
+      if (p.contagem === 'corridos') { d.setUTCDate(d.getUTCDate() + p.dias); while (!util(d)) d.setUTCDate(d.getUTCDate() + 1) }
+      else { let k = 0; while (k < p.dias) { d.setUTCDate(d.getUTCDate() + 1); if (util(d)) k++ } }
+      return { publicacao, fim: d.toISOString().slice(0, 10), coberturaAte: '2028-01-20', pulados: [] }
     },
     async ativarArea(area, ativa) {
       const lista = AREAS[atual] ?? (AREAS[atual] = [])

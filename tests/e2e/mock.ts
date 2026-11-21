@@ -5,6 +5,8 @@ export type Cenario = {
   senha?: string
   papel?: string
   areas?: Array<{ area: string; nome: string; ordem: number }> | 'sem-funcao'
+  publicacoes?: Array<Record<string, unknown> & { publicacao: boolean }>
+  oabs?: string[]
   escritorios?: Array<{ id: string; nome: string; atual: boolean }>
   areasPorEscritorio?: Record<string, Array<{ area: string; nome: string; ordem: number }>>
   tarefas?: Array<Record<string, unknown>>
@@ -123,6 +125,10 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'agente_configurar') { registrar(); return json(r, c.recusarAgente ? { ok: false, erro: c.recusarAgente } : { ok: true }) }
       if (nome === 'caso_beneficio_salvar') { const v = req.postDataJSON() as { p: object }; estado.beneficios.push(v); return json(r, { ok: true, alterados: Object.keys(v.p).length }) }
       if (nome === 'caso_gate') { estado.gates.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true }) }
+      if (nome === 'hiadv_publicacoes') { const b = registrar() as { p_so_publicacoes: boolean }; return json(r, (c.publicacoes ?? []).filter((x) => !b.p_so_publicacoes || x.publicacao)) }
+      if (nome === 'hiadv_oabs') return json(r, { oabs: c.oabs ?? [], da_equipe: [] })
+      if (nome === 'hiadv_oabs_salvar') { const b = registrar() as { p_oabs: string[] }; c.oabs = b.p_oabs; return json(r, { ok: true, oabs: b.p_oabs }) }
+      if (nome === 'hiadv_prazo') { registrar(); return json(r, { ok: true, publicacao: '2026-11-23', fim: '2026-12-15', cobertura_ate: '2028-01-20', pulados: [{ dia: '2026-12-08', nome: 'Dia da Justiça' }] }) }
       if (nome === 'area_ativar') {
         const b = registrar() as { p_area: string; p_ativa: boolean }
         const lista = (c.areas && c.areas !== 'sem-funcao' ? c.areas : (c.areas = [{ area: 'trabalhista', nome: 'Trabalhista', ordem: 10 }])) as Array<{ area: string; nome: string; ordem: number }>

@@ -9,6 +9,7 @@ import { ErrorState } from '../design/components/ErrorState'
 import { Button } from '../design/components/Button'
 import { Dialog } from '../design/components/Dialog'
 import { useToast } from '../design/components/Toast'
+import { PrazoDialog } from './Prazo'
 
 const VAZIA: NovaTarefa = { titulo: '', responsavel: '', prazo: '', detalhe: '' }
 
@@ -36,6 +37,7 @@ export function Tarefas() {
   const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   const [quem, setQuem] = useState<string>('minhas')
   const [novaAberta, setNovaAberta] = useState(false)
+  const [prazoAberto, setPrazoAberto] = useState(false)
   const [nova, setNova] = useState<NovaTarefa>(VAZIA)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -109,6 +111,7 @@ export function Tarefas() {
               {gestor && pessoas.filter((p) => p.email !== perfil?.email).map((p) => <option key={p.email} value={p.email}>{p.nome}</option>)}
             </select>
           </label>
+          <Button variant="secondary" onClick={() => setPrazoAberto(true)}>Calcular prazo</Button>
           <Button onClick={abrirNova}>Nova tarefa</Button>
         </div>
       </div>
@@ -125,6 +128,7 @@ export function Tarefas() {
         ))}
       </Panel>
 
+      <PrazoDialog aberto={prazoAberto} aoFechar={() => setPrazoAberto(false)} />
       <Dialog open={novaAberta} onOpenChange={setNovaAberta} title="Nova tarefa">
         <form className="hv-dialog-body catalogo-pilha" onSubmit={enviar} noValidate>
           <div className="hv-field">

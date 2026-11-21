@@ -5,6 +5,7 @@ import type { CargaPessoa, Falha, ItemAtencao, ParDuplicado, RegrasAtencao } fro
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
+import type { Oabs, PedidoPrazo, Publicacao, ResultadoPrazo } from './publicacoes'
 import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
@@ -38,6 +39,12 @@ export interface Api {
   escritorios(): Promise<Escritorio[]>
   trocarEscritorio(id: string): Promise<void>
   areas(): Promise<Area[]>
+  /** Publicações (DJEN) e andamentos (DataJud) dos processos do escritório, com a tarefa gerada. */
+  publicacoes(dias: number, soPublicacoes: boolean): Promise<Publicacao[]>
+  oabs(): Promise<Oabs>
+  /** Só o Gestor Master. Devolve as OABs normalizadas. */
+  salvarOabs(oabs: string[]): Promise<string[]>
+  calcularPrazo(p: PedidoPrazo): Promise<ResultadoPrazo>
   /** Só o Gestor Master. Liga ou desliga uma área do catálogo no escritório; os casos ficam guardados. */
   ativarArea(area: string, ativa: boolean): Promise<void>
   busca(q: string): Promise<Achado[]>
