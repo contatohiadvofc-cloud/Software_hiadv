@@ -174,6 +174,11 @@ export function criarApiDemo(): Api {
       logado = true; gravar(true); avisar()
     },
     async sair() { logado = false; gravar(false); avisar() },
+    async criarSenhaPessoal(_email, mestra, nova) {
+      if (mestra !== 'demo') throw new Error('Senha mestra incorreta, ou e-mail fora da equipe.')
+      if (nova.trim().length < 8) throw new Error('Escolha uma senha mais forte.')
+      logado = true; gravar(true); avisar()
+    },
     aoMudarSessao(fn) { ouvintes.add(fn); return () => ouvintes.delete(fn) },
     async perfil(): Promise<Perfil> {
       return { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: 'code', escritorioId: atual, escritorioNome: ESCRITORIOS.find((e) => e.id === atual)!.nome }

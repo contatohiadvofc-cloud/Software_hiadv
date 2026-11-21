@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient, type PostgrestError } from '@supabase/supabase-js'
 import type { Api, Achado, Area, Escritorio, Papel, Perfil } from './api'
-import { CredencialInvalida, SessaoExpirada } from './api'
+import { CredencialInvalida, PrimeiroAcesso, SessaoExpirada } from './api'
+import { mensagemLogin, normSenha } from './senha'
 import { diaSP, horaSP, type ItemDia } from './seuDia'
 import { lerItemAtencao, lerRodizio, ordenarAtencao, REGRAS_PADRAO, type Falha, type ParDuplicado, type RegrasAtencao } from './atencao'
 import { destaquesDoCartao, type Quadro } from './quadro'
@@ -40,6 +41,17 @@ function lerRegras(d: Record<string, unknown> | null): RegrasAtencao {
 
 export function criarApiSupabase(url: string, chave: string): Api {
   const sb: SupabaseClient = createClient(url, chave, { auth: { persistSession: true, autoRefreshToken: true } })
+  type RespEquipe = { ok: boolean; motivo?: string; restam?: number | null; erro?: string }
+  async function funcaoEquipe(corpo: Record<string, unknown>): Promise<RespEquipe> {
+    try {
+      const r = await fetch(`${url}/functions/v1/Consutar_processos`, {
+        method: 'POST',
+        headers: { apikey: chave, Authorization: `Bearer ${chave}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(corpo),
+      })
+      return r.ok ? ((await r.json()) as RespEquipe) : { ok: false, motivo: 'indisponivel' }
+    } catch { return { ok: false, motivo: 'indisponivel' } }
+  }
 
   return {
     async temSessao() {
@@ -47,11 +59,24 @@ export function criarApiSupabase(url: string, chave: string): Api {
       return !!data.session
     },
     async entrar(email, senha) {
-      const { error } = await sb.auth.signInWithPassword({ email: email.trim().toLowerCase(), password: senha })
+      const e = email.trim().toLowerCase()
+      const s = normSenha(senha)
+      // Confere no servidor da equipe (senha pessoal) e sincroniza a conta de acesso; depois entra.
+      const j = await funcaoEquipe({ equipeEntrar: true, email: e, senha: s })
+      if (!j.ok && j.motivo === 'primeiro_acesso') throw new PrimeiroAcesso()
+      if (!j.ok && j.motivo !== 'indisponivel') throw new CredencialInvalida(mensagemLogin(j.motivo, j.restam))
+      const { error } = await sb.auth.signInWithPassword({ email: e, password: s })
       if (error) {
-        if (error.status === 400 || /invalid/i.test(error.message)) throw new CredencialInvalida()
+        if (!j.ok && (error.status === 400 || /invalid/i.test(error.message))) throw new CredencialInvalida()
         throw new Error('Não foi possível entrar agora. Tente de novo em instantes.')
       }
+    },
+    async criarSenhaPessoal(email, mestra, nova) {
+      const e = email.trim().toLowerCase()
+      const j = await funcaoEquipe({ equipeNovaSenha: true, email: e, mestra: normSenha(mestra), nova: normSenha(nova) })
+      if (!j.ok) throw new Error(j.motivo === 'fraca' && j.erro ? String(j.erro) : mensagemLogin(j.motivo ?? 'mestra', j.restam))
+      const { error } = await sb.auth.signInWithPassword({ email: e, password: normSenha(nova) })
+      if (error) throw new Error('Senha salva, mas a entrada falhou. Volte e entre com a nova senha.')
     },
     async sair() { await sb.auth.signOut() },
     aoMudarSessao(fn) {

@@ -20,6 +20,7 @@ type Sessao = {
   perfil: Perfil | null
   aviso: string | null
   entrar(email: string, senha: string): Promise<void>
+  criarSenha(email: string, mestra: string, nova: string): Promise<void>
   sair(aviso?: string): Promise<void>
   trocarEscritorio(id: string): Promise<void>
 }
@@ -57,6 +58,11 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     async entrar(email, senha) {
       setAviso(null)
       await api.entrar(email, senha)
+      await carregarPerfil()
+    },
+    async criarSenha(email, mestra, nova) {
+      setAviso(null)
+      await api.criarSenhaPessoal(email, mestra, nova)
       await carregarPerfil()
     },
     async sair(msg) {

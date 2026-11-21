@@ -32,6 +32,8 @@ export type Cenario = {
   duplicados?: Array<Record<string, unknown>>
   carga?: Array<Record<string, unknown>>
   falhas?: Array<Record<string, unknown>>
+  /** login da equipe: 'primeiro_acesso' simula quem ainda não criou a senha pessoal */
+  loginEquipe?: 'ok' | 'primeiro_acesso' | 'bloqueado' | 'fora'
 }
 
 function b64url(o: object) {
@@ -41,7 +43,7 @@ const TOKEN = `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ sub: 'u1', ema
 const USER = { id: 'u1', aud: 'authenticated', role: 'authenticated', email: 'ana@silvaprado.exemplo.br', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' }
 
 export async function simularSupabase(page: Page, c: Cenario = {}) {
-  const estado = { atual: c.escritorios?.find((e) => e.atual)?.id ?? 'esc-1', falhas: c.falharSeuDia ?? 0, chamadasBusca: 0, movidos: [] as Array<Record<string, unknown>>, salvos: [] as Array<Record<string, unknown>>, tarefasMudadas: [] as Array<Record<string, unknown>>, tarefasCriadas: [] as Array<Record<string, unknown>>, beneficios: [] as Array<Record<string, unknown>>, gates: [] as Array<Record<string, unknown>>, rpcs: [] as Array<{ nome: string; corpo: Record<string, unknown> }>, uploads: [] as string[] }
+  const estado = { funcao: [] as Array<Record<string, unknown>>, senhaCriada: false, atual: c.escritorios?.find((e) => e.atual)?.id ?? 'esc-1', falhas: c.falharSeuDia ?? 0, chamadasBusca: 0, movidos: [] as Array<Record<string, unknown>>, salvos: [] as Array<Record<string, unknown>>, tarefasMudadas: [] as Array<Record<string, unknown>>, tarefasCriadas: [] as Array<Record<string, unknown>>, beneficios: [] as Array<Record<string, unknown>>, gates: [] as Array<Record<string, unknown>>, rpcs: [] as Array<{ nome: string; corpo: Record<string, unknown> }>, uploads: [] as string[] }
   const feitas = new Set<string>()
   const json = (r: Route, corpo: unknown, status = 200) => r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(corpo) })
 
@@ -53,6 +55,21 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       const corpo = req.postDataJSON() as { password?: string }
       if (corpo.password !== (c.senha ?? 'certa')) return json(r, { code: 400, error_code: 'invalid_credentials', msg: 'Invalid login credentials' }, 400)
       return json(r, { access_token: TOKEN, token_type: 'bearer', expires_in: 3600, expires_at: 4102444800, refresh_token: 'r1', user: USER })
+    }
+    if (p.endsWith('/functions/v1/Consutar_processos')) {
+      const b = (req.postDataJSON() ?? {}) as Record<string, unknown>
+      estado.funcao.push(b)
+      if (c.loginEquipe === 'fora') return json(r, { erro: 'fora' }, 503)
+      if (b.equipeEntrar) {
+        if (c.loginEquipe === 'primeiro_acesso' && !estado.senhaCriada) return json(r, { ok: false, motivo: 'primeiro_acesso' })
+        if (c.loginEquipe === 'bloqueado') return json(r, { ok: false, motivo: 'bloqueado' })
+        return json(r, b.senha === (c.senha ?? 'certa') ? { ok: true } : { ok: false, motivo: 'senha', restam: 4 })
+      }
+      if (b.equipeNovaSenha) {
+        if (b.mestra !== 'mestra-ficticia') return json(r, { ok: false, motivo: 'mestra', restam: 4 })
+        estado.senhaCriada = true; c.senha = String(b.nova); return json(r, { ok: true })
+      }
+      return json(r, { ok: false, motivo: 'indisponivel' })
     }
     if (p.endsWith('/auth/v1/user')) return json(r, USER)
     if (p.endsWith('/auth/v1/logout')) return r.fulfill({ status: 204 })

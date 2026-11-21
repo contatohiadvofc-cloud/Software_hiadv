@@ -17,7 +17,12 @@ export class SessaoExpirada extends Error {
   constructor() { super('Sua sessão terminou. Entre de novo.') }
 }
 export class CredencialInvalida extends Error {
-  constructor() { super('E-mail ou senha incorretos.') }
+  constructor(mensagem = 'E-mail ou senha incorretos.') { super(mensagem) }
+}
+
+/** A pessoa é da equipe mas ainda não criou a senha pessoal (entra com a senha mestra e cria a dela). */
+export class PrimeiroAcesso extends Error {
+  constructor() { super('Primeiro acesso: crie agora a sua senha pessoal. A senha mestra serve só para criar ou recuperar a senha.') }
 }
 
 /** Tudo o que as telas precisam do servidor. Duas implementações: Supabase e demonstração. */
@@ -25,6 +30,8 @@ export interface Api {
   temSessao(): Promise<boolean>
   entrar(email: string, senha: string): Promise<void>
   sair(): Promise<void>
+  /** Primeiro acesso ou esqueci a senha: e-mail + senha mestra + nova senha pessoal. Já entra em seguida. */
+  criarSenhaPessoal(email: string, mestra: string, nova: string): Promise<void>
   aoMudarSessao(fn: (logado: boolean) => void): () => void
   perfil(): Promise<Perfil>
   escritorios(): Promise<Escritorio[]>

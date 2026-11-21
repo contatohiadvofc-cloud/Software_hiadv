@@ -24,6 +24,7 @@
   --accent-soft-ink: #174d40;
   --brand-mark: #14463a;   /* verde-escuro da marca */
   --brand-mark-ink: #ffffff;
+  --brand-dot: #4fae93;    /* ponto menta do monograma */
   --brand-deep: #0f3a30;   /* toques: faixa do topo, item ativo */
 
   /* estados (diferem também em claridade, não só em matiz) */
@@ -72,6 +73,7 @@
   --accent-soft-ink: #8fd6c0;
   --brand-mark: #2f7d68;
   --brand-mark-ink: #ffffff;
+  --brand-dot: #8fd6c0;
   --brand-deep: #4fae93;
   --info: #79a9f2;    --info-soft: #1a2638;
   --success: #6cc89a; --success-soft: #16291f;

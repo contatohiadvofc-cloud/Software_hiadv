@@ -34,13 +34,15 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [x] Desempenho (PageSpeed, celular): Preact no lugar do React no navegador, páginas carregadas sob demanda, login já pintado no HTML, CSS embutido, só a fonte latina, Supabase baixado só quando a pessoa interage ou já tem sessão, modo offline registrado depois da abertura. Lighthouse local (celular, simulado): 99 desempenho, 100 acessibilidade, 100 boas práticas, 100 SEO.
 - [x] Núcleo · "Precisa de atenção" no Seu dia (sem custo, calculado na hora): prazo fatal chegando ou interno vencido (A14), escalonamento ao gestor, que vê os da equipe (A15), caso parado na mesma etapa (A17) e perícia ou audiência chegando sem preparação, com tarefa de roteiro em um clique (A19–A22). Regras por escritório em Configurações. SQL `hiadv2-nucleo-atencao.sql` aplicado no TESTE e no OFICIAL (OK do Felipe em 21/11).
 - [x] Núcleo · possíveis duplicados em Clientes, só para o gestor (mesmo CPF, telefone ou nome; nada é juntado sozinho) (A04); distribuição por carga em Configurações, com rodízio por área para casos novos sem responsável (A29); fila de falhas das automações com "Resolvida" (A30). SQL `hiadv2-nucleo-duplicidade-rodizio-falhas.sql` aplicado no TESTE e no OFICIAL (OK do Felipe em 21/11).
+- [x] Login da equipe igual ao app antigo: confere a senha pessoal no servidor da equipe (função Consutar_processos), cria a conta de acesso quando falta, e oferece "Primeiro acesso ou esqueci a senha" (e-mail + senha mestra + senha pessoal, com regras). Sem isso, quem nunca entrou no app antigo não conseguia entrar.
+- [x] Identidade: ícones do app em verde-escuro com o ponto menta (antes azul-marinho), cor do tema #14463a, imagem de prévia do link (og-hiadv.png, 1200x630) com título e descrição. Gerados por `node scripts/marca.mjs`.
 - [ ] Próximos: pacote de modelos previdenciários e trabalhistas na Biblioteca; agentes com IA (chave do escritório); ZapSign em um clique; Drive.
 - [ ] Execução dos agentes (função no servidor chamando a Claude com a chave do escritório) — depende de chave cadastrada.
 - [ ] ZapSign: envio do kit com um clique (função no servidor + webhook de assinatura).
 - [ ] Google Drive: pasta compartilhada, mapa de nomes, relacionar pasta ao cliente com aprovação, importar só ativos com aprovação.
 - [ ] Documentos, publicações virando tarefa, novo cliente/novo caso.
 
-Testes: 64 de lógica e 89 de tela, todos passando.
+Testes: 67 de lógica e 101 de tela, todos passando.
 
 ## Para os gestores aprovarem / fazerem
 

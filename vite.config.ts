@@ -52,7 +52,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       // Registrado pelo próprio app depois que a página termina de abrir (main.tsx).
       injectRegister: null,
-      includeAssets: ['icons/favicon-48.png', 'icons/apple-touch-icon.png', 'CNAME', 'robots.txt'],
+      includeAssets: ['icons/favicon-48.png', 'icons/apple-touch-icon.png', 'CNAME', 'robots.txt', 'og-hiadv.png'],
       manifest: {
         name: 'HiAdv · Gestão Jurídica',
         short_name: 'HiAdv',
@@ -62,7 +62,7 @@ export default defineConfig({
         scope: '/',
         display: 'standalone',
         background_color: '#f5f6f8',
-        theme_color: '#16202e',
+        theme_color: '#14463a',
         icons: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },

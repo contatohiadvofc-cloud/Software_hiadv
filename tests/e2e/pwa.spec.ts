@@ -17,3 +17,12 @@ test('CNAME do domínio vai junto na publicação', async ({ request }) => {
   const r = await request.get('/CNAME')
   expect((await r.text()).trim()).toBe('hiadv.com.br')
 })
+
+test('prévia do link: imagem de compartilhamento declarada e publicada', async ({ page, request }) => {
+  await page.goto('/login')
+  await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', 'https://hiadv.com.br/og-hiadv.png')
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image')
+  const r = await request.get('/og-hiadv.png')
+  expect(r.ok()).toBe(true)
+  expect(r.headers()['content-type']).toContain('image/png')
+})
