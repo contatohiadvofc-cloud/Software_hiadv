@@ -56,6 +56,11 @@ export function Sidebar() {
             <Icone d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />Financeiro
           </Link>
         )}
+        {gestor && (
+          <Link to="/relatorios" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+            <Icone d="M4 20V10M10 20V4M16 20v-7M22 20H2" />Relatórios
+          </Link>
+        )}
         <Link to="/biblioteca" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />Biblioteca
         </Link>

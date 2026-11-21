@@ -562,6 +562,25 @@ export function criarApiDemo(): Api {
       DADOS_CLIENTE[clienteId] = atual
     },
     async arquivoBiblioteca() { throw new Error('No modo demonstração os modelos em arquivo não são baixados. Use um modelo em texto.') },
+    async relatorio(dias) {
+      const mes = (n: number) => { const d = new Date(); d.setUTCDate(1); d.setUTCMonth(d.getUTCMonth() - n); return d.toISOString().slice(0, 7) }
+      return {
+        dias, casos: { abertos: CASOS.length, novos: 6, encerrados: 2 },
+        etapas: [
+          { area: 'administrativo', etapa: 'ag. docs do(a) cliente', casos: 3, media_dias: 14.5, maior_dias: 31 },
+          { area: 'trabalhista', etapa: 'ag. audiência', casos: 2, media_dias: 9, maior_dias: 12 },
+          { area: 'judicial', etapa: 'ag. perícia', casos: 2, media_dias: 5, maior_dias: 7 },
+        ],
+        ciclo: [{ area: 'administrativo', casos: 2, media_dias: 48 }],
+        pessoas: [
+          { email: 'ana@demo.hiadv', nome: 'Ana Prado', abertas: 6, atrasadas: 1, feitas: 14, casos: 5 },
+          { email: 'julia@demo.hiadv', nome: 'Júlia Costa', abertas: 9, atrasadas: 3, feitas: 21, casos: 7 },
+        ],
+        clientes: { total: CLIENTES.length, novos: 4, origens: [{ origem: 'whatsapp', n: 3 }, { origem: 'indicação', n: 1 }] },
+        prazos: { publicacoes: 12, cumpridos: 9, em_aberto: 3, vencidos: 0 },
+        financeiro: { meses: [5, 4, 3, 2, 1, 0].map((n, i) => ({ mes: mes(n), recebido: 1500 + i * 400, pago: 600 + i * 50 })), em_atraso: 800, a_receber: 1300, clientes_em_atraso: 1 },
+      }
+    },
     async ativarArea(area, ativa) {
       const lista = AREAS[atual] ?? (AREAS[atual] = [])
       const i = lista.findIndex((a) => a.area === area)

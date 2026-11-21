@@ -12,6 +12,7 @@ import { nomeTipo, type Compromisso } from './agenda'
 import { nomeArquivoSeguro, type PacoteBiblioteca, type Agente, type EtapaEscritorio, type Integracao, type ItemBiblioteca, type Servico, type TipoBiblioteca } from './escritorio'
 import { lerValor } from './financeiro'
 import type { DadosDocumento } from './modelos'
+import type { Relatorio } from './relatorios'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -424,6 +425,9 @@ export function criarApiSupabase(url: string, chave: string): Api {
       const r = await sb.storage.from('biblioteca').download(caminho)
       if (r.error || !r.data) throw new Error('Não foi possível baixar o modelo.')
       return r.data.arrayBuffer()
+    },
+    async relatorio(dias) {
+      return verificar(await sb.rpc('hiadv_relatorio', { p_dias: dias })) as Relatorio
     },
     async ativarArea(area, ativa) {
       okOuErro(verificar(await sb.rpc('area_ativar', { p_area: area, p_ativa: ativa })))

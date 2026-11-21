@@ -400,3 +400,25 @@ a.hv-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 .bib-variaveis summary { cursor: pointer; font-weight: 600; color: var(--accent); }
 .bib-variaveis ul { margin: var(--s-2) 0 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: var(--fs-sm); max-height: 220px; overflow: auto; }
 .bib-variaveis code { background: var(--surface-2); border-radius: 4px; padding: 0 4px; user-select: all; }
+
+/* Relatórios */
+.rel-cartoes { margin-top: var(--s-3); }
+.rel-lista { list-style: none; margin: 0 0 var(--s-3); padding: 0; display: grid; gap: 8px; }
+.rel-barra { display: grid; grid-template-columns: minmax(0, 1fr) minmax(80px, 2fr) auto; gap: var(--s-2); align-items: center; font-size: var(--fs-sm); }
+.rel-rotulo { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rel-trilho { height: 10px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.rel-cheio { display: block; height: 100%; background: var(--accent); border-radius: 6px; }
+.rel-cheio[data-tom="alerta"] { background: var(--warning); }
+.rel-cheio[data-tom="suave"] { background: var(--ink-3); }
+.rel-valor { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 5ch; text-align: right; }
+.rel-destaque { margin: 0 0 var(--s-3); padding: var(--s-2) var(--s-3); border-left: 4px solid var(--warning); background: var(--surface-2); border-radius: 6px; }
+.rel-linha { display: flex; justify-content: space-between; gap: var(--s-3); margin: 6px 0; font-size: var(--fs-sm); }
+.rel-linha[data-alerta] strong { color: var(--danger); }
+.rel-sub { font-size: var(--fs-sm); margin: 0 0 var(--s-2); }
+.rel-tabela-rolagem { overflow-x: auto; }
+.rel-tabela { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.rel-tabela th, .rel-tabela td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line); white-space: nowrap; }
+.rel-tabela thead th { border-top: 0; color: var(--ink-2); font-weight: 600; }
+.rel-tabela td[data-alerta] { color: var(--danger); font-weight: 700; }
+.rel-mini { display: inline-block; height: 8px; background: var(--accent); border-radius: 4px; margin-right: 6px; max-width: 60px; vertical-align: middle; }
+@media (max-width: 720px) { .rel-barra { grid-template-columns: 1fr auto; } .rel-trilho { grid-column: 1 / -1; grid-row: 2; } }

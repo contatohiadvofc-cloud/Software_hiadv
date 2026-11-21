@@ -5,6 +5,7 @@ import type { CargaPessoa, Falha, ItemAtencao, ParDuplicado, RegrasAtencao } fro
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
+import type { Relatorio } from './relatorios'
 import type { DadosCliente, DadosDocumento } from './modelos'
 import type { Honorario, Lancamento, NovoHonorario, NovoLancamento } from './financeiro'
 import type { Oabs, PedidoPrazo, Publicacao, ResultadoPrazo } from './publicacoes'
@@ -60,6 +61,8 @@ export interface Api {
   documentoDados(clienteId: string, casoId: string | null): Promise<DadosDocumento>
   /** Dados de qualificação do cliente; campo vazio apaga. */
   salvarDadosCliente(clienteId: string, dados: Partial<DadosCliente>): Promise<void>
+  /** Só Gestor Master: indicadores dos últimos N dias. */
+  relatorio(dias: number): Promise<Relatorio>
   /** Baixa o arquivo de um item da Biblioteca (para preencher um modelo .docx). */
   arquivoBiblioteca(caminho: string): Promise<ArrayBuffer>
   /** Só o Gestor Master. Liga ou desliga uma área do catálogo no escritório; os casos ficam guardados. */

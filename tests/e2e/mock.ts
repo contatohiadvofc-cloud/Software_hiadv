@@ -9,6 +9,7 @@ export type Cenario = {
   oabs?: string[]
   lancamentos?: Array<Record<string, unknown>>
   documento?: Record<string, unknown>
+  relatorio?: Record<string, unknown>
   honorarios?: Array<Record<string, unknown>>
   escritorios?: Array<{ id: string; nome: string; atual: boolean }>
   areasPorEscritorio?: Record<string, Array<{ area: string; nome: string; ordem: number }>>
@@ -128,6 +129,7 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'agente_configurar') { registrar(); return json(r, c.recusarAgente ? { ok: false, erro: c.recusarAgente } : { ok: true }) }
       if (nome === 'caso_beneficio_salvar') { const v = req.postDataJSON() as { p: object }; estado.beneficios.push(v); return json(r, { ok: true, alterados: Object.keys(v.p).length }) }
       if (nome === 'caso_gate') { estado.gates.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true }) }
+      if (nome === 'hiadv_relatorio') { registrar(); return json(r, c.relatorio ?? null) }
       if (nome === 'hiadv_documento_dados') { registrar(); return json(r, c.documento ?? { cliente: { nome: 'Bruno Teixeira', cpf: '52998224725' }, caso: null, escritorio: { nome: 'Silva & Prado', cidade: 'Joinville/SC', oabs: [] }, advogado: { nome: 'Ana Prado', oab: 'OAB/SC 00.101' } }) }
       if (nome === 'hiadv_cliente_dados_salvar') { registrar(); return json(r, { ok: true }) }
       if (nome === 'hiadv_fin_lista') { registrar(); return json(r, c.lancamentos ?? []) }
