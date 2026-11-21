@@ -30,6 +30,7 @@ export function montarSite(doc: Document, win: Window) {
   }
 
   montarTour(doc)
+  montarAreas(doc)
   montarVideo(doc, win)
   montarInstalar(doc, win)
 
@@ -65,6 +66,30 @@ function montarTour(doc: Document) {
   // baixa as outras telas quando o navegador estiver livre, para a troca ser instantânea
   const pre = () => abas.forEach((a) => { if (a.dataset.tela) new Image().src = a.dataset.tela })
   ;('requestIdleCallback' in window ? (window as Window & { requestIdleCallback: (f: () => void) => void }).requestIdleCallback : (f: () => void) => setTimeout(f, 3000))(pre)
+}
+
+/** Abas das áreas de atuação: mostra um painel por vez (no HTML estão todos, para a busca do Google). */
+function montarAreas(doc: Document) {
+  const abas = Array.from(doc.querySelectorAll<HTMLButtonElement>('.sv-areas-abas [role="tab"]'))
+  if (!abas.length) return
+  const escolher = (aba: HTMLButtonElement, focar: boolean) => {
+    for (const a of abas) {
+      const sel = a === aba
+      a.setAttribute('aria-selected', String(sel)); a.tabIndex = sel ? 0 : -1
+      const painel = doc.getElementById(a.getAttribute('aria-controls') ?? '')
+      if (painel) painel.hidden = !sel
+    }
+    if (focar) aba.focus()
+  }
+  abas.forEach((aba, i) => {
+    aba.addEventListener('click', () => escolher(aba, false))
+    aba.addEventListener('keydown', (e) => {
+      const ir = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key]
+      if (ir) { e.preventDefault(); escolher(abas[(i + ir + abas.length) % abas.length], true) }
+      else if (e.key === 'Home') { e.preventDefault(); escolher(abas[0], true) }
+      else if (e.key === 'End') { e.preventDefault(); escolher(abas[abas.length - 1], true) }
+    })
+  })
 }
 
 function montarVideo(doc: Document, win: Window) {

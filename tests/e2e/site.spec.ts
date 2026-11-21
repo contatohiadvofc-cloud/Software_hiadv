@@ -46,3 +46,14 @@ test('login e questionário têm caminho de volta ao site', async ({ page }) => 
   await page.getByRole('link', { name: 'Voltar ao site' }).click()
   await expect(page.getByRole('heading', { level: 1, name: 'Seu escritório inteiro, num só lugar.' })).toBeVisible()
 })
+
+test('áreas de atuação: as abas trocam o caminho do caso', async ({ page }) => {
+  await page.goto('/')
+  await expect(page.getByRole('heading', { name: 'Para todas as áreas da advocacia' })).toBeVisible()
+  await expect(page.getByRole('tabpanel', { name: 'Trabalhista' })).toContainText('Aguardando audiência')
+  await page.getByRole('tab', { name: 'Penal' }).click()
+  await expect(page.getByRole('tabpanel', { name: 'Penal' })).toContainText('Fazendo a defesa')
+  await expect(page.getByRole('tabpanel', { name: 'Trabalhista' })).toBeHidden()
+  await page.keyboard.press('ArrowRight')
+  await expect(page.getByRole('tab', { name: 'Previdenciário' })).toHaveAttribute('aria-selected', 'true')
+})

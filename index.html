@@ -6,7 +6,7 @@
     <title>HiAdv · Software de gestão jurídica para escritórios de advocacia</title>
     <meta name="application-name" content="HiAdv" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
-    <meta name="description" content="HiAdv organiza prazos, publicações, casos, atendimentos e o acompanhamento do cliente num só lugar. Feito por advogados previdenciários. Descubra o plano do seu escritório." />
+    <meta name="description" content="HiAdv organiza prazos, publicações, casos, atendimentos e o acompanhamento do cliente num só lugar, para escritórios de todas as áreas: trabalhista, cível e família, bancário, penal, previdenciário e extrajudicial." />
     <meta name="theme-color" content="#6b1a2c" />
     <link rel="canonical" href="https://hiadv.com.br/" />
     <meta property="og:type" content="website" />
@@ -39,6 +39,7 @@
           <span>HiAdv</span>
         </a>
         <nav class="sv-menu" aria-label="Seções">
+          <a href="#areas">Áreas</a>
           <a href="#recursos">Recursos</a>
           <a href="#planos">Planos</a>
           <a href="#instalar">Instalar</a>
@@ -56,7 +57,7 @@
         <div class="sv-largura sv-heroi-grade">
         <div class="sv-heroi-texto">
           <h1 id="t-heroi">Seu escritório inteiro, num só lugar.</h1>
-          <p class="sv-heroi-sub">Prazos, publicações, casos, atendimentos e o acompanhamento do cliente no mesmo sistema, no celular e no computador. Feito por advogados que vivem o previdenciário todos os dias.</p>
+          <p class="sv-heroi-sub">Prazos, publicações, casos, atendimentos e o acompanhamento do cliente no mesmo sistema, no celular e no computador. Feito por advogados, para escritórios de todas as áreas.</p>
           <div class="sv-heroi-acoes">
             <a class="sv-btn sv-btn-claro sv-btn-grande" href="/aderir" data-aderir>Aderir ao HiAdv</a>
             <a class="sv-btn sv-btn-contorno sv-btn-grande" href="/login" data-entrar>Já tenho acesso</a>
@@ -85,6 +86,53 @@
         </video>
       </dialog>
 
+      <section class="sv-secao sv-secao-rose" id="areas" aria-labelledby="t-areas">
+        <div class="sv-largura">
+          <h2 id="t-areas">Para todas as áreas da advocacia</h2>
+          <p class="sv-intro">Ligue as áreas que o escritório atende. Cada uma vira um quadro próprio, já com as etapas prontas, e o mesmo cliente pode ter casos em várias áreas.</p>
+          <div class="sv-areas">
+            <div class="sv-areas-abas" role="tablist" aria-label="Áreas de atuação"><button type="button" role="tab" id="aba-area-trabalhista" aria-controls="area-trabalhista" aria-selected="true">Trabalhista</button><button type="button" role="tab" id="aba-area-civel" aria-controls="area-civel" aria-selected="false" tabindex="-1">Cível e família</button><button type="button" role="tab" id="aba-area-bancario" aria-controls="area-bancario" aria-selected="false" tabindex="-1">Bancário</button><button type="button" role="tab" id="aba-area-penal" aria-controls="area-penal" aria-selected="false" tabindex="-1">Penal</button><button type="button" role="tab" id="aba-area-previdenciario" aria-controls="area-previdenciario" aria-selected="false" tabindex="-1">Previdenciário</button><button type="button" role="tab" id="aba-area-extrajudicial" aria-controls="area-extrajudicial" aria-selected="false" tabindex="-1">Extrajudicial</button></div>
+            <div class="sv-area-painel" id="area-trabalhista" role="tabpanel" aria-labelledby="aba-area-trabalhista" tabindex="0">
+              <p class="sv-area-frase">Reclamações trabalhistas, audiências e acordos, com o prazo de cada fase no dia de quem cuida.</p>
+              <div class="sv-fluxo"><ol><li>Novo caso</li><li>Aguardando documentação</li><li>Fazendo a inicial</li><li>Em revisão</li><li>Protocolado</li><li>Aguardando audiência</li><li>Em pagamento</li></ol></div>
+              <p class="sv-desfechos-rot">Como pode terminar</p>
+              <ul class="sv-desfechos"><li>Decisão positiva</li><li>Recorrer</li><li>Improcedente</li><li>Desistiu da ação</li></ul>
+            </div>
+            <div class="sv-area-painel" id="area-civel" role="tabpanel" aria-labelledby="aba-area-civel" tabindex="0" hidden>
+              <p class="sv-area-frase">Cobranças, indenizações, contratos, divórcios e inventários judiciais no mesmo quadro.</p>
+              <div class="sv-fluxo"><ol><li>Novo caso</li><li>Aguardando documentação</li><li>Fazendo a inicial</li><li>Em tramitação</li><li>Em grau de recurso</li></ol></div>
+              <p class="sv-desfechos-rot">Como pode terminar</p>
+              <ul class="sv-desfechos"><li>Decisão positiva</li><li>Decisão negativa</li><li>Recorrer</li></ul>
+            </div>
+            <div class="sv-area-painel" id="area-bancario" role="tabpanel" aria-labelledby="aba-area-bancario" tabindex="0" hidden>
+              <p class="sv-area-frase">Consignados, juros abusivos e revisões de contrato, da análise dos documentos ao recurso.</p>
+              <div class="sv-fluxo"><ol><li>Novo caso</li><li>Aguardando documentos</li><li>Fazendo a inicial</li><li>Em revisão</li><li>Em tramitação</li><li>Fazendo recurso</li></ol></div>
+              <p class="sv-desfechos-rot">Como pode terminar</p>
+              <ul class="sv-desfechos"><li>Decisão positiva</li><li>Improcedente</li><li>Desistência</li></ul>
+            </div>
+            <div class="sv-area-painel" id="area-penal" role="tabpanel" aria-labelledby="aba-area-penal" tabindex="0" hidden>
+              <p class="sv-area-frase">Defesas criminais, inquéritos e audiências, com cada prazo contado em dias corridos ou úteis.</p>
+              <div class="sv-fluxo"><ol><li>Novo caso</li><li>Aguardando documentação</li><li>Fazendo a defesa</li><li>Em tramitação</li><li>Aguardando audiência</li><li>Recorrer</li></ol></div>
+              <p class="sv-desfechos-rot">Como pode terminar</p>
+              <ul class="sv-desfechos"><li>Absolvição</li><li>Condenação</li><li>Arquivado</li></ul>
+            </div>
+            <div class="sv-area-painel" id="area-previdenciario" role="tabpanel" aria-labelledby="aba-area-previdenciario" tabindex="0" hidden>
+              <p class="sv-area-frase">Do requerimento no INSS à ação judicial, com perícias, exigências e recurso ao CRPS.</p>
+              <div class="sv-fluxo"><span class=sv-fluxo-rot>Administrativo</span><ol><li>Novo cliente</li><li>Aguardando documentos</li><li>Fazendo o requerimento</li><li>Protocolado</li><li>Exigência</li><li>Aguardando perícia</li></ol></div><div class="sv-fluxo" aria-label="Judicial"><span class=sv-fluxo-rot>Judicial</span><ol><li>Fazendo a inicial</li><li>Protocolado</li><li>Aguardando perícia</li><li>Impugnar laudo</li><li>Aguardando julgamento</li><li>Em execução</li></ol></div>
+              <p class="sv-desfechos-rot">Como pode terminar</p>
+              <ul class="sv-desfechos"><li>Benefício concedido</li><li>Recurso administrativo</li><li>Ação judicial</li><li>Decisão negativa</li></ul>
+            </div>
+            <div class="sv-area-painel" id="area-extrajudicial" role="tabpanel" aria-labelledby="aba-area-extrajudicial" tabindex="0" hidden>
+              <p class="sv-area-frase">Acordos, notificações e inventários em cartório, sem perder exigências e protocolos.</p>
+              <div class="sv-fluxo"><ol><li>Novo caso</li><li>Aguardando documentação</li><li>Em produção</li><li>Protocolado</li><li>Em exigência</li></ol></div>
+              <p class="sv-desfechos-rot">Como pode terminar</p>
+              <ul class="sv-desfechos"><li>Decisão positiva</li><li>Arquivado</li></ul>
+            </div>
+          </div>
+          <p class="sv-nota sv-nota-clara">Cada etapa tem responsável, checklist e aviso quando o caso fica parado. Quem recebe o caso na etapa seguinte é avisado.</p>
+        </div>
+      </section>
+
       <section class="sv-secao" id="recursos" aria-labelledby="t-recursos">
         <div class="sv-largura">
           <h2 id="t-recursos">O que o HiAdv faz pelo seu dia</h2>
@@ -93,7 +141,7 @@
             <div class="sv-tour-lista" role="tablist" aria-label="Telas do HiAdv">
               <button type="button" role="tab" id="aba-dia" aria-controls="painel-tour" aria-selected="true" data-tela="/site/seu-dia.webp" data-alt="Tela Seu dia com atrasados, tarefas de hoje e o que precisa de atenção">
                 <strong>Seu dia</strong>
-                <span>O que precisa de você hoje: prazos fatais, casos parados e perícias aparecem antes de virar problema.</span>
+                <span>O que precisa de você hoje: prazos fatais, audiências, perícias e casos parados aparecem antes de virar problema.</span>
               </button>
               <button type="button" role="tab" id="aba-atend" aria-controls="painel-tour" aria-selected="false" tabindex="-1" data-tela="/site/atendimentos.webp" data-alt="Funil de atendimentos com novos contatos, em conversa e contratados">
                 <strong>Atendimentos</strong>
@@ -101,7 +149,7 @@
               </button>
               <button type="button" role="tab" id="aba-quadro" aria-controls="painel-tour" aria-selected="false" tabindex="-1" data-tela="/site/quadro.webp" data-alt="Quadro de casos dividido por etapas">
                 <strong>Casos por etapas</strong>
-                <span>Do requerimento ao judicial, cada caso anda pelas etapas da sua área, com responsável e checklist.</span>
+                <span>Do primeiro contato ao arquivamento, cada caso anda pelas etapas da sua área, com responsável e checklist.</span>
               </button>
               <button type="button" role="tab" id="aba-pub" aria-controls="painel-tour" aria-selected="false" tabindex="-1" data-tela="/site/publicacoes.webp" data-alt="Lista de publicações e intimações encontradas pela OAB">
                 <strong>Publicações e prazos</strong>
@@ -131,14 +179,18 @@
         </div>
       </section>
 
-      <section class="sv-secao sv-secao-rose" aria-labelledby="t-prev">
-        <div class="sv-largura sv-prev">
-          <h2 id="t-prev">Pensado para quem advoga no previdenciário</h2>
-          <div class="sv-prev-texto">
-            <p>O HiAdv nasceu dentro de um escritório previdenciário 100% online. Por isso já vem com as áreas administrativa e judicial, checklist de documentos com CNIS, CTPS, laudos e exames, e perícias e exigências do INSS no dia de quem cuida do caso.</p>
-            <p>A equipe trabalha por etapas, do primeiro contato à triagem de documentos, do requerimento ao acompanhamento depois do protocolo, e quem recebe o caso na etapa seguinte é avisado.</p>
-            <p>Atende também escritórios de outras áreas: as etapas e os campos são ajustados pelos próprios gestores, sem programar.</p>
-          </div>
+
+      <section class="sv-secao sv-secao-escura" aria-labelledby="t-dif">
+        <div class="sv-largura">
+          <h2 id="t-dif">O que muda no seu escritório</h2>
+          <dl class="sv-difs">
+            <div><dt>Seus arquivos continuam no seu Google Drive</dt><dd>No plano Sênior, o HiAdv lê e salva na pasta do cliente, sem cobrar por armazenamento e sem prender seus documentos.</dd></div>
+            <div><dt>IA que escreve o rascunho, advogado que decide</dt><dd>No plano Sênior: quesitos, minutas e resumos de intimações com a chave da Claude do próprio escritório. Você paga só o que usar e define o limite do mês.</dd></div>
+            <div><dt>O cliente acompanha sem precisar perguntar</dt><dd>Um link pessoal, sem senha, mostra a fase do caso em palavras simples e os próximos compromissos.</dd></div>
+            <div><dt>Do contato ao contrato, com números</dt><dd>Cada atendimento guarda a origem e o motivo de quem não fechou; o relatório mostra quanto vira cliente.</dd></div>
+            <div><dt>Prazos com o calendário dos tribunais</dt><dd>Dias úteis ou corridos, com feriados e suspensões, já na agenda de quem vai cumprir.</dd></div>
+            <div><dt>Um plano por escritório, sem surpresa</dt><dd>Preço fixo por mês, com Masters, colaboradores e OABs incluídos no plano. O app no celular e no computador não custa nada a mais.</dd></div>
+          </dl>
         </div>
       </section>
 
@@ -250,6 +302,10 @@
           <details>
             <summary>O HiAdv está na Play Store ou na App Store?</summary>
             <p>Ainda não. Ele se instala pelo navegador, no Android, no iPhone e no computador, e funciona como um aplicativo comum. Veja o passo a passo em “Instale no seu aparelho”.</p>
+          </details>
+          <details>
+            <summary>O HiAdv serve para a área do meu escritório?</summary>
+            <p>Sim. Ele já vem com trabalhista, cível e família, bancário, penal, previdenciário (administrativo e judicial) e extrajudicial. O escritório liga só as áreas que atende, e cada uma tem o seu quadro com as etapas prontas.</p>
           </details>
           <details>
             <summary>Quanto tempo dura o teste grátis?</summary>
