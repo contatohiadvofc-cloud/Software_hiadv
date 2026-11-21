@@ -64,6 +64,8 @@ test('busca: Ctrl+K abre, 1 letra não busca, setas e Enter abrem', async ({ pag
   const est = await simularSupabase(page, { busca: [{ tipo: 'cliente', titulo: 'Rita Moura', trecho: 'Previdenciário', cliente_id: 'c1' }, { tipo: 'cliente', titulo: 'Rita Souza', trecho: 'Trabalhista', cliente_id: 'c2' }] })
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)
+  // a casca das páginas internas carrega à parte; espera ela aparecer antes da tecla
+  await expect(page.locator('.topo-busca')).toBeVisible()
   if (isMobile) await page.locator('.topo-busca').click()
   else await page.keyboard.press('Control+k')
   const campo = page.getByRole('combobox')

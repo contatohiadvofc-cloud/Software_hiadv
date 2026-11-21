@@ -30,14 +30,15 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [x] caso_beneficio_salvar aplicado no oficial (OK do Felipe em 21/11).
 - [x] Relato do cliente na ficha; Biblioteca (modelos, jurisprudência, referências, teses, com arquivo); Configurações do escritório (Integrações Claude/ZapSign/Drive com chave no cofre; Agentes com etapas e modelo).
 - [x] hiadv2-biblioteca-integracoes-agentes.sql e hiadv2-agentes-internos.sql aplicados no OFICIAL (OK do Felipe em 21/11).
-- [x] Núcleo · Andamento na ficha: registrar protocolo (número e data; no judicial, CNJ que liga o processo), registrar exigência (tarefa com prazo interno e fatal, folga em dias úteis descontando feriados) e mudar de via (caso novo ligado ao de origem, com dados e relato). SQL `hiadv2-nucleo-marcos-exigencia-via.sql` aplicado e testado no TESTE; **falta aplicar no OFICIAL (aguarda OK)** e só depois publicar a tela.
+- [x] Núcleo · Andamento na ficha: registrar protocolo (número e data; no judicial, CNJ que liga o processo), registrar exigência (tarefa com prazo interno e fatal, folga em dias úteis descontando feriados) e mudar de via (caso novo ligado ao de origem, com dados e relato). SQL `hiadv2-nucleo-marcos-exigencia-via.sql` aplicado no TESTE e no OFICIAL (OK do Felipe em 21/11).
+- [x] Desempenho (PageSpeed, celular): Preact no lugar do React no navegador, páginas carregadas sob demanda, login já pintado no HTML, CSS embutido, só a fonte latina, Supabase baixado só quando a pessoa interage ou já tem sessão, modo offline registrado depois da abertura. Lighthouse local (celular, simulado): 99 desempenho, 100 acessibilidade, 100 boas práticas, 100 SEO.
 - [ ] Núcleo, próximos: alertas e escalonamento de prazo (A14/A15), caso parado (A17), evento com preparação (A19–A22), duplicidade (A04), distribuição por carga (A29), fila de falhas (A30); pacote de modelos previdenciários e trabalhistas na Biblioteca.
 - [ ] Execução dos agentes (função no servidor chamando a Claude com a chave do escritório) — depende de chave cadastrada.
 - [ ] ZapSign: envio do kit com um clique (função no servidor + webhook de assinatura).
 - [ ] Google Drive: pasta compartilhada, mapa de nomes, relacionar pasta ao cliente com aprovação, importar só ativos com aprovação.
 - [ ] Documentos, publicações virando tarefa, novo cliente/novo caso.
 
-Testes: 55 de lógica e 77 de tela, todos passando.
+Testes: 59 de lógica e 77 de tela, todos passando.
 
 ## Para os gestores aprovarem / fazerem
 

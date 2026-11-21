@@ -2,16 +2,57 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import type { Plugin } from 'vite'
+
+/** Desempenho na primeira visita (PageSpeed):
+ *  - o CSS vai dentro do index.html (sem pedido extra que trava a pintura);
+ *  - o módulo do servidor e a fonte do texto começam a baixar junto com a página. */
+function primeiraPintura(): Plugin {
+  return {
+    name: 'hiadv-primeira-pintura',
+    apply: 'build',
+    enforce: 'post',
+    generateBundle(_o, bundle) {
+      const html = bundle['index.html']
+      if (!html || html.type !== 'asset') return
+      let fonte = String(html.source)
+      const dicas: string[] = []
+      for (const [nome, item] of Object.entries(bundle)) {
+        if (item.type === 'asset' && nome.endsWith('.css')) {
+          const tag = new RegExp(`<link rel="stylesheet"[^>]*href="[^"]*${nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`)
+          if (tag.test(fonte)) { fonte = fonte.replace(tag, `<style>${String(item.source)}</style>`); delete bundle[nome] }
+        }
+      }
+      html.source = fonte.replace('</head>', `${dicas.join('')}</head>`)
+    },
+  }
+}
 
 const previa = process.env.VITE_PREVIA === '1'
 
+// No navegador, o React é trocado pelo Preact (mesma API, bem menor e mais rápido para abrir).
+// Os testes de lógica continuam no React.
+const usarPreact = process.env.VITEST !== 'true' && process.env.HIADV_REACT !== '1'
+
 export default defineConfig({
+  resolve: usarPreact ? {
+    alias: [
+      { find: /^react$/, replacement: 'preact/compat' },
+      { find: /^react-dom\/client$/, replacement: 'preact/compat/client' },
+      { find: /^react-dom$/, replacement: 'preact/compat' },
+      { find: /^react\/jsx-runtime$/, replacement: 'preact/jsx-runtime' },
+      { find: /^react\/jsx-dev-runtime$/, replacement: 'preact/jsx-runtime' },
+    ],
+  } : undefined,
   base: previa ? './' : '/',
   plugins: [
     react(),
+    !previa && primeiraPintura(),
     !previa && VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['icons/favicon-48.png', 'icons/apple-touch-icon.png', 'CNAME'],
+      // Registrado pelo próprio app depois que a página termina de abrir (main.tsx).
+      injectRegister: null,
+      includeAssets: ['icons/favicon-48.png', 'icons/apple-touch-icon.png', 'CNAME', 'robots.txt'],
       manifest: {
         name: 'HiAdv · Gestão Jurídica',
         short_name: 'HiAdv',

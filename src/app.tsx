@@ -1,21 +1,26 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { createHashHistory, createRootRoute, createRoute, createRouter, Outlet, redirect, RouterProvider } from '@tanstack/react-router'
+import { createHashHistory, createRootRoute, createRoute, createRouter, lazyRouteComponent, Outlet, redirect, RouterProvider } from '@tanstack/react-router'
 import type { Api } from './data/api'
 import { SessaoExpirada } from './data/api'
 import { ApiProvider, SessaoProvider } from './lib/contexto'
 import { ToastProvider } from './design/components/Toast'
-import { AppShell } from './shell/AppShell'
 import { Login } from './routes/Login'
-import { SeuDia } from './routes/SeuDia'
-import { Area } from './routes/Area'
-import { Areas } from './routes/Areas'
-import { Catalogo } from './routes/Catalogo'
-import { Tarefas } from './routes/Tarefas'
-import { Clientes } from './routes/Clientes'
-import { Cliente } from './routes/Cliente'
-import { Agenda } from './routes/Agenda'
-import { Biblioteca } from './routes/Biblioteca'
-import { Configuracoes } from './routes/Configuracoes'
+
+const LSeuDia = lazyRouteComponent(() => import('./routes/SeuDia'), 'SeuDia')
+const LArea = lazyRouteComponent(() => import('./routes/Area'), 'Area')
+const LAreas = lazyRouteComponent(() => import('./routes/Areas'), 'Areas')
+const LCatalogo = lazyRouteComponent(() => import('./routes/Catalogo'), 'Catalogo')
+const LTarefas = lazyRouteComponent(() => import('./routes/Tarefas'), 'Tarefas')
+const LClientes = lazyRouteComponent(() => import('./routes/Clientes'), 'Clientes')
+const LCliente = lazyRouteComponent(() => import('./routes/Cliente'), 'Cliente')
+const LAgenda = lazyRouteComponent(() => import('./routes/Agenda'), 'Agenda')
+const LBiblioteca = lazyRouteComponent(() => import('./routes/Biblioteca'), 'Biblioteca')
+const LConfiguracoes = lazyRouteComponent(() => import('./routes/Configuracoes'), 'Configuracoes')
+const LAppShell = lazyRouteComponent(() => import('./shell/AppShell'), 'AppShellRota')
+
+// Sem sessão salva no aparelho, as páginas internas mandam direto para o login (sem baixar a casca do app).
+let semSessaoSalva: () => boolean = () => false
+export function definirSemSessao(fn: () => boolean) { semSessaoSalva = fn }
 
 const raiz = createRootRoute({ component: () => <Outlet />, head: () => ({ meta: [{ title: 'HiAdv' }] }) })
 const inicio = createRoute({ getParentRoute: () => raiz, path: '/', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
@@ -23,17 +28,22 @@ const login = createRoute({
   getParentRoute: () => raiz, path: '/login', component: Login, head: () => ({ meta: [{ title: 'Entrar · HiAdv' }] }),
   validateSearch: (s: Record<string, unknown>): { volta?: string } => (typeof s.volta === 'string' ? { volta: s.volta } : {}),
 })
-const catalogo = createRoute({ getParentRoute: () => raiz, path: '/catalogo', component: Catalogo, head: () => ({ meta: [{ title: 'Design system · HiAdv' }] }) })
-const dentro = createRoute({ getParentRoute: () => raiz, id: 'dentro', component: () => <AppShell><Outlet /></AppShell> })
-const seuDia = createRoute({ getParentRoute: () => dentro, path: '/seu-dia', component: SeuDia, head: () => ({ meta: [{ title: 'Seu dia · HiAdv' }] }) })
-const area = createRoute({ getParentRoute: () => dentro, path: '/area/$slug', component: Area, head: () => ({ meta: [{ title: 'Área · HiAdv' }] }) })
-const listaAreas = createRoute({ getParentRoute: () => dentro, path: '/areas', component: Areas, head: () => ({ meta: [{ title: 'Áreas · HiAdv' }] }) })
-const tarefas = createRoute({ getParentRoute: () => dentro, path: '/tarefas', component: Tarefas, head: () => ({ meta: [{ title: 'Tarefas · HiAdv' }] }) })
-const clientes = createRoute({ getParentRoute: () => dentro, path: '/clientes', component: Clientes, head: () => ({ meta: [{ title: 'Clientes · HiAdv' }] }) })
-const cliente = createRoute({ getParentRoute: () => dentro, path: '/clientes/$id', component: Cliente, head: () => ({ meta: [{ title: 'Cliente · HiAdv' }] }) })
-const agenda = createRoute({ getParentRoute: () => dentro, path: '/agenda', component: Agenda, head: () => ({ meta: [{ title: 'Agenda · HiAdv' }] }) })
-const biblioteca = createRoute({ getParentRoute: () => dentro, path: '/biblioteca', component: Biblioteca, head: () => ({ meta: [{ title: 'Biblioteca · HiAdv' }] }) })
-const configuracoes = createRoute({ getParentRoute: () => dentro, path: '/configuracoes', component: Configuracoes, head: () => ({ meta: [{ title: 'Configurações · HiAdv' }] }) })
+const catalogo = createRoute({ getParentRoute: () => raiz, path: '/catalogo', component: LCatalogo, head: () => ({ meta: [{ title: 'Design system · HiAdv' }] }) })
+const dentro = createRoute({
+  getParentRoute: () => raiz, id: 'dentro', component: LAppShell,
+  beforeLoad: ({ location }) => {
+    if (semSessaoSalva()) throw redirect({ to: '/login', search: location.pathname === '/seu-dia' ? {} : { volta: location.pathname }, replace: true })
+  },
+})
+const seuDia = createRoute({ getParentRoute: () => dentro, path: '/seu-dia', component: LSeuDia, head: () => ({ meta: [{ title: 'Seu dia · HiAdv' }] }) })
+const area = createRoute({ getParentRoute: () => dentro, path: '/area/$slug', component: LArea, head: () => ({ meta: [{ title: 'Área · HiAdv' }] }) })
+const listaAreas = createRoute({ getParentRoute: () => dentro, path: '/areas', component: LAreas, head: () => ({ meta: [{ title: 'Áreas · HiAdv' }] }) })
+const tarefas = createRoute({ getParentRoute: () => dentro, path: '/tarefas', component: LTarefas, head: () => ({ meta: [{ title: 'Tarefas · HiAdv' }] }) })
+const clientes = createRoute({ getParentRoute: () => dentro, path: '/clientes', component: LClientes, head: () => ({ meta: [{ title: 'Clientes · HiAdv' }] }) })
+const cliente = createRoute({ getParentRoute: () => dentro, path: '/clientes/$id', component: LCliente, head: () => ({ meta: [{ title: 'Cliente · HiAdv' }] }) })
+const agenda = createRoute({ getParentRoute: () => dentro, path: '/agenda', component: LAgenda, head: () => ({ meta: [{ title: 'Agenda · HiAdv' }] }) })
+const biblioteca = createRoute({ getParentRoute: () => dentro, path: '/biblioteca', component: LBiblioteca, head: () => ({ meta: [{ title: 'Biblioteca · HiAdv' }] }) })
+const configuracoes = createRoute({ getParentRoute: () => dentro, path: '/configuracoes', component: LConfiguracoes, head: () => ({ meta: [{ title: 'Configurações · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
 const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, tarefas, agenda, clientes, cliente, biblioteca, configuracoes, area, listaAreas]), naoEncontrada])

@@ -10,7 +10,14 @@
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root"><div class="login" inert data-estatico><div class="login-caixa"><span class="marca"><svg class="marca-sinal" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand-mark)"></rect><path d="M10 8v16M22 8v16M10 16h12" stroke="var(--brand-mark-ink)" stroke-width="2.6" stroke-linecap="round"></path><circle cx="16" cy="16" r="2.2" fill="var(--accent)"></circle></svg><span class="marca-nome">HiAdv</span></span><h1>Entrar no HiAdv</h1><form novalidate class="login-form"><div class="hv-field"><label for="e_email">E-mail</label><input id="e_email" class="hv-input" type="email" autocomplete="username"></div><div class="hv-field"><label for="e_senha">Senha</label><input id="e_senha" class="hv-input" type="password" autocomplete="current-password"></div><button type="submit" class="hv-btn" data-variant="primary" data-size="md">Entrar</button></form><p class="muted login-rodape">O acesso é liberado pelo Gestor Master do seu escritório.</p></div></div></div>
+    <script>
+      // Quem já está logado não vê o login estático: a tela fica limpa até o app abrir.
+      try {
+        if (location.pathname !== '/login' && Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k) })) document.getElementById('root').textContent = ''
+      } catch (e) {}
+    </script>
+    <noscript><p style="padding:24px">Para usar o HiAdv, ative o JavaScript do navegador.</p></noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

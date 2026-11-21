@@ -133,6 +133,8 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
 
 export async function entrar(page: Page, senha = 'certa') {
   await page.goto('/login')
+  // o login estático (pintura rápida) é trocado pelo app; só preenche depois da troca
+  await page.locator('[data-estatico]').waitFor({ state: 'detached' })
   await page.getByLabel('E-mail').fill('ana@silvaprado.exemplo.br')
   await page.getByLabel('Senha').fill(senha)
   await page.getByRole('button', { name: 'Entrar' }).click()

@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react'
-import { useLocation, useNavigate } from '@tanstack/react-router'
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSessao } from '../lib/contexto'
 import { SessaoExpirada } from '../data/api'
@@ -33,8 +33,8 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }), [qc, sessao, nav, loc.pathname])
 
-  // Ctrl+K e "/" abrem a busca.
-  useEffect(() => {
+  // Ctrl+K e "/" abrem a busca (registrado logo ao montar, antes da primeira tecla).
+  useLayoutEffect(() => {
     function tecla(e: KeyboardEvent) {
       const alvo = e.target as HTMLElement
       const digitando = alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.isContentEditable)
@@ -67,4 +67,9 @@ export function AppShell({ children }: { children: ReactNode }) {
       <CommandSearch open={buscando} onOpenChange={setBuscando} />
     </div>
   )
+}
+
+/** Casca com as páginas internas dentro (carregada à parte, depois do login). */
+export function AppShellRota() {
+  return <AppShell><Outlet /></AppShell>
 }
