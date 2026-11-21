@@ -12,6 +12,8 @@ export type Ficha = {
   numeroCnj: string | null
   campos: Record<string, unknown>
   defs: CampoDef[]
+  /** Relato do cliente, em texto livre (base para os agentes). */
+  relato: string | null
   /** Só nas áreas previdenciárias: NB, DIB, DCB, acidente, sequela… (colunas próprias do caso) */
   beneficio: Record<string, unknown> | null
   checklist: ItemChecklist[]

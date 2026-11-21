@@ -23,6 +23,10 @@ export type Cenario = {
   processos?: Array<Record<string, unknown>>
   pericias?: Array<Record<string, unknown>>
   audienciasLista?: Array<Record<string, unknown>>
+  biblioteca?: Array<Record<string, unknown>>
+  integracoes?: Array<Record<string, unknown>>
+  agentes?: Array<Record<string, unknown>>
+  recusarAgente?: string
 }
 
 function b64url(o: object) {
@@ -32,7 +36,7 @@ const TOKEN = `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ sub: 'u1', ema
 const USER = { id: 'u1', aud: 'authenticated', role: 'authenticated', email: 'ana@silvaprado.exemplo.br', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' }
 
 export async function simularSupabase(page: Page, c: Cenario = {}) {
-  const estado = { atual: c.escritorios?.find((e) => e.atual)?.id ?? 'esc-1', falhas: c.falharSeuDia ?? 0, chamadasBusca: 0, movidos: [] as Array<Record<string, unknown>>, salvos: [] as Array<Record<string, unknown>>, tarefasMudadas: [] as Array<Record<string, unknown>>, tarefasCriadas: [] as Array<Record<string, unknown>>, beneficios: [] as Array<Record<string, unknown>>, gates: [] as Array<Record<string, unknown>> }
+  const estado = { atual: c.escritorios?.find((e) => e.atual)?.id ?? 'esc-1', falhas: c.falharSeuDia ?? 0, chamadasBusca: 0, movidos: [] as Array<Record<string, unknown>>, salvos: [] as Array<Record<string, unknown>>, tarefasMudadas: [] as Array<Record<string, unknown>>, tarefasCriadas: [] as Array<Record<string, unknown>>, beneficios: [] as Array<Record<string, unknown>>, gates: [] as Array<Record<string, unknown>>, rpcs: [] as Array<{ nome: string; corpo: Record<string, unknown> }>, uploads: [] as string[] }
   const feitas = new Set<string>()
   const json = (r: Route, corpo: unknown, status = 200) => r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(corpo) })
 
@@ -70,6 +74,16 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
         return json(r, { ok: true })
       }
       if (nome === 'tarefa_criar') { estado.tarefasCriadas.push(req.postDataJSON() as Record<string, unknown>); return json(r, { id: 'novo' }) }
+      const registrar = () => { const corpo = (req.postDataJSON() ?? {}) as Record<string, unknown>; estado.rpcs.push({ nome, corpo }); return corpo }
+      if (nome === 'caso_relato_salvar') { registrar(); return json(r, { ok: true, alterado: true }) }
+      if (nome === 'biblioteca_salvar') { registrar(); return json(r, { ok: true, id: 'novo' }) }
+      if (nome === 'biblioteca_retirar') { registrar(); return json(r, { ok: true }) }
+      if (nome === 'integracoes_listar') return json(r, c.integracoes ?? [])
+      if (nome === 'integracao_salvar') { registrar(); return json(r, { ok: true }) }
+      if (nome === 'integracao_chave_salvar') { const b = registrar(); return json(r, { ok: true, chave_final: String(b.p_chave).slice(-4) }) }
+      if (nome === 'integracao_chave_remover') { registrar(); return json(r, { ok: true }) }
+      if (nome === 'agentes_listar') return json(r, c.agentes ?? [])
+      if (nome === 'agente_configurar') { registrar(); return json(r, c.recusarAgente ? { ok: false, erro: c.recusarAgente } : { ok: true }) }
       if (nome === 'caso_beneficio_salvar') { const v = req.postDataJSON() as { p: object }; estado.beneficios.push(v); return json(r, { ok: true, alterados: Object.keys(v.p).length }) }
       if (nome === 'caso_gate') { estado.gates.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true }) }
       if (nome === 'caso_detalhe') return json(r, c.detalhe ?? null)
@@ -105,6 +119,8 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       const fil = id ? lista.filter((x) => x.id === id) : nome ? lista.filter((x) => String(x.nome).toLowerCase().includes(nome)) : lista
       return json(r, (req.headers()['accept'] ?? '').includes('vnd.pgrst.object') ? fil[0] ?? null : fil)
     }
+    if (p.endsWith('/rest/v1/biblioteca')) return json(r, c.biblioteca ?? [])
+    if (p.includes('/storage/v1/object/biblioteca/')) { estado.uploads.push(p.split('/storage/v1/object/biblioteca/')[1]); return json(r, { Key: 'ok' }) }
     if (p.endsWith('/rest/v1/area_campos')) return json(r, c.camposArea ?? [])
     if (p.endsWith('/rest/v1/fluxo_status')) return json(r, c.etapas ?? [])
     return json(r, [])

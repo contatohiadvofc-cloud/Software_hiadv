@@ -7,6 +7,7 @@ import { telaParaValor, validarCampo, type CampoDef } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
 import type { ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
+import type { Agente, Integracao, ItemBiblioteca } from './escritorio'
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
 const ESCRITORIOS: Escritorio[] = [
@@ -93,6 +94,36 @@ const CLIENTES: ClienteResumo[] = [
   { id: 'c7', nome: 'Lúcia Farias', telefone: '49999110007', origem: 'site', desde: '2026-11-03T12:00:00Z' },
   { id: 'c8', nome: 'Paula Nunes', telefone: '49999110008', origem: 'chatbot', desde: '2026-11-12T12:00:00Z' },
 ]
+
+const RELATOS: Record<string, string> = {
+  k6: 'Trabalhava como auxiliar de produção quando caiu da escada do setor, em 03/11/2024, e fraturou o punho direito. Ficou afastada pelo INSS até fevereiro de 2025. Voltou ao trabalho, mas não consegue mais carregar caixas nem fazer força com a mão direita.',
+}
+const BIBLIOTECA: ItemBiblioteca[] = [
+  { id: 'b1', tipo: 'modelo', titulo: 'Inicial de auxílio-acidente (JEF)', area: 'judicial', peca: 'Petição inicial', conteudo: 'MERITÍSSIMO JUÍZO DA __ VARA FEDERAL DE __\n\n{{cliente.nome}}, {{cliente.qualificacao}}…', link: null, arquivo: null, arquivoNome: 'inicial-auxilio-acidente.docx', tamanho: 48211, criadoPor: 'ana@silvaprado.exemplo.br', criadoEm: '2026-11-10T12:00:00Z' },
+  { id: 'b2', tipo: 'modelo', titulo: 'Kit do cliente (contrato, procuração, declaração)', area: null, peca: 'Kit do cliente', conteudo: null, link: null, arquivo: null, arquivoNome: 'kit-cliente.docx', tamanho: 61002, criadoPor: 'ana@silvaprado.exemplo.br', criadoEm: '2026-11-08T12:00:00Z' },
+  { id: 'b3', tipo: 'modelo', titulo: 'Reclamação trabalhista: verbas rescisórias', area: 'trabalhista', peca: 'Petição inicial', conteudo: 'Modelo fictício para demonstração.', link: null, arquivo: null, arquivoNome: null, tamanho: null, criadoPor: 'rafael@silvaprado.exemplo.br', criadoEm: '2026-11-12T12:00:00Z' },
+  { id: 'b4', tipo: 'jurisprudencia', titulo: 'Tema exemplo: redução da capacidade em grau mínimo', area: 'judicial', peca: null, conteudo: 'Ementa fictícia para demonstração do sistema.', link: 'https://exemplo.br/precedente', arquivo: null, arquivoNome: null, tamanho: null, criadoPor: 'ana@silvaprado.exemplo.br', criadoEm: '2026-11-09T12:00:00Z' },
+  { id: 'b5', tipo: 'tese', titulo: 'Sequela que exige maior esforço na mesma função', area: 'judicial', peca: null, conteudo: 'Linha de argumentação fictícia para demonstração.', link: null, arquivo: null, arquivoNome: null, tamanho: null, criadoPor: 'ana@silvaprado.exemplo.br', criadoEm: '2026-11-11T12:00:00Z' },
+]
+const INTEGRACOES: Integracao[] = [
+  { servico: 'claude', ativo: false, modo: null, limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null },
+  { servico: 'zapsign', ativo: false, modo: 'um_clique', limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null },
+  { servico: 'google_drive', ativo: false, modo: null, limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null },
+]
+const CATALOGO: Array<Omit<Agente, 'ativo' | 'etapas' | 'modeloId' | 'modeloTitulo'>> = [
+  { agente: 'triagem', nome: 'Triagem', descricao: 'Lê o relato e os documentos do lead e aponta se o caso parece viável e o que falta. A decisão é do advogado.', areas: null, precisa: ['claude', 'relato'], usaModelo: false },
+  { agente: 'leitora', nome: 'Leitora de documentos', descricao: 'Extrai de laudos, exames e atestados as datas, CID, sequela e médico, montando a linha do tempo clínica do caso.', areas: null, precisa: ['claude'], usaModelo: false },
+  { agente: 'cnis', nome: 'Analista de CNIS', descricao: 'Confere qualidade de segurado, carência, vínculo na data do fato e lacunas de contribuição.', areas: ['administrativo', 'judicial'], precisa: ['claude'], usaModelo: false },
+  { agente: 'redatora', nome: 'Redatora', descricao: 'Escreve a minuta da peça a partir do modelo do escritório, do relato e das provas do caso. Entrega para revisão; nunca protocola.', areas: null, precisa: ['claude', 'relato', 'modelo'], usaModelo: true },
+  { agente: 'quesitos', nome: 'Quesitos periciais', descricao: 'Prepara quesitos citando a documentação médica com datas, no padrão do escritório.', areas: ['administrativo', 'judicial', 'trabalhista'], precisa: ['claude', 'modelo'], usaModelo: true },
+  { agente: 'laudo', nome: 'Análise de laudo', descricao: 'Compara o laudo pericial com os documentos do caso e prepara a base da manifestação ou impugnação.', areas: ['judicial', 'trabalhista'], precisa: ['claude'], usaModelo: false },
+  { agente: 'conferente', nome: 'Conferente', descricao: 'Revisa toda minuta: destaca citação que não está na Biblioteca, dado que não bate com o caso e formatação fora do padrão.', areas: null, precisa: ['claude'], usaModelo: false },
+  { agente: 'mensageira', nome: 'Mensageira', descricao: 'Escreve atualizações ao cliente em linguagem simples. Nada sai sem um clique da equipe.', areas: null, precisa: ['claude'], usaModelo: false },
+  { agente: 'intimacoes', nome: 'Leitor de intimações', descricao: 'Transforma publicações e movimentações em tarefas com prazo sugerido, para alguém da equipe conferir.', areas: null, precisa: ['claude'], usaModelo: false },
+  { agente: 'organizadora', nome: 'Organizadora de pastas', descricao: 'Nomeia arquivos com data aaaa_mm_dd e organiza documentos constitutivos e por benefício.', areas: null, precisa: [], usaModelo: false },
+  { agente: 'verbas', nome: 'Cálculo de verbas', descricao: 'Monta a planilha de verbas rescisórias a partir dos dados do contrato (fórmulas fixas, sem IA).', areas: ['trabalhista'], precisa: [], usaModelo: false },
+]
+const CONFIG_AGENTES: Record<string, { ativo: boolean; etapas: string[]; modeloId: string | null }> = {}
 
 const EQUIPE: Pessoa[] = [
   { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado' }, { email: 'rafael@silvaprado.exemplo.br', nome: 'Rafael Souza' },
@@ -182,6 +213,7 @@ export function criarApiDemo(): Api {
       return {
         id, area, cliente: c.cliente, status: c.status, produto: c.produto, numeroCnj: c.numeroCnj,
         campos: { ...(CAMPOS[id] ?? {}) }, defs: DEFS[area] ?? [],
+        relato: RELATOS[id] ?? null,
         beneficio: AREAS_PREVIDENCIARIAS.includes(area) ? Object.fromEntries(BENEFICIO_DEFS.map((b) => [b.chave, BENEF[id]?.[b.chave] ?? null])) : null,
         checklist: CHECK.slice(0, n).map((r, i) => {
           const m = MARCADOS[id]?.[`i${i}`]
@@ -263,6 +295,54 @@ export function criarApiDemo(): Api {
         x('p2', 'pericia', 'Perícia médica', 'c3', 3, '13:15', 'JEF · sala 2', 'Ana'),
         x('p3', 'pericia', 'Perícia social', 'c8', 12, '08:00', 'Visita domiciliar', 'Júlia'),
       ]
+    },
+    async salvarRelato(id, relato) {
+      if (relato.length > 20000) throw new Error('O relato passa de 20 mil caracteres.')
+      RELATOS[id] = relato.trim()
+      ;(HIST[id] ??= []).unshift({ evento: 'relato', de: null, para: null, detalhe: 'Atualizou o relato do cliente', quem: 'Ana Prado', em: new Date().toISOString() })
+    },
+    async biblioteca() { return BIBLIOTECA.map((b) => ({ ...b })) },
+    async salvarBiblioteca(id, item, arquivo) {
+      if (item.titulo.trim().length < 2) throw new Error('Dê um título.')
+      if (!arquivo && !item.link.trim() && !item.conteudo.trim() && !id) throw new Error('Anexe um arquivo, cole o texto ou informe um link.')
+      const base = { tipo: item.tipo, titulo: item.titulo.trim(), area: item.area || null, peca: item.peca.trim() || null, conteudo: item.conteudo || null, link: item.link.trim() || null }
+      if (id) { const b = BIBLIOTECA.find((x) => x.id === id); if (b) Object.assign(b, base, arquivo ? { arquivoNome: arquivo.name, tamanho: arquivo.size } : {}) }
+      else BIBLIOTECA.push({ id: `b${Date.now()}`, ...base, arquivo: null, arquivoNome: arquivo?.name ?? null, tamanho: arquivo?.size ?? null, criadoPor: 'ana@silvaprado.exemplo.br', criadoEm: new Date().toISOString() })
+    },
+    async retirarBiblioteca(id) { const i = BIBLIOTECA.findIndex((b) => b.id === id); if (i >= 0) BIBLIOTECA.splice(i, 1) },
+    async linkArquivo() { throw new Error('Na demonstração os arquivos não são guardados.') },
+    async integracoes() { return INTEGRACOES.map((i) => ({ ...i })) },
+    async salvarIntegracao(servico, ativo, modo, limite) {
+      const i = INTEGRACOES.find((x) => x.servico === servico)!
+      if (ativo && servico !== 'google_drive' && !i.temChave) throw new Error('Cadastre a chave antes de ativar.')
+      Object.assign(i, { ativo, modo: modo ?? i.modo, limiteMensal: limite ?? null, configuradoEm: new Date().toISOString(), configuradoPor: 'ana@silvaprado.exemplo.br' })
+    },
+    async salvarChave(servico, chave) {
+      const c = chave.trim()
+      if (c.length < 20 || /\s/.test(c)) throw new Error('A chave não parece válida.')
+      if (servico === 'claude' && !c.startsWith('sk-ant-')) throw new Error('A chave da Claude começa com sk-ant-.')
+      const i = INTEGRACOES.find((x) => x.servico === servico)!
+      Object.assign(i, { temChave: true, chaveFinal: c.slice(-4), configuradoEm: new Date().toISOString(), configuradoPor: 'ana@silvaprado.exemplo.br' })
+      return c.slice(-4)
+    },
+    async removerChave(servico) { Object.assign(INTEGRACOES.find((x) => x.servico === servico)!, { temChave: false, chaveFinal: null, ativo: false }) },
+    async agentes() {
+      const ativas = (AREAS[atual] ?? []).map((a) => a.area)
+      return CATALOGO.filter((c) => !c.areas || c.areas.some((a) => ativas.includes(a))).map((c) => {
+        const cfg = CONFIG_AGENTES[`${atual}:${c.agente}`] ?? { ativo: false, etapas: [], modeloId: null }
+        return { ...c, ...cfg, modeloTitulo: BIBLIOTECA.find((b) => b.id === cfg.modeloId)?.titulo ?? null }
+      })
+    },
+    async configurarAgente(agente, ativo, etapas, modeloId) {
+      const c = CATALOGO.find((x) => x.agente === agente)
+      if (!c) throw new Error('Agente desconhecido.')
+      const claude = INTEGRACOES[0]
+      if (ativo && c.precisa.includes('claude') && !(claude.ativo && claude.temChave)) throw new Error('Ative a Claude em Integrações antes de ligar este agente.')
+      if (ativo && c.usaModelo && !modeloId) throw new Error('Escolha o modelo da Biblioteca que este agente vai usar.')
+      CONFIG_AGENTES[`${atual}:${agente}`] = { ativo, etapas, modeloId }
+    },
+    async etapasDoEscritorio() {
+      return (AREAS[atual] ?? []).flatMap((a) => (ETAPAS[a.area] ?? []).filter((e) => !e.final).map((e) => ({ area: a.area, areaNome: a.nome, status: e.status })))
     },
   }
 }

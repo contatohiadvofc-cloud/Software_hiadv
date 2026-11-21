@@ -37,7 +37,7 @@ test('telas novas sem violações sérias de acessibilidade', async ({ page }) =
   const { default: AxeBuilder } = await import('@axe-core/playwright')
   await simularSupabase(page, { clientes, tarefas: [{ id: 't1', titulo: 'Pedir CTPS', detalhe: null, prazo: '2026-01-02', prazo_fatal: null, responsavel: 'ana@silvaprado.exemplo.br' }] })
   await abrir(page)
-  for (const rota of ['/clientes', '/clientes/c1', '/tarefas']) {
+  for (const rota of ['/clientes', '/clientes/c1', '/tarefas', '/biblioteca', '/configuracoes']) {
     await page.goto(rota)
     await page.locator('main h1').first().waitFor()
     const r = await new AxeBuilder({ page }).analyze()

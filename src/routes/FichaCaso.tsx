@@ -144,6 +144,42 @@ function Checklist({ f, aoMudar }: { f: Ficha; aoMudar: () => void }) {
   )
 }
 
+function Relato({ f, aoSalvo }: { f: Ficha; aoSalvo: () => void }) {
+  const api = useApi()
+  const toast = useToast()
+  const [editando, setEditando] = useState(false)
+  const [texto, setTexto] = useState('')
+  const salvar = useMutation({
+    mutationFn: (t: string) => api.salvarRelato(f.id, t),
+    onSuccess: () => { toast('Relato salvo.'); setEditando(false); aoSalvo() },
+    onError: (e) => toast(`Não foi possível salvar: ${(e as Error).message}`, 'danger'),
+  })
+  return (
+    <section aria-labelledby="ficha-relato">
+      <div className="ficha-secao-cabeca">
+        <h3 id="ficha-relato">Relato do cliente</h3>
+        {!editando && <Button size="sm" variant="ghost" onClick={() => { setTexto(f.relato ?? ''); setEditando(true) }}>{f.relato ? 'Editar relato' : 'Escrever relato'}</Button>}
+      </div>
+      {!editando && (f.relato
+        ? <p className="ficha-relato">{f.relato}</p>
+        : <p className="muted">Conte aqui, com as palavras do cliente, o que aconteceu: como foi o acidente ou a doença, o trabalho que fazia na época, o tratamento e o que mudou na vida dele. Os agentes usam este texto para preparar as peças.</p>)}
+      {editando && (
+        <form className="ficha-form" onSubmit={(e) => { e.preventDefault(); salvar.mutate(texto) }}>
+          <div className="hv-field">
+            <label htmlFor="relato-texto" className="sr-only">Relato do cliente</label>
+            <textarea id="relato-texto" className="hv-input textarea" rows={8} maxLength={20000} value={texto} onChange={(e) => setTexto(e.target.value)} autoFocus />
+            <span className="hv-hint">{texto.length.toLocaleString('pt-BR')} de 20.000 caracteres</span>
+          </div>
+          <div className="catalogo-linha">
+            <Button type="submit" disabled={salvar.isPending}>{salvar.isPending ? 'Salvando…' : 'Salvar relato'}</Button>
+            <Button variant="ghost" onClick={() => setEditando(false)}>Cancelar</Button>
+          </div>
+        </form>
+      )}
+    </section>
+  )
+}
+
 function Conteudo({ f }: { f: Ficha }) {
   const api = useApi()
   const { perfil } = useSessao()
@@ -160,6 +196,8 @@ function Conteudo({ f }: { f: Ficha }) {
         {f.produto && <span className="muted">{f.produto}</span>}
         {f.numeroCnj && <span className="muted">Processo {f.numeroCnj}</span>}
       </div>
+
+      <Relato key={`r-${f.id}`} f={f} aoSalvo={atualizar} />
 
       {f.beneficio && (
         <SecaoCampos key={`b-${f.id}`} id="ficha-benef" titulo="Dados do benefício" defs={BENEFICIO_DEFS} valores={f.beneficio} vazio=""

@@ -4,6 +4,7 @@ import type { Ficha } from './ficha'
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
+import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
 export type Perfil = { email: string; nome: string; papel: Papel | null; escritorioId: string | null; escritorioNome: string }
@@ -53,4 +54,21 @@ export interface Api {
   cliente(id: string): Promise<ClienteFicha>
   /** Perícias e audiências não canceladas nem realizadas. */
   agenda(): Promise<Compromisso[]>
+  /** Relato do cliente no caso (texto livre). */
+  salvarRelato(id: string, relato: string): Promise<void>
+  biblioteca(): Promise<ItemBiblioteca[]>
+  /** Inclui ou edita; com arquivo, envia para a pasta do escritório antes. */
+  salvarBiblioteca(id: string | null, item: NovoItemBiblioteca, arquivo?: File | null): Promise<void>
+  retirarBiblioteca(id: string): Promise<void>
+  /** Link temporário (5 min) para baixar o arquivo do item. */
+  linkArquivo(caminho: string): Promise<string>
+  integracoes(): Promise<Integracao[]>
+  salvarIntegracao(servico: Servico, ativo: boolean, modo?: string | null, limite?: number | null): Promise<void>
+  /** A chave vai direto ao cofre do servidor; nunca volta para a tela. */
+  salvarChave(servico: Servico, chave: string): Promise<string>
+  removerChave(servico: Servico): Promise<void>
+  agentes(): Promise<Agente[]>
+  configurarAgente(agente: string, ativo: boolean, etapas: string[], modeloId: string | null): Promise<void>
+  /** Etapas das áreas ativas, para escolher quando cada agente entra. */
+  etapasDoEscritorio(): Promise<EtapaEscritorio[]>
 }

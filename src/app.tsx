@@ -14,6 +14,8 @@ import { Tarefas } from './routes/Tarefas'
 import { Clientes } from './routes/Clientes'
 import { Cliente } from './routes/Cliente'
 import { Agenda } from './routes/Agenda'
+import { Biblioteca } from './routes/Biblioteca'
+import { Configuracoes } from './routes/Configuracoes'
 
 const raiz = createRootRoute({ component: () => <Outlet />, head: () => ({ meta: [{ title: 'HiAdv' }] }) })
 const inicio = createRoute({ getParentRoute: () => raiz, path: '/', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
@@ -30,9 +32,11 @@ const tarefas = createRoute({ getParentRoute: () => dentro, path: '/tarefas', co
 const clientes = createRoute({ getParentRoute: () => dentro, path: '/clientes', component: Clientes, head: () => ({ meta: [{ title: 'Clientes · HiAdv' }] }) })
 const cliente = createRoute({ getParentRoute: () => dentro, path: '/clientes/$id', component: Cliente, head: () => ({ meta: [{ title: 'Cliente · HiAdv' }] }) })
 const agenda = createRoute({ getParentRoute: () => dentro, path: '/agenda', component: Agenda, head: () => ({ meta: [{ title: 'Agenda · HiAdv' }] }) })
+const biblioteca = createRoute({ getParentRoute: () => dentro, path: '/biblioteca', component: Biblioteca, head: () => ({ meta: [{ title: 'Biblioteca · HiAdv' }] }) })
+const configuracoes = createRoute({ getParentRoute: () => dentro, path: '/configuracoes', component: Configuracoes, head: () => ({ meta: [{ title: 'Configurações · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, tarefas, agenda, clientes, cliente, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, tarefas, agenda, clientes, cliente, biblioteca, configuracoes, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

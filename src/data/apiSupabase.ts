@@ -7,6 +7,7 @@ import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
 import { nomeTipo, type Compromisso } from './agenda'
+import { nomeArquivoSeguro, type Agente, type EtapaEscritorio, type Integracao, type ItemBiblioteca, type Servico, type TipoBiblioteca } from './escritorio'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -18,6 +19,13 @@ function verificar<T>(r: { data: T; error: PostgrestError | null; status?: numbe
 }
 
 const PAPEIS: Papel[] = ['code', 'master', 'colaborador', 'parceiro']
+
+/** As funções do servidor devolvem {ok, erro}; erro vira mensagem na tela. */
+function okOuErro(r: unknown): Record<string, unknown> {
+  const v = (r ?? {}) as Record<string, unknown>
+  if (v.ok === false) throw new Error(String(v.erro ?? 'Não foi possível concluir.'))
+  return v
+}
 
 export function criarApiSupabase(url: string, chave: string): Api {
   const sb: SupabaseClient = createClient(url, chave, { auth: { persistSession: true, autoRefreshToken: true } })
@@ -137,6 +145,7 @@ export function criarApiSupabase(url: string, chave: string): Api {
         id, area, cliente: String(c.cliente ?? ''), status: String(c.status ?? ''),
         produto: (c.produto as string) ?? null, numeroCnj: (c.numero_cnj as string) ?? null,
         campos: (c.campos as Record<string, unknown>) ?? {}, defs,
+        relato: (c.relato as string) ?? null,
         beneficio: AREAS_PREVIDENCIARIAS.includes(area) ? Object.fromEntries(BENEFICIO_DEFS.map((b) => [b.chave, c[b.chave] ?? null])) : null,
         checklist: ((d?.checklist as any[]) ?? []).map((g) => ({ item: String(g.item), rotulo: String(g.rotulo ?? g.item), feito: !!g.data, data: (g.data as string) ?? null })),
         historico: ((d?.historico as any[]) ?? []).map((h) => ({ evento: String(h.evento ?? ''), de: h.de ?? null, para: h.para ?? null, detalhe: h.detalhe ?? null, quem: h.quem ?? null, em: String(h.em ?? '') })),
@@ -211,6 +220,72 @@ export function criarApiSupabase(url: string, chave: string): Api {
         fora.push({ id: `a:${a.id}`, tipo: 'audiencia', titulo: `Audiência ${nomeTipo(a.tipo as string, '').toLowerCase()}`.trim(), cliente: String(a.cliente ?? ''), clienteId: (a.cliente_id as string) ?? null, dia: diaSP(d), hora: horaSP(d), local, quem: String(a.responsavel ?? '') })
       }
       return fora
+    },
+    async salvarRelato(id, relato) {
+      const r = await sb.rpc('caso_relato_salvar', { p_caso: id, p_relato: relato })
+      if (r.error && /caso_relato_salvar|PGRST202/i.test(`${r.error.code} ${r.error.message}`)) throw new Error('Esta função ainda não foi ativada no servidor.')
+      okOuErro(verificar(r))
+    },
+    async biblioteca(): Promise<ItemBiblioteca[]> {
+      const r = await sb.from('biblioteca').select('id, tipo, titulo, area, peca, conteudo, link, arquivo, arquivo_nome, tamanho, criado_por, criado_em').eq('ativo', true).order('titulo').limit(1000)
+      if (r.error && /biblioteca|42P01|PGRST205/i.test(`${r.error.code} ${r.error.message}`)) return []
+      return (verificar(r) ?? []).map((b) => ({
+        id: b.id as string, tipo: b.tipo as TipoBiblioteca, titulo: b.titulo as string, area: (b.area as string) ?? null, peca: (b.peca as string) ?? null,
+        conteudo: (b.conteudo as string) ?? null, link: (b.link as string) ?? null, arquivo: (b.arquivo as string) ?? null,
+        arquivoNome: (b.arquivo_nome as string) ?? null, tamanho: (b.tamanho as number) ?? null, criadoPor: (b.criado_por as string) ?? null, criadoEm: String(b.criado_em),
+      }))
+    },
+    async salvarBiblioteca(id, item, arquivo) {
+      let extra: Record<string, unknown> = {}
+      if (arquivo) {
+        const p = await this.perfil()
+        if (!p.escritorioId) throw new Error('Escritório não definido.')
+        const caminho = `${p.escritorioId}/${crypto.randomUUID()}-${nomeArquivoSeguro(arquivo.name)}`
+        const up = await sb.storage.from('biblioteca').upload(caminho, arquivo, { contentType: arquivo.type || undefined, upsert: false })
+        if (up.error) throw new Error('Não foi possível enviar o arquivo.')
+        extra = { arquivo: caminho, arquivo_nome: arquivo.name, tamanho: arquivo.size }
+      }
+      okOuErro(verificar(await sb.rpc('biblioteca_salvar', { p_id: id, p: { ...item, ...extra } })))
+    },
+    async retirarBiblioteca(id) { okOuErro(verificar(await sb.rpc('biblioteca_retirar', { p_id: id }))) },
+    async linkArquivo(caminho) {
+      const r = await sb.storage.from('biblioteca').createSignedUrl(caminho, 300)
+      if (r.error || !r.data) throw new Error('Não foi possível abrir o arquivo.')
+      return r.data.signedUrl
+    },
+    async integracoes(): Promise<Integracao[]> {
+      const r = await sb.rpc('integracoes_listar')
+      if (r.error && /integracoes_listar|PGRST202/i.test(`${r.error.code} ${r.error.message}`)) return []
+      return ((verificar(r) as Array<Record<string, unknown>> | null) ?? []).map((i) => ({
+        servico: i.servico as Servico, ativo: !!i.ativo, modo: (i.modo as string) ?? null, limiteMensal: i.limite_mensal == null ? null : Number(i.limite_mensal),
+        temChave: !!i.tem_chave, chaveFinal: (i.chave_final as string) ?? null, configuradoEm: (i.configurado_em as string) ?? null, configuradoPor: (i.configurado_por as string) ?? null,
+      }))
+    },
+    async salvarIntegracao(servico, ativo, modo, limite) {
+      okOuErro(verificar(await sb.rpc('integracao_salvar', { p_servico: servico, p_ativo: ativo, p_modo: modo ?? null, p_limite: limite ?? null })))
+    },
+    async salvarChave(servico, chave) {
+      const r = okOuErro(verificar(await sb.rpc('integracao_chave_salvar', { p_servico: servico, p_chave: chave })))
+      return String(r.chave_final ?? '')
+    },
+    async removerChave(servico) { okOuErro(verificar(await sb.rpc('integracao_chave_remover', { p_servico: servico }))) },
+    async agentes(): Promise<Agente[]> {
+      const r = await sb.rpc('agentes_listar')
+      if (r.error && /agentes_listar|PGRST202/i.test(`${r.error.code} ${r.error.message}`)) return []
+      return ((verificar(r) as Array<Record<string, unknown>> | null) ?? []).map((a) => ({
+        agente: a.agente as string, nome: a.nome as string, descricao: a.descricao as string, areas: (a.areas as string[]) ?? null,
+        precisa: (a.precisa as string[]) ?? [], usaModelo: !!a.usa_modelo, ativo: !!a.ativo, etapas: (a.etapas as string[]) ?? [],
+        modeloId: (a.modelo_id as string) ?? null, modeloTitulo: (a.modelo_titulo as string) ?? null,
+      }))
+    },
+    async configurarAgente(agente, ativo, etapas, modeloId) {
+      okOuErro(verificar(await sb.rpc('agente_configurar', { p_agente: agente, p_ativo: ativo, p_etapas: etapas, p_modelo: modeloId })))
+    },
+    async etapasDoEscritorio(): Promise<EtapaEscritorio[]> {
+      const areas = await this.areas()
+      if (!areas.length) return []
+      const r = verificar(await sb.from('fluxo_status').select('area, status, ordem, final').in('area', areas.map((a) => a.area)).order('ordem')) ?? []
+      return r.filter((e) => !e.final).map((e) => ({ area: e.area as string, areaNome: areas.find((a) => a.area === e.area)?.nome ?? String(e.area), status: e.status as string }))
     },
   }
 }

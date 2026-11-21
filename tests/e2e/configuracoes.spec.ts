@@ -1,0 +1,48 @@
+import { test, expect } from '@playwright/test'
+import { simularSupabase, entrar } from './mock'
+
+const integracoes = [
+  { servico: 'claude', ativo: false, modo: null, limite_mensal: null, tem_chave: false, chave_final: null, configurado_em: null },
+  { servico: 'zapsign', ativo: false, modo: 'um_clique', limite_mensal: null, tem_chave: false, chave_final: null, configurado_em: null },
+  { servico: 'google_drive', ativo: false, modo: null, limite_mensal: null, tem_chave: false, chave_final: null, configurado_em: null },
+]
+const agentes = [{ agente: 'redatora', nome: 'Redatora', descricao: 'Escreve a minuta.', areas: null, precisa: ['claude', 'relato', 'modelo'], usa_modelo: true, ativo: false, etapas: [], modelo_id: null, modelo_titulo: null }]
+
+async function abrir(page: import('@playwright/test').Page) {
+  await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
+  await page.goto('/configuracoes')
+}
+
+test('integrações: chave vai ao servidor e só o final aparece; ativar exige chave', async ({ page }) => {
+  const est = await simularSupabase(page, { integracoes, agentes })
+  await abrir(page)
+  const claude = page.locator('.integracao', { hasText: 'Claude (IA dos agentes)' })
+  await expect(claude.getByRole('button', { name: 'Ativar' })).toBeDisabled()
+  await claude.getByRole('button', { name: 'Cadastrar chave' }).click()
+  const d = page.getByRole('dialog', { name: /Chave: Claude/ })
+  await expect(d.getByLabel(/Chave da API Anthropic/)).toHaveAttribute('type', 'password')
+  await d.getByLabel(/Chave da API Anthropic/).fill('sk-ant-FICTICIA-0000000000WXYZ')
+  await d.getByRole('button', { name: 'Salvar chave' }).click()
+  await expect(page.getByText('Chave cadastrada (final WXYZ).')).toBeVisible()
+  expect(est.rpcs.find((x) => x.nome === 'integracao_chave_salvar')!.corpo).toEqual({ p_servico: 'claude', p_chave: 'sk-ant-FICTICIA-0000000000WXYZ' })
+  await expect(page.getByText('sk-ant-FICTICIA-0000000000WXYZ')).toHaveCount(0)
+})
+
+test('agentes: recusa do servidor aparece; quem não é gestor não entra', async ({ page }) => {
+  await simularSupabase(page, { integracoes, agentes, etapas: [{ status: 'fazendo inicial', ordem: 3, final: false, pede_motivo: false }], recusarAgente: 'Ative a Claude em Integrações antes de ligar este agente.' })
+  await abrir(page)
+  const r = page.locator('.agente', { hasText: 'Redatora' })
+  await expect(r.getByText(/Para ligar: Ativar a Claude em Integrações · Escolher o modelo da Biblioteca/)).toBeVisible()
+  await r.getByRole('button', { name: 'Configurar Redatora' }).click()
+  const d = page.getByRole('dialog', { name: 'Configurar: Redatora' })
+  await d.getByLabel('Fazendo inicial').check()
+  await d.getByRole('button', { name: 'Salvar e ligar' }).click()
+  await expect(d.getByText('Ative a Claude em Integrações antes de ligar este agente.')).toBeVisible()
+})
+
+test('colaborador não vê as configurações', async ({ page }) => {
+  await simularSupabase(page, { papel: 'colaborador', integracoes, agentes })
+  await abrir(page)
+  await expect(page.getByText('Só o Gestor Master acessa as configurações do escritório.')).toBeVisible()
+})

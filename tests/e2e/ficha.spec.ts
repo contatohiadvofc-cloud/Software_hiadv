@@ -98,3 +98,14 @@ test('previdenciário: dados do benefício editáveis e checklist com data do do
   await expect(page.getByText('Item marcado.')).toBeVisible()
   expect(est.gates[0]).toEqual({ p_caso: 'k9', p_item: 'procuracao', p_data: '2026-11-10' })
 })
+
+test('relato do cliente: escreve e salva no caso', async ({ page }) => {
+  const est = await simularSupabase(page, { etapas, casos, detalhe, camposArea })
+  const f = await abrirFicha(page)
+  await expect(f.getByText(/Conte aqui, com as palavras do cliente/)).toBeVisible()
+  await f.getByRole('button', { name: 'Escrever relato' }).click()
+  await f.getByRole('textbox', { name: 'Relato do cliente' }).fill('Foi dispensado sem receber as verbas rescisórias.')
+  await f.getByRole('button', { name: 'Salvar relato' }).click()
+  await expect(page.getByText('Relato salvo.')).toBeVisible()
+  expect(est.rpcs.find((x) => x.nome === 'caso_relato_salvar')!.corpo).toEqual({ p_caso: 'k1', p_relato: 'Foi dispensado sem receber as verbas rescisórias.' })
+})

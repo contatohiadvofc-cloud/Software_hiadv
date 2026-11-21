@@ -27,7 +27,12 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [x] Clientes: lista com filtro e página do cliente (casos, processos, tarefas); busca abre o cliente.
 - [x] Agenda: perícias e audiências dos próximos 30 dias por dia, com filtro.
 - [x] Ficha: dados do benefício nas áreas previdenciárias (caso_beneficio_salvar) e checklist marcável com data (caso_gate).
-- [ ] caso_beneficio_salvar: aplicado no TESTE; falta aplicar no OFICIAL (aguarda OK do Felipe).
+- [x] caso_beneficio_salvar aplicado no oficial (OK do Felipe em 21/11).
+- [x] Relato do cliente na ficha; Biblioteca (modelos, jurisprudência, referências, teses, com arquivo); Configurações do escritório (Integrações Claude/ZapSign/Drive com chave no cofre; Agentes com etapas e modelo).
+- [ ] hiadv2-biblioteca-integracoes-agentes.sql: aplicado e testado no TESTE; falta aplicar no OFICIAL (aguarda OK).
+- [ ] Execução dos agentes (função no servidor chamando a Claude com a chave do escritório) — depende de chave cadastrada.
+- [ ] ZapSign: envio do kit com um clique (função no servidor + webhook de assinatura).
+- [ ] Google Drive: pasta compartilhada, mapa de nomes, relacionar pasta ao cliente com aprovação, importar só ativos com aprovação.
 - [ ] Documentos, publicações virando tarefa, novo cliente/novo caso.
 
 Testes: 18 de lógica e 33 de tela, todos passando.
