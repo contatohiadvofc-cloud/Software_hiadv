@@ -1,3 +1,4 @@
+import { valorParaTela, type CampoDef } from './campos'
 export type Etapa = { status: string; ordem: number; final: boolean; pedeMotivo: boolean }
 export type CasoCard = {
   id: string
@@ -8,6 +9,8 @@ export type CasoCard = {
   numeroCnj: string | null
   gateOk: number
   gateTotal: number
+  /** Campos da área marcados para aparecer no cartão (já formatados). */
+  destaques?: Array<{ rotulo: string; valor: string }>
 }
 export type Coluna = { etapa: Etapa; casos: CasoCard[] }
 export type Quadro = { etapas: Etapa[]; casos: CasoCard[] }
@@ -35,4 +38,12 @@ export function exigenciaDaMudanca(destino: Etapa): { motivo: boolean; confirmar
 
 export function rotuloEtapa(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+/** Monta os destaques do cartão a partir dos campos do caso. Vazios ficam de fora. */
+export function destaquesDoCartao(defs: CampoDef[], campos: Record<string, unknown> | null | undefined): Array<{ rotulo: string; valor: string }> {
+  if (!campos) return []
+  return defs.filter((d) => d.noCartao).sort((a, b) => a.ordem - b.ordem)
+    .map((d) => ({ rotulo: d.rotulo, valor: valorParaTela(d, campos[d.chave]) }))
+    .filter((x) => x.valor !== '–')
 }

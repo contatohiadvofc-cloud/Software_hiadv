@@ -20,6 +20,11 @@ function Cartao({ c, etapas, aoMover, aoAbrir }: { c: CasoCard; etapas: Etapa[];
     <li className="cartao" draggable onDragStart={(e) => { e.dataTransfer.setData('text/plain', c.id); e.dataTransfer.effectAllowed = 'move' }}>
       <button type="button" className="cartao-nome" onClick={() => aoAbrir(c)}>{c.cliente}</button>
       {c.produto && <span className="cartao-sub">{c.produto}</span>}
+      {!!c.destaques?.length && (
+        <dl className="cartao-destaques">
+          {c.destaques.map((d) => <div key={d.rotulo}><dt>{d.rotulo}</dt><dd>{d.valor}</dd></div>)}
+        </dl>
+      )}
       <span className="cartao-meta">
         <span data-parado={c.dias >= PARADO_DIAS ? 'true' : undefined}>{c.dias === 0 ? 'Entrou hoje' : `${c.dias} ${c.dias === 1 ? 'dia' : 'dias'} na etapa`}</span>
         {c.gateTotal > 0 && <span>Checklist {c.gateOk}/{c.gateTotal}</span>}

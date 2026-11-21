@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient, type PostgrestError } from '@supabas
 import type { Api, Achado, Area, Escritorio, Papel, Perfil } from './api'
 import { CredencialInvalida, SessaoExpirada } from './api'
 import { diaSP, horaSP, type ItemDia } from './seuDia'
-import type { Quadro } from './quadro'
+import { destaquesDoCartao, type Quadro } from './quadro'
 import type { Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
 
@@ -96,9 +96,10 @@ export function criarApiSupabase(url: string, chave: string): Api {
       return itens
     },
     async quadro(area): Promise<Quadro> {
-      const [et, cs] = await Promise.all([
+      const [et, cs, cd] = await Promise.all([
         sb.from('fluxo_status').select('status, ordem, final, pede_motivo').eq('area', area).order('ordem'),
         sb.rpc('casos_quadro', { p_via: area }),
+        sb.from('area_campos').select('chave, rotulo, tipo, opcoes, ordem, no_cartao').eq('area', area).eq('ativo', true).eq('no_cartao', true),
       ])
       const etapas = (verificar(et) ?? []).map((e) => ({ status: e.status as string, ordem: e.ordem as number, final: !!e.final, pedeMotivo: !!e.pede_motivo }))
       const casos = ((verificar(cs) as Array<Record<string, unknown>> | null) ?? []).map((c) => ({
@@ -106,6 +107,17 @@ export function criarApiSupabase(url: string, chave: string): Api {
         produto: (c.produto as string) ?? null, numeroCnj: (c.numero_cnj as string) ?? null,
         gateOk: Number(c.gate_ok ?? 0), gateTotal: Number(c.gate_total ?? 0),
       }))
+      // Campos do cartão: lidos à parte e sem travar o quadro se falharem.
+      const defs = cd.error ? [] : (cd.data ?? []).map((x): CampoDef => ({ chave: x.chave as string, rotulo: x.rotulo as string, tipo: x.tipo as TipoCampo, opcoes: (x.opcoes as string[] | null) ?? null, ordem: Number(x.ordem), noCartao: true }))
+      if (defs.length && casos.length) {
+        const porId = new Map<string, Record<string, unknown>>()
+        for (let i = 0; i < casos.length; i += 150) {
+          const r = await sb.from('casos').select('id, campos').in('id', casos.slice(i, i + 150).map((c) => c.id))
+          if (r.error) break
+          for (const x of r.data ?? []) porId.set(x.id as string, (x.campos as Record<string, unknown>) ?? {})
+        }
+        for (const c of casos) (c as { destaques?: unknown }).destaques = destaquesDoCartao(defs, porId.get(c.id))
+      }
       return { etapas, casos }
     },
     async moverCaso(id, status, motivo) {

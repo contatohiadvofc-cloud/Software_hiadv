@@ -1,7 +1,7 @@
 import type { Api, Area, Escritorio, Perfil } from './api'
 import { CredencialInvalida } from './api'
 import { diaSP, type ItemDia } from './seuDia'
-import type { CasoCard, Etapa } from './quadro'
+import { destaquesDoCartao, type CasoCard, type Etapa } from './quadro'
 import type { EventoHistorico, Ficha } from './ficha'
 import { telaParaValor, validarCampo, type CampoDef } from './campos'
 
@@ -130,7 +130,7 @@ export function criarApiDemo(): Api {
       ]
     },
     async quadro(area) {
-      return { etapas: ETAPAS[area] ?? [], casos: CASOS.filter((c) => AREA_DO_CASO[c.id] === area).map((c) => ({ ...c })) }
+      return { etapas: ETAPAS[area] ?? [], casos: CASOS.filter((c) => AREA_DO_CASO[c.id] === area).map((c) => ({ ...c, destaques: destaquesDoCartao(DEFS[area] ?? [], CAMPOS[c.id]) })) }
     },
     async moverCaso(id, status) {
       const c = CASOS.find((x) => x.id === id)

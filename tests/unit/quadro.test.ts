@@ -1,4 +1,5 @@
 import { montarColunas, exigenciaDaMudanca, type Etapa, type CasoCard } from '../../src/data/quadro'
+import { destaquesDoCartao } from '../../src/data/quadro'
 
 const etapas: Etapa[] = [
   { status: 'pendente', ordem: 1, final: false, pedeMotivo: false },
@@ -34,5 +35,17 @@ describe('exigenciaDaMudanca', () => {
   })
   it('etapa final sem motivo: só confirmação', () => {
     expect(exigenciaDaMudanca(etapas[3])).toEqual({ motivo: false, confirmar: true })
+  })
+})
+
+describe('destaquesDoCartao', () => {
+  const defs = [
+    { chave: 'fase', rotulo: 'Fase', tipo: 'lista' as const, opcoes: ['Recurso'], ordem: 120, noCartao: true },
+    { chave: 'reclamadas', rotulo: 'Reclamada(s)', tipo: 'texto' as const, opcoes: null, ordem: 10, noCartao: true },
+    { chave: 'salario', rotulo: 'Salário', tipo: 'moeda' as const, opcoes: null, ordem: 50, noCartao: false },
+  ]
+  it('só os marcados para o cartão, na ordem, sem vazios', () => {
+    expect(destaquesDoCartao(defs, { fase: 'Recurso', salario: 10, vara: '' })).toEqual([{ rotulo: 'Fase', valor: 'Recurso' }])
+    expect(destaquesDoCartao(defs, { fase: 'Recurso', reclamadas: 'Alfa' }).map((d) => d.rotulo)).toEqual(['Reclamada(s)', 'Fase'])
   })
 })

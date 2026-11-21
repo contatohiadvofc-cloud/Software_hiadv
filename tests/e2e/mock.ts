@@ -17,6 +17,7 @@ export type Cenario = {
   detalhe?: Record<string, unknown>
   camposArea?: Array<Record<string, unknown>>
   recusarCampos?: string
+  camposCasos?: Array<{ id: string; campos: Record<string, unknown> }>
 }
 
 function b64url(o: object) {
@@ -77,6 +78,7 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       return json(r, c.tarefas ?? [])
     }
     if (p.endsWith('/rest/v1/audiencias')) return json(r, [])
+    if (p.endsWith('/rest/v1/casos')) return json(r, c.camposCasos ?? [])
     if (p.endsWith('/rest/v1/area_campos')) return json(r, c.camposArea ?? [])
     if (p.endsWith('/rest/v1/fluxo_status')) return json(r, c.etapas ?? [])
     return json(r, [])
