@@ -5,6 +5,7 @@ import type { CargaPessoa, Falha, ItemAtencao, ParDuplicado, RegrasAtencao } fro
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
+import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
@@ -104,4 +105,10 @@ export interface Api {
   /** Só o gestor: automações que não concluíram, nos últimos 60 dias. */
   falhas(): Promise<Falha[]>
   resolverFalha(id: number): Promise<void>
+  /** Cria o cliente no escritório; com CPF já cadastrado, devolve o existente (ja = true). */
+  criarCliente(c: NovoCliente): Promise<{ id: string; ja: boolean }>
+  /** Abre um caso na etapa inicial da área. Devolve o id do caso. */
+  criarCaso(c: NovoCaso): Promise<string>
+  /** Só o gestor. Com simular = true nada é gravado. */
+  importarClientes(itens: NovoCliente[], simular: boolean): Promise<ResultadoImportacao>
 }

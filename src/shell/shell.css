@@ -314,3 +314,19 @@ li.hv-row.cliente-caso { cursor: default; }
 .pacote-cabeca h3 { margin: 0; font-size: var(--fs-lg); }
 .pacote details summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: var(--fs-sm); min-height: 32px; display: flex; align-items: center; }
 .pacote-lista { margin: var(--s-2) 0 0; padding-left: var(--s-5); font-size: var(--fs-sm); color: var(--ink-2); display: grid; gap: 2px; }
+
+/* Cadastro: novo cliente, novo caso e importação */
+.cad-grupo { border: 1px solid var(--line); border-radius: var(--r-2, 10px); padding: var(--s-3); margin: 0; display: grid; gap: var(--s-2); }
+.cad-grupo legend { padding: 0 var(--s-1); font-weight: 600; }
+.cad-escolhido { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); margin: 0; }
+.cad-achados { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.cad-achados .hv-row { width: 100%; text-align: left; background: none; border: 0; padding: var(--s-2); border-radius: 8px; font: inherit; color: inherit; cursor: pointer; }
+.cad-achados .hv-row:hover, .cad-achados .hv-row:focus-visible { background: var(--surface-2); }
+.imp-resumo { background: var(--surface-2); border-radius: 10px; padding: var(--s-3); }
+.imp-resumo p { margin: 0 0 var(--s-1); }
+.imp-erros { margin: 0; padding-left: 1.2em; max-height: 180px; overflow: auto; color: var(--danger); font-size: .9em; }
+@media (max-width: 720px) {
+  /* linhas sem áreas nomeadas: os filhos voltam ao fluxo normal da grade */
+  .hv-row.cliente-linha > *, .hv-row.cliente-caso > *, .hv-row.agenda-item > *, .hv-row.biblioteca-item > * { grid-area: auto; }
+}
+.cad-achados .hv-row { display: block; min-height: 0; }

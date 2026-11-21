@@ -359,6 +359,23 @@ export function criarApiSupabase(url: string, chave: string): Api {
       if (r.error) return []
       return ((r.data as Record<string, unknown>[] | null) ?? []).map((x) => ({ email: String(x.email), nome: String(x.nome ?? x.email), tarefas: Number(x.tarefas ?? 0), casos: Number(x.casos ?? 0), total: Number(x.total ?? 0) }))
     },
+    async criarCliente(c) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_cliente_criar', { p: c })))
+      return { id: String(r.id), ja: r.ja === true }
+    },
+    async criarCaso(c) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_caso_criar', {
+        p_cliente: c.cliente, p_area: c.area, p_produto: c.produto, p_relato: c.relato.trim() || null, p_responsavel: c.responsavel,
+      })))
+      return String(r.id)
+    },
+    async importarClientes(itens, simular) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_clientes_importar', { p_itens: itens, p_simular: simular })))
+      return {
+        simulado: r.simulado === true, novos: Number(r.novos ?? 0), existentes: Number(r.existentes ?? 0), erros: Number(r.erros ?? 0),
+        linhas: ((r.linhas as Record<string, unknown>[]) ?? []).map((l) => ({ linha: Number(l.linha), nome: String(l.nome ?? ''), resultado: l.resultado as 'novo' | 'ja' | 'erro', motivo: (l.motivo as string) ?? null })),
+      }
+    },
     async falhas() {
       const r = await sb.rpc('falhas_listar')
       if (r.error && /function .*does not exist|Could not find the function/i.test(r.error.message)) return []

@@ -123,6 +123,14 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'agente_configurar') { registrar(); return json(r, c.recusarAgente ? { ok: false, erro: c.recusarAgente } : { ok: true }) }
       if (nome === 'caso_beneficio_salvar') { const v = req.postDataJSON() as { p: object }; estado.beneficios.push(v); return json(r, { ok: true, alterados: Object.keys(v.p).length }) }
       if (nome === 'caso_gate') { estado.gates.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true }) }
+      if (nome === 'hiadv_cliente_criar') { const b = registrar() as { p: { cpf?: string } }; return json(r, { ok: true, id: b.p.cpf === '529.982.247-25' ? 'c1' : 'c-novo', ja: b.p.cpf === '529.982.247-25' }) }
+      if (nome === 'hiadv_caso_criar') { registrar(); return json(r, { ok: true, id: 'k-novo' }) }
+      if (nome === 'hiadv_clientes_importar') {
+        const b = registrar() as { p_itens: Array<{ nome: string }>; p_simular: boolean }
+        const linhas = b.p_itens.map((x, i) => ({ linha: i + 1, nome: x.nome, resultado: x.nome.length < 2 ? 'erro' : 'novo', motivo: x.nome.length < 2 ? 'Nome em branco ou curto demais.' : null }))
+        const erros = linhas.filter((l) => l.resultado === 'erro').length
+        return json(r, { ok: true, simulado: b.p_simular, novos: linhas.length - erros, existentes: 0, erros, linhas })
+      }
       if (nome === 'caso_detalhe') return json(r, c.detalhe ?? null)
       if (nome === 'caso_campos_salvar') {
         const corpo = req.postDataJSON() as Record<string, unknown>

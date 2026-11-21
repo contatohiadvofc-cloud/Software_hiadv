@@ -11,6 +11,7 @@ import { Button } from '../design/components/Button'
 import { Dialog } from '../design/components/Dialog'
 import { useToast } from '../design/components/Toast'
 import { FichaCaso } from './FichaCaso'
+import { NovoCasoDialog } from './Cadastro'
 
 type Pedido = { caso: CasoCard; destino: Etapa }
 const PARADO_DIAS = 15
@@ -54,6 +55,7 @@ export function Area() {
   const [motivo, setMotivo] = useState('')
   const [alvo, setAlvo] = useState<string | null>(null)
   const [aberto, setAberto] = useState<CasoCard | null>(null)
+  const [novoCaso, setNovoCaso] = useState(false)
   const [etapaCel, setEtapaCel] = useState<string | null>(null)
   const chave = ['quadro', perfil?.escritorioId, slug]
 
@@ -110,6 +112,7 @@ export function Area() {
             <button type="button" aria-pressed={visao === 'quadro'} onClick={() => setVisao('quadro')}>Quadro</button>
             <button type="button" aria-pressed={visao === 'lista'} onClick={() => setVisao('lista')}>Lista</button>
           </div>
+          <Button onClick={() => setNovoCaso(true)}>Novo caso</Button>
         </div>
       </div>
 
@@ -162,6 +165,11 @@ export function Area() {
       )}
 
       <FichaCaso casoId={aberto?.id ?? null} nome={aberto?.cliente ?? ''} aoFechar={() => setAberto(null)} />
+      <NovoCasoDialog aberto={novoCaso} area={slug} aoFechar={() => setNovoCaso(false)}
+        aoCriar={(id, areaDoCaso, cliente) => {
+          setNovoCaso(false)
+          if (areaDoCaso === slug) setAberto({ id, cliente, status: '', dias: 0, produto: null, numeroCnj: null, gateOk: 0, gateTotal: 0 } as CasoCard)
+        }} />
 
       <Dialog open={!!pedido} onOpenChange={(v) => !v && setPedido(null)} title="Confirmar mudança de etapa">
         {pedido && ex && (

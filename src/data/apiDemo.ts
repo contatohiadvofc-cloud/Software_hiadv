@@ -1,4 +1,5 @@
 import type { Api, Area, Escritorio, Perfil } from './api'
+import { PRODUTOS_PREV, areaPrevidenciaria, soDigitos, validarCliente } from './cadastro'
 import { CredencialInvalida } from './api'
 import { diaSP, type ItemDia } from './seuDia'
 import { destaquesDoCartao, type CasoCard, type Etapa } from './quadro'
@@ -85,6 +86,7 @@ const MARCADOS: Record<string, Record<string, string>> = {}
 const CHECK = ['Procuração assinada', 'Documento com foto', 'CTPS digital', 'Holerites', 'Termo de rescisão', 'Laudos e exames', 'CNIS']
 
 const CLIENTE_DO_CASO: Record<string, string> = { k1: 'c2', k2: 'c4', k3: 'c5', k4: 'c6', k5: 'c7', k6: 'c1', k7: 'c8', k8: 'c3' }
+const CPFS: Record<string, string> = { c1: '52998224725' }
 const CLIENTES: ClienteResumo[] = [
   { id: 'c1', nome: 'Rita Moura', telefone: '49999110001', origem: 'site', desde: '2026-08-02T12:00:00Z' },
   { id: 'c2', nome: 'Bruno Teixeira', telefone: '49999110002', origem: 'whatsapp', desde: '2026-09-10T12:00:00Z' },
@@ -457,6 +459,41 @@ export function criarApiDemo(): Api {
         const tarefas = tarefasDemo().filter((t) => t.status === 'aberta' && t.responsavel === p.email).length
         return { email: p.email, nome: p.nome, tarefas, casos: 0, total: tarefas }
       }).sort((a, b) => a.total - b.total || a.email.localeCompare(b.email))
+    },
+    async criarCliente(c) {
+      const erro = validarCliente(c); if (erro) throw new Error(erro)
+      const cpf = soDigitos(c.cpf)
+      const ja = cpf ? CLIENTES.find((x) => CPFS[x.id] === cpf) : undefined
+      if (ja) return { id: ja.id, ja: true }
+      const id = `c${CLIENTES.length + 1}-${Date.now() % 100000}`
+      CLIENTES.push({ id, nome: c.nome.replace(/\s+/g, ' ').trim(), telefone: soDigitos(c.telefone).replace(/^55(?=\d{10,11}$)/, '') || null, origem: 'equipe', desde: new Date().toISOString() })
+      if (cpf) CPFS[id] = cpf
+      return { id, ja: false }
+    },
+    async criarCaso(c) {
+      const cli = CLIENTES.find((x) => x.id === c.cliente); if (!cli) throw new Error('Cliente não encontrado.')
+      const etapas = ETAPAS[c.area]; if (!etapas?.length) throw new Error('Essa área não está ativa no escritório.')
+      const id = `k${CASOS.length + 1}-${Date.now() % 100000}`
+      const prod = areaPrevidenciaria(c.area) ? (PRODUTOS_PREV.find((p) => p.valor === c.produto)?.nome ?? 'Outro benefício') : (c.area === 'trabalhista' ? 'Reclamação trabalhista' : c.area)
+      CASOS.push({ id, cliente: cli.nome, status: etapas[0].status, dias: 0, produto: prod, numeroCnj: null, gateOk: 0, gateTotal: 5 })
+      AREA_DO_CASO[id] = c.area; CLIENTE_DO_CASO[id] = cli.id
+      if (c.relato.trim()) RELATOS[id] = c.relato.trim()
+      return id
+    },
+    async importarClientes(itens, simular) {
+      const vistos = new Set<string>(); let novos = 0, existentes = 0, erros = 0
+      const linhas = itens.map((it, i) => {
+        const erro = validarCliente(it); const cpf = soDigitos(it.cpf)
+        let resultado: 'novo' | 'ja' | 'erro' = 'novo'; let motivo: string | null = null
+        if (erro) { resultado = 'erro'; motivo = erro === 'Informe o nome.' ? 'Nome em branco ou curto demais.' : erro }
+        else if (cpf && vistos.has(cpf)) { resultado = 'erro'; motivo = 'CPF repetido na planilha.' }
+        else if (cpf && CLIENTES.some((x) => CPFS[x.id] === cpf)) resultado = 'ja'
+        if (cpf) vistos.add(cpf)
+        if (resultado === 'novo') novos++; else if (resultado === 'ja') existentes++; else erros++
+        return { linha: i + 1, nome: it.nome.trim(), resultado, motivo }
+      })
+      if (!simular) for (const [i, l] of linhas.entries()) if (l.resultado === 'novo') await this.criarCliente(itens[i])
+      return { simulado: simular, novos, existentes, erros, linhas }
     },
     async falhas() { return FALHAS.filter((f) => !RESOLVIDAS.has(f.id)).map((f) => ({ ...f })) },
     async resolverFalha(id) { RESOLVIDAS.add(id) },

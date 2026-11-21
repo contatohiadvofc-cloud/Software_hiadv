@@ -12,6 +12,8 @@ import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
 import { Badge } from '../design/components/Badge'
 import { FichaCaso } from './FichaCaso'
+import { NovoCasoDialog } from './Cadastro'
+import { Button } from '../design/components/Button'
 
 export function Cliente() {
   const { id } = useParams({ strict: false }) as { id: string }
@@ -21,6 +23,7 @@ export function Cliente() {
   const q = useQuery({ queryKey: ['cliente', perfil?.escritorioId, id], queryFn: () => api.cliente(id), enabled: !!perfil })
   const equipe = useQuery({ queryKey: ['equipe', perfil?.escritorioId], queryFn: () => api.equipe(), enabled: !!perfil, staleTime: 10 * 60_000 })
   const [aberto, setAberto] = useState<CasoDoCliente | null>(null)
+  const [novoCaso, setNovoCaso] = useState(false)
   const nomeArea = (a: string) => areas.data?.find((x) => x.area === a)?.nome ?? rotuloEtapa(a)
   const agora = new Date()
 
@@ -41,7 +44,10 @@ export function Cliente() {
             {wa && <> · <a href={wa} target="_blank" rel="noopener noreferrer">Abrir no WhatsApp</a></>}
           </p>
         </div>
+        <div className="pagina-acoes"><Button onClick={() => setNovoCaso(true)}>Novo caso</Button></div>
       </div>
+      <NovoCasoDialog aberto={novoCaso} aoFechar={() => setNovoCaso(false)} clienteId={c.id} clienteNome={c.nome}
+        aoCriar={(id, area) => { setNovoCaso(false); setAberto({ id, area, status: '', produto: null }) }} />
 
       <div className="cliente-grade">
         <Panel title="Casos" labelId="cli-casos">

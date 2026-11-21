@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { Panel } from '../design/components/Panel'
@@ -8,6 +8,7 @@ import { ErrorState } from '../design/components/ErrorState'
 import { telefoneTela } from '../data/clientes'
 import { Button } from '../design/components/Button'
 import { useToast } from '../design/components/Toast'
+import { ImportarClientesDialog, NovoClienteDialog } from './Cadastro'
 
 const desdeFmt = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric', timeZone: 'America/Sao_Paulo' })
 
@@ -48,6 +49,8 @@ export function Clientes() {
   const { perfil } = useSessao()
   const [texto, setTexto] = useState('')
   const [termo, setTermo] = useState('')
+  const [dialogo, setDialogo] = useState<'novo' | 'importar' | null>(null)
+  const nav = useNavigate()
   useEffect(() => { const t = setTimeout(() => setTermo(texto.trim()), 250); return () => clearTimeout(t) }, [texto])
   const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   const q = useQuery({ queryKey: ['clientes', perfil?.escritorioId, termo.length >= 2 ? termo : ''], queryFn: () => api.clientes(termo), enabled: !!perfil })
@@ -56,7 +59,13 @@ export function Clientes() {
     <div className="pagina">
       <div className="pagina-cabeca">
         <div><h1>Clientes</h1>{q.isSuccess && <p className="muted">{q.data.length === 100 ? 'Mostrando os 100 primeiros' : `${q.data.length} ${q.data.length === 1 ? 'cliente' : 'clientes'}`}</p>}</div>
+        <div className="pagina-acoes">
+          {gestor && <Button variant="secondary" onClick={() => setDialogo('importar')}>Importar planilha</Button>}
+          <Button onClick={() => setDialogo('novo')}>Novo cliente</Button>
+        </div>
       </div>
+      <NovoClienteDialog aberto={dialogo === 'novo'} aoFechar={() => setDialogo(null)} aoCriar={(id) => { setDialogo(null); nav({ to: '/clientes/$id', params: { id } }) }} />
+      {gestor && <ImportarClientesDialog aberto={dialogo === 'importar'} aoFechar={() => setDialogo(null)} />}
       <div className="hv-field filtro-largo">
         <label htmlFor="cli-busca" className="sr-only">Filtrar clientes pelo nome</label>
         <input id="cli-busca" className="hv-input" type="search" placeholder="Filtrar pelo nome" value={texto} onChange={(e) => setTexto(e.target.value)} />
