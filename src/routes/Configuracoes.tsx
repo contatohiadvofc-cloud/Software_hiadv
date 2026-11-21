@@ -8,6 +8,7 @@ import { useAreas } from '../data/consultas'
 import { FichaCaso } from './FichaCaso'
 import { Panel } from '../design/components/Panel'
 import { AgendaNoGoogle, ContatoEscritorio } from './ConfigContatoAgenda'
+import { RecursosDoHiAdv } from './Recursos'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
 import { Button } from '../design/components/Button'
@@ -323,12 +324,13 @@ export function Configuracoes() {
   const atualizar = () => { qc.invalidateQueries({ queryKey: ['integracoes'] }); qc.invalidateQueries({ queryKey: ['agentes'] }) }
 
   const aparelho = <>
-    <Panel title="Este aparelho" labelId="cfg-aparelho"><DesbloqueioNesteAparelho /></Panel>
+    <section id="aparelho"><Panel title="Este aparelho" labelId="cfg-aparelho"><DesbloqueioNesteAparelho /></Panel></section>
     <section id="agenda-google"><Panel title="Agenda no Google" labelId="cfg-agenda"><AgendaNoGoogle /></Panel></section>
   </>
   if (perfil && !gestor) return (
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Configurações</h1></div></div>
+      <section id="recursos"><Panel title="Recursos do HiAdv" labelId="cfg-recursos"><RecursosDoHiAdv /></Panel></section>
       {aparelho}
       <Panel><Empty title="As configurações do escritório ficam com o Gestor Master." /></Panel>
     </div>
@@ -338,6 +340,8 @@ export function Configuracoes() {
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Configurações</h1><p className="muted">{perfil?.escritorioNome}. Cada escritório tem as suas chaves, os seus custos e os seus agentes.</p></div></div>
 
+      <section id="recursos"><Panel title="Recursos do HiAdv" labelId="cfg-recursos"><RecursosDoHiAdv /></Panel></section>
+
       {aparelho}
 
       <section id="contato"><Panel title="Contato do escritório" labelId="cfg-contato"><ContatoEscritorio /></Panel></section>
@@ -346,20 +350,20 @@ export function Configuracoes() {
 
       <section id="areas-de-atuacao"><Panel title="Áreas de atuação" labelId="cfg-areas"><AreasDeAtuacao /></Panel></section>
 
-      <Panel title="Regras de atenção" labelId="cfg-regras">
+      <section id="regras"><Panel title="Regras de atenção" labelId="cfg-regras">
         <RegrasDeAtencao />
-      </Panel>
+      </Panel></section>
 
       <Panel title="Falhas das automações" labelId="cfg-falhas">
         <Falhas />
       </Panel>
 
-      <Panel title="Integrações" labelId="cfg-integ">
+      <section id="integracoes"><Panel title="Integrações" labelId="cfg-integ">
         {integ.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {integ.isError && <ErrorState onRetry={() => integ.refetch()} />}
         {integ.isSuccess && integ.data.length === 0 && <Empty title="As integrações ainda não foram ativadas no servidor." />}
         {integ.isSuccess && integ.data.length > 0 && <ul className="integracoes">{integ.data.map((i) => <CartaoIntegracao key={i.servico} i={i} aoMudar={atualizar} />)}</ul>}
-      </Panel>
+      </Panel></section>
 
       <Panel title="Agentes" labelId="cfg-agentes">
         <p className="hv-panel-body muted">Os agentes preparam; quem decide e assina é o advogado. Tudo o que fazem fica no histórico do caso. Os marcados “Sem custo” funcionam por regras, sem IA, e podem ser ligados já.</p>
