@@ -14,6 +14,8 @@ import { Badge } from '../design/components/Badge'
 import { FichaCaso } from './FichaCaso'
 import { NovoCasoDialog } from './Cadastro'
 import { HonorariosCliente } from './HonorariosCliente'
+import { DadosCliente } from './DadosCliente'
+import { GerarDocumentoDialog } from './GerarDocumento'
 import { Button } from '../design/components/Button'
 
 export function Cliente() {
@@ -26,6 +28,7 @@ export function Cliente() {
   const equipe = useQuery({ queryKey: ['equipe', perfil?.escritorioId], queryFn: () => api.equipe(), enabled: !!perfil, staleTime: 10 * 60_000 })
   const [aberto, setAberto] = useState<CasoDoCliente | null>(null)
   const [novoCaso, setNovoCaso] = useState(false)
+  const [gerarDoc, setGerarDoc] = useState(false)
   const nomeArea = (a: string) => areas.data?.find((x) => x.area === a)?.nome ?? rotuloEtapa(a)
   const agora = new Date()
 
@@ -46,8 +49,12 @@ export function Cliente() {
             {wa && <> · <a href={wa} target="_blank" rel="noopener noreferrer">Abrir no WhatsApp</a></>}
           </p>
         </div>
-        <div className="pagina-acoes"><Button onClick={() => setNovoCaso(true)}>Novo caso</Button></div>
+        <div className="pagina-acoes">
+          <Button variant="secondary" onClick={() => setGerarDoc(true)}>Gerar documento</Button>
+          <Button onClick={() => setNovoCaso(true)}>Novo caso</Button>
+        </div>
       </div>
+      <GerarDocumentoDialog aberto={gerarDoc} aoFechar={() => setGerarDoc(false)} cliente={{ id: c.id, nome: c.nome }} />
       <NovoCasoDialog aberto={novoCaso} aoFechar={() => setNovoCaso(false)} clienteId={c.id} clienteNome={c.nome}
         aoCriar={(id, area) => { setNovoCaso(false); setAberto({ id, area, status: '', produto: null }) }} />
 
@@ -80,6 +87,7 @@ export function Cliente() {
           )}
         </Panel>
 
+        <DadosCliente clienteId={c.id} />
         {gestor && <HonorariosCliente cliente={{ id: c.id, nome: c.nome }} />}
         <Panel title="Tarefas abertas" labelId="cli-tar">
           {tarefas.length === 0 ? <Empty title="Nenhuma tarefa aberta para este cliente." /> : (

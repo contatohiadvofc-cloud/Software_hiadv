@@ -5,6 +5,7 @@ import type { CargaPessoa, Falha, ItemAtencao, ParDuplicado, RegrasAtencao } fro
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
+import type { DadosCliente, DadosDocumento } from './modelos'
 import type { Honorario, Lancamento, NovoHonorario, NovoLancamento } from './financeiro'
 import type { Oabs, PedidoPrazo, Publicacao, ResultadoPrazo } from './publicacoes'
 import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
@@ -55,6 +56,12 @@ export interface Api {
   /** Lança o êxito sobre o valor recebido pelo cliente; devolve o valor do honorário. */
   honorarioExito(id: string, valorRecebido: number): Promise<number>
   honorariosCliente(clienteId: string): Promise<Honorario[]>
+  /** Tudo o que um modelo pode usar (cliente, caso, escritório, advogado). */
+  documentoDados(clienteId: string, casoId: string | null): Promise<DadosDocumento>
+  /** Dados de qualificação do cliente; campo vazio apaga. */
+  salvarDadosCliente(clienteId: string, dados: Partial<DadosCliente>): Promise<void>
+  /** Baixa o arquivo de um item da Biblioteca (para preencher um modelo .docx). */
+  arquivoBiblioteca(caminho: string): Promise<ArrayBuffer>
   /** Só o Gestor Master. Liga ou desliga uma área do catálogo no escritório; os casos ficam guardados. */
   ativarArea(area: string, ativa: boolean): Promise<void>
   busca(q: string): Promise<Achado[]>

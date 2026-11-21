@@ -9,6 +9,8 @@ import { ErrorState } from '../design/components/ErrorState'
 import { Button } from '../design/components/Button'
 import { Dialog } from '../design/components/Dialog'
 import { useToast } from '../design/components/Toast'
+import { GerarDocumentoDialog } from './GerarDocumento'
+import { VARIAVEIS } from '../data/modelos'
 
 const VAZIO: NovoItemBiblioteca = { tipo: 'modelo', titulo: '', area: '', peca: '', conteudo: '', link: '' }
 const PECAS = ['Kit do cliente', 'Requerimento administrativo', 'Petição inicial', 'Quesitos', 'Manifestação sobre laudo', 'Réplica', 'Recurso', 'Contestação']
@@ -64,6 +66,7 @@ export function Biblioteca() {
   const [arquivo, setArquivo] = useState<File | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const [retirando, setRetirando] = useState<ItemBiblioteca | null>(null)
+  const [usando, setUsando] = useState<ItemBiblioteca | null>(null)
   const chave = ['biblioteca', perfil?.escritorioId]
   const q = useQuery({ queryKey: chave, queryFn: () => api.biblioteca(), enabled: !!perfil })
   const nomeArea = (a: string | null) => (a ? areas.data?.find((x) => x.area === a)?.nome ?? a : 'Todas as áreas')
@@ -138,6 +141,7 @@ export function Biblioteca() {
                   <span className="sub">{[nomeArea(b.area), b.peca, b.arquivoNome ? `${b.arquivoNome}${b.tamanho ? ` · ${tamanhoTela(b.tamanho)}` : ''}` : null].filter(Boolean).join(' · ')}</span>
                 </span>
                 <span className="biblioteca-acoes">
+                  {b.tipo === 'modelo' && (b.conteudo?.trim() || /\.docx$/i.test(b.arquivoNome ?? '')) && <Button size="sm" variant="secondary" onClick={() => setUsando(b)} aria-label={`Usar o modelo ${b.titulo} com um cliente`}>Usar</Button>}
                   {b.arquivo && <Button size="sm" variant="ghost" onClick={() => abrirArquivo.mutate(b.arquivo!)} aria-label={`Abrir arquivo de ${b.titulo}`}>Abrir</Button>}
                   {b.link && <a className="hv-btn" data-variant="ghost" data-size="sm" href={b.link} target="_blank" rel="noopener noreferrer" aria-label={`Abrir link de ${b.titulo}`}>Link</a>}
                   <Button size="sm" variant="ghost" onClick={() => editar(b)} aria-label={`Editar ${b.titulo}`}>Editar</Button>
@@ -150,6 +154,7 @@ export function Biblioteca() {
       </Panel>
 
       {gestor && tipo === 'modelo' && <Pacotes />}
+      <GerarDocumentoDialog aberto={!!usando} aoFechar={() => setUsando(null)} modelo={usando ?? undefined} />
 
       <Dialog open={!!aberto} onOpenChange={(v) => !v && setAberto(null)} title={aberto?.id ? 'Editar item' : 'Incluir na Biblioteca'}>
         <form className="hv-dialog-body catalogo-pilha" onSubmit={enviar} noValidate>
@@ -187,6 +192,13 @@ export function Biblioteca() {
             <label htmlFor="bib-conteudo">{form.tipo === 'jurisprudencia' ? 'Ementa' : 'Texto'} (opcional se houver arquivo)</label>
             <textarea id="bib-conteudo" className="hv-input textarea" rows={5} value={form.conteudo} onChange={(e) => setForm({ ...form, conteudo: e.target.value })} />
           </div>
+          {form.tipo === 'modelo' && (
+            <details className="bib-variaveis">
+              <summary>Variáveis para preencher sozinho (no texto ou no Word)</summary>
+              <p className="hv-hint">Escreva a variável entre chaves duplas. Ao usar o modelo com um cliente, o HiAdv troca pelos dados dele.</p>
+              <ul>{VARIAVEIS.map((v) => <li key={v.chave}><code>{`{{${v.chave}}}`}</code> {v.rotulo}</li>)}</ul>
+            </details>
+          )}
           <div className="hv-field">
             <label htmlFor="bib-link">Link (inteiro teor ou fonte)</label>
             <input id="bib-link" className="hv-input" inputMode="url" placeholder="https://" value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />

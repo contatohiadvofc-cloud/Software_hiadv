@@ -11,6 +11,7 @@ import type { Pessoa, Tarefa } from './tarefas'
 import { nomeTipo, type Compromisso } from './agenda'
 import { nomeArquivoSeguro, type PacoteBiblioteca, type Agente, type EtapaEscritorio, type Integracao, type ItemBiblioteca, type Servico, type TipoBiblioteca } from './escritorio'
 import { lerValor } from './financeiro'
+import type { DadosDocumento } from './modelos'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -412,6 +413,17 @@ export function criarApiSupabase(url: string, chave: string): Api {
         parcelas: h.parcelas == null ? null : Number(h.parcelas), percentualExito: h.percentual_exito == null ? null : Number(h.percentual_exito),
         status: h.status as 'ativo' | 'encerrado', criadoEm: String(h.criado_em), recebido: Number(h.recebido), aReceber: Number(h.a_receber), atrasado: Number(h.atrasado),
       }))
+    },
+    async documentoDados(clienteId, casoId) {
+      return verificar(await sb.rpc('hiadv_documento_dados', { p_cliente: clienteId, p_caso: casoId })) as DadosDocumento
+    },
+    async salvarDadosCliente(clienteId, dados) {
+      okOuErro(verificar(await sb.rpc('hiadv_cliente_dados_salvar', { p_cliente: clienteId, p: dados })))
+    },
+    async arquivoBiblioteca(caminho) {
+      const r = await sb.storage.from('biblioteca').download(caminho)
+      if (r.error || !r.data) throw new Error('Não foi possível baixar o modelo.')
+      return r.data.arrayBuffer()
     },
     async ativarArea(area, ativa) {
       okOuErro(verificar(await sb.rpc('area_ativar', { p_area: area, p_ativa: ativa })))

@@ -91,6 +91,7 @@ const CHECK = ['Procuração assinada', 'Documento com foto', 'CTPS digital', 'H
 const CLIENTE_DO_CASO: Record<string, string> = { k1: 'c2', k2: 'c4', k3: 'c5', k4: 'c6', k5: 'c7', k6: 'c1', k7: 'c8', k8: 'c3' }
 const CPFS: Record<string, string> = { c1: '52998224725' }
 const OABS_DEMO: string[] = ['OAB/SP 123.456']
+const DADOS_CLIENTE: Record<string, Record<string, string>> = { c1: { nacionalidade: 'brasileira', estado_civil: 'casada', profissao: 'costureira', cidade: 'São Paulo', uf: 'SP' } }
 const mesAtual = () => new Date().toISOString().slice(0, 7)
 const LANCAMENTOS: Lancamento[] = [
   { id: 'l1', sentido: 'entrada', etiqueta: 'Honorários', titulo: 'Parcela 2/6 · Rita Moura', descricao: null, valor: 500, vencimento: `${mesAtual()}-05`, pagoEm: `${mesAtual()}-05`, clienteId: 'c1', cliente: 'Rita Moura', telefone: '49999110001', honorarioId: 'h1' },
@@ -545,6 +546,22 @@ export function criarApiDemo(): Api {
         return { ...h, recebido: soma(ls.filter((l) => l.pagoEm)), aReceber: soma(ls.filter((l) => !l.pagoEm)), atrasado: soma(ls.filter((l) => !l.pagoEm && l.vencimento < hoje)) }
       })
     },
+    async documentoDados(clienteId, casoId) {
+      const c = CLIENTES.find((x) => x.id === clienteId); if (!c) throw new Error('Cliente não encontrado.')
+      const caso = casoId ? CASOS.find((x) => x.id === casoId) : undefined
+      return {
+        cliente: { nome: c.nome, cpf: CPFS[c.id] ?? null, telefone: c.telefone, email: null, ...(DADOS_CLIENTE[c.id] ?? {}) },
+        caso: caso ? { area: AREA_DO_CASO[caso.id] ?? 'trabalhista', produto: null, nb: null, dib: null, dcb: null, data_acidente: null, causa_acidente: null, sequela: null, profissao_epoca: null, uf: null, relato: RELATOS[caso.id] ?? null, processo: caso.numeroCnj } : null,
+        escritorio: { nome: 'Silva & Prado Advocacia', cidade: 'São Paulo/SP', oabs: [...OABS_DEMO] },
+        advogado: { nome: 'Ana Prado', oab: 'OAB/SP 123.456' },
+      }
+    },
+    async salvarDadosCliente(clienteId, dados) {
+      const atual = { ...(DADOS_CLIENTE[clienteId] ?? {}) } as Record<string, string>
+      for (const [k, v] of Object.entries(dados)) { const t = String(v ?? '').trim(); if (t) atual[k] = t; else delete atual[k] }
+      DADOS_CLIENTE[clienteId] = atual
+    },
+    async arquivoBiblioteca() { throw new Error('No modo demonstração os modelos em arquivo não são baixados. Use um modelo em texto.') },
     async ativarArea(area, ativa) {
       const lista = AREAS[atual] ?? (AREAS[atual] = [])
       const i = lista.findIndex((a) => a.area === area)
