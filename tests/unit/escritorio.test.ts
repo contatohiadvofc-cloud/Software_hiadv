@@ -23,3 +23,12 @@ describe('escritorio', () => {
   })
   it('tamanho legível', () => expect(tamanhoTela(2.5 * 1024 * 1024)).toBe('2,5 MB'))
 })
+
+describe('pacotes da biblioteca', () => {
+  it('diz o que o botão faz conforme o que já foi adicionado', async () => {
+    const { situacaoPacote } = await import('../../src/data/escritorio')
+    expect(situacaoPacote({ itens: 14, adicionados: 0 })).toEqual({ pronto: false, botao: 'Adicionar 14 roteiros' })
+    expect(situacaoPacote({ itens: 14, adicionados: 10 })).toEqual({ pronto: false, botao: 'Adicionar os 4 que faltam' })
+    expect(situacaoPacote({ itens: 8, adicionados: 8 })).toEqual({ pronto: true, botao: 'Já está na sua biblioteca' })
+  })
+})

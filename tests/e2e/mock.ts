@@ -34,6 +34,7 @@ export type Cenario = {
   falhas?: Array<Record<string, unknown>>
   /** login da equipe: 'primeiro_acesso' simula quem ainda não criou a senha pessoal */
   loginEquipe?: 'ok' | 'primeiro_acesso' | 'bloqueado' | 'fora'
+  pacotes?: Array<Record<string, unknown>>
 }
 
 function b64url(o: object) {
@@ -109,6 +110,8 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'integracao_chave_remover') { registrar(); return json(r, { ok: true }) }
       if (nome === 'agentes_listar') return json(r, c.agentes ?? [])
       if (nome === 'atencao_listar') return json(r, c.atencao ?? [])
+      if (nome === 'pacotes_listar') return json(r, c.pacotes ?? [])
+      if (nome === 'pacote_adicionar') { registrar(); return json(r, { ok: true, adicionados: 14 }) }
       if (nome === 'duplicidades_listar') return json(r, c.duplicados ?? [])
       if (nome === 'duplicidade_ignorar') { registrar(); return json(r, { ok: true }) }
       if (nome === 'carga_equipe') return json(r, c.carga ?? [])

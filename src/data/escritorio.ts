@@ -12,6 +12,15 @@ export type ItemBiblioteca = {
   conteudo: string | null; link: string | null; arquivo: string | null; arquivoNome: string | null; tamanho: number | null
   criadoPor: string | null; criadoEm: string
 }
+/** Pacote de roteiros pronto (núcleo do HiAdv) que o gestor copia para a biblioteca do escritório. */
+export type PacoteBiblioteca = { slug: string; nome: string; descricao: string; areas: string[]; itens: number; adicionados: number; titulos: string[] }
+
+export function situacaoPacote(p: Pick<PacoteBiblioteca, 'itens' | 'adicionados'>): { pronto: boolean; botao: string } {
+  if (p.adicionados >= p.itens) return { pronto: true, botao: 'Já está na sua biblioteca' }
+  if (p.adicionados > 0) return { pronto: false, botao: `Adicionar os ${p.itens - p.adicionados} que faltam` }
+  return { pronto: false, botao: `Adicionar ${p.itens} roteiros` }
+}
+
 export type NovoItemBiblioteca = { tipo: TipoBiblioteca; titulo: string; area: string; peca: string; conteudo: string; link: string }
 
 export type Servico = 'claude' | 'zapsign' | 'google_drive'

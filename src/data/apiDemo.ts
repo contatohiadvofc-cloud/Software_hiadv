@@ -154,7 +154,12 @@ function dia(n: number): string {
 function ler(): boolean { try { return sessionStorage.getItem('hiadv-demo') === '1' } catch { return false } }
 function gravar(v: boolean) { try { if (v) sessionStorage.setItem('hiadv-demo', '1'); else sessionStorage.removeItem('hiadv-demo') } catch { /* sem armazenamento */ } }
 
+const PACOTES_DEMO = [
+  { slug: 'previdenciario', nome: 'Previdenciário', descricao: 'Roteiros de requerimentos, petições, quesitos, impugnações, réplica, recursos e análises.', areas: ['administrativo', 'judicial'], itens: 3, adicionados: 0, titulos: ['Requerimento de auxílio-acidente', 'Petição inicial de auxílio-acidente', 'Quesitos médicos de auxílio-acidente'] },
+  { slug: 'trabalhista', nome: 'Trabalhista', descricao: 'Roteiros de inicial, verbas rescisórias, réplica, audiência e recursos.', areas: ['trabalhista'], itens: 2, adicionados: 0, titulos: ['Petição inicial de reclamação trabalhista', 'Recurso ordinário'] },
+]
 const PREPAROS = new Set<string>()
+const DOS_PACOTES = new Map<string, Set<string>>()
 const IGNORADOS = new Set<string>()
 const RESOLVIDAS = new Set<number>()
 const DUPLICADOS: ParDuplicado[] = [{ a: { id: 'c1', nome: 'Paulo Henrique Dias' }, b: { id: 'c9', nome: 'Paulo Henrique Dias' }, motivos: ['mesmo telefone', 'mesmo nome'] }]
@@ -455,6 +460,22 @@ export function criarApiDemo(): Api {
     },
     async falhas() { return FALHAS.filter((f) => !RESOLVIDAS.has(f.id)).map((f) => ({ ...f })) },
     async resolverFalha(id) { RESOLVIDAS.add(id) },
+    async pacotes() {
+      return PACOTES_DEMO.map((p) => ({ ...p, titulos: [...p.titulos], adicionados: (DOS_PACOTES.get(p.slug)?.size ?? 0) }))
+    },
+    async adicionarPacote(slug) {
+      const p = PACOTES_DEMO.find((x) => x.slug === slug)
+      if (!p) throw new Error('Pacote não encontrado.')
+      let n = 0
+      for (const t of p.titulos) {
+        const ja = DOS_PACOTES.get(slug) ?? new Set<string>()
+        if (ja.has(t)) continue
+        ja.add(t); DOS_PACOTES.set(slug, ja)
+        BIBLIOTECA.push({ id: `pk-${slug}-${n}-${Date.now()}`, tipo: 'modelo', titulo: t, area: p.areas[0] ?? null, peca: 'Roteiro', conteudo: 'Roteiro de exemplo.', link: null, arquivo: null, arquivoNome: null, tamanho: null, criadoPor: 'ana@silvaprado.exemplo.br', criadoEm: new Date().toISOString() })
+        n++
+      }
+      return n
+    },
     async etapasDoEscritorio() {
       return (AREAS[atual] ?? []).flatMap((a) => (ETAPAS[a.area] ?? []).filter((e) => !e.final).map((e) => ({ area: a.area, areaNome: a.nome, status: e.status })))
     },

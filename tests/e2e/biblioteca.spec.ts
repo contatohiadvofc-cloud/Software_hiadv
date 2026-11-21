@@ -44,3 +44,31 @@ test('biblioteca: arquivo de tipo não aceito é recusado antes de enviar', asyn
   await expect(d.getByText('Envie Word, PDF, ODT, RTF ou texto.')).toBeVisible()
   expect(est.uploads).toHaveLength(0)
 })
+
+const pacotes = [
+  { slug: 'previdenciario', nome: 'Previdenciário', descricao: 'Roteiros previdenciários.', areas: ['judicial'], itens: 14, adicionados: 0, titulos: ['Petição inicial de auxílio-acidente', 'Quesitos médicos de auxílio-acidente'] },
+  { slug: 'trabalhista', nome: 'Trabalhista', descricao: 'Roteiros trabalhistas.', areas: ['trabalhista'], itens: 8, adicionados: 8, titulos: ['Recurso ordinário'] },
+]
+
+test('biblioteca: gestor adiciona um pacote de roteiros prontos', async ({ page }) => {
+  const est = await simularSupabase(page, { papel: 'master', biblioteca, pacotes })
+  await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
+  await page.goto('/biblioteca')
+  const painel = page.getByRole('region', { name: 'Roteiros prontos do HiAdv' })
+  await expect(painel.getByRole('button', { name: 'Já está na sua biblioteca' })).toBeDisabled()
+  await painel.getByText('Ver a lista').first().click()
+  await expect(painel.getByText('Quesitos médicos de auxílio-acidente')).toBeVisible()
+  await painel.getByRole('button', { name: 'Adicionar 14 roteiros' }).click()
+  await expect(page.getByText(/14 roteiros adicionados à sua biblioteca/)).toBeVisible()
+  expect(est.rpcs.find((x) => x.nome === 'pacote_adicionar')?.corpo).toEqual({ p_slug: 'previdenciario' })
+})
+
+test('biblioteca: colaborador não vê os pacotes', async ({ page }) => {
+  await simularSupabase(page, { papel: 'colaborador', biblioteca, pacotes })
+  await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
+  await page.goto('/biblioteca')
+  await expect(page.getByText('Inicial de auxílio-acidente')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Roteiros prontos do HiAdv' })).toHaveCount(0)
+})

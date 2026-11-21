@@ -9,7 +9,7 @@ import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
 import { nomeTipo, type Compromisso } from './agenda'
-import { nomeArquivoSeguro, type Agente, type EtapaEscritorio, type Integracao, type ItemBiblioteca, type Servico, type TipoBiblioteca } from './escritorio'
+import { nomeArquivoSeguro, type PacoteBiblioteca, type Agente, type EtapaEscritorio, type Integracao, type ItemBiblioteca, type Servico, type TipoBiblioteca } from './escritorio'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -368,6 +368,18 @@ export function criarApiSupabase(url: string, chave: string): Api {
       }))
     },
     async resolverFalha(id) { okOuErro(verificar(await sb.rpc('falha_resolver', { p_id: id }))) },
+    async pacotes() {
+      const r = await sb.rpc('pacotes_listar')
+      if (r.error && /function .*does not exist|Could not find the function/i.test(r.error.message)) return []
+      return ((verificar(r) as Record<string, unknown>[] | null) ?? []).map((x): PacoteBiblioteca => ({
+        slug: String(x.slug), nome: String(x.nome), descricao: String(x.descricao ?? ''), areas: (x.areas as string[] | null) ?? [],
+        itens: Number(x.itens ?? 0), adicionados: Number(x.adicionados ?? 0), titulos: ((x.titulos as string[] | null) ?? []).map(String),
+      }))
+    },
+    async adicionarPacote(slug) {
+      const r = okOuErro(verificar(await sb.rpc('pacote_adicionar', { p_slug: slug }))) as Record<string, unknown>
+      return Number(r.adicionados ?? 0)
+    },
     async etapasDoEscritorio(): Promise<EtapaEscritorio[]> {
       const areas = await this.areas()
       if (!areas.length) return []

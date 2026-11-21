@@ -2,7 +2,7 @@ import { useMemo, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { useAreas } from '../data/consultas'
-import { TIPOS_BIBLIOTECA, tamanhoTela, validarArquivo, EXTENSOES_BIBLIOTECA, type ItemBiblioteca, type NovoItemBiblioteca, type TipoBiblioteca } from '../data/escritorio'
+import { situacaoPacote, TIPOS_BIBLIOTECA, tamanhoTela, validarArquivo, EXTENSOES_BIBLIOTECA, type ItemBiblioteca, type NovoItemBiblioteca, type TipoBiblioteca } from '../data/escritorio'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
@@ -12,6 +12,43 @@ import { useToast } from '../design/components/Toast'
 
 const VAZIO: NovoItemBiblioteca = { tipo: 'modelo', titulo: '', area: '', peca: '', conteudo: '', link: '' }
 const PECAS = ['Kit do cliente', 'Requerimento administrativo', 'Petição inicial', 'Quesitos', 'Manifestação sobre laudo', 'Réplica', 'Recurso', 'Contestação']
+
+function Pacotes() {
+  const api = useApi()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const { perfil } = useSessao()
+  const q = useQuery({ queryKey: ['pacotes', perfil?.escritorioId], queryFn: () => api.pacotes(), enabled: !!perfil })
+  const adicionar = useMutation({
+    mutationFn: (slug: string) => api.adicionarPacote(slug),
+    onSuccess: (n) => {
+      toast(n > 0 ? `${n} roteiros adicionados à sua biblioteca. Edite à vontade: a cópia é do seu escritório.` : 'Esses roteiros já estavam na sua biblioteca.')
+      qc.invalidateQueries({ queryKey: ['pacotes'] }); qc.invalidateQueries({ queryKey: ['biblioteca'] })
+    },
+    onError: (e) => toast((e as Error).message),
+  })
+  if (!q.isSuccess || q.data.length === 0) return null
+  return (
+    <Panel title="Roteiros prontos do HiAdv" labelId="h-pacotes">
+      <p className="hv-panel-body muted">Passo a passo de cada peça, com documentos de entrada, estrutura e cuidados. Ao adicionar, o escritório recebe uma cópia para ajustar ao seu jeito; os agentes também usam esses roteiros.</p>
+      <ul className="pacotes">
+        {q.data.map((p) => {
+          const s = situacaoPacote(p)
+          return (
+            <li key={p.slug} className="pacote">
+              <div className="pacote-cabeca">
+                <h3>{p.nome} <span className="muted">· {p.itens} roteiros</span></h3>
+                <Button size="sm" variant={s.pronto ? 'ghost' : 'secondary'} disabled={s.pronto || adicionar.isPending} onClick={() => adicionar.mutate(p.slug)}>{s.botao}</Button>
+              </div>
+              <p className="muted">{p.descricao}</p>
+              <details><summary>Ver a lista</summary><ul className="pacote-lista">{p.titulos.map((t) => <li key={t}>{t}</li>)}</ul></details>
+            </li>
+          )
+        })}
+      </ul>
+    </Panel>
+  )
+}
 
 export function Biblioteca() {
   const api = useApi()
@@ -111,6 +148,8 @@ export function Biblioteca() {
           </ul>
         )}
       </Panel>
+
+      {gestor && tipo === 'modelo' && <Pacotes />}
 
       <Dialog open={!!aberto} onOpenChange={(v) => !v && setAberto(null)} title={aberto?.id ? 'Editar item' : 'Incluir na Biblioteca'}>
         <form className="hv-dialog-body catalogo-pilha" onSubmit={enviar} noValidate>

@@ -5,7 +5,7 @@ import type { CargaPessoa, Falha, ItemAtencao, ParDuplicado, RegrasAtencao } fro
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
-import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, Servico } from './escritorio'
+import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
 export type Perfil = { email: string; nome: string; papel: Papel | null; escritorioId: string | null; escritorioNome: string }
@@ -85,6 +85,10 @@ export interface Api {
   configurarAgente(agente: string, ativo: boolean, etapas: string[], modeloId: string | null, parametros?: Record<string, unknown>): Promise<void>
   /** Etapas das áreas ativas, para escolher quando cada agente entra. */
   etapasDoEscritorio(): Promise<EtapaEscritorio[]>
+  /** Pacotes de roteiros prontos (previdenciário, trabalhista). */
+  pacotes(): Promise<PacoteBiblioteca[]>
+  /** Só o gestor: copia os roteiros que ainda faltam; devolve quantos entraram. */
+  adicionarPacote(slug: string): Promise<number>
   /** Prazos fatais, casos parados e eventos sem preparação (o gestor vê também os da equipe). */
   atencao(): Promise<ItemAtencao[]>
   /** Cria a tarefa de preparação (com roteiro) de uma perícia ou audiência. Uma vez só por evento. */
