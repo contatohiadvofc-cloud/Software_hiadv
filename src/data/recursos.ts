@@ -30,9 +30,9 @@ export const RECURSOS: Recurso[] = [
   { id: 'atencao', grupo: 'ligado', nome: 'Avisos e agentes sem custo', resumo: 'Prazo fatal chegando, caso parado, preparo de perícia e rodízio de responsáveis.', onde: { rotulo: 'Regras de atenção', to: '/configuracoes', hash: 'regras' } },
   { id: 'celular', grupo: 'ligado', nome: 'App no celular', resumo: 'Instala pelo navegador e abre com a digital ou a senha do celular.', onde: { rotulo: 'Este aparelho', to: '/configuracoes', hash: 'aparelho' } },
 
-  // ---------- Para ativar (custo na conta do escritório) ----------
+  // ---------- Em preparação: já dá para deixar a chave guardada ----------
   {
-    id: 'ia', grupo: 'ativar', nome: 'IA dos agentes (Claude)', soGestor: true,
+    id: 'ia', grupo: 'preparo', nome: 'IA dos agentes (Claude)', soGestor: true,
     resumo: 'Lê documentos, sugere a providência da intimação, prepara minutas e quesitos. Quem decide e assina é o advogado.',
     custo: 'Pago por uso na conta Anthropic do escritório. Dá para definir um limite por mês.',
     onde: { rotulo: 'Integrações', to: '/configuracoes', hash: 'integracoes' },
@@ -41,11 +41,11 @@ export const RECURSOS: Recurso[] = [
       'Em API Keys, crie uma chave com o nome "HiAdv".',
       'Aqui em Integrações, em Claude, clique em "Cadastrar chave" e cole. A chave vai direto para o cofre: depois de salva, ninguém vê de novo.',
       'Defina o limite por mês (opcional) e clique em "Ativar".',
-      'Em Agentes, ligue os que quiser e escolha em quais etapas cada um entra.',
+      'Quando a leitura por IA for liberada, os agentes que usam a Claude passam a funcionar sozinhos com essa chave. Os agentes sem custo já funcionam hoje.',
     ],
   },
   {
-    id: 'zapsign', grupo: 'ativar', nome: 'Assinatura digital (ZapSign)', soGestor: true,
+    id: 'zapsign', grupo: 'preparo', nome: 'Assinatura digital (ZapSign)', soGestor: true,
     resumo: 'Envia o kit do cliente (contrato, procuração, declaração) para assinar pelo celular, com validade jurídica.',
     custo: 'Plano da ZapSign contratado pelo escritório (há plano gratuito com poucos envios por mês).',
     onde: { rotulo: 'Integrações', to: '/configuracoes', hash: 'integracoes' },
@@ -53,7 +53,7 @@ export const RECURSOS: Recurso[] = [
       'Crie a conta do escritório em zapsign.com.br e escolha o plano.',
       'Em Configurações, Integração, API, copie o token de produção.',
       'Aqui em Integrações, em ZapSign, cadastre o token e escolha como enviar: com um clique (mostra a prévia) ou automático.',
-      'Deixe os modelos do kit (contrato, procuração, declaração) na Biblioteca.',
+      'Deixe os modelos do kit (contrato, procuração, declaração) na Biblioteca. O envio para assinatura é liberado na próxima atualização; até lá, gere os documentos em Word pela página do cliente.',
     ],
   },
 
@@ -64,7 +64,7 @@ export const RECURSOS: Recurso[] = [
     custo: 'Cobrança da Meta por conversa, na conta do escritório.',
     passos: [
       'Hoje: as mensagens saem prontas pelo botão do WhatsApp e quem envia é sempre o advogado.',
-      'Para ligar quando estiver pronto: conta no Gerenciador de Negócios da Meta verificada, um número exclusivo (que não esteja no WhatsApp comum) e a aprovação dos modelos de mensagem.',
+      'Para ligar quando for liberado: conta no Gerenciador de Negócios da Meta verificada, um número exclusivo (que não esteja no WhatsApp comum) e a aprovação dos modelos de mensagem.',
       'Mensagem ao cliente continua sem envio automático; o robô só qualifica e organiza.',
     ],
   },

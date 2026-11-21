@@ -23,7 +23,8 @@ export function RecursosDoHiAdv() {
   const contato = useQuery({ queryKey: ['contato', perfil?.escritorioId], queryFn: () => api.contatoEscritorio(), enabled: !!perfil && gestor })
   const grupos = recursosVisiveis(gestor)
 
-  const ativo = (id: string) => integ.data?.find((i) => i.servico === (id === 'ia' ? 'claude' : id))?.ativo === true
+  const integracao = (id: string) => integ.data?.find((i) => i.servico === (id === 'ia' ? 'claude' : id))
+  const comChave = (id: string) => integracao(id)?.temChave === true
   /** Pendência que o gestor resolve em um minuto, mostrada só quando existe. */
   function pendencia(r: Recurso): { texto: string; hash: string } | null {
     if (!gestor) return null
@@ -49,10 +50,10 @@ export function RecursosDoHiAdv() {
           <details>
             <summary>
               <span className="recurso-texto"><strong>{r.nome}</strong><span className="muted">{r.resumo}</span></span>
-              {g === 'ativar' && <Badge tone={ativo(r.id) ? 'success' : 'neutral'}>{ativo(r.id) ? 'Ativo' : 'Desligado'}</Badge>}
+              {comChave(r.id) && <Badge tone="success">Chave guardada</Badge>}
             </summary>
             <div className="recurso-passos">
-              {r.passos && (g === 'ativar' ? <ol>{r.passos.map((x) => <li key={x}>{x}</li>)}</ol> : <ul>{r.passos.map((x) => <li key={x}>{x}</li>)}</ul>)}
+              {r.passos && (r.passos.length > 2 ? <ol>{r.passos.map((x) => <li key={x}>{x}</li>)}</ol> : <ul>{r.passos.map((x) => <li key={x}>{x}</li>)}</ul>)}
               {r.custo && <p className="hv-hint">Custo: {r.custo}</p>}
               {r.onde && <Onde r={r} />}
             </div>

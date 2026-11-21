@@ -359,6 +359,7 @@ export function Configuracoes() {
       </Panel>
 
       <section id="integracoes"><Panel title="Integrações" labelId="cfg-integ">
+        <p className="hv-panel-body muted">Já dá para guardar as chaves com segurança. O envio pela ZapSign e a leitura por IA com a chave do escritório são liberados na próxima atualização.</p>
         {integ.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {integ.isError && <ErrorState onRetry={() => integ.refetch()} />}
         {integ.isSuccess && integ.data.length === 0 && <Empty title="As integrações ainda não foram ativadas no servidor." />}

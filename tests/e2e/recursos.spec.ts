@@ -7,7 +7,7 @@ async function ir(page: Page) {
   await page.goto('/configuracoes')
 }
 
-test('recursos: gestor vê o que está ligado, o passo a passo para ativar e a pendência da OAB', async ({ page }) => {
+test('recursos: gestor vê o que está ligado, o passo a passo do que está em preparação e a pendência da OAB', async ({ page }) => {
   await simularSupabase(page, { oabs: [], integracoes: [{ servico: 'claude', ativo: true, tem_chave: true, chave_final: 'abcd' }] })
   await ir(page)
   const painel = page.getByRole('region', { name: 'Recursos do HiAdv' })
@@ -20,6 +20,8 @@ test('recursos: gestor vê o que está ligado, o passo a passo para ativar e a p
   await zap.click()
   await expect(painel.getByText('Em Configurações, Integração, API, copie o token de produção.')).toBeVisible()
   await expect(painel.getByText('WhatsApp oficial com robô de triagem')).toBeVisible()
+  await expect(painel.locator('summary', { hasText: 'IA dos agentes' }).getByText('Chave guardada')).toBeVisible()
+  await expect(painel.getByText('Para ativar')).toHaveCount(0)
   const { default: AxeBuilder } = await import('@axe-core/playwright')
   const r = await new AxeBuilder({ page }).include('#recursos').analyze()
   expect(r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual([])
@@ -33,4 +35,5 @@ test('recursos: colaborador vê só o que usa, sem itens de gestor', async ({ pa
   await expect(painel.getByRole('link', { name: 'Abrir Atendimentos' })).toBeVisible()
   await expect(painel.getByText('Financeiro e honorários')).toHaveCount(0)
   await expect(painel.getByText('IA dos agentes (Claude)')).toHaveCount(0)
+  await expect(painel.getByText('Para ativar')).toHaveCount(0)
 })

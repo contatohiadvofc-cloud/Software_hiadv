@@ -6,7 +6,8 @@ describe('recursos do HiAdv', () => {
     const c = recursosVisiveis(false)
     expect(c.ativar).toHaveLength(0)
     expect(c.ligado.some((r) => r.id === 'financeiro')).toBe(false)
-    expect(recursosVisiveis(true).ativar.map((r) => r.id)).toEqual(['ia', 'zapsign'])
+    expect(recursosVisiveis(true).preparo.map((r) => r.id)).toEqual(['ia', 'zapsign', 'whatsapp', 'drive', 'api'])
+    expect(recursosVisiveis(false).preparo.map((r) => r.id)).toEqual(['whatsapp'])
   })
   it('todo recurso para ativar tem passo a passo e custo', () => {
     for (const r of RECURSOS.filter((x) => x.grupo !== 'ligado')) {

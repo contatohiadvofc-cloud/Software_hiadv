@@ -78,17 +78,19 @@ Onde fica: Este aparelho.
 
 ## Para ativar
 
+## Em preparação
+
 ### IA dos agentes (Claude) (Gestor Master)
 
 Lê documentos, sugere a providência da intimação, prepara minutas e quesitos. Quem decide e assina é o advogado.
 
 Onde fica: Integrações.
 
-1. Crie a conta do escritório em console.anthropic.com e cadastre um cartão em Billing.
-2. Em API Keys, crie uma chave com o nome "HiAdv".
-3. Aqui em Integrações, em Claude, clique em "Cadastrar chave" e cole. A chave vai direto para o cofre: depois de salva, ninguém vê de novo.
-4. Defina o limite por mês (opcional) e clique em "Ativar".
-5. Em Agentes, ligue os que quiser e escolha em quais etapas cada um entra.
+- Crie a conta do escritório em console.anthropic.com e cadastre um cartão em Billing.
+- Em API Keys, crie uma chave com o nome "HiAdv".
+- Aqui em Integrações, em Claude, clique em "Cadastrar chave" e cole. A chave vai direto para o cofre: depois de salva, ninguém vê de novo.
+- Defina o limite por mês (opcional) e clique em "Ativar".
+- Quando a leitura por IA for liberada, os agentes que usam a Claude passam a funcionar sozinhos com essa chave. Os agentes sem custo já funcionam hoje.
 
 Custo: Pago por uso na conta Anthropic do escritório. Dá para definir um limite por mês.
 
@@ -98,21 +100,19 @@ Envia o kit do cliente (contrato, procuração, declaração) para assinar pelo 
 
 Onde fica: Integrações.
 
-1. Crie a conta do escritório em zapsign.com.br e escolha o plano.
-2. Em Configurações, Integração, API, copie o token de produção.
-3. Aqui em Integrações, em ZapSign, cadastre o token e escolha como enviar: com um clique (mostra a prévia) ou automático.
-4. Deixe os modelos do kit (contrato, procuração, declaração) na Biblioteca.
+- Crie a conta do escritório em zapsign.com.br e escolha o plano.
+- Em Configurações, Integração, API, copie o token de produção.
+- Aqui em Integrações, em ZapSign, cadastre o token e escolha como enviar: com um clique (mostra a prévia) ou automático.
+- Deixe os modelos do kit (contrato, procuração, declaração) na Biblioteca. O envio para assinatura é liberado na próxima atualização; até lá, gere os documentos em Word pela página do cliente.
 
 Custo: Plano da ZapSign contratado pelo escritório (há plano gratuito com poucos envios por mês).
-
-## Em preparação
 
 ### WhatsApp oficial com robô de triagem
 
 Número oficial do escritório respondendo e qualificando contatos, que entram sozinhos em Atendimentos.
 
 - Hoje: as mensagens saem prontas pelo botão do WhatsApp e quem envia é sempre o advogado.
-- Para ligar quando estiver pronto: conta no Gerenciador de Negócios da Meta verificada, um número exclusivo (que não esteja no WhatsApp comum) e a aprovação dos modelos de mensagem.
+- Para ligar quando for liberado: conta no Gerenciador de Negócios da Meta verificada, um número exclusivo (que não esteja no WhatsApp comum) e a aprovação dos modelos de mensagem.
 - Mensagem ao cliente continua sem envio automático; o robô só qualifica e organiza.
 
 Custo: Cobrança da Meta por conversa, na conta do escritório.

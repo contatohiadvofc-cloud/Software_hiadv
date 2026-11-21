@@ -64,9 +64,11 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - Correção: o aviso "sem sessão" do início não apaga mais consultas públicas em andamento (só limpa a memória de quem esteve logado).
 - SQL `hiadv2-leva2.sql` + `hiadv2-relatorios.sql` (nova versão) e função `funcao-agenda.ts` no TESTE, conferidos por papel (gestor/colaborador/visitante sem login).
 
-- [x] Recursos do HiAdv (21/11): painel no topo de Configurações com o que está ligado (12 recursos, recolhido), o que falta configurar (ex.: OAB, WhatsApp do escritório), o que o escritório ativa com passo a passo e custo (IA Claude, ZapSign) e o que está em preparação (WhatsApp oficial com robô, pastas do Google Drive, API). O colaborador vê só o que usa. Mesmo conteúdo em `docs/RECURSOS.md`, gerado por `npm run recursos` (teste confere que está em dia).
+- [x] Recursos do HiAdv (21/11): painel no topo de Configurações com o que está ligado (12 recursos, recolhido), o que falta configurar (ex.: OAB, WhatsApp do escritório), e o que está em preparação, com passo a passo e custo: IA com a chave do escritório e ZapSign (a chave já pode ser guardada no cofre; o uso ainda não está ligado, nenhuma função lê essas chaves), WhatsApp oficial com robô, pastas do Google Drive e API. O colaborador vê só o que usa. Mesmo conteúdo em `docs/RECURSOS.md`, gerado por `npm run recursos` (teste confere que está em dia).
 
 Testes: 110 de lógica e 190 de tela, todos passando.
+
+Pendente (próxima atualização): envio do kit pela ZapSign (com prévia e confirmação) e agentes de IA lendo a chave do escritório do cofre, com limite mensal.
 
 ## Para os gestores aprovarem / fazerem
 
