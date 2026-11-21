@@ -1,6 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { useItensDoDia } from '../data/consultas'
-import { useSessao } from '../lib/contexto'
+import { useApi, useSessao } from '../lib/contexto'
+import { rotuloAtencao, type ItemAtencao } from '../data/atencao'
+import { Button } from '../design/components/Button'
+import { useToast } from '../design/components/Toast'
+import { FichaCaso } from './FichaCaso'
 import { agruparSeuDia, quandoTexto, type ItemDia } from '../data/seuDia'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
@@ -35,6 +41,52 @@ function Grupo({ titulo, itens, urgente = false, agora }: { titulo: string; iten
   )
 }
 
+function nomeCurto(email: string | null) {
+  if (!email) return null
+  const n = email.split('@')[0].split(/[._-]/)[0]
+  return n ? n.charAt(0).toUpperCase() + n.slice(1) : null
+}
+
+function Atencao() {
+  const api = useApi()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const { perfil } = useSessao()
+  const [ficha, setFicha] = useState<{ id: string; nome: string } | null>(null)
+  const q = useQuery({ queryKey: ['atencao', perfil?.escritorioId, perfil?.email], queryFn: () => api.atencao(), enabled: !!perfil })
+  const preparo = useMutation({
+    mutationFn: (it: ItemAtencao) => api.criarPreparo(it.evento ?? 'pericia', it.id),
+    onSuccess: (r) => {
+      toast(r.ja ? 'A preparação já tinha sido criada.' : 'Tarefa de preparação criada, com roteiro.')
+      qc.invalidateQueries({ queryKey: ['atencao'] }); qc.invalidateQueries({ queryKey: ['tarefas'] }); qc.invalidateQueries({ queryKey: ['seu-dia'] })
+    },
+    onError: (e) => toast((e as Error).message),
+  })
+  const itens = q.data ?? []
+  if (!q.isSuccess || itens.length === 0) return null
+  return (
+    <Panel title="Precisa de atenção" labelId="h-precisa">
+      <ul className="seu-dia-lista atencao-lista">
+        {itens.map((it) => {
+          const quem = it.escalado ? nomeCurto(it.responsavel) : null
+          return (
+            <li key={`${it.tipo}-${it.id}`} className="hv-row atencao-item" data-gravidade={it.gravidade}>
+              <span className="tipo"><span className="hv-dot" data-tipo={it.tipo} aria-hidden="true" />{rotuloAtencao(it)}</span>
+              <span className="texto"><span className="titulo">{it.titulo}</span><span className="sub">{it.detalhe}{quem && ` · com ${quem}`}</span></span>
+              <span className="atencao-acao">
+                {it.tipo === 'preparo' && <Button size="sm" variant="secondary" disabled={preparo.isPending} onClick={() => preparo.mutate(it)}>Criar preparação</Button>}
+                {it.tipo === 'parado' && it.casoId && <Button size="sm" variant="ghost" onClick={() => setFicha({ id: it.casoId!, nome: it.titulo })}>Abrir caso</Button>}
+                {it.tipo === 'prazo' && <Link to="/tarefas" className="hv-link">Ver tarefa</Link>}
+              </span>
+            </li>
+          )
+        })}
+      </ul>
+      <FichaCaso casoId={ficha?.id ?? null} nome={ficha?.nome ?? ''} aoFechar={() => { setFicha(null); qc.invalidateQueries({ queryKey: ['atencao'] }) }} />
+    </Panel>
+  )
+}
+
 export function SeuDia() {
   const { perfil } = useSessao()
   const q = useItensDoDia()
@@ -61,7 +113,9 @@ export function SeuDia() {
         ))}
       </div>
 
-      <Panel title="O que pede atenção" labelId="h-atencao">
+      <Atencao />
+
+      <Panel title="Sua agenda" labelId="h-agenda">
         {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && total === 0 && <Empty title="Nada pendente para hoje.">Quando chegarem prazos, perícias, audiências ou tarefas para você, eles aparecem aqui.</Empty>}

@@ -1,6 +1,7 @@
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
 import type { Ficha, NovaExigencia } from './ficha'
+import type { ItemAtencao, RegrasAtencao } from './atencao'
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
@@ -77,4 +78,11 @@ export interface Api {
   configurarAgente(agente: string, ativo: boolean, etapas: string[], modeloId: string | null, parametros?: Record<string, unknown>): Promise<void>
   /** Etapas das áreas ativas, para escolher quando cada agente entra. */
   etapasDoEscritorio(): Promise<EtapaEscritorio[]>
+  /** Prazos fatais, casos parados e eventos sem preparação (o gestor vê também os da equipe). */
+  atencao(): Promise<ItemAtencao[]>
+  /** Cria a tarefa de preparação (com roteiro) de uma perícia ou audiência. Uma vez só por evento. */
+  criarPreparo(evento: 'pericia' | 'audiencia', id: string): Promise<{ ja: boolean; prazo: string }>
+  regrasAtencao(): Promise<RegrasAtencao>
+  /** Só o gestor. */
+  salvarRegrasAtencao(r: RegrasAtencao): Promise<RegrasAtencao>
 }

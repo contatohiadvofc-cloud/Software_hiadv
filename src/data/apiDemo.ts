@@ -2,6 +2,7 @@ import type { Api, Area, Escritorio, Perfil } from './api'
 import { CredencialInvalida } from './api'
 import { diaSP, type ItemDia } from './seuDia'
 import { destaquesDoCartao, type CasoCard, type Etapa } from './quadro'
+import { ordenarAtencao, REGRAS_PADRAO, validarRegras, type ItemAtencao, type RegrasAtencao } from './atencao'
 import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, etapaDeExigencia, prazoInterno, validarExigencia, validarProtocolo, type EventoHistorico, type Ficha } from './ficha'
 import { telaParaValor, validarCampo, type CampoDef } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
@@ -152,6 +153,9 @@ function dia(n: number): string {
 
 function ler(): boolean { try { return sessionStorage.getItem('hiadv-demo') === '1' } catch { return false } }
 function gravar(v: boolean) { try { if (v) sessionStorage.setItem('hiadv-demo', '1'); else sessionStorage.removeItem('hiadv-demo') } catch { /* sem armazenamento */ } }
+
+const PREPAROS = new Set<string>()
+let REGRAS_DEMO: RegrasAtencao = { ...REGRAS_PADRAO }
 
 export function criarApiDemo(): Api {
   let logado = ler()
@@ -401,6 +405,36 @@ export function criarApiDemo(): Api {
       if (ativo && c.precisa.includes('claude') && !(claude.ativo && claude.temChave)) throw new Error('Ative a Claude em Integrações antes de ligar este agente.')
       if (ativo && c.usaModelo && !modeloId) throw new Error('Escolha o modelo da Biblioteca que este agente vai usar.')
       CONFIG_AGENTES[`${atual}:${agente}`] = { ativo, etapas, modeloId, parametros: agente === 'acompanhamento' ? { dias } : {} }
+    },
+    async atencao() {
+      const hoje = diaSP(new Date())
+      const dia = (n: number) => { const d = new Date(`${hoje}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10) }
+      const itens: ItemAtencao[] = []
+      const fatal = tarefasDemo().find((t) => t.status === 'aberta' && t.fatal && t.prazo)
+      if (fatal?.prazo) itens.push({ tipo: 'prazo', id: fatal.id, evento: null, titulo: fatal.titulo, detalhe: `Fatal ${fatal.prazo.slice(8, 10)}/${fatal.prazo.slice(5, 7)}`, dia: fatal.prazo, responsavel: fatal.responsavel, clienteId: null, casoId: null, gravidade: 'alta', escalado: fatal.responsavel !== 'ana.prado@silvaprado.exemplo.br' })
+      const ignorar = REGRAS_DEMO.paradoIgnorar
+      for (const c of CASOS) {
+        if (c.dias >= REGRAS_DEMO.paradoDias && !ignorar.includes(c.status)) itens.push({ tipo: 'parado', id: c.id, evento: null, titulo: c.cliente, detalhe: `Em "${c.status}" há ${c.dias} dias`, dia: dia(-c.dias), responsavel: null, clienteId: null, casoId: c.id, gravidade: c.dias >= REGRAS_DEMO.paradoDias * 2 ? 'alta' : 'media', escalado: false })
+      }
+      if (!PREPAROS.has('pericia:demo-p1')) itens.push({ tipo: 'preparo', id: 'demo-p1', evento: 'pericia', titulo: 'Paulo Henrique Dias', detalhe: `Perícia ${dia(2).slice(8, 10)}/${dia(2).slice(5, 7)} às 09:30 · Justiça Federal — Joinville/SC`, dia: dia(2), responsavel: 'julia.costa@silvaprado.exemplo.br', clienteId: null, casoId: null, gravidade: 'media', escalado: true })
+      return ordenarAtencao(itens)
+    },
+    async criarPreparo(evento, id) {
+      const chave = `${evento}:${id}`
+      const ja = PREPAROS.has(chave)
+      const prazo = diaSP(new Date())
+      if (!ja) {
+        PREPAROS.add(chave)
+        tarefasDemo().push({ id: `t-prep-${id}`, titulo: `Preparar ${evento === 'pericia' ? 'perícia' : 'audiência'}: Paulo Henrique Dias`, detalhe: 'Roteiro de preparação', prazo, fatal: false, responsavel: 'julia.costa@silvaprado.exemplo.br', status: 'aberta' })
+      }
+      return { ja, prazo }
+    },
+    async regrasAtencao() { return { ...REGRAS_DEMO, paradoIgnorar: [...REGRAS_DEMO.paradoIgnorar] } },
+    async salvarRegrasAtencao(r) {
+      const erro = validarRegras(r)
+      if (erro) throw new Error(erro)
+      REGRAS_DEMO = { ...r, paradoIgnorar: [...r.paradoIgnorar] }
+      return this.regrasAtencao()
     },
     async etapasDoEscritorio() {
       return (AREAS[atual] ?? []).flatMap((a) => (ETAPAS[a.area] ?? []).filter((e) => !e.final).map((e) => ({ area: a.area, areaNome: a.nome, status: e.status })))

@@ -2,6 +2,7 @@ import { createClient, type SupabaseClient, type PostgrestError } from '@supabas
 import type { Api, Achado, Area, Escritorio, Papel, Perfil } from './api'
 import { CredencialInvalida, SessaoExpirada } from './api'
 import { diaSP, horaSP, type ItemDia } from './seuDia'
+import { lerItemAtencao, ordenarAtencao, REGRAS_PADRAO, type RegrasAtencao } from './atencao'
 import { destaquesDoCartao, type Quadro } from './quadro'
 import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
@@ -25,6 +26,15 @@ function okOuErro(r: unknown): Record<string, unknown> {
   const v = (r ?? {}) as Record<string, unknown>
   if (v.ok === false) throw new Error(String(v.erro ?? 'Não foi possível concluir.'))
   return v
+}
+
+function lerRegras(d: Record<string, unknown> | null): RegrasAtencao {
+  if (!d) return { ...REGRAS_PADRAO }
+  return {
+    paradoDias: Number(d.parado_dias ?? REGRAS_PADRAO.paradoDias), preparoDias: Number(d.preparo_dias ?? REGRAS_PADRAO.preparoDias),
+    fatalAlertaDias: Number(d.fatal_alerta_dias ?? REGRAS_PADRAO.fatalAlertaDias),
+    paradoIgnorar: Array.isArray(d.parado_ignorar) ? d.parado_ignorar.map(String) : [],
+  }
 }
 
 export function criarApiSupabase(url: string, chave: string): Api {
@@ -293,6 +303,24 @@ export function criarApiSupabase(url: string, chave: string): Api {
     },
     async configurarAgente(agente, ativo, etapas, modeloId, parametros) {
       okOuErro(verificar(await sb.rpc('agente_configurar', { p_agente: agente, p_ativo: ativo, p_etapas: etapas, p_modelo: modeloId, p_parametros: parametros ?? {} })))
+    },
+    async atencao() {
+      const r = await sb.rpc('atencao_listar')
+      if (r.error && /function .*does not exist|Could not find the function/i.test(r.error.message)) return []
+      return ordenarAtencao(((verificar(r) as Record<string, unknown>[] | null) ?? []).map(lerItemAtencao))
+    },
+    async criarPreparo(evento, id) {
+      const r = okOuErro(verificar(await sb.rpc('preparo_criar', { p_evento: evento, p_id: id }))) as Record<string, unknown>
+      return { ja: r.ja === true, prazo: String(r.prazo ?? '') }
+    },
+    async regrasAtencao() {
+      const r = await sb.rpc('regras_obter')
+      if (r.error) return { ...REGRAS_PADRAO }
+      return lerRegras(r.data as Record<string, unknown> | null)
+    },
+    async salvarRegrasAtencao(x) {
+      const r = verificar(await sb.rpc('regras_salvar', { p: { parado_dias: x.paradoDias, preparo_dias: x.preparoDias, fatal_alerta_dias: x.fatalAlertaDias, parado_ignorar: x.paradoIgnorar } }))
+      return lerRegras(r as Record<string, unknown> | null)
     },
     async etapasDoEscritorio(): Promise<EtapaEscritorio[]> {
       const areas = await this.areas()

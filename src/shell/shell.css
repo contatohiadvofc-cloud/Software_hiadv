@@ -273,3 +273,17 @@ li.hv-row.cliente-caso { cursor: default; }
 .agente-selo { display: inline-block; margin-left: var(--s-2); padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-soft-ink); font-size: var(--fs-xs); font-weight: 600; vertical-align: 2px; }
 .agente-selo-breve { background: var(--surface-2); color: var(--ink-2); }
 .ficha-protocolo { margin: 0 0 var(--s-3); }
+
+/* ---------- Seu dia · Precisa de atenção ---------- */
+.atencao-item { grid-template-columns: 136px minmax(0, 1fr) auto; }
+.atencao-item[data-gravidade='alta'] { box-shadow: inset 3px 0 0 var(--danger, #b3261e); }
+.atencao-item .hv-dot[data-tipo='prazo'] { background: var(--t-prazo); }
+.atencao-item .hv-dot[data-tipo='parado'] { background: var(--ink-3); }
+.atencao-item .hv-dot[data-tipo='preparo'] { background: var(--t-pericia); }
+.atencao-item .sub { white-space: normal; }
+.atencao-acao { display: flex; justify-content: flex-end; }
+.hv-link { color: var(--accent); font-weight: 600; font-size: var(--fs-sm); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
+@media (max-width: 720px) {
+  .atencao-item { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'tipo acao' 'texto texto'; }
+  .atencao-item .tipo { grid-area: tipo; } .atencao-item .texto { grid-area: texto; } .atencao-item .atencao-acao { grid-area: acao; }
+}

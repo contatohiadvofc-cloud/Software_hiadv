@@ -3,6 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { AGENTES_EM_BREVE, SERVICOS, faltasDoAgente, type Agente, type Integracao } from '../data/escritorio'
 import { rotuloEtapa } from '../data/quadro'
+import { validarRegras, type RegrasAtencao } from '../data/atencao'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
@@ -189,6 +190,66 @@ function LinhaAgente({ a, integracoes, aoMudar }: { a: Agente; integracoes: Inte
   )
 }
 
+function RegrasDeAtencao() {
+  const api = useApi()
+  const { perfil } = useSessao()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const q = useQuery({ queryKey: ['regras-atencao', perfil?.escritorioId], queryFn: () => api.regrasAtencao(), enabled: !!perfil })
+  const etapas = useQuery({ queryKey: ['etapas-escritorio', perfil?.escritorioId], queryFn: () => api.etapasDoEscritorio(), enabled: !!perfil })
+  const [r, setR] = useState<RegrasAtencao | null>(null)
+  const [erro, setErro] = useState<string | null>(null)
+  const atual = r ?? q.data ?? null
+  const salvar = useMutation({
+    mutationFn: (x: RegrasAtencao) => api.salvarRegrasAtencao(x),
+    onSuccess: (x) => { setR(x); toast('Regras salvas.'); qc.invalidateQueries({ queryKey: ['regras-atencao'] }); qc.invalidateQueries({ queryKey: ['atencao'] }) },
+    onError: (e) => setErro((e as Error).message),
+  })
+  if (q.isLoading) return <p className="hv-panel-body muted" role="status">Carregando…</p>
+  if (q.isError || !atual) return <ErrorState onRetry={() => q.refetch()} />
+  const mudar = (k: keyof RegrasAtencao, v: number) => setR({ ...atual, [k]: v })
+  const statuses = [...new Set((etapas.data ?? []).map((e) => e.status))]
+  function enviar(e: FormEvent) {
+    e.preventDefault()
+    const v = validarRegras(atual!)
+    if (v) return setErro(v)
+    setErro(null); salvar.mutate(atual!)
+  }
+  return (
+    <form className="hv-panel-body ficha-form" onSubmit={enviar} noValidate>
+      <p className="muted">Define o que aparece em “Precisa de atenção” no Seu dia. Cada pessoa vê o que é dela; o gestor vê o escritório todo.</p>
+      <div className="hv-field">
+        <label htmlFor="rg-fatal">Avisar do prazo fatal com quantos dias úteis de antecedência</label>
+        <input id="rg-fatal" type="number" className="hv-input" min={0} max={10} value={atual.fatalAlertaDias} onChange={(e) => mudar('fatalAlertaDias', Number(e.target.value))} />
+      </div>
+      <div className="hv-field">
+        <label htmlFor="rg-parado">Caso parado: dias na mesma etapa</label>
+        <input id="rg-parado" type="number" className="hv-input" min={2} max={90} value={atual.paradoDias} onChange={(e) => mudar('paradoDias', Number(e.target.value))} />
+      </div>
+      <div className="hv-field">
+        <label htmlFor="rg-preparo">Perícias e audiências: pedir preparação com quantos dias de antecedência</label>
+        <input id="rg-preparo" type="number" className="hv-input" min={1} max={30} value={atual.preparoDias} onChange={(e) => mudar('preparoDias', Number(e.target.value))} />
+      </div>
+      {statuses.length > 0 && (
+        <fieldset className="integracao-opcoes">
+          <legend>Etapas que esperam terceiros (não contam como caso parado)</legend>
+          <div className="agente-etapas">
+            {statuses.map((st) => (
+              <label key={st} className="alternar">
+                <input type="checkbox" checked={atual.paradoIgnorar.includes(st)}
+                  onChange={(e) => setR({ ...atual, paradoIgnorar: e.target.checked ? [...atual.paradoIgnorar, st] : atual.paradoIgnorar.filter((x) => x !== st) })} />
+                {rotuloEtapa(st)}
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
+      {erro && <p className="hv-error" role="alert">{erro}</p>}
+      <div className="catalogo-linha"><Button type="submit" disabled={salvar.isPending}>{salvar.isPending ? 'Salvando…' : 'Salvar regras'}</Button></div>
+    </form>
+  )
+}
+
 export function Configuracoes() {
   const api = useApi()
   const { perfil } = useSessao()
@@ -203,6 +264,10 @@ export function Configuracoes() {
   return (
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Configurações</h1><p className="muted">{perfil?.escritorioNome}. Cada escritório tem as suas chaves, os seus custos e os seus agentes.</p></div></div>
+
+      <Panel title="Regras de atenção" labelId="cfg-regras">
+        <RegrasDeAtencao />
+      </Panel>
 
       <Panel title="Integrações" labelId="cfg-integ">
         {integ.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}

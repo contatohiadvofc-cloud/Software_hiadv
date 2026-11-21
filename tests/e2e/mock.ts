@@ -27,6 +27,8 @@ export type Cenario = {
   integracoes?: Array<Record<string, unknown>>
   agentes?: Array<Record<string, unknown>>
   recusarAgente?: string
+  atencao?: Array<Record<string, unknown>>
+  regras?: Record<string, unknown>
 }
 
 function b64url(o: object) {
@@ -86,6 +88,10 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'integracao_chave_salvar') { const b = registrar(); return json(r, { ok: true, chave_final: String(b.p_chave).slice(-4) }) }
       if (nome === 'integracao_chave_remover') { registrar(); return json(r, { ok: true }) }
       if (nome === 'agentes_listar') return json(r, c.agentes ?? [])
+      if (nome === 'atencao_listar') return json(r, c.atencao ?? [])
+      if (nome === 'preparo_criar') { registrar(); return json(r, { ok: true, ja: false, tarefa: 't-prep', prazo: '2026-11-23' }) }
+      if (nome === 'regras_obter') return json(r, c.regras ?? { parado_dias: 10, preparo_dias: 5, fatal_alerta_dias: 2, parado_ignorar: [] })
+      if (nome === 'regras_salvar') { const b = registrar(); return json(r, (b as { p: object }).p) }
       if (nome === 'agente_configurar') { registrar(); return json(r, c.recusarAgente ? { ok: false, erro: c.recusarAgente } : { ok: true }) }
       if (nome === 'caso_beneficio_salvar') { const v = req.postDataJSON() as { p: object }; estado.beneficios.push(v); return json(r, { ok: true, alterados: Object.keys(v.p).length }) }
       if (nome === 'caso_gate') { estado.gates.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true }) }
