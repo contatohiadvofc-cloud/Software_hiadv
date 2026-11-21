@@ -1,4 +1,5 @@
 import type { Api, Area, Escritorio, Perfil } from './api'
+import { nomeDaArea } from './areas'
 import { PRODUTOS_PREV, areaPrevidenciaria, soDigitos, validarCliente } from './cadastro'
 import { CredencialInvalida } from './api'
 import { diaSP, type ItemDia } from './seuDia'
@@ -459,6 +460,13 @@ export function criarApiDemo(): Api {
         const tarefas = tarefasDemo().filter((t) => t.status === 'aberta' && t.responsavel === p.email).length
         return { email: p.email, nome: p.nome, tarefas, casos: 0, total: tarefas }
       }).sort((a, b) => a.total - b.total || a.email.localeCompare(b.email))
+    },
+    async ativarArea(area, ativa) {
+      const lista = AREAS[atual] ?? (AREAS[atual] = [])
+      const i = lista.findIndex((a) => a.area === area)
+      if (ativa && i < 0) lista.push({ area, nome: nomeDaArea(area), ordem: (lista.length + 1) * 10 })
+      if (!ativa && i >= 0) lista.splice(i, 1)
+      if (ativa && !ETAPAS[area]) ETAPAS[area] = [{ status: 'novo', ordem: 1, final: false, pedeMotivo: false }, { status: 'em andamento', ordem: 2, final: false, pedeMotivo: false }, { status: 'concluído', ordem: 3, final: true, pedeMotivo: false }]
     },
     async criarCliente(c) {
       const erro = validarCliente(c); if (erro) throw new Error(erro)

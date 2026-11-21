@@ -14,6 +14,7 @@ import { Badge } from '../design/components/Badge'
 import { Dialog } from '../design/components/Dialog'
 import { useToast } from '../design/components/Toast'
 import { DesbloqueioNesteAparelho } from '../shell/Desbloqueio'
+import { AreasDeAtuacao } from './AreasDeAtuacao'
 
 const dataFmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeZone: 'America/Sao_Paulo' })
 
@@ -333,6 +334,8 @@ export function Configuracoes() {
       <div className="pagina-cabeca"><div><h1>Configurações</h1><p className="muted">{perfil?.escritorioNome}. Cada escritório tem as suas chaves, os seus custos e os seus agentes.</p></div></div>
 
       {aparelho}
+
+      <section id="areas-de-atuacao"><Panel title="Áreas de atuação" labelId="cfg-areas"><AreasDeAtuacao /></Panel></section>
 
       <Panel title="Regras de atenção" labelId="cfg-regras">
         <RegrasDeAtencao />

@@ -42,6 +42,7 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [x] Login no oficial (21/11): a senha era aceita, mas o banco recusava a leitura do papel e do escritório (e do telefone dos clientes), e o app voltava à entrada. Liberada só a leitura dessas colunas (`hiadv2-colunas-leitura.sql`, TESTE e OFICIAL com OK do Felipe).
 - [x] Senha visível enquanto digita ("Mostrar"/"Ocultar") em todos os campos de senha.
 - [x] Desbloqueio pelo celular (21/11): depois do primeiro login no celular, o HiAdv oferece abrir das próximas vezes com a digital, o rosto ou a senha de tela do aparelho (trava local por WebAuthn; nada de biometria sai do aparelho). Liga e desliga em Configurações › Este aparelho, que agora aparece para todos.
+- [x] Áreas de atuação (21/11): o Gestor Master liga e desliga áreas do catálogo (previdenciário administrativo e judicial, trabalhista, cível, bancário, penal, extrajudicial) em Configurações › Áreas de atuação, ou direto no "Novo caso" ("Ligar outra área"), que liga a área e abre o caso de uma vez. Desligar pede confirmação e não apaga nada. No celular, a página Áreas tem "Novo caso" e o atalho para ligar outra área. Usa a função `area_ativar` que já existia no servidor.
 - [ ] Vitrine em hiadv.com.br (decisão do Felipe em 21/11): quem não está logado vê a apresentação; quem está logado vai direto ao sistema; botões "Quero o HiAdv para o meu escritório" e "Quero o HiAdv como advogado autônomo" abrem o WhatsApp comercial 49 99973-0572 com mensagem pronta; e-mail hiadvofc@gmail.com; sem preços por enquanto; vídeos curtos de demonstração com dados fictícios (um por área) na vitrine e numa área "Aprenda a usar" no sistema. Fazer depois de terminar o sistema e limpar os restos dos apps antigos.
 - [ ] Próximos: agentes com IA (chave do escritório); ZapSign em um clique; Drive.
 - [ ] Execução dos agentes (função no servidor chamando a Claude com a chave do escritório) — depende de chave cadastrada.
@@ -49,7 +50,7 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [ ] Google Drive: pasta compartilhada, mapa de nomes, relacionar pasta ao cliente com aprovação, importar só ativos com aprovação.
 - [ ] Documentos, publicações virando tarefa, novo cliente/novo caso.
 
-Testes: 73 de lógica e 130 de tela, todos passando.
+Testes: 75 de lógica e 138 de tela, todos passando.
 
 ## Para os gestores aprovarem / fazerem
 

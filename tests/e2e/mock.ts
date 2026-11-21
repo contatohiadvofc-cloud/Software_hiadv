@@ -123,6 +123,15 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'agente_configurar') { registrar(); return json(r, c.recusarAgente ? { ok: false, erro: c.recusarAgente } : { ok: true }) }
       if (nome === 'caso_beneficio_salvar') { const v = req.postDataJSON() as { p: object }; estado.beneficios.push(v); return json(r, { ok: true, alterados: Object.keys(v.p).length }) }
       if (nome === 'caso_gate') { estado.gates.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true }) }
+      if (nome === 'area_ativar') {
+        const b = registrar() as { p_area: string; p_ativa: boolean }
+        const lista = (c.areas && c.areas !== 'sem-funcao' ? c.areas : (c.areas = [{ area: 'trabalhista', nome: 'Trabalhista', ordem: 10 }])) as Array<{ area: string; nome: string; ordem: number }>
+        const i = lista.findIndex((a) => a.area === b.p_area)
+        const nomes: Record<string, string> = { civel: 'Cível', bancario: 'Bancário', penal: 'Penal', trabalhista: 'Trabalhista' }
+        if (b.p_ativa && i < 0) lista.push({ area: b.p_area, nome: nomes[b.p_area] ?? b.p_area, ordem: 99 })
+        if (!b.p_ativa && i >= 0) lista.splice(i, 1)
+        return json(r, { ok: true })
+      }
       if (nome === 'hiadv_cliente_criar') { const b = registrar() as { p: { cpf?: string } }; return json(r, { ok: true, id: b.p.cpf === '529.982.247-25' ? 'c1' : 'c-novo', ja: b.p.cpf === '529.982.247-25' }) }
       if (nome === 'hiadv_caso_criar') { registrar(); return json(r, { ok: true, id: 'k-novo' }) }
       if (nome === 'hiadv_clientes_importar') {

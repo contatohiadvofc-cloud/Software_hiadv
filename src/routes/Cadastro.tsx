@@ -2,6 +2,8 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { useAreas } from '../data/consultas'
+import { areasParaLigar, nomeDaArea } from '../data/areas'
+import { useLigarArea } from './AreasDeAtuacao'
 import { PRODUTOS_PREV, areaPrevidenciaria, lerPlanilha, validarCliente, type NovoCliente, type ResultadoImportacao } from '../data/cadastro'
 import { Dialog } from '../design/components/Dialog'
 import { Button } from '../design/components/Button'
@@ -65,6 +67,8 @@ export function NovoCasoDialog({ aberto, aoFechar, aoCriar, clienteId, clienteNo
   const toast = useToast()
   const { perfil } = useSessao()
   const areas = useAreas()
+  const ligarArea = useLigarArea()
+  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   const equipe = useQuery({ queryKey: ['equipe', perfil?.escritorioId], queryFn: () => api.equipe(), enabled: !!perfil && aberto, staleTime: 10 * 60_000 })
   const [modo, setModo] = useState<'buscar' | 'novo'>('buscar')
   const [busca, setBusca] = useState('')
@@ -93,12 +97,13 @@ export function NovoCasoDialog({ aberto, aoFechar, aoCriar, clienteId, clienteNo
   const criar = useMutation({
     mutationFn: async () => {
       let c = cliente
+      if (!(areas.data ?? []).some((a) => a.area === area)) await ligarArea.mutateAsync({ area, ativa: true })
       if (!c) { const r = await api.criarCliente(novo); c = { id: r.id, nome: novo.nome.trim() } }
       const id = await api.criarCaso({ cliente: c.id, area, produto: areaPrevidenciaria(area) ? produto : null, relato, responsavel: responsavel || null })
       return { id, cliente: c }
     },
     onSuccess: ({ id, cliente: c }) => {
-      toast(`Caso aberto em ${areas.data?.find((a) => a.area === area)?.nome ?? area}.`)
+      toast(`Caso aberto em ${areas.data?.find((a) => a.area === area)?.nome ?? nomeDaArea(area)}.`)
       qc.invalidateQueries({ queryKey: ['quadro', perfil?.escritorioId, area] })
       qc.invalidateQueries({ queryKey: ['cliente', perfil?.escritorioId, c.id] })
       qc.invalidateQueries({ queryKey: ['clientes', perfil?.escritorioId] })
@@ -149,9 +154,21 @@ export function NovoCasoDialog({ aberto, aoFechar, aoCriar, clienteId, clienteNo
 
         <div className="hv-field">
           <label htmlFor="cad-area">Área</label>
-          <select id="cad-area" className="hv-input" value={area} onChange={(e) => setArea(e.target.value)}>
-            {(areas.data ?? []).map((a) => <option key={a.area} value={a.area}>{a.nome}</option>)}
+          <select id="cad-area" className="hv-input" value={area} onChange={(e) => setArea(e.target.value)} aria-describedby="cad-area-dica">
+            <optgroup label="Áreas do escritório">
+              {(areas.data ?? []).map((a) => <option key={a.area} value={a.area}>{a.nome}</option>)}
+            </optgroup>
+            {gestor && areasParaLigar(areas.data ?? []).length > 0 && (
+              <optgroup label="Ligar outra área">
+                {areasParaLigar(areas.data ?? []).map((a) => <option key={a.area} value={a.area}>{a.nome} (ligar)</option>)}
+              </optgroup>
+            )}
           </select>
+          <span id="cad-area-dica" className="hv-hint">
+            {area && !(areas.data ?? []).some((a) => a.area === area)
+              ? `Ao abrir o caso, a área ${nomeDaArea(area)} é ligada no escritório e ganha quadro próprio.`
+              : gestor ? 'Caso de outra área? Escolha em "Ligar outra área".' : 'Caso de outra área? Peça ao Gestor Master para ligar a área em Configurações.'}
+          </span>
         </div>
         {areaPrevidenciaria(area) && (
           <div className="hv-field">

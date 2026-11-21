@@ -359,6 +359,9 @@ export function criarApiSupabase(url: string, chave: string): Api {
       if (r.error) return []
       return ((r.data as Record<string, unknown>[] | null) ?? []).map((x) => ({ email: String(x.email), nome: String(x.nome ?? x.email), tarefas: Number(x.tarefas ?? 0), casos: Number(x.casos ?? 0), total: Number(x.total ?? 0) }))
     },
+    async ativarArea(area, ativa) {
+      okOuErro(verificar(await sb.rpc('area_ativar', { p_area: area, p_ativa: ativa })))
+    },
     async criarCliente(c) {
       const r = okOuErro(verificar(await sb.rpc('hiadv_cliente_criar', { p: c })))
       return { id: String(r.id), ja: r.ja === true }

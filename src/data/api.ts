@@ -38,6 +38,8 @@ export interface Api {
   escritorios(): Promise<Escritorio[]>
   trocarEscritorio(id: string): Promise<void>
   areas(): Promise<Area[]>
+  /** Só o Gestor Master. Liga ou desliga uma área do catálogo no escritório; os casos ficam guardados. */
+  ativarArea(area: string, ativa: boolean): Promise<void>
   busca(q: string): Promise<Achado[]>
   itensDoDia(email: string): Promise<ItemDia[]>
   quadro(area: string): Promise<Quadro>

@@ -1,17 +1,30 @@
-import { Link } from '@tanstack/react-router'
+import { useState } from 'react'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { useAreas } from '../data/consultas'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
 import { OfficeSwitcher } from '../shell/OfficeSwitcher'
 import { TEXTO_SEM_AREAS } from '../shell/Sidebar'
+import { Button } from '../design/components/Button'
+import { useSessao } from '../lib/contexto'
+import { NovoCasoDialog } from './Cadastro'
 
 /** No celular: escritório em uso e a lista de áreas (no computador ficam na barra lateral). */
 export function Areas() {
   const areas = useAreas()
+  const { perfil } = useSessao()
+  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const [novoCaso, setNovoCaso] = useState(false)
+  const nav = useNavigate()
   return (
     <div className="pagina">
-      <div className="pagina-cabeca"><h1>Áreas do escritório</h1></div>
+      <div className="pagina-cabeca">
+        <h1>Áreas do escritório</h1>
+        <div className="pagina-acoes"><Button onClick={() => setNovoCaso(true)}>Novo caso</Button></div>
+      </div>
+      <NovoCasoDialog aberto={novoCaso} aoFechar={() => setNovoCaso(false)}
+        aoCriar={(_id, area) => { setNovoCaso(false); nav({ to: '/area/$slug', params: { slug: area } }) }} />
       <OfficeSwitcher />
       <Panel>
         {areas.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
@@ -23,6 +36,11 @@ export function Areas() {
               <li key={a.area}><Link to="/area/$slug" params={{ slug: a.area }} className="areas-item">{a.nome}<span aria-hidden="true">›</span></Link></li>
             ))}
           </ul>
+        )}
+        {gestor && (
+          <div className="hv-panel-body">
+            <Link to="/configuracoes" hash="areas-de-atuacao" className="areas-ligar">Ligar outra área (cível, bancário, penal…)</Link>
+          </div>
         )}
       </Panel>
       <Panel title="Do escritório" labelId="areas-mais">
