@@ -59,7 +59,7 @@ export function Aderir() {
   return (
     <main className="ad">
       <div className="ad-coluna">
-        <header className="ad-topo"><Sinal />{ref && <span className="ad-ref">Indicação {ref}</span>}</header>
+        <header className="ad-topo"><Sinal />{ref && <span className="ad-ref">Indicação {ref}</span>}<a className="voltar-site" href={ref ? `/?ref=${ref}` : '/'}><span aria-hidden="true">‹</span> Voltar ao site</a></header>
 
         {etapa === 'inicio' && (
           <section className="ad-inicio" aria-labelledby="ad-titulo">

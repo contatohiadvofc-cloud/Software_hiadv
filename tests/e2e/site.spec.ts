@@ -37,3 +37,12 @@ test('site acessível (axe)', async ({ page }) => {
   const r = await new AxeBuilder({ page }).analyze()
   expect(r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(' | ')}`)).toEqual([])
 })
+
+test('login e questionário têm caminho de volta ao site', async ({ page }) => {
+  await page.goto('/aderir')
+  await expect(page.getByRole('link', { name: 'Voltar ao site' })).toHaveAttribute('href', '/')
+  await page.goto('/login')
+  await page.locator('[data-estatico]').waitFor({ state: 'detached' })
+  await page.getByRole('link', { name: 'Voltar ao site' }).click()
+  await expect(page.getByRole('heading', { level: 1, name: 'Seu escritório inteiro, num só lugar.' })).toBeVisible()
+})

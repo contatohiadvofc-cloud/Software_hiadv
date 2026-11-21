@@ -9,10 +9,10 @@
   --vinho-claro: #7a1f33;
   --rose: #f0b7c2;
   --rose-claro: #f5e6e9;
-  --tinta: #221b1e;
-  --tinta-2: #5a4f53;
-  --papel: #fbf8f6;
-  --linha: #e6ddd8;
+  --tinta: #ffffff;
+  --tinta-2: #ecccd3;
+  --papel: #4a1120;
+  --linha: rgb(255 255 255 / .16);
   --serifa: 'Source Serif 4', Georgia, 'Times New Roman', serif;
   --texto: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
@@ -214,3 +214,37 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 @media (max-width: 520px) { .sv-whats span { display: none; } .sv-whats { padding: 0; width: 56px; justify-content: center; } }
 .sv [hidden] { display: none !important; }
 .sv-rodape .sv-rodape-fim { margin: 32px auto 0; }
+
+/* Vermelho predominante: todas as seções em tons de vinho, com destaques em branco */
+.sv-secao-clara { background: #3d0e1a; border-block: 0; }
+.sv-secao-rose { background: var(--vinho); }
+.sv-final { background: #3d0e1a; }
+.sv-heroi::after { background: var(--papel); }
+.sv :focus-visible, .sv-secao :focus-visible, .sv-secao-clara :focus-visible { outline-color: var(--rose); }
+.sv-btn-vinho { background: #fff; color: var(--vinho) !important; }
+.sv-btn-vinho:hover { background: var(--rose-claro); }
+.sv-btn-contorno-vinho { border-color: rgb(255 255 255 / .6); color: #fff !important; }
+.sv-btn-contorno-vinho:hover { background: rgb(255 255 255 / .08); border-color: #fff; }
+.sv-tour-lista button:hover { background: rgb(255 255 255 / .05); }
+.sv-tour-lista button[aria-selected='true'] { border-left-color: var(--rose); background: rgb(255 255 255 / .09); }
+.sv-tour-lista button[aria-selected='true'] strong { color: #fff; }
+.sv-tour-lista button:focus-visible { outline-color: var(--rose); }
+.sv-aparelho { border-color: #1a0509; box-shadow: 0 30px 60px -30px rgb(10 1 4 / .8); }
+.sv-mais li::before { background: var(--rose); box-shadow: none; }
+.sv-plano { background: rgb(255 255 255 / .06); border-color: rgb(255 255 255 / .14); }
+.sv-plano li::before { border-color: var(--rose); }
+.sv-fundador-preco { color: var(--rose); }
+.sv-selo { background: rgb(240 183 194 / .18); color: var(--rose); }
+.sv-plano-destaque { background: #fff; color: var(--vinho); border-color: #fff; box-shadow: 0 30px 60px -30px rgb(10 1 4 / .7); }
+.sv-plano-destaque .sv-preco, .sv-plano-destaque .sv-limites { color: #6b4a52; }
+.sv-plano-destaque .sv-preco strong, .sv-plano-destaque h3, .sv-plano-destaque .sv-plano-resumo, .sv-plano-destaque li { color: #3a0c17; }
+.sv-plano-destaque .sv-fundador-preco { color: var(--vinho); }
+.sv-plano-destaque ul { border-top-color: #eaded9; }
+.sv-plano-destaque li::before { border-color: var(--vinho); }
+.sv-plano-destaque .sv-btn-claro { background: var(--vinho); color: #fff !important; }
+.sv-plano-destaque .sv-btn-claro:hover { background: var(--vinho-fundo); }
+.sv-plano-destaque :focus-visible { outline-color: var(--vinho); }
+.sv-passos li { border-top-color: var(--rose); }
+.sv-passos li::before { color: var(--rose); }
+.sv-duvidas summary::after { color: var(--rose); }
+.sv-rodape { background: #2a0912; }

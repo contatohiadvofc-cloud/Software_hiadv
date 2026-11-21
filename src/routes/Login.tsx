@@ -94,6 +94,7 @@ export function Login() {
     <div className="login">
       <Apresentacao />
       <div className="login-caixa">
+        {!modoDemo() && <a className="voltar-site" href="/"><span aria-hidden="true">‹</span> Voltar ao site</a>}
         <Marca />
         <h1>{modo === 'entrar' ? 'Entrar no HiAdv' : 'Criar a sua senha'}</h1>
         {modoDemo() && <p className="login-demo">Prévia com dados fictícios. Use qualquer e-mail e a senha <b>demo</b>.</p>}
