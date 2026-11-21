@@ -13,6 +13,7 @@ import { Button } from '../design/components/Button'
 import { Badge } from '../design/components/Badge'
 import { Dialog } from '../design/components/Dialog'
 import { useToast } from '../design/components/Toast'
+import { DesbloqueioNesteAparelho } from '../shell/Desbloqueio'
 
 const dataFmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeZone: 'America/Sao_Paulo' })
 
@@ -318,11 +319,20 @@ export function Configuracoes() {
   const ag = useQuery({ queryKey: ['agentes', perfil?.escritorioId], queryFn: () => api.agentes(), enabled: !!perfil && gestor })
   const atualizar = () => { qc.invalidateQueries({ queryKey: ['integracoes'] }); qc.invalidateQueries({ queryKey: ['agentes'] }) }
 
-  if (perfil && !gestor) return <div className="pagina"><Panel><Empty title="Só o Gestor Master acessa as configurações do escritório." /></Panel></div>
+  const aparelho = <Panel title="Este aparelho" labelId="cfg-aparelho"><DesbloqueioNesteAparelho /></Panel>
+  if (perfil && !gestor) return (
+    <div className="pagina">
+      <div className="pagina-cabeca"><div><h1>Configurações</h1></div></div>
+      {aparelho}
+      <Panel><Empty title="As configurações do escritório ficam com o Gestor Master." /></Panel>
+    </div>
+  )
 
   return (
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Configurações</h1><p className="muted">{perfil?.escritorioNome}. Cada escritório tem as suas chaves, os seus custos e os seus agentes.</p></div></div>
+
+      {aparelho}
 
       <Panel title="Regras de atenção" labelId="cfg-regras">
         <RegrasDeAtencao />

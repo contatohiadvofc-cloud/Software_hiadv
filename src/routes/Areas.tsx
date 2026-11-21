@@ -5,13 +5,10 @@ import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
 import { OfficeSwitcher } from '../shell/OfficeSwitcher'
 import { TEXTO_SEM_AREAS } from '../shell/Sidebar'
-import { useSessao } from '../lib/contexto'
 
 /** No celular: escritório em uso e a lista de áreas (no computador ficam na barra lateral). */
 export function Areas() {
   const areas = useAreas()
-  const { perfil } = useSessao()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   return (
     <div className="pagina">
       <div className="pagina-cabeca"><h1>Áreas do escritório</h1></div>
@@ -31,7 +28,7 @@ export function Areas() {
       <Panel title="Do escritório" labelId="areas-mais">
         <ul className="areas-lista">
           <li><Link to="/biblioteca" className="areas-item">Biblioteca<span aria-hidden="true">›</span></Link></li>
-          {gestor && <li><Link to="/configuracoes" className="areas-item">Configurações<span aria-hidden="true">›</span></Link></li>}
+          <li><Link to="/configuracoes" className="areas-item">Configurações<span aria-hidden="true">›</span></Link></li>
         </ul>
       </Panel>
     </div>

@@ -330,3 +330,9 @@ li.hv-row.cliente-caso { cursor: default; }
   .hv-row.cliente-linha > *, .hv-row.cliente-caso > *, .hv-row.agenda-item > *, .hv-row.biblioteca-item > * { grid-area: auto; }
 }
 .cad-achados .hv-row { display: block; min-height: 0; }
+
+/* Desbloqueio pelo celular */
+.oferta-desbloqueio { margin: 0 0 var(--s-4); padding: var(--s-3) var(--s-4); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 12px; background: var(--surface); }
+.oferta-desbloqueio p { margin: 0 0 var(--s-2); }
+.travado .login-caixa { margin: auto; }
+.travado .login-caixa .hv-btn { width: 100%; margin-top: var(--s-3); }

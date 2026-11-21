@@ -38,6 +38,10 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [x] Identidade vinho (escolha do Felipe em 21/11): claro = Vinho #7a1f33, Papel #f8f5f2, Grafite #221b1e; escuro = Noite #170b10, Vinho claro #d4677b, Linho #f2e8e5. Vinho só para marca, botões e item escolhido; alertas em vermelho-alaranjado (#b43a0a / #ff8a50) e avisos em âmbar, para não confundir. Ícone "Hi" (perna direita do H vira um i com ponto rosé). Fontes: Inter Tight no texto e Source Serif 4 só no nome HiAdv e nos títulos de página. Frase: "Seus processos, prazos e peças sob controle." Ícones e prévia do link gerados por `node scripts/marca.mjs`.
 - [x] Biblioteca: "Roteiros prontos do HiAdv" (pacote Previdenciário com 14 roteiros e Trabalhista com 8), só para o gestor; adicionar copia para o escritório, sem repetir. Texto próprio e genérico, gerado por `supabase/pacotes/roteiros.py`. Aplicado no TESTE e no OFICIAL (OK do Felipe em 21/11).
 - [x] Limpeza dos apps antigos no site da Lanhi (21/11): /equipe/, colaborador.html e /hiadv/ antigo levam para hiadv.com.br; os service workers antigos limpam o aparelho e se desligam; botões do site e de app.html apontam para o HiAdv. Pastas js/css antigas mantidas por enquanto (sem links), por decisão do Felipe.
+- [x] Cadastro (21/11): novo cliente (CPF conferido; CPF já cadastrado abre o existente), novo caso pelo cliente ou pelo quadro (cliente novo na hora, benefício nas áreas previdenciárias, responsável, relato) e importação de clientes por planilha colada ou CSV, sempre conferida antes de gravar (só gestor). SQL `hiadv2-cadastro.sql` aplicado no TESTE e no OFICIAL (OK do Felipe em 21/11).
+- [x] Login no oficial (21/11): a senha era aceita, mas o banco recusava a leitura do papel e do escritório (e do telefone dos clientes), e o app voltava à entrada. Liberada só a leitura dessas colunas (`hiadv2-colunas-leitura.sql`, TESTE e OFICIAL com OK do Felipe).
+- [x] Senha visível enquanto digita ("Mostrar"/"Ocultar") em todos os campos de senha.
+- [x] Desbloqueio pelo celular (21/11): depois do primeiro login no celular, o HiAdv oferece abrir das próximas vezes com a digital, o rosto ou a senha de tela do aparelho (trava local por WebAuthn; nada de biometria sai do aparelho). Liga e desliga em Configurações › Este aparelho, que agora aparece para todos.
 - [ ] Vitrine em hiadv.com.br (decisão do Felipe em 21/11): quem não está logado vê a apresentação; quem está logado vai direto ao sistema; botões "Quero o HiAdv para o meu escritório" e "Quero o HiAdv como advogado autônomo" abrem o WhatsApp comercial 49 99973-0572 com mensagem pronta; e-mail hiadvofc@gmail.com; sem preços por enquanto; vídeos curtos de demonstração com dados fictícios (um por área) na vitrine e numa área "Aprenda a usar" no sistema. Fazer depois de terminar o sistema e limpar os restos dos apps antigos.
 - [ ] Próximos: agentes com IA (chave do escritório); ZapSign em um clique; Drive.
 - [ ] Execução dos agentes (função no servidor chamando a Claude com a chave do escritório) — depende de chave cadastrada.
@@ -45,7 +49,7 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [ ] Google Drive: pasta compartilhada, mapa de nomes, relacionar pasta ao cliente com aprovação, importar só ativos com aprovação.
 - [ ] Documentos, publicações virando tarefa, novo cliente/novo caso.
 
-Testes: 68 de lógica e 107 de tela, todos passando.
+Testes: 73 de lógica e 130 de tela, todos passando.
 
 ## Para os gestores aprovarem / fazerem
 

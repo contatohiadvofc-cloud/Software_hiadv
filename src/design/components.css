@@ -95,3 +95,10 @@
 
 /* ---------- tecla ---------- */
 .hv-kbd { font-family: var(--font); font-size: var(--fs-xs); padding: 1px 6px; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 5px; color: var(--ink-2); background: var(--surface); }
+
+/* Campo de senha com "Mostrar" */
+.hv-senha { position: relative; }
+.hv-senha .hv-input { padding-right: 5.5rem; width: 100%; }
+.hv-senha-ver { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); min-height: 36px; padding: 0 10px; border: 0; border-radius: 8px; background: none; color: var(--accent); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
+.hv-senha-ver:hover { background: var(--surface-2); }
+.hv-senha-ver:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }

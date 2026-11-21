@@ -41,10 +41,11 @@ test('agentes: recusa do servidor aparece; quem não é gestor não entra', asyn
   await expect(d.getByText('Ative a Claude em Integrações antes de ligar este agente.')).toBeVisible()
 })
 
-test('colaborador não vê as configurações', async ({ page }) => {
+test('colaborador vê só o próprio aparelho, não as configurações do escritório', async ({ page }) => {
   await simularSupabase(page, { papel: 'colaborador', integracoes, agentes })
   await abrir(page)
-  await expect(page.getByText('Só o Gestor Master acessa as configurações do escritório.')).toBeVisible()
+  await expect(page.getByText('As configurações do escritório ficam com o Gestor Master.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Integrações' })).toHaveCount(0)
 })
 
 test('agente sem custo: liga só com a etapa e manda os dias do acompanhamento', async ({ page }) => {

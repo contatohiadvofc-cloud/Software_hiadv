@@ -1,3 +1,5 @@
+import { OfertaDesbloqueio, Travado } from './Desbloqueio'
+import { precisaDesbloquear } from '../lib/desbloqueio'
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
 import { Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
@@ -16,6 +18,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const qc = useQueryClient()
   const [buscando, setBuscando] = useState(false)
   const indo = useRef(false)
+  const [livre, setLivre] = useState(false)
 
   // Sem sessão: vai ao login uma única vez, guardando para onde voltar.
   useEffect(() => {
@@ -48,6 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [])
 
   if (sessao.estado !== 'dentro') return <div className="carregando" role="status">Carregando o HiAdv…</div>
+  if (!livre && precisaDesbloquear(sessao.perfil?.email)) return <Travado aoLiberar={() => setLivre(true)} />
 
   return (
     <div className="app">
@@ -61,7 +65,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
           <MenuConta />
         </header>
-        <main className="conteudo" id="conteudo">{children}</main>
+        <main className="conteudo" id="conteudo"><OfertaDesbloqueio />{children}</main>
       </div>
       <BottomBar />
       <CommandSearch open={buscando} onOpenChange={setBuscando} />

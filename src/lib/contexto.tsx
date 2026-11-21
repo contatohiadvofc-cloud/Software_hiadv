@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import type { Api, Perfil } from '../data/api'
+import { marcarLiberado } from './desbloqueio'
 
 const ApiCtx = createContext<Api | null>(null)
 
@@ -58,11 +59,13 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     async entrar(email, senha) {
       setAviso(null)
       await api.entrar(email, senha)
+      marcarLiberado() // acabou de digitar a senha: não pede o desbloqueio de novo nesta abertura
       await carregarPerfil()
     },
     async criarSenha(email, mestra, nova) {
       setAviso(null)
       await api.criarSenhaPessoal(email, mestra, nova)
+      marcarLiberado()
       await carregarPerfil()
     },
     async sair(msg) {
