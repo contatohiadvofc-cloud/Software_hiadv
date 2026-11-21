@@ -10,14 +10,15 @@ import { ErrorState } from '../design/components/ErrorState'
 import { Button } from '../design/components/Button'
 import { Dialog } from '../design/components/Dialog'
 import { useToast } from '../design/components/Toast'
+import { FichaCaso } from './FichaCaso'
 
 type Pedido = { caso: CasoCard; destino: Etapa }
 const PARADO_DIAS = 15
 
-function Cartao({ c, etapas, aoMover }: { c: CasoCard; etapas: Etapa[]; aoMover: (c: CasoCard, status: string) => void }) {
+function Cartao({ c, etapas, aoMover, aoAbrir }: { c: CasoCard; etapas: Etapa[]; aoMover: (c: CasoCard, status: string) => void; aoAbrir: (c: CasoCard) => void }) {
   return (
     <li className="cartao" draggable onDragStart={(e) => { e.dataTransfer.setData('text/plain', c.id); e.dataTransfer.effectAllowed = 'move' }}>
-      <span className="cartao-nome">{c.cliente}</span>
+      <button type="button" className="cartao-nome" onClick={() => aoAbrir(c)}>{c.cliente}</button>
       {c.produto && <span className="cartao-sub">{c.produto}</span>}
       <span className="cartao-meta">
         <span data-parado={c.dias >= PARADO_DIAS ? 'true' : undefined}>{c.dias === 0 ? 'Entrou hoje' : `${c.dias} ${c.dias === 1 ? 'dia' : 'dias'} na etapa`}</span>
@@ -47,6 +48,7 @@ export function Area() {
   const [pedido, setPedido] = useState<Pedido | null>(null)
   const [motivo, setMotivo] = useState('')
   const [alvo, setAlvo] = useState<string | null>(null)
+  const [aberto, setAberto] = useState<CasoCard | null>(null)
   const chave = ['quadro', perfil?.escritorioId, slug]
 
   const q = useQuery({ queryKey: chave, queryFn: () => api.quadro(slug), enabled: !!area })
@@ -115,7 +117,7 @@ export function Area() {
               onDragOver={(e) => { e.preventDefault(); setAlvo(col.etapa.status) }} onDragLeave={() => setAlvo(null)} onDrop={(e) => soltar(e, col.etapa.status)}>
               <h2 className="coluna-titulo"><span>{rotuloEtapa(col.etapa.status)}</span><span className="coluna-n">{col.casos.length}</span></h2>
               <ul className="coluna-lista">
-                {col.casos.map((c) => <Cartao key={c.id} c={c} etapas={q.data.etapas} aoMover={pedirMudanca} />)}
+                {col.casos.map((c) => <Cartao key={c.id} c={c} etapas={q.data.etapas} aoMover={pedirMudanca} aoAbrir={setAberto} />)}
               </ul>
             </section>
           ))}
@@ -130,7 +132,7 @@ export function Area() {
                 <thead><tr><th scope="col">Cliente</th><th scope="col">Etapa</th><th scope="col">Na etapa</th><th scope="col">Checklist</th></tr></thead>
                 <tbody>
                   {colunas.flatMap((col) => col.casos).map((c) => (
-                    <tr key={c.id}><td><b>{c.cliente}</b>{c.produto && <div className="muted">{c.produto}</div>}</td><td>{rotuloEtapa(c.status)}</td>
+                    <tr key={c.id}><td><button type="button" className="link-botao" onClick={() => setAberto(c)}><b>{c.cliente}</b></button>{c.produto && <div className="muted">{c.produto}</div>}</td><td>{rotuloEtapa(c.status)}</td>
                       <td data-parado={c.dias >= PARADO_DIAS ? 'true' : undefined}>{c.dias} d</td><td>{c.gateTotal ? `${c.gateOk}/${c.gateTotal}` : '–'}</td></tr>
                   ))}
                 </tbody>
@@ -139,6 +141,8 @@ export function Area() {
           )}
         </Panel>
       )}
+
+      <FichaCaso casoId={aberto?.id ?? null} nome={aberto?.cliente ?? ''} aoFechar={() => setAberto(null)} />
 
       <Dialog open={!!pedido} onOpenChange={(v) => !v && setPedido(null)} title="Confirmar mudança de etapa">
         {pedido && ex && (

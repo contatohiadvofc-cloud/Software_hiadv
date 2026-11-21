@@ -2,6 +2,8 @@ import type { Api, Area, Escritorio, Perfil } from './api'
 import { CredencialInvalida } from './api'
 import { diaSP, type ItemDia } from './seuDia'
 import type { CasoCard, Etapa } from './quadro'
+import type { EventoHistorico, Ficha } from './ficha'
+import { telaParaValor, validarCampo, type CampoDef } from './campos'
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
 const ESCRITORIOS: Escritorio[] = [
@@ -47,6 +49,30 @@ const CASOS: CasoCard[] = [
   { id: 'k8', cliente: 'José Lima', status: 'impugnar laudo', dias: 3, produto: 'Auxílio-acidente', numeroCnj: null, gateOk: 6, gateTotal: 6 },
 ]
 const AREA_DO_CASO: Record<string, string> = { k1: 'trabalhista', k2: 'trabalhista', k3: 'trabalhista', k4: 'trabalhista', k5: 'trabalhista', k6: 'administrativo', k7: 'administrativo', k8: 'judicial' }
+
+const MOTIVOS = ['Dispensa sem justa causa', 'Pedido de demissão', 'Justa causa', 'Rescisão indireta', 'Acordo (art. 484-A)', 'Término de contrato', 'Ainda trabalha']
+const DEFS: Record<string, CampoDef[]> = {
+  trabalhista: [
+    { chave: 'reclamadas', rotulo: 'Reclamada(s)', tipo: 'texto', opcoes: null, ordem: 10, noCartao: true },
+    { chave: 'funcao', rotulo: 'Função', tipo: 'texto', opcoes: null, ordem: 20, noCartao: false },
+    { chave: 'admissao', rotulo: 'Admissão', tipo: 'data', opcoes: null, ordem: 30, noCartao: false },
+    { chave: 'saida', rotulo: 'Saída', tipo: 'data', opcoes: null, ordem: 40, noCartao: false },
+    { chave: 'salario', rotulo: 'Último salário', tipo: 'moeda', opcoes: null, ordem: 50, noCartao: false },
+    { chave: 'motivo_saida', rotulo: 'Motivo da saída', tipo: 'lista', opcoes: MOTIVOS, ordem: 60, noCartao: false },
+    { chave: 'verbas', rotulo: 'Verbas pedidas', tipo: 'texto_longo', opcoes: null, ordem: 70, noCartao: false },
+    { chave: 'valor_causa', rotulo: 'Valor da causa', tipo: 'moeda', opcoes: null, ordem: 80, noCartao: false },
+    { chave: 'vara', rotulo: 'Vara / TRT', tipo: 'texto', opcoes: null, ordem: 90, noCartao: true },
+    { chave: 'aud_inicial', rotulo: 'Audiência inicial', tipo: 'data', opcoes: null, ordem: 100, noCartao: false },
+    { chave: 'aud_instrucao', rotulo: 'Audiência de instrução', tipo: 'data', opcoes: null, ordem: 110, noCartao: false },
+    { chave: 'fase', rotulo: 'Fase', tipo: 'lista', opcoes: ['Conhecimento', 'Recurso', 'Execução', 'Acordo em cumprimento'], ordem: 120, noCartao: true },
+  ],
+}
+const CAMPOS: Record<string, Record<string, unknown>> = {
+  k1: { reclamadas: 'Metalúrgica Alfa Ltda.', funcao: 'Soldador', admissao: '2019-03-01', saida: '2025-08-15', salario: 3150, motivo_saida: 'Dispensa sem justa causa', vara: '2ª Vara do Trabalho de Exemplo', fase: 'Conhecimento' },
+  k3: { reclamadas: 'Transportes Sul S.A.', funcao: 'Motorista', fase: 'Conhecimento' },
+}
+const HIST: Record<string, EventoHistorico[]> = {}
+const CHECK = ['Procuração assinada', 'Documento com foto', 'CTPS digital', 'Holerites', 'Termo de rescisão', 'Laudos e exames', 'CNIS']
 
 function dia(n: number): string {
   return diaSP(new Date(Date.now() + n * 86400000))
@@ -109,6 +135,35 @@ export function criarApiDemo(): Api {
     async moverCaso(id, status) {
       const c = CASOS.find((x) => x.id === id)
       if (c) { c.status = status; c.dias = 0 }
+    },
+    async ficha(id): Promise<Ficha> {
+      const c = CASOS.find((x) => x.id === id)
+      if (!c) throw new Error('Caso não encontrado.')
+      const area = AREA_DO_CASO[id]
+      const n = c.gateTotal
+      return {
+        id, area, cliente: c.cliente, status: c.status, produto: c.produto, numeroCnj: c.numeroCnj,
+        campos: { ...(CAMPOS[id] ?? {}) }, defs: DEFS[area] ?? [],
+        checklist: CHECK.slice(0, n).map((r, i) => ({ item: `i${i}`, rotulo: r, feito: i < c.gateOk })),
+        historico: [...(HIST[id] ?? []), { evento: 'status', de: null, para: c.status, detalhe: null, quem: 'Ana Prado', em: new Date(Date.now() - c.dias * 86400000).toISOString() }],
+        etapas: ETAPAS[area] ?? [],
+      }
+    },
+    async salvarCampos(id, campos) {
+      const defs = DEFS[AREA_DO_CASO[id]] ?? []
+      const atual = (CAMPOS[id] ??= {})
+      const mudou: string[] = []
+      for (const [k, v] of Object.entries(campos)) {
+        const d = defs.find((x) => x.chave === k)
+        if (!d) throw new Error(`Campo "${k}" não existe nesta área.`)
+        const erro = validarCampo(d, v)
+        if (erro) throw new Error(erro)
+        const val = v.trim() === '' ? undefined : (d.tipo === 'moeda' || d.tipo === 'numero' ? Number(telaParaValor(d, v)) : v.trim())
+        if (val === undefined) delete atual[k]; else atual[k] = val
+        mudou.push(d.rotulo)
+      }
+      if (mudou.length) (HIST[id] ??= []).unshift({ evento: 'campos', de: null, para: null, detalhe: `Atualizou: ${mudou.join(', ')}`, quem: 'Ana Prado', em: new Date().toISOString() })
+      return mudou.length
     },
   }
 }

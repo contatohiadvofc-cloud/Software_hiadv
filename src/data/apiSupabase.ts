@@ -3,6 +3,8 @@ import type { Api, Achado, Area, Escritorio, Papel, Perfil } from './api'
 import { CredencialInvalida, SessaoExpirada } from './api'
 import { diaSP, horaSP, type ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
+import type { Ficha } from './ficha'
+import type { CampoDef, TipoCampo } from './campos'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
   if (r.error) {
@@ -108,6 +110,27 @@ export function criarApiSupabase(url: string, chave: string): Api {
     },
     async moverCaso(id, status, motivo) {
       verificar(await sb.rpc('caso_status', { p_caso: id, p_status: status, p_motivo: motivo ?? null }))
+    },
+    async ficha(id): Promise<Ficha> {
+      const d = verificar(await sb.rpc('caso_detalhe', { p_caso: id })) as Record<string, any> | null
+      const c = d?.caso as Record<string, any> | null
+      if (!c) throw new Error('Caso não encontrado.')
+      const area = String(c.via ?? '')
+      const defs = (verificar(await sb.from('area_campos').select('chave, rotulo, tipo, opcoes, ordem, no_cartao').eq('area', area).eq('ativo', true).order('ordem')) ?? [])
+        .map((x): CampoDef => ({ chave: x.chave as string, rotulo: x.rotulo as string, tipo: x.tipo as TipoCampo, opcoes: (x.opcoes as string[] | null) ?? null, ordem: Number(x.ordem), noCartao: !!x.no_cartao }))
+      return {
+        id, area, cliente: String(c.cliente ?? ''), status: String(c.status ?? ''),
+        produto: (c.produto as string) ?? null, numeroCnj: (c.numero_cnj as string) ?? null,
+        campos: (c.campos as Record<string, unknown>) ?? {}, defs,
+        checklist: ((d?.checklist as any[]) ?? []).map((g) => ({ item: String(g.item), rotulo: String(g.rotulo ?? g.item), feito: !!g.data })),
+        historico: ((d?.historico as any[]) ?? []).map((h) => ({ evento: String(h.evento ?? ''), de: h.de ?? null, para: h.para ?? null, detalhe: h.detalhe ?? null, quem: h.quem ?? null, em: String(h.em ?? '') })),
+        etapas: ((d?.status as any[]) ?? []).map((e, i) => ({ status: String(e.status), ordem: i + 1, final: !!e.final, pedeMotivo: !!e.pede_motivo })),
+      }
+    },
+    async salvarCampos(id, campos) {
+      const r = verificar(await sb.rpc('caso_campos_salvar', { p_caso: id, p_campos: campos })) as { ok: boolean; erro?: string; alterados?: number }
+      if (!r?.ok) throw new Error(r?.erro ?? 'Não foi possível salvar.')
+      return Number(r.alterados ?? 0)
     },
   }
 }

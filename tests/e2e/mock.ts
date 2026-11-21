@@ -14,6 +14,9 @@ export type Cenario = {
   etapas?: Array<Record<string, unknown>>
   casos?: Array<Record<string, unknown>>
   recusarMover?: boolean
+  detalhe?: Record<string, unknown>
+  camposArea?: Array<Record<string, unknown>>
+  recusarCampos?: string
 }
 
 function b64url(o: object) {
@@ -23,7 +26,7 @@ const TOKEN = `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ sub: 'u1', ema
 const USER = { id: 'u1', aud: 'authenticated', role: 'authenticated', email: 'ana@silvaprado.exemplo.br', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' }
 
 export async function simularSupabase(page: Page, c: Cenario = {}) {
-  const estado = { atual: c.escritorios?.find((e) => e.atual)?.id ?? 'esc-1', falhas: c.falharSeuDia ?? 0, chamadasBusca: 0, movidos: [] as Array<Record<string, unknown>> }
+  const estado = { atual: c.escritorios?.find((e) => e.atual)?.id ?? 'esc-1', falhas: c.falharSeuDia ?? 0, chamadasBusca: 0, movidos: [] as Array<Record<string, unknown>>, salvos: [] as Array<Record<string, unknown>> }
   const json = (r: Route, corpo: unknown, status = 200) => r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(corpo) })
 
   await page.route('**/*.supabase.co/**', async (r) => {
@@ -53,6 +56,12 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
         if (c.recusarMover) return json(r, { code: 'P0001', message: 'Só o jurídico move nesta etapa.' }, 400)
         estado.movidos.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true })
       }
+      if (nome === 'caso_detalhe') return json(r, c.detalhe ?? null)
+      if (nome === 'caso_campos_salvar') {
+        const corpo = req.postDataJSON() as Record<string, unknown>
+        if (c.recusarCampos) return json(r, { ok: false, erro: c.recusarCampos })
+        estado.salvos.push(corpo); return json(r, { ok: true, alterados: Object.keys(corpo.p_campos as object).length })
+      }
       return json(r, null)
     }
     if (p.endsWith('/rest/v1/equipe')) {
@@ -68,6 +77,7 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       return json(r, c.tarefas ?? [])
     }
     if (p.endsWith('/rest/v1/audiencias')) return json(r, [])
+    if (p.endsWith('/rest/v1/area_campos')) return json(r, c.camposArea ?? [])
     if (p.endsWith('/rest/v1/fluxo_status')) return json(r, c.etapas ?? [])
     return json(r, [])
   })

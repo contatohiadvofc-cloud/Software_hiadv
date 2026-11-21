@@ -1,5 +1,6 @@
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
+import type { Ficha } from './ficha'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
 export type Perfil = { email: string; nome: string; papel: Papel | null; escritorioId: string | null; escritorioNome: string }
@@ -29,4 +30,8 @@ export interface Api {
   quadro(area: string): Promise<Quadro>
   /** Muda o caso de etapa. Fica no histórico do caso (registro do servidor). */
   moverCaso(id: string, status: string, motivo?: string): Promise<void>
+  /** Ficha completa do caso: campos da área, checklist e histórico. */
+  ficha(id: string): Promise<Ficha>
+  /** Grava os campos da área (o servidor confere tipo e opções). Devolve quantos mudaram. */
+  salvarCampos(id: string, campos: Record<string, string>): Promise<number>
 }

@@ -135,7 +135,26 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
 .coluna-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-2); }
 .cartao { display: flex; flex-direction: column; gap: 4px; padding: var(--s-3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); cursor: grab; }
 .cartao:active { cursor: grabbing; }
-.cartao-nome { font-weight: 600; }
+.cartao-nome { font-weight: 600; font: inherit; font-weight: 600; text-align: left; background: none; border: 0; padding: 0; color: inherit; cursor: pointer; }
+.cartao-nome:hover, .link-botao:hover { text-decoration: underline; text-underline-offset: 3px; }
+.link-botao { font: inherit; background: none; border: 0; padding: 0; color: inherit; cursor: pointer; text-align: left; }
+
+/* ---------- ficha do caso ---------- */
+.ficha { display: flex; flex-direction: column; gap: var(--s-5); }
+.ficha h3 { font-size: 0.95rem; font-weight: 600; margin: 0 0 var(--s-2); }
+.ficha-topo { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
+.ficha-secao-cabeca { display: flex; justify-content: space-between; align-items: baseline; gap: var(--s-3); }
+.ficha-campos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-3) var(--s-4); margin: 0; }
+.ficha-campos > [data-largo] { grid-column: 1 / -1; }
+.ficha-campos dt { font-size: 0.8rem; color: var(--muted); }
+.ficha-campos dd { margin: 2px 0 0; overflow-wrap: anywhere; white-space: pre-wrap; }
+.ficha-form { display: flex; flex-direction: column; gap: var(--s-4); }
+.ficha-check, .ficha-hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-2); }
+.ficha-check li { color: var(--muted); }
+.ficha-check li[data-feito] { color: var(--ink); }
+.ficha-hist li { display: flex; flex-direction: column; gap: 2px; padding-left: var(--s-3); border-left: 2px solid var(--line); }
+.ficha-hist .muted { font-size: 0.8rem; }
+@media (max-width: 520px) { .ficha-campos { grid-template-columns: 1fr; } }
 .cartao-sub { font-size: var(--fs-sm); color: var(--ink-2); }
 .cartao-meta { display: flex; flex-wrap: wrap; gap: var(--s-3); font-size: var(--fs-xs); color: var(--ink-3); font-weight: 500; }
 [data-parado='true'] { color: var(--warning); font-weight: 600; }
