@@ -19,6 +19,9 @@ const LPublicacoes = lazyRouteComponent(() => import('./routes/Publicacoes'), 'P
 const LFinanceiro = lazyRouteComponent(() => import('./routes/Financeiro'), 'Financeiro')
 const LRelatorios = lazyRouteComponent(() => import('./routes/Relatorios'), 'Relatorios')
 const LAtendimentos = lazyRouteComponent(() => import('./routes/Atendimentos'), 'Atendimentos')
+const LAderir = lazyRouteComponent(() => import('./routes/Aderir'), 'Aderir')
+const LIndicar = lazyRouteComponent(() => import('./routes/Indicar'), 'Indicar')
+const LAdesoes = lazyRouteComponent(() => import('./routes/Adesoes'), 'Adesoes')
 const LAcompanhar = lazyRouteComponent(() => import('./routes/Acompanhar'), 'Acompanhar')
 const LConfiguracoes = lazyRouteComponent(() => import('./routes/Configuracoes'), 'Configuracoes')
 const LAppShell = lazyRouteComponent(() => import('./shell/AppShell'), 'AppShellRota')
@@ -55,9 +58,15 @@ const configuracoes = createRoute({ getParentRoute: () => dentro, path: '/config
 const atendimentos = createRoute({ getParentRoute: () => dentro, path: '/atendimentos', component: LAtendimentos, head: () => ({ meta: [{ title: 'Atendimentos · HiAdv' }] }) })
 // Página pública do cliente: fora da casca do app, sem login.
 const acompanhar = createRoute({ getParentRoute: () => raiz, path: '/acompanhar/$token', component: LAcompanhar, head: () => ({ meta: [{ title: 'Acompanhamento do seu caso' }, { name: 'robots', content: 'noindex' }, { name: 'referrer', content: 'no-referrer' }] }) })
+const aderir = createRoute({
+  getParentRoute: () => raiz, path: '/aderir', component: LAderir, head: () => ({ meta: [{ title: 'Aderir ao HiAdv' }] }),
+  validateSearch: (s: Record<string, unknown>): { ref?: string } => (typeof s.ref === 'string' ? { ref: s.ref } : {}),
+})
+const indicar = createRoute({ getParentRoute: () => dentro, path: '/indicar', component: LIndicar, head: () => ({ meta: [{ title: 'Indique o HiAdv · HiAdv' }] }) })
+const adesoes = createRoute({ getParentRoute: () => dentro, path: '/adesoes', component: LAdesoes, head: () => ({ meta: [{ title: 'Adesões · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, dentro.addChildren([seuDia, atendimentos, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, configuracoes, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, configuracoes, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

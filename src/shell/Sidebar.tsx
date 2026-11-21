@@ -64,6 +64,14 @@ export function Sidebar() {
             <Icone d="M4 20V10M10 20V4M16 20v-7M22 20H2" />Relatórios
           </Link>
         )}
+        {perfil?.papel === 'code' && (
+          <Link to="/adesoes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+            <Icone d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6" />Adesões
+          </Link>
+        )}
+        <Link to="/indicar" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+          <Icone d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H8a2.5 2.5 0 0 1 0-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 0 0 0-5c-3 0-4 5-4 5z" />Indique o HiAdv
+        </Link>
         <Link to="/biblioteca" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />Biblioteca
         </Link>

@@ -15,6 +15,7 @@ import type { Compromisso } from './agenda'
 import type { Agente, Integracao, ItemBiblioteca } from './escritorio'
 import { validarLead, type Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
+import { validarAdesao, type Adesao } from './adesao'
 
 const hojeDemo = () => new Date().toISOString().slice(0, 10)
 const LEADS: Lead[] = [
@@ -28,6 +29,8 @@ const HORAS: (RegistroHoras & { cliente: string })[] = [
 const PORTAIS = new Map<string, { cliente: string; expira: string; acessos: number }>()
 let contatoDemo = { cidade: 'Capinzal' as string | null, whatsapp: '49999990000' as string | null }
 let agendaDemo = false
+const ADESOES: Adesao[] = []
+const CODIGO_DEMO = 'ANA7K2Q'
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
 const ESCRITORIOS: Escritorio[] = [
@@ -700,6 +703,28 @@ export function criarApiDemo(): Api {
     },
     async agendaLinkGerar() { agendaDemo = true; return `https://exemplo.supabase.co/functions/v1/agenda?t=${'d'.repeat(64)}` },
     async agendaLinkExiste() { return agendaDemo },
+    async adesaoVagas() { return 20 - ADESOES.filter((a) => a.fundador && a.status === 'ativada').length },
+    async adesaoEnviar(p) {
+      const m = validarAdesao(p); if (m) throw new Error(m)
+      const ref = p.ref?.toUpperCase() === CODIGO_DEMO
+      ADESOES.unshift({ id: `ad${Date.now()}`, nome: p.nome.trim(), email: p.email.trim().toLowerCase(), whatsapp: p.whatsapp.replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, ''),
+        oab: p.oab || null, escritorio: p.escritorio || null, cidade: p.cidade || null, uf: p.uf.toUpperCase() || null, plano: p.plano, recomendado: p.recomendado, respostas: p.respostas,
+        indicadorEmail: ref ? 'ana@silvaprado.exemplo.br' : null, indicadorEscritorio: ref ? 'Silva & Prado Advocacia' : null, status: 'nova', fundador: false, cortesia: 'nenhuma', obs: null, criadoEm: new Date().toISOString() })
+      return { lista: p.plano === 'supremo' }
+    },
+    async indicacaoCodigo() { return CODIGO_DEMO },
+    async indicacoes() {
+      return ADESOES.filter((a) => a.indicadorEmail).map((a) => ({ id: a.id, primeiroNome: a.nome.split(' ')[0], plano: a.plano, status: a.status, cortesia: a.cortesia, criadoEm: a.criadoEm, quem: a.indicadorEmail, minha: true }))
+    },
+    async adesoes() { return ADESOES.map((a) => ({ ...a })) },
+    async adesaoAtualizar(id, status, extra) {
+      const a = ADESOES.find((x) => x.id === id); if (!a) throw new Error('Pedido não encontrado.')
+      if (status === 'ativada' && a.plano === 'supremo') throw new Error('O Supremo ainda não está liberado: ative em outro plano ou mantenha na lista.')
+      a.status = status; if (extra?.fundador !== undefined) a.fundador = extra.fundador
+      if (extra?.cortesia) a.cortesia = extra.cortesia; else if (status === 'ativada' && a.indicadorEmail && a.cortesia === 'nenhuma') a.cortesia = 'pendente'
+      if (extra?.obs !== undefined) a.obs = extra.obs.trim() || null
+    },
+    async adesaoPlano(id, plano) { const a = ADESOES.find((x) => x.id === id); if (!a) throw new Error('Pedido não encontrado.'); a.plano = plano },
     async falhas() { return FALHAS.filter((f) => !RESOLVIDAS.has(f.id)).map((f) => ({ ...f })) },
     async resolverFalha(id) { RESOLVIDAS.add(id) },
     async pacotes() {

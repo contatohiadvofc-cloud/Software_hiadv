@@ -50,6 +50,8 @@ export function Areas() {
           {gestor && <li><Link to="/relatorios" className="areas-item">Relatórios<span aria-hidden="true">›</span></Link></li>}
           {gestor && <li><Link to="/financeiro" className="areas-item">Financeiro<span aria-hidden="true">›</span></Link></li>}
           <li><Link to="/biblioteca" className="areas-item">Biblioteca<span aria-hidden="true">›</span></Link></li>
+          <li><Link to="/indicar" className="areas-item">Indique o HiAdv<span aria-hidden="true">›</span></Link></li>
+          {perfil?.papel === 'code' && <li><Link to="/adesoes" className="areas-item">Adesões<span aria-hidden="true">›</span></Link></li>}
           <li><Link to="/configuracoes" className="areas-item">Configurações<span aria-hidden="true">›</span></Link></li>
         </ul>
       </Panel>

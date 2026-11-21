@@ -45,6 +45,9 @@ export type Cenario = {
   horas?: Array<Record<string, unknown>>
   portal?: Record<string, unknown> | null
   portalAtivo?: boolean
+  adesoes?: Array<Record<string, unknown>>
+  indicacoes?: Array<Record<string, unknown>>
+  vagas?: number
 }
 
 function b64url(o: object) {
@@ -194,6 +197,12 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'hiadv_escritorio_contato_salvar') { registrar(); return json(r, { ok: true }) }
       if (nome === 'hiadv_agenda_link_existe') return json(r, false)
       if (nome === 'hiadv_agenda_link_gerar') { registrar(); return json(r, { ok: true, token: 'e'.repeat(64) }) }
+      if (nome === 'hiadv_adesao_vagas') return json(r, c.vagas ?? 20)
+      if (nome === 'hiadv_adesao_enviar') { const b = registrar() as { p: { plano: string; consentimento: boolean } }; return json(r, b.p.consentimento ? { ok: true, id: 'ad-1', lista: b.p.plano === 'supremo' } : { ok: false, erro: 'Marque que concorda com o uso dos dados para o contato.' }) }
+      if (nome === 'hiadv_indicacao_link') return json(r, { ok: true, codigo: 'ANA7K2Q' })
+      if (nome === 'hiadv_indicacoes') return json(r, c.indicacoes ?? [])
+      if (nome === 'hiadv_adesoes') return json(r, c.adesoes ?? [])
+      if (nome === 'hiadv_adesao_atualizar' || nome === 'hiadv_adesao_plano') { registrar(); return json(r, { ok: true }) }
       if (nome === 'caso_detalhe') return json(r, c.detalhe ?? null)
       if (nome === 'caso_campos_salvar') {
         const corpo = req.postDataJSON() as Record<string, unknown>

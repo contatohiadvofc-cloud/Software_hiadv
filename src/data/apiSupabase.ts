@@ -16,6 +16,7 @@ import type { Relatorio } from './relatorios'
 import type { Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
+import type { Adesao, Indicacao } from './adesao'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -518,6 +519,39 @@ export function criarApiSupabase(url: string, chave: string): Api {
     },
     async agendaLinkExiste() {
       return verificar(await sb.rpc('hiadv_agenda_link_existe')) === true
+    },
+    async adesaoVagas() {
+      return Number(verificar(await sb.rpc('hiadv_adesao_vagas')) ?? 0)
+    },
+    async adesaoEnviar(p) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_adesao_enviar', { p: {
+        nome: p.nome, email: p.email, whatsapp: p.whatsapp, oab: p.oab, escritorio: p.escritorio, cidade: p.cidade, uf: p.uf,
+        plano: p.plano, recomendado: p.recomendado, respostas: p.respostas, ref: p.ref, consentimento: p.consentimento,
+      } })))
+      return { lista: r.lista === true }
+    },
+    async indicacaoCodigo() {
+      return String(okOuErro(verificar(await sb.rpc('hiadv_indicacao_link'))).codigo)
+    },
+    async indicacoes() {
+      const d = (verificar(await sb.rpc('hiadv_indicacoes')) ?? []) as Record<string, unknown>[]
+      return d.map((x): Indicacao => ({ id: String(x.id), primeiroNome: String(x.primeiro_nome ?? ''), plano: x.plano as Indicacao['plano'], status: x.status as Indicacao['status'],
+        cortesia: x.cortesia as Indicacao['cortesia'], criadoEm: String(x.criado_em), quem: (x.quem as string) ?? null, minha: x.minha === true }))
+    },
+    async adesoes() {
+      const d = (verificar(await sb.rpc('hiadv_adesoes')) ?? []) as Record<string, unknown>[]
+      return d.map((x): Adesao => ({
+        id: String(x.id), nome: String(x.nome), email: String(x.email), whatsapp: String(x.whatsapp), oab: (x.oab as string) ?? null, escritorio: (x.escritorio as string) ?? null,
+        cidade: (x.cidade as string) ?? null, uf: (x.uf as string) ?? null, plano: x.plano as Adesao['plano'], recomendado: (x.recomendado as Adesao['recomendado']) ?? null,
+        respostas: (x.respostas as Adesao['respostas']) ?? {}, indicadorEmail: (x.indicador_email as string) ?? null, indicadorEscritorio: (x.indicador_escritorio as string) ?? null,
+        status: x.status as Adesao['status'], fundador: x.fundador === true, cortesia: x.cortesia as Adesao['cortesia'], obs: (x.obs as string) ?? null, criadoEm: String(x.criado_em),
+      }))
+    },
+    async adesaoAtualizar(id, status, extra) {
+      okOuErro(verificar(await sb.rpc('hiadv_adesao_atualizar', { p_id: id, p_status: status, p_fundador: extra?.fundador ?? null, p_cortesia: extra?.cortesia ?? null, p_obs: extra?.obs ?? null })))
+    },
+    async adesaoPlano(id, plano) {
+      okOuErro(verificar(await sb.rpc('hiadv_adesao_plano', { p_id: id, p_plano: plano })))
     },
     async falhas() {
       const r = await sb.rpc('falhas_listar')

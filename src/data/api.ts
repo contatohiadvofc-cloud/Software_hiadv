@@ -13,6 +13,7 @@ import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
 import type { EtapaLead, Lead, NovoLead } from './atendimentos'
 import type { NovasHoras, RegistroHoras } from './horas'
 import type { Portal, SituacaoPortal } from './portal'
+import type { Adesao, Cortesia, FormAdesao, Indicacao, PlanoId, Respostas, StatusAdesao } from './adesao'
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
@@ -166,4 +167,15 @@ export interface Api {
   /** Gera (ou troca) o link pessoal da agenda; o anterior deixa de funcionar. Devolve o endereço para o Google Agenda. */
   agendaLinkGerar(): Promise<string>
   agendaLinkExiste(): Promise<boolean>
+  /** Público: vagas de fundador que restam (de 20). */
+  adesaoVagas(): Promise<number>
+  /** Público: pedido de adesão. lista = entrou na lista de interesse (Supremo). */
+  adesaoEnviar(p: FormAdesao & { plano: PlanoId; recomendado: PlanoId | null; respostas: Respostas; ref: string | null }): Promise<{ lista: boolean }>
+  /** Código pessoal de indicação (cria na primeira vez). */
+  indicacaoCodigo(): Promise<string>
+  indicacoes(): Promise<Indicacao[]>
+  /** Só o papel code (administração do HiAdv). */
+  adesoes(): Promise<Adesao[]>
+  adesaoAtualizar(id: string, status: StatusAdesao, extra?: { fundador?: boolean; cortesia?: Cortesia; obs?: string }): Promise<void>
+  adesaoPlano(id: string, plano: PlanoId): Promise<void>
 }

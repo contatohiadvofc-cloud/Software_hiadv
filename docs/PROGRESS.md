@@ -66,7 +66,11 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 
 - [x] Recursos do HiAdv (21/11): painel no topo de Configurações com o que está ligado (12 recursos, recolhido), o que falta configurar (ex.: OAB, WhatsApp do escritório), e o que está em preparação, com passo a passo e custo: IA com a chave do escritório e ZapSign (a chave já pode ser guardada no cofre; o uso ainda não está ligado, nenhuma função lê essas chaves), WhatsApp oficial com robô, pastas do Google Drive e API. O colaborador vê só o que usa. Mesmo conteúdo em `docs/RECURSOS.md`, gerado por `npm run recursos` (teste confere que está em dia).
 
-Testes: 110 de lógica e 190 de tela, todos passando.
+- [x] Adesão pública (21/11): /aderir, questionário de 5 perguntas, plano recomendado com motivo (Pro, Premium, Supremo), preço de fundador enquanto houver vaga (20), pedido com consentimento. Supremo só entra como lista de interesse até a IA e o Drive ficarem prontos. Nada é liberado automaticamente.
+- [x] Indique o HiAdv (21/11): link pessoal (código de 7 letras), envio pelo WhatsApp, lista de indicados (só o primeiro nome) e cortesia de 1 mês grátis por escritório ativado, até 12 por ano.
+- [x] Adesões (papel code): pedidos para tratar, lista do Supremo, situação, plano, fundador, cortesia de quem indicou e anotação interna. SQL `hiadv2-adesao.sql` no TESTE e no OFICIAL.
+
+Testes: 118 de lógica e 200 de tela, todos passando.
 
 Pendente (próxima atualização): envio do kit pela ZapSign (com prévia e confirmação) e agentes de IA lendo a chave do escritório do cofre, com limite mensal.
 

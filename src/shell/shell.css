@@ -476,3 +476,68 @@ a.hv-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 .recursos-ligado > summary::after { content: ' ›'; color: var(--ink-3); }
 .recursos-ligado[open] > summary::after { content: ' ˅'; }
 .recursos-ligado > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* Adesão (página pública): o vinho do HiAdv domina; o conteúdo fica em cartões brancos */
+.ad { min-height: 100dvh; background: #6b1a2c; color: #fff; padding: var(--s-5) var(--s-4) var(--s-7); font-family: var(--font); }
+.ad-coluna { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--s-4); }
+.ad-topo { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); margin-bottom: var(--s-4); }
+.ad-marca { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-marca); font-size: 22px; font-weight: 600; color: #fff; }
+.ad-ref { font-size: var(--fs-sm); color: #f0b7c2; }
+.ad-inicio { padding: var(--s-6) 0 var(--s-5); }
+.ad-inicio h1 { font-family: var(--font-marca); font-weight: 600; font-size: clamp(32px, 7vw, 46px); line-height: 1.08; letter-spacing: -0.01em; margin: 0 0 var(--s-4); max-width: 15ch; }
+.ad-inicio p { font-size: var(--fs-lg); line-height: 1.55; color: #f7e3e7; margin: 0 0 var(--s-5); max-width: 52ch; }
+.ad-nota { font-size: var(--fs-md) !important; color: #f0b7c2 !important; margin-top: var(--s-4) !important; }
+.ad-cartao { background: #fff; color: var(--ink); border-radius: 18px; padding: var(--s-5); box-shadow: 0 1px 0 rgba(0, 0, 0, 0.08); }
+.ad-cartao h2 { font-family: var(--font-marca); font-weight: 600; font-size: 24px; line-height: 1.2; margin: 0 0 var(--s-2); }
+.ad-progresso { height: 6px; border-radius: 99px; background: #f5e6e9; overflow: hidden; margin-bottom: var(--s-4); }
+.ad-progresso span { display: block; height: 100%; background: #7a1f33; border-radius: 99px; transition: width 240ms var(--ease, ease); }
+.ad-contador { font-size: var(--fs-sm); color: var(--ink-2); margin: 0 0 var(--s-2); }
+.ad-dica { font-size: var(--fs-sm); color: var(--ink-2); margin: 0 0 var(--s-3); line-height: 1.5; }
+.ad-opcoes { display: flex; flex-direction: column; gap: var(--s-2); margin: var(--s-4) 0; }
+.ad-opcao { text-align: left; min-height: 52px; padding: var(--s-3) var(--s-4); border-radius: 12px; border: 1.5px solid #e7d7db; background: #fff; color: var(--ink); font: inherit; font-size: var(--fs-md); cursor: pointer; transition: border-color 120ms, background 120ms; }
+.ad-opcao:hover { border-color: #b7798a; }
+.ad-opcao[aria-pressed='true'] { border-color: #7a1f33; background: #f5e6e9; font-weight: 600; }
+.ad-opcao:focus-visible, .ad-plano:focus-visible, .ad-botao:focus-visible, .ad-voltar:focus-visible { outline: 3px solid #f0b7c2; outline-offset: 2px; }
+.ad-navega { display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); margin-top: var(--s-2); }
+.ad-botao { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 var(--s-5); border-radius: 12px; border: 0; background: #7a1f33; color: #fff; font: inherit; font-weight: 600; font-size: var(--fs-md); cursor: pointer; text-decoration: none; }
+.ad-botao:hover { background: #5c1626; }
+.ad-botao:disabled { opacity: 0.45; cursor: not-allowed; }
+.ad-botao-claro { background: #fff; color: #6b1a2c; }
+.ad-botao-claro:hover { background: #f5e6e9; }
+.ad-voltar { background: none; border: 0; color: var(--ink-2); font: inherit; font-size: var(--fs-md); padding: var(--s-2) 0; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.ad-relatorio { border-top: 6px solid #f0b7c2; }
+.ad-plano-nome { font-size: 40px !important; color: #7a1f33; }
+.ad-motivos { margin: var(--s-3) 0 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: var(--s-1); line-height: 1.5; }
+.ad-aviso { margin: var(--s-4) 0 0; padding: var(--s-3) var(--s-4); background: #f5e6e9; border-radius: 12px; font-size: var(--fs-sm); line-height: 1.5; color: #4a1220; }
+.ad-planos { display: grid; gap: var(--s-2); margin: var(--s-3) 0 var(--s-4); }
+.ad-plano { display: grid; gap: 2px; text-align: left; padding: var(--s-3) var(--s-4); border-radius: 12px; border: 1.5px solid #e7d7db; background: #fff; color: var(--ink); font: inherit; cursor: pointer; }
+.ad-plano[aria-checked='true'] { border-color: #7a1f33; box-shadow: inset 0 0 0 1px #7a1f33; background: #fdf7f8; }
+.ad-plano-topo { display: flex; align-items: center; gap: var(--s-2); font-size: var(--fs-lg); }
+.ad-selo { font-size: var(--fs-xs); font-weight: 600; padding: 2px 8px; border-radius: 99px; background: #7a1f33; color: #fff; }
+.ad-selo-claro { background: #f5e6e9; color: #6b1a2c; }
+.ad-preco { font-size: var(--fs-xl); font-weight: 600; color: #7a1f33; }
+.ad-preco small { font-size: var(--fs-sm); font-weight: 400; color: var(--ink-2); margin-left: 2px; }
+.ad-depois, .ad-resumo { font-size: var(--fs-sm); color: var(--ink-2); }
+.ad-sub { font-size: var(--fs-md); margin: 0 0 var(--s-2); }
+.ad-inclui { margin: 0 0 var(--s-3); padding-left: 1.2rem; display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-md); }
+.ad-form { display: flex; flex-direction: column; gap: var(--s-3); margin-top: var(--s-3); }
+.ad-duas { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-3); }
+.ad-cidade { grid-template-columns: 1fr 88px; }
+.ad-consent { display: flex; gap: var(--s-2); align-items: flex-start; font-size: var(--fs-sm); line-height: 1.45; color: var(--ink-2); }
+.ad-consent input { width: 18px; height: 18px; margin-top: 2px; accent-color: #7a1f33; flex-shrink: 0; }
+.ad-erro { color: #a3142d; font-size: var(--fs-sm); margin: 0; }
+.ad-rodape { text-align: center; font-size: var(--fs-xs); color: #e8c3cb; margin-top: var(--s-5); }
+@media (max-width: 520px) { .ad-cartao { padding: var(--s-4); } .ad-duas { grid-template-columns: 1fr; } .ad-cidade { grid-template-columns: 1fr 88px; } }
+@media (prefers-reduced-motion: reduce) { .ad-progresso span { transition: none; } }
+
+/* Adesões (administração) e indicações */
+.adm-lista { list-style: none; margin: 0; padding: 0; }
+.adm-pedido { padding: var(--s-4); border-top: 1px solid var(--line); display: flex; flex-direction: column; gap: var(--s-3); }
+.adm-pedido:first-child { border-top: 0; }
+.adm-topo { display: flex; justify-content: space-between; gap: var(--s-3); align-items: flex-start; }
+.adm-respostas { margin: 0; font-size: var(--fs-sm); color: var(--ink-2); }
+.adm-acoes { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: end; }
+.adm-campo { display: flex; flex-direction: column; gap: 4px; font-size: var(--fs-xs); color: var(--ink-2); min-width: 150px; }
+.adm-obs { flex: 1; min-width: 200px; }
+.adm-acoes .hv-btn { text-decoration: none; }
+.ind-resumo { padding: var(--s-4) var(--s-4) 0; }
