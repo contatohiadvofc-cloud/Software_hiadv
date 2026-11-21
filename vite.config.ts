@@ -22,6 +22,8 @@ function primeiraPintura(): Plugin {
           const tag = new RegExp(`<link rel="stylesheet"[^>]*href="[^"]*${nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`)
           if (tag.test(fonte)) { fonte = fonte.replace(tag, `<style>${String(item.source)}</style>`); delete bundle[nome] }
         }
+        // a frase de apresentação do login (maior texto da primeira tela) usa a serifa: baixa junto com a página
+        if (item.type === 'asset' && /source-serif-4-latin-600-normal-.*\.woff2$/.test(nome)) dicas.push(`<link rel="preload" as="font" type="font/woff2" crossorigin href="/${nome}">`)
       }
       html.source = fonte.replace('</head>', `${dicas.join('')}</head>`)
     },

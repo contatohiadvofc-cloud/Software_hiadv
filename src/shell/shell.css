@@ -95,7 +95,22 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
 .busca-nota { padding: var(--s-2) var(--s-4) var(--s-3); font-size: var(--fs-sm); }
 
 /* ---------- login ---------- */
-.login { min-height: 100dvh; display: grid; place-items: center; padding: var(--s-4); background: var(--bg); }
+.login { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); background: var(--bg); }
+.login > .login-caixa { align-self: center; justify-self: center; margin: var(--s-6) var(--s-4); }
+.login-apresenta { background: var(--brand-mark); color: var(--brand-mark-ink); padding: clamp(32px, 7vw, 96px); display: flex; flex-direction: column; justify-content: center; gap: var(--s-4); }
+.login-chamada { margin: 0; font-family: var(--font-marca); font-weight: 600; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.12; letter-spacing: -0.01em; max-width: 16ch; text-wrap: balance; }
+.login-sub { margin: 0; font-size: var(--fs-lg); line-height: 1.45; max-width: 40ch; opacity: 0.92; }
+.login-pontos { margin: var(--s-3) 0 0; padding: 0; list-style: none; display: grid; gap: var(--s-3); max-width: 46ch; }
+.login-pontos li { padding-left: 22px; position: relative; line-height: 1.45; }
+.login-pontos li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 8px; height: 8px; border-radius: 50%; background: var(--brand-dot); }
+@media (max-width: 860px) {
+  .login { grid-template-columns: 1fr; align-content: start; }
+  .login-apresenta { padding: var(--s-6) var(--s-5) var(--s-5); gap: var(--s-2); }
+  .login-chamada { font-size: 26px; max-width: 22ch; }
+  .login-sub { font-size: var(--fs-md); }
+  .login-pontos { display: none; }
+  .login > .login-caixa { margin: var(--s-5) var(--s-4) var(--s-6); }
+}
 .login-caixa { width: min(400px, 100%); display: flex; flex-direction: column; gap: var(--s-4); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s-6) var(--s-5); }
 .login-caixa h1 { font-size: var(--fs-xl); }
 .login-form { display: flex; flex-direction: column; gap: var(--s-4); }

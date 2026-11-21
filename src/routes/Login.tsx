@@ -12,6 +12,25 @@ function modoDemo() {
   try { return sessionStorage.getItem('hiadv-modo-demo') === '1' } catch { return false }
 }
 
+/** Apresentação do HiAdv ao lado do login (no celular, uma faixa curta em cima). */
+export const CHAMADA = 'Seus processos, prazos e peças sob controle.'
+export const SUBCHAMADA = 'Gestão e fluxo jurídico para quem está construindo o próprio escritório.'
+export const PONTOS = [
+  'Controladoria: prazos, perícias e audiências no seu dia, com aviso antes do fatal.',
+  'Peças a partir dos seus modelos, teses e jurisprudência da sua biblioteca.',
+  'Casos andando por etapas, com a equipe no mesmo quadro.',
+]
+
+function Apresentacao() {
+  return (
+    <aside className="login-apresenta" aria-label="Sobre o HiAdv">
+      <p className="login-chamada">{CHAMADA}</p>
+      <p className="login-sub">{SUBCHAMADA}</p>
+      <ul className="login-pontos">{PONTOS.map((t) => <li key={t}>{t}</li>)}</ul>
+    </aside>
+  )
+}
+
 export function Login() {
   const sessao = useSessao()
   const nav = useNavigate()
@@ -73,6 +92,7 @@ export function Login() {
 
   return (
     <div className="login">
+      <Apresentacao />
       <div className="login-caixa">
         <Marca />
         <h1>{modo === 'entrar' ? 'Entrar no HiAdv' : 'Criar a sua senha'}</h1>

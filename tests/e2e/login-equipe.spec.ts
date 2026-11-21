@@ -61,3 +61,14 @@ test('se o servidor da equipe estiver fora, ainda tenta entrar direto', async ({
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page).toHaveURL(/\/seu-dia$/)
 })
+
+test('a entrada apresenta o HiAdv e o login estático bate com o do app', async ({ page, request }) => {
+  const html = await (await request.get('/login')).text()
+  expect(html).toContain('<p class="login-chamada">Seus processos, prazos e peças sob controle.</p>')
+  await simularSupabase(page, {})
+  await page.goto('/login')
+  await page.locator('[data-estatico]').waitFor({ state: 'detached' })
+  const sobre = page.getByRole('complementary', { name: 'Sobre o HiAdv' })
+  await expect(sobre.getByText('Seus processos, prazos e peças sob controle.')).toBeVisible()
+  await expect(sobre.getByText(/construindo o próprio escritório/)).toBeVisible()
+})
