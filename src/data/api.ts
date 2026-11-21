@@ -169,7 +169,7 @@ export interface Api {
   agendaLinkExiste(): Promise<boolean>
   /** Público: vagas de fundador que restam (de 20). */
   adesaoVagas(): Promise<number>
-  /** Público: pedido de adesão. lista = entrou na lista de interesse (Supremo). */
+  /** Público: pedido de adesão. lista = entrou na lista de interesse (Sênior). */
   adesaoEnviar(p: FormAdesao & { plano: PlanoId; recomendado: PlanoId | null; respostas: Respostas; ref: string | null }): Promise<{ lista: boolean }>
   /** Código pessoal de indicação (cria na primeira vez). */
   indicacaoCodigo(): Promise<string>

@@ -719,7 +719,7 @@ export function criarApiDemo(): Api {
     async adesoes() { return ADESOES.map((a) => ({ ...a })) },
     async adesaoAtualizar(id, status, extra) {
       const a = ADESOES.find((x) => x.id === id); if (!a) throw new Error('Pedido não encontrado.')
-      if (status === 'ativada' && a.plano === 'supremo') throw new Error('O Supremo ainda não está liberado: ative em outro plano ou mantenha na lista.')
+      if (status === 'ativada' && a.plano === 'supremo') throw new Error('O Sênior ainda não está liberado: ative em outro plano ou mantenha na lista.')
       a.status = status; if (extra?.fundador !== undefined) a.fundador = extra.fundador
       if (extra?.cortesia) a.cortesia = extra.cortesia; else if (status === 'ativada' && a.indicadorEmail && a.cortesia === 'nenhuma') a.cortesia = 'pendente'
       if (extra?.obs !== undefined) a.obs = extra.obs.trim() || null

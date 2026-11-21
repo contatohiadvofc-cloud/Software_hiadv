@@ -11,7 +11,7 @@ import { Badge } from '../design/components/Badge'
 import { useToast } from '../design/components/Toast'
 
 type Filtro = 'abertas' | 'ativada' | 'supremo' | 'todas'
-const FILTROS: [Filtro, string][] = [['abertas', 'Para tratar'], ['ativada', 'Ativadas'], ['supremo', 'Lista do Supremo'], ['todas', 'Todas']]
+const FILTROS: [Filtro, string][] = [['abertas', 'Para tratar'], ['ativada', 'Ativadas'], ['supremo', 'Lista do Sênior'], ['todas', 'Todas']]
 
 function respostasTela(a: Adesao): string {
   return PERGUNTAS.map((p) => {
@@ -85,7 +85,7 @@ export function Adesoes() {
   return (
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Adesões</h1>
-        <p className="muted">{vagas.data !== undefined ? `${vagas.data} de 20 vagas de fundador restantes. ` : ''}{supremo ? `${supremo} ${supremo === 1 ? 'pessoa' : 'pessoas'} na lista do Supremo.` : ''}</p></div></div>
+        <p className="muted">{vagas.data !== undefined ? `${vagas.data} de 20 vagas de fundador restantes. ` : ''}{supremo ? `${supremo} ${supremo === 1 ? 'pessoa' : 'pessoas'} na lista do Sênior.` : ''}</p></div></div>
       <div className="segmentos" role="group" aria-label="Filtrar pedidos">
         {FILTROS.map(([f, nome]) => <button key={f} type="button" aria-pressed={filtro === f} onClick={() => setFiltro(f)}>{nome}</button>)}
       </div>

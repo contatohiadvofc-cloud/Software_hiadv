@@ -106,7 +106,7 @@ export function Aderir() {
               <h2 id="ad-plano" className="ad-plano-nome">{dadosPlano(rec.plano).nome}</h2>
               <ul className="ad-motivos">{rec.motivos.map((m) => <li key={m}>{m}</li>)}</ul>
               {rec.plano === 'supremo' && rec.comecarCom && (
-                <p className="ad-aviso">O Supremo é liberado quando a IA e a leitura no Google Drive ficarem prontas. Você pode entrar na lista agora ou começar pelo {dadosPlano(rec.comecarCom).nome} e mudar depois.</p>
+                <p className="ad-aviso">O Sênior é liberado quando a IA e a leitura no Google Drive ficarem prontas. Você pode entrar na lista agora ou começar pelo {dadosPlano(rec.comecarCom).nome} e mudar depois.</p>
               )}
             </section>
 
@@ -128,8 +128,8 @@ export function Aderir() {
             </section>
 
             <section className="ad-cartao" aria-labelledby="ad-dados">
-              <h2 id="ad-dados">{p.emBreve ? 'Entrar na lista do Supremo' : 'Pedir adesão'}</h2>
-              <p className="ad-dica">{p.emBreve ? 'Avisamos você pelo WhatsApp assim que o Supremo for liberado. Nada é cobrado agora.' : 'A equipe do HiAdv chama você pelo WhatsApp para liberar o acesso e ajudar na configuração.'}</p>
+              <h2 id="ad-dados">{p.emBreve ? 'Entrar na lista do Sênior' : 'Pedir adesão'}</h2>
+              <p className="ad-dica">{p.emBreve ? 'Avisamos você pelo WhatsApp assim que o Sênior for liberado. Nada é cobrado agora.' : 'A equipe do HiAdv chama você pelo WhatsApp para liberar o acesso e ajudar na configuração.'}</p>
               <form className="ad-form" onSubmit={pedir} noValidate>
                 <Field label="Nome completo" autoComplete="name" maxLength={160} value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} />
                 <Field label="E-mail" type="email" autoComplete="email" maxLength={160} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} />
@@ -159,8 +159,8 @@ export function Aderir() {
         {etapa === 'enviado' && (
           <section className="ad-inicio" aria-labelledby="ad-ok" role="status">
             <h1 id="ad-ok">{p.emBreve ? 'Você está na lista.' : 'Pedido recebido.'}</h1>
-            <p>{p.emBreve ? 'Assim que o Supremo for liberado, avisamos você pelo WhatsApp.' : 'Em breve a equipe do HiAdv chama você pelo WhatsApp para liberar o acesso. Se preferir, fale agora.'}</p>
-            <a className="ad-botao ad-botao-claro" href={`https://wa.me/55${WHATSAPP_HIADV}?text=${encodeURIComponent(`Olá! Acabei de pedir ${p.emBreve ? 'para entrar na lista do Supremo' : `a adesão ao plano ${p.nome}`} do HiAdv.`)}`} target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
+            <p>{p.emBreve ? 'Assim que o Sênior for liberado, avisamos você pelo WhatsApp.' : 'Em breve a equipe do HiAdv chama você pelo WhatsApp para liberar o acesso. Se preferir, fale agora.'}</p>
+            <a className="ad-botao ad-botao-claro" href={`https://wa.me/55${WHATSAPP_HIADV}?text=${encodeURIComponent(`Olá! Acabei de pedir ${p.emBreve ? 'para entrar na lista do Sênior' : `a adesão ao plano ${p.nome}`} do HiAdv.`)}`} target="_blank" rel="noopener noreferrer">Falar no WhatsApp</a>
           </section>
         )}
 

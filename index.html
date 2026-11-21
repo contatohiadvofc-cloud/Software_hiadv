@@ -1,20 +1,19 @@
 <!doctype html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="description" content="HiAdv: gestão e fluxo jurídico para advogados. Processos, prazos e peças sob controle." />
-    <title>HiAdv</title>
-    <meta name="theme-color" content="#7a1f33" />
+    <title>HiAdv · Gestão jurídica para escritórios de advocacia</title>
+    <meta name="description" content="HiAdv organiza prazos, publicações, casos, atendimentos e o acompanhamento do cliente num só lugar. Feito por advogados previdenciários. Descubra o plano do seu escritório." />
+    <meta name="theme-color" content="#6b1a2c" />
     <link rel="canonical" href="https://hiadv.com.br/" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="HiAdv" />
     <meta property="og:locale" content="pt_BR" />
     <meta property="og:url" content="https://hiadv.com.br/" />
-    <meta property="og:title" content="HiAdv" />
-    <meta property="og:description" content="Gestão e fluxo jurídico para advogados: processos, prazos e peças sob controle." />
+    <meta property="og:title" content="HiAdv · Seu escritório inteiro, num só lugar" />
+    <meta property="og:description" content="Prazos, publicações, casos, atendimentos e o acompanhamento do cliente num só lugar." />
     <meta property="og:image" content="https://hiadv.com.br/og-hiadv.png" />
-    <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Marca do HiAdv sobre fundo vinho" />
@@ -22,16 +21,290 @@
     <meta name="twitter:image" content="https://hiadv.com.br/og-hiadv.png" />
     <link rel="icon" href="/icons/favicon-48.png" sizes="48x48" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"HiAdv","applicationCategory":"BusinessApplication","operatingSystem":"Android, iOS, Windows, macOS","url":"https://hiadv.com.br/","offers":[{"@type":"Offer","name":"Júnior","price":"109.90","priceCurrency":"BRL"},{"@type":"Offer","name":"Pleno","price":"189.90","priceCurrency":"BRL"}],"publisher":{"@type":"Organization","name":"HiAdv","email":"hiadvofc@gmail.com"}}</script>
   </head>
-  <body>
-    <div id="root"><div class="login" inert data-estatico><aside class="login-apresenta" aria-label="Sobre o HiAdv"><p class="login-chamada">Seus processos, prazos e peças sob controle.</p><p class="login-sub">Gestão e fluxo jurídico para quem está construindo o próprio escritório.</p><ul class="login-pontos"><li>Controladoria: prazos, perícias e audiências no seu dia, com aviso antes do fatal.</li><li>Peças a partir dos seus modelos, teses e jurisprudência da sua biblioteca.</li><li>Casos andando por etapas, com a equipe no mesmo quadro.</li></ul></aside><div class="login-caixa"><span class="marca"><svg class="marca-sinal" width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="var(--brand-mark)"></rect><path d="M10 7.5v17M22 13.5v11M10 16h12" stroke="var(--brand-mark-ink)" stroke-width="3" stroke-linecap="round" fill="none"></path><circle cx="22" cy="8" r="2.1" fill="var(--brand-dot)"></circle></svg><span class="marca-nome">HiAdv</span></span><h1>Entrar no HiAdv</h1><form novalidate class="login-form"><div class="hv-field"><label for="e_email">E-mail</label><input id="e_email" class="hv-input" type="email" autocomplete="username"></div><div class="hv-field"><label for="e_senha">Senha</label><input id="e_senha" class="hv-input" type="password" autocomplete="current-password"></div><button type="submit" class="hv-btn" data-variant="primary" data-size="md">Entrar</button></form><button type="button" class="login-link">Primeiro acesso ou esqueci a senha</button><p class="muted login-rodape">O acesso é liberado pelo Gestor Master do seu escritório.</p></div></div></div>
-    <script>
-      // Quem já está logado não vê o login estático: a tela fica limpa até o app abrir.
-      try {
-        if (location.pathname !== '/login' && Object.keys(localStorage).some(function (k) { return /^sb-.*-auth-token$/.test(k) })) document.getElementById('root').textContent = ''
-      } catch (e) {}
-    </script>
-    <noscript><p style="padding:24px">Para usar o HiAdv, ative o JavaScript do navegador.</p></noscript>
-    <script type="module" src="/src/main.tsx"></script>
+  <body class="sv">
+    <a class="sv-pular" href="#conteudo">Pular para o conteúdo</a>
+
+    <header class="sv-topo">
+      <div class="sv-largura sv-topo-linha">
+        <a class="sv-marca" href="/" aria-label="HiAdv, início">
+          <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="8" fill="#ffffff"/><path d="M10 7.5v17M22 13.5v11M10 16h12" stroke="#6b1a2c" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="22" cy="8" r="2.1" fill="#f0b7c2"/></svg>
+          <span>HiAdv</span>
+        </a>
+        <nav class="sv-menu" aria-label="Seções">
+          <a href="#recursos">Recursos</a>
+          <a href="#planos">Planos</a>
+          <a href="#instalar">Instalar</a>
+          <a href="#duvidas">Dúvidas</a>
+        </nav>
+        <div class="sv-topo-acoes">
+          <a class="sv-entrar" href="/login" data-entrar>Entrar</a>
+          <a class="sv-btn sv-btn-claro" href="/aderir" data-aderir>Aderir</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="conteudo">
+      <section class="sv-heroi" aria-labelledby="t-heroi">
+        <div class="sv-largura sv-heroi-grade">
+        <div class="sv-heroi-texto">
+          <h1 id="t-heroi">Seu escritório inteiro, num só lugar.</h1>
+          <p class="sv-heroi-sub">Prazos, publicações, casos, atendimentos e o acompanhamento do cliente no mesmo sistema, no celular e no computador. Feito por advogados que vivem o previdenciário todos os dias.</p>
+          <div class="sv-heroi-acoes">
+            <a class="sv-btn sv-btn-claro sv-btn-grande" href="/aderir" data-aderir>Aderir ao HiAdv</a>
+            <a class="sv-btn sv-btn-contorno sv-btn-grande" href="/login" data-entrar>Já tenho acesso</a>
+            <button type="button" class="sv-assistir" id="abrir-video"><span class="sv-play" aria-hidden="true"></span>Assistir à apresentação <span class="sv-dur">48 s</span></button>
+          </div>
+          <p class="sv-fundador">Para os 20 primeiros escritórios: 60 dias grátis e preço de fundador por 12 meses.</p>
+        </div>
+        <div class="sv-produto">
+          <div class="sv-janela">
+            <div class="sv-janela-barra" aria-hidden="true"><i></i><i></i><i></i><span>hiadv.com.br/seu-dia</span></div>
+            <img src="/site/produto-seu-dia.webp" width="1600" height="1000" alt="Tela Seu dia do HiAdv no computador, com atrasados, tarefas de hoje e o que precisa de atenção" fetchpriority="high" decoding="async" />
+          </div>
+          <div class="sv-celular"><img src="/site/produto-celular.webp" width="400" height="814" alt="Tela de atendimentos do HiAdv no celular" decoding="async" /></div>
+        </div>
+        </div>
+      </section>
+
+      <dialog class="sv-dialogo" id="dialogo-video" aria-labelledby="t-video">
+        <div class="sv-dialogo-topo">
+          <h2 id="t-video">Apresentação do HiAdv</h2>
+          <button type="button" class="sv-fechar" id="fechar-video">Fechar</button>
+        </div>
+        <video id="video-apresentacao" controls playsinline preload="none" poster="/video/capa.jpg"
+          data-h="/video/hiadv-apresentacao.mp4" data-v="/video/hiadv-apresentacao-vertical.mp4" data-capa-v="/video/capa-vertical.jpg">
+          <track kind="captions" srclang="pt-BR" label="Português" src="/video/hiadv-apresentacao.vtt" />
+        </video>
+      </dialog>
+
+      <section class="sv-secao" id="recursos" aria-labelledby="t-recursos">
+        <div class="sv-largura">
+          <h2 id="t-recursos">O que o HiAdv faz pelo seu dia</h2>
+          <p class="sv-intro">Escolha uma tela para ver como ela funciona. As imagens usam dados de demonstração.</p>
+          <div class="sv-tour">
+            <div class="sv-tour-lista" role="tablist" aria-label="Telas do HiAdv">
+              <button type="button" role="tab" id="aba-dia" aria-controls="painel-tour" aria-selected="true" data-tela="/site/seu-dia.webp" data-alt="Tela Seu dia com atrasados, tarefas de hoje e o que precisa de atenção">
+                <strong>Seu dia</strong>
+                <span>O que precisa de você hoje: prazos fatais, casos parados e perícias aparecem antes de virar problema.</span>
+              </button>
+              <button type="button" role="tab" id="aba-atend" aria-controls="painel-tour" aria-selected="false" tabindex="-1" data-tela="/site/atendimentos.webp" data-alt="Funil de atendimentos com novos contatos, em conversa e contratados">
+                <strong>Atendimentos</strong>
+                <span>Cada pessoa que chama no WhatsApp fica registrada, com origem, próximo passo e o motivo quando não fecha.</span>
+              </button>
+              <button type="button" role="tab" id="aba-quadro" aria-controls="painel-tour" aria-selected="false" tabindex="-1" data-tela="/site/quadro.webp" data-alt="Quadro de casos dividido por etapas">
+                <strong>Casos por etapas</strong>
+                <span>Do requerimento ao judicial, cada caso anda pelas etapas da sua área, com responsável e checklist.</span>
+              </button>
+              <button type="button" role="tab" id="aba-pub" aria-controls="painel-tour" aria-selected="false" tabindex="-1" data-tela="/site/publicacoes.webp" data-alt="Lista de publicações e intimações encontradas pela OAB">
+                <strong>Publicações e prazos</strong>
+                <span>Publicações pela OAB e prazos contados com os feriados dos tribunais, já na agenda de quem vai cumprir.</span>
+              </button>
+              <button type="button" role="tab" id="aba-cliente" aria-controls="painel-tour" aria-selected="false" tabindex="-1" data-tela="/site/cliente.webp" data-alt="Página de acompanhamento que o cliente abre pelo link">
+                <strong>Acompanhamento do cliente</strong>
+                <span>Um link para o cliente ver em que fase está o caso, em linguagem simples, sem precisar perguntar.</span>
+              </button>
+              <button type="button" role="tab" id="aba-rel" aria-controls="painel-tour" aria-selected="false" tabindex="-1" data-tela="/site/relatorios.webp" data-alt="Relatórios com funil de atendimentos e produtividade da equipe">
+                <strong>Relatórios</strong>
+                <span>Funil de atendimentos, gargalos por etapa e produtividade de cada pessoa da equipe.</span>
+              </button>
+            </div>
+            <div class="sv-tour-tela" id="painel-tour" role="tabpanel" aria-labelledby="aba-dia" tabindex="0">
+              <div class="sv-aparelho"><img id="tour-img" src="/site/seu-dia.webp" width="540" height="848" alt="Tela Seu dia com atrasados, tarefas de hoje e o que precisa de atenção" loading="lazy" decoding="async" /></div>
+            </div>
+          </div>
+          <ul class="sv-mais">
+            <li>Horas trabalhadas por cliente e por pessoa</li>
+            <li>Agenda do HiAdv dentro do Google Agenda</li>
+            <li>Documentos a partir dos seus modelos</li>
+            <li>Financeiro e honorários (Pleno)</li>
+            <li>Busca de cliente, caso, processo ou CPF</li>
+            <li>Modo claro e escuro, no celular e no computador</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="sv-secao sv-secao-rose" aria-labelledby="t-prev">
+        <div class="sv-largura sv-prev">
+          <h2 id="t-prev">Pensado para quem advoga no previdenciário</h2>
+          <div class="sv-prev-texto">
+            <p>O HiAdv nasceu dentro de um escritório previdenciário 100% online. Por isso já vem com as áreas administrativa e judicial, checklist de documentos com CNIS, CTPS, laudos e exames, e perícias e exigências do INSS no dia de quem cuida do caso.</p>
+            <p>A equipe trabalha por etapas, do primeiro contato à triagem de documentos, do requerimento ao acompanhamento depois do protocolo, e quem recebe o caso na etapa seguinte é avisado.</p>
+            <p>Atende também escritórios de outras áreas: as etapas e os campos são ajustados pelos próprios gestores, sem programar.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="sv-secao" id="planos" aria-labelledby="t-planos">
+        <div class="sv-largura">
+          <h2 id="t-planos">Planos</h2>
+          <p class="sv-intro">Não sabe qual escolher? Responda o questionário de 2 minutos e receba a recomendação com o motivo.</p>
+          <div class="sv-planos">
+            <article class="sv-plano">
+              <h3>Júnior</h3>
+              <p class="sv-preco"><strong>R$&nbsp;109,90</strong> por mês</p>
+              <p class="sv-plano-resumo">Para o advogado autônomo, com ou sem um assistente.</p>
+              <p class="sv-limites">1 acesso Master, 1 colaborador e 1 OAB acompanhada</p>
+              <ul>
+                <li>Casos por área, em etapas</li>
+                <li>Prazos com feriados dos tribunais</li>
+                <li>Publicações e andamentos pela OAB</li>
+                <li>Atendimentos, do contato até virar cliente</li>
+                <li>Link de acompanhamento para o cliente</li>
+              </ul>
+              <a class="sv-btn sv-btn-vinho" href="/aderir" data-aderir>Quero o Júnior</a>
+            </article>
+            <article class="sv-plano sv-plano-destaque">
+              <h3>Pleno</h3>
+              <p class="sv-preco"><strong>R$&nbsp;189,90</strong> por mês</p>
+              <p class="sv-fundador-preco">Fundadores: R$&nbsp;169,90 por 12 meses</p>
+              <p class="sv-plano-resumo">Para o escritório com equipe e financeiro.</p>
+              <p class="sv-limites">Até 3 acessos Master, 8 colaboradores e 3 OABs</p>
+              <ul>
+                <li>Tudo do Júnior</li>
+                <li>Financeiro e honorários</li>
+                <li>Relatórios e produtividade da equipe</li>
+                <li>Horas trabalhadas</li>
+                <li>Avisos e rodízio de responsáveis</li>
+              </ul>
+              <a class="sv-btn sv-btn-claro" href="/aderir" data-aderir>Quero o Pleno</a>
+            </article>
+            <article class="sv-plano">
+              <h3>Sênior <span class="sv-selo">Em breve</span></h3>
+              <p class="sv-preco"><strong>R$&nbsp;297,00</strong> por mês</p>
+              <p class="sv-fundador-preco">Fundadores: R$&nbsp;200,00 por 12 meses</p>
+              <p class="sv-plano-resumo">Tudo do HiAdv, com IA e leitura no seu Google Drive.</p>
+              <p class="sv-limites">Até 5 acessos Master, 20 colaboradores e 10 OABs</p>
+              <ul>
+                <li>Tudo do Pleno</li>
+                <li>IA para minutas, quesitos e leitura de intimações</li>
+                <li>Leitura e organização no seu Google Drive</li>
+                <li>Assinatura digital e WhatsApp oficial</li>
+                <li>Implantação assistida</li>
+              </ul>
+              <a class="sv-btn sv-btn-contorno-vinho" href="/aderir" data-aderir>Entrar na lista de espera</a>
+            </article>
+          </div>
+          <p class="sv-nota">Os 20 primeiros escritórios têm 60 dias grátis. Depois disso, o teste é de 14 dias no Pleno. O Sênior é liberado quando a IA e a leitura do Drive estiverem prontas; quem entra na lista é avisado primeiro.</p>
+        </div>
+      </section>
+
+      <section class="sv-secao sv-secao-clara" aria-labelledby="t-passos">
+        <div class="sv-largura">
+          <h2 id="t-passos">Como aderir</h2>
+          <ol class="sv-passos">
+            <li><strong>Responda o questionário</strong><span>Como você atua, quantos processos e o que mais pesa no seu dia. Leva 2 minutos.</span></li>
+            <li><strong>Veja o plano recomendado</strong><span>Com o motivo da recomendação e o que já vem incluído.</span></li>
+            <li><strong>Fale com a gente</strong><span>Confirmamos os dados pelo WhatsApp e liberamos o acesso do Gestor Master.</span></li>
+            <li><strong>Traga a equipe</strong><span>O Gestor convida os colaboradores e cada um entra com o próprio acesso.</span></li>
+          </ol>
+          <a class="sv-btn sv-btn-vinho sv-btn-grande" href="/aderir" data-aderir>Começar o questionário</a>
+        </div>
+      </section>
+
+      <section class="sv-secao" id="instalar" aria-labelledby="t-instalar">
+        <div class="sv-largura">
+          <h2 id="t-instalar">Instale no seu aparelho</h2>
+          <p class="sv-intro">O HiAdv é um aplicativo que se instala direto pelo navegador, sem loja: ocupa pouco espaço, abre em tela cheia e se atualiza sozinho.</p>
+          <div class="sv-instalar">
+            <div class="sv-instalar-item">
+              <h3>Android</h3>
+              <p>Abra hiadv.com.br no Chrome e toque em Instalar. Se o botão não aparecer, toque nos três pontinhos e em “Instalar app”.</p>
+              <button type="button" class="sv-btn sv-btn-vinho" data-instalar hidden>Instalar o HiAdv</button>
+            </div>
+            <div class="sv-instalar-item">
+              <h3>iPhone e iPad</h3>
+              <p>Abra hiadv.com.br no Safari, toque em Compartilhar (o quadrado com a seta) e depois em “Adicionar à Tela de Início”.</p>
+            </div>
+            <div class="sv-instalar-item">
+              <h3>Computador</h3>
+              <p>No Chrome ou no Edge, clique no ícone de instalar no fim da barra de endereço, ou use o botão abaixo. Funciona no Windows, no Mac e no Linux.</p>
+              <button type="button" class="sv-btn sv-btn-vinho" data-instalar hidden>Instalar o HiAdv</button>
+            </div>
+          </div>
+          <p class="sv-nota" data-instalado hidden>O HiAdv já está instalado neste aparelho.</p>
+        </div>
+      </section>
+
+      <section class="sv-secao sv-secao-clara" aria-labelledby="t-seg">
+        <div class="sv-largura sv-prev">
+          <h2 id="t-seg">Sigilo e ética desde o começo</h2>
+          <div class="sv-prev-texto">
+            <p>Cada escritório só enxerga os próprios dados. O acesso é por pessoa, com papéis definidos pelo Gestor Master, e as ações importantes ficam registradas.</p>
+            <p>A conexão é sempre criptografada e os dados dos clientes não ficam guardados no aparelho. Laudos e exames são tratados como dados sensíveis, como pede a LGPD.</p>
+            <p>O sistema organiza, avisa e agenda. Parecer e decisão continuam com o advogado, e nenhuma mensagem é enviada ao cliente sem alguém da equipe conferir.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="sv-secao" id="duvidas" aria-labelledby="t-duvidas">
+        <div class="sv-largura sv-duvidas">
+          <h2 id="t-duvidas">Dúvidas</h2>
+          <details>
+            <summary>O HiAdv está na Play Store ou na App Store?</summary>
+            <p>Ainda não. Ele se instala pelo navegador, no Android, no iPhone e no computador, e funciona como um aplicativo comum. Veja o passo a passo em “Instale no seu aparelho”.</p>
+          </details>
+          <details>
+            <summary>Quanto tempo dura o teste grátis?</summary>
+            <p>Os 20 primeiros escritórios têm 60 dias grátis e pagam o preço de fundador por 12 meses. Depois das vagas de fundador, o teste é de 14 dias no plano Pleno.</p>
+          </details>
+          <details>
+            <summary>Os meus arquivos ficam guardados no HiAdv?</summary>
+            <p>A ideia é o contrário: os arquivos e as peças continuam no Google Drive do escritório. Com o Sênior, o HiAdv lê e organiza dentro do seu Drive, sem levar os arquivos para fora.</p>
+          </details>
+          <details>
+            <summary>Já tenho acesso. Como entro?</summary>
+            <p>Toque em “Entrar”, no alto da página. O primeiro acesso é liberado pelo Gestor Master do seu escritório; se esqueceu a senha, use “Primeiro acesso ou esqueci a senha” na tela de entrada.</p>
+          </details>
+          <details>
+            <summary>A IA vai escrever as peças sozinha?</summary>
+            <p>Não. Quando chegar, no Sênior, a IA vai preparar minutas e resumos para o advogado revisar. Quem decide e assina é sempre o advogado.</p>
+          </details>
+          <details>
+            <summary>Ganho alguma coisa indicando o HiAdv?</summary>
+            <p>Sim. Quem já usa o HiAdv tem um link de indicação no sistema. A cada escritório que aderir pelo seu link e pagar a primeira mensalidade, o seu escritório ganha 1 mês grátis, até 12 meses por ano.</p>
+          </details>
+        </div>
+      </section>
+
+      <section class="sv-final" aria-labelledby="t-final">
+        <div class="sv-largura">
+          <h2 id="t-final">Descubra o plano do seu escritório.</h2>
+          <div class="sv-heroi-acoes">
+            <a class="sv-btn sv-btn-claro sv-btn-grande" href="/aderir" data-aderir>Aderir ao HiAdv</a>
+            <a class="sv-btn sv-btn-contorno sv-btn-grande" href="https://wa.me/5549999730572?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20HiAdv." target="_blank" rel="noopener">Falar no WhatsApp</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="sv-rodape">
+      <div class="sv-largura sv-rodape-grade">
+        <div>
+          <p class="sv-rodape-marca">HiAdv</p>
+          <p>Gestão jurídica para escritórios de advocacia.</p>
+        </div>
+        <div>
+          <p class="sv-rodape-titulo">Contato</p>
+          <p><a href="https://wa.me/5549999730572" target="_blank" rel="noopener">WhatsApp (49) 99973-0572</a></p>
+          <p><a href="mailto:hiadvofc@gmail.com">hiadvofc@gmail.com</a></p>
+        </div>
+        <div>
+          <p class="sv-rodape-titulo">Acesso</p>
+          <p><a href="/login" data-entrar>Entrar</a></p>
+          <p><a href="/aderir" data-aderir>Aderir ao HiAdv</a></p>
+        </div>
+      </div>
+      <p class="sv-largura sv-rodape-fim">© 2026 HiAdv</p>
+  <a class="sv-whats" href="https://wa.me/5549999730572?text=Ol%C3%A1%2C%20quero%20saber%20mais%20sobre%20o%20HiAdv." target="_blank" rel="noopener" aria-label="Falar com o HiAdv no WhatsApp">
+      <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3Z"/></svg>
+      <span>WhatsApp</span>
+    </a>
+    </footer>
+
+
+
+    <script type="module" src="/src/site/site.ts"></script>
   </body>
 </html>

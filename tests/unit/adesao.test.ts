@@ -1,18 +1,18 @@
 import { alternar, codigoValido, linkIndicacao, mensagemIndicacao, recomendar, respostasCompletas, resumoIndicacoes, validarAdesao, PLANOS } from '../../src/data/adesao'
 
 describe('adesão', () => {
-  it('recomenda o Pro para quem trabalha sozinho e foca em prazos', () => {
+  it('recomenda o Júnior para quem trabalha sozinho e foca em prazos', () => {
     const r = recomendar({ atuacao: 'sozinho', processos: 'ate100', oabs: '1', areas: ['previdenciario'], prioridades: ['prazos', 'contatos'] })
     expect(r.plano).toBe('pro')
     expect(r.motivos.length).toBeGreaterThan(0)
   })
-  it('recomenda o Premium para equipe, várias OABs ou financeiro', () => {
+  it('recomenda o Pleno para equipe, várias OABs ou financeiro', () => {
     expect(recomendar({ atuacao: 'equipe', prioridades: ['prazos'] }).plano).toBe('premium')
     expect(recomendar({ atuacao: 'sozinho', oabs: '2a3', prioridades: ['prazos'] }).plano).toBe('premium')
     expect(recomendar({ atuacao: 'sozinho', prioridades: ['financeiro'] }).plano).toBe('premium')
     expect(recomendar({ atuacao: 'grande', oabs: '4mais' }).motivos.join(' ')).toContain('adicional')
   })
-  it('IA leva ao Supremo, com plano para começar enquanto não é liberado', () => {
+  it('IA leva ao Sênior, com plano para começar enquanto não é liberado', () => {
     expect(recomendar({ atuacao: 'sozinho', prioridades: ['ia'] })).toMatchObject({ plano: 'supremo', comecarCom: 'pro' })
     expect(recomendar({ atuacao: 'equipe', prioridades: ['ia'] })).toMatchObject({ plano: 'supremo', comecarCom: 'premium' })
   })

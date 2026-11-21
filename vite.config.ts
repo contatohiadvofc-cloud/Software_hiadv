@@ -13,20 +13,39 @@ function primeiraPintura(): Plugin {
     apply: 'build',
     enforce: 'post',
     generateBundle(_o, bundle) {
-      const html = bundle['index.html']
-      if (!html || html.type !== 'asset') return
-      let fonte = String(html.source)
-      const dicas: string[] = []
-      for (const [nome, item] of Object.entries(bundle)) {
-        if (item.type === 'asset' && nome.endsWith('.css')) {
+      // as duas páginas: o site de apresentação (index.html) e o aplicativo (app.html)
+      const css = Object.entries(bundle).filter(([nome, item]) => item.type === 'asset' && nome.endsWith('.css'))
+      for (const pagina of ['index.html', 'app.html']) {
+        const html = bundle[pagina]
+        if (!html || html.type !== 'asset') continue
+        let fonte = String(html.source)
+        const dicas: string[] = []
+        for (const [nome, item] of css) {
+          if (item.type !== 'asset') continue
           const tag = new RegExp(`<link rel="stylesheet"[^>]*href="[^"]*${nome.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"[^>]*>`)
-          if (tag.test(fonte)) { fonte = fonte.replace(tag, `<style>${String(item.source)}</style>`); delete bundle[nome] }
+          if (tag.test(fonte)) { fonte = fonte.replace(tag, `<style>${String(item.source)}</style>`) }
         }
-        // a frase de apresentação do login (maior texto da primeira tela) usa a serifa: baixa junto com a página
-        if (item.type === 'asset' && /source-serif-4-latin-600-normal-.*\.woff2$/.test(nome)) dicas.push(`<link rel="preload" as="font" type="font/woff2" crossorigin href="/${nome}">`)
+        // o maior texto da primeira tela usa a serifa: baixa junto com a página
+        for (const nome of Object.keys(bundle)) if (/source-serif-4-latin-600-normal-.*\.woff2$/.test(nome)) dicas.push(`<link rel="preload" as="font" type="font/woff2" crossorigin href="/${nome}">`)
+        html.source = fonte.replace('</head>', `${dicas.join('')}</head>`)
       }
-      html.source = fonte.replace('</head>', `${dicas.join('')}</head>`)
+      // o arquivo .css continua publicado: partes do aplicativo abertas depois ainda podem pedi-lo
     },
+  }
+}
+
+/** O site de apresentação fica em "/"; qualquer outro endereço sem arquivo é o aplicativo (app.html).
+ *  No GitHub Pages isso é feito pelo 404.html (cópia do app.html). */
+function rotasDoApp(): Plugin {
+  const reescrever = (req: { url?: string }, _res: unknown, next: () => void) => {
+    const caminho = (req.url ?? '/').split('?')[0]
+    if (caminho !== '/' && caminho !== '/index.html' && caminho !== '/CNAME' && !/\.[a-z0-9]+$/i.test(caminho) && !caminho.startsWith('/@') && !caminho.startsWith('/src/') && !caminho.startsWith('/node_modules/')) req.url = '/app.html' + (req.url?.slice(caminho.length) ?? '')
+    next()
+  }
+  return {
+    name: 'hiadv-rotas-do-app',
+    configureServer(s) { s.middlewares.use(reescrever) },
+    configurePreviewServer(s) { s.middlewares.use(reescrever) },
   }
 }
 
@@ -47,8 +66,11 @@ export default defineConfig({
     ],
   } : undefined,
   base: previa ? './' : '/',
+  appType: 'mpa',
+  build: { rollupOptions: { input: previa ? { app: 'app.html' } : { index: 'index.html', app: 'app.html' } } },
   plugins: [
     react(),
+    rotasDoApp(),
     !previa && primeiraPintura(),
     !previa && VitePWA({
       registerType: 'autoUpdate',
@@ -72,7 +94,9 @@ export default defineConfig({
         ],
       },
       workbox: {
-        navigateFallback: '/index.html',
+        navigateFallback: '/app.html',
+        // o site de apresentação e os vídeos não passam pelo aplicativo
+        navigateFallbackDenylist: [/^\/$/, /^\/index\.html$/, /^\/video\//],
         // Dados do escritório nunca ficam no cache do aparelho: só os arquivos do aplicativo.
         runtimeCaching: [],
         globPatterns: ['**/*.{js,css,html,woff2,png,svg}'],

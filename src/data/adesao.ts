@@ -41,40 +41,40 @@ export const PERGUNTAS: Pergunta[] = [
 export type Plano = { id: PlanoId; nome: string; preco: number; fundador: number; resumo: string; limites: string; destaques: string[]; emBreve?: boolean }
 
 export const PLANOS: Plano[] = [
-  { id: 'pro', nome: 'Pro', preco: 109.9, fundador: 109.9, resumo: 'Para o advogado autônomo, com ou sem um assistente.', limites: '1 acesso Master, 1 colaborador e 1 OAB acompanhada',
+  { id: 'pro', nome: 'Júnior', preco: 109.9, fundador: 109.9, resumo: 'Para o advogado autônomo, com ou sem um assistente.', limites: '1 acesso Master, 1 colaborador e 1 OAB acompanhada',
     destaques: ['Casos por área, em etapas', 'Prazos com feriados dos tribunais', 'Publicações e andamentos pela OAB', 'Atendimentos, do contato até virar cliente', 'Link de acompanhamento para o cliente'] },
-  { id: 'premium', nome: 'Premium', preco: 189.9, fundador: 169.9, resumo: 'Para o escritório com equipe e financeiro.', limites: 'Até 3 acessos Master, 8 colaboradores e 3 OABs',
-    destaques: ['Tudo do Pro', 'Financeiro e honorários', 'Relatórios e produtividade da equipe', 'Horas trabalhadas', 'Avisos e rodízio de responsáveis'] },
-  { id: 'supremo', nome: 'Supremo', preco: 297, fundador: 200, resumo: 'Tudo do HiAdv, com IA e leitura no seu Google Drive.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
-    destaques: ['Tudo do Premium', 'IA para minutas, quesitos e leitura de intimações', 'Leitura e organização no seu Google Drive', 'Assinatura digital e WhatsApp oficial', 'Implantação assistida'] },
+  { id: 'premium', nome: 'Pleno', preco: 189.9, fundador: 169.9, resumo: 'Para o escritório com equipe e financeiro.', limites: 'Até 3 acessos Master, 8 colaboradores e 3 OABs',
+    destaques: ['Tudo do Júnior', 'Financeiro e honorários', 'Relatórios e produtividade da equipe', 'Horas trabalhadas', 'Avisos e rodízio de responsáveis'] },
+  { id: 'supremo', nome: 'Sênior', preco: 297, fundador: 200, resumo: 'Tudo do HiAdv, com IA e leitura no seu Google Drive.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
+    destaques: ['Tudo do Pleno', 'IA para minutas, quesitos e leitura de intimações', 'Leitura e organização no seu Google Drive', 'Assinatura digital e WhatsApp oficial', 'Implantação assistida'] },
 ]
 export const plano = (id: PlanoId) => PLANOS.find((p) => p.id === id)!
 
 const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
 export const preco = (v: number) => BRL.format(v)
 
-/** Recomendação simples e explicada. Supremo vem com "comece pelo Premium" enquanto não é liberado. */
+/** Recomendação simples e explicada. Sênior vem com "comece pelo Pleno" enquanto não é liberado. */
 export function recomendar(r: Respostas): { plano: PlanoId; motivos: string[]; comecarCom: PlanoId | null } {
   const pr = r.prioridades ?? []
   const motivos: string[] = []
   const temEquipe = r.atuacao === 'equipe' || r.atuacao === 'grande'
   if (pr.includes('ia')) {
-    motivos.push('Você quer usar IA nas peças e documentos, que é o centro do Supremo.')
-    if (temEquipe) motivos.push('Com equipe, o financeiro e os relatórios do Premium já ajudam desde o primeiro dia.')
+    motivos.push('Você quer usar IA nas peças e documentos, que é o centro do Sênior.')
+    if (temEquipe) motivos.push('Com equipe, o financeiro e os relatórios do Pleno já ajudam desde o primeiro dia.')
     return { plano: 'supremo', motivos, comecarCom: temEquipe || pr.includes('financeiro') ? 'premium' : 'pro' }
   }
   if (temEquipe) motivos.push('Com equipe, você acompanha quem faz o quê e a carga de cada pessoa.')
-  if (r.oabs && r.oabs !== '1') motivos.push('O Premium acompanha até 3 OABs nas publicações.')
-  if (pr.includes('financeiro')) motivos.push('Financeiro e honorários estão no Premium.')
-  if (pr.includes('equipe')) motivos.push('Produtividade da equipe está no Premium.')
+  if (r.oabs && r.oabs !== '1') motivos.push('O Pleno acompanha até 3 OABs nas publicações.')
+  if (pr.includes('financeiro')) motivos.push('Financeiro e honorários estão no Pleno.')
+  if (pr.includes('equipe')) motivos.push('Produtividade da equipe está no Pleno.')
   if (motivos.length) {
     if (r.atuacao === 'grande' || r.oabs === '4mais') motivos.push('Acessos ou OABs além do limite entram como adicional.')
     return { plano: 'premium', motivos, comecarCom: null }
   }
-  if (pr.includes('prazos') || !pr.length) motivos.push('Prazos, publicações e intimações já vêm no Pro.')
-  if (pr.includes('contatos')) motivos.push('Os atendimentos, do contato até virar cliente, já vêm no Pro.')
-  if (pr.includes('cliente')) motivos.push('O link de acompanhamento para o cliente já vem no Pro.')
-  if (pr.includes('organizar')) motivos.push('Casos por área e documentos a partir de modelos já vêm no Pro.')
+  if (pr.includes('prazos') || !pr.length) motivos.push('Prazos, publicações e intimações já vêm no Júnior.')
+  if (pr.includes('contatos')) motivos.push('Os atendimentos, do contato até virar cliente, já vêm no Júnior.')
+  if (pr.includes('cliente')) motivos.push('O link de acompanhamento para o cliente já vem no Júnior.')
+  if (pr.includes('organizar')) motivos.push('Casos por área e documentos a partir de modelos já vêm no Júnior.')
   return { plano: 'pro', motivos, comecarCom: null }
 }
 
