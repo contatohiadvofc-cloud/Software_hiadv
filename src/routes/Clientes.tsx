@@ -1,13 +1,47 @@
 import { useEffect, useState } from 'react'
 import { Link } from '@tanstack/react-router'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
 import { telefoneTela } from '../data/clientes'
+import { Button } from '../design/components/Button'
+import { useToast } from '../design/components/Toast'
 
 const desdeFmt = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric', timeZone: 'America/Sao_Paulo' })
+
+function Duplicados() {
+  const api = useApi()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const { perfil } = useSessao()
+  const q = useQuery({ queryKey: ['duplicados', perfil?.escritorioId], queryFn: () => api.duplicados(), enabled: !!perfil })
+  const ignorar = useMutation({
+    mutationFn: ({ a, b }: { a: string; b: string }) => api.ignorarDuplicado(a, b),
+    onSuccess: () => { toast('Marcado como pessoas diferentes.'); qc.invalidateQueries({ queryKey: ['duplicados'] }) },
+    onError: (e) => toast((e as Error).message),
+  })
+  const pares = q.data ?? []
+  if (!q.isSuccess || pares.length === 0) return null
+  return (
+    <Panel title="Possíveis duplicados" labelId="h-duplicados">
+      <p className="hv-panel-body muted">Confira se são a mesma pessoa. Nada é juntado sozinho: se forem a mesma, mantenha um cadastro e passe os casos para ele.</p>
+      <ul className="seu-dia-lista">
+        {pares.map((p) => (
+          <li key={`${p.a.id}-${p.b.id}`} className="hv-row atencao-item">
+            <span className="tipo">{p.motivos.join(' · ')}</span>
+            <span className="texto">
+              <Link to="/clientes/$id" params={{ id: p.a.id }} className="titulo">{p.a.nome}</Link>
+              <Link to="/clientes/$id" params={{ id: p.b.id }} className="sub">{p.b.nome}</Link>
+            </span>
+            <span className="atencao-acao"><Button size="sm" variant="ghost" disabled={ignorar.isPending} onClick={() => ignorar.mutate({ a: p.a.id, b: p.b.id })}>São pessoas diferentes</Button></span>
+          </li>
+        ))}
+      </ul>
+    </Panel>
+  )
+}
 
 export function Clientes() {
   const api = useApi()
@@ -15,6 +49,7 @@ export function Clientes() {
   const [texto, setTexto] = useState('')
   const [termo, setTermo] = useState('')
   useEffect(() => { const t = setTimeout(() => setTermo(texto.trim()), 250); return () => clearTimeout(t) }, [texto])
+  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   const q = useQuery({ queryKey: ['clientes', perfil?.escritorioId, termo.length >= 2 ? termo : ''], queryFn: () => api.clientes(termo), enabled: !!perfil })
 
   return (
@@ -26,6 +61,8 @@ export function Clientes() {
         <label htmlFor="cli-busca" className="sr-only">Filtrar clientes pelo nome</label>
         <input id="cli-busca" className="hv-input" type="search" placeholder="Filtrar pelo nome" value={texto} onChange={(e) => setTexto(e.target.value)} />
       </div>
+      {gestor && <Duplicados />}
+
       <Panel>
         {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}

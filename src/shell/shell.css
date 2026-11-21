@@ -281,7 +281,7 @@ li.hv-row.cliente-caso { cursor: default; }
 .atencao-item .hv-dot[data-tipo='parado'] { background: var(--ink-3); }
 .atencao-item .hv-dot[data-tipo='preparo'] { background: var(--t-pericia); }
 .atencao-item .sub { white-space: normal; }
-.atencao-acao { display: flex; justify-content: flex-end; }
+.atencao-acao { display: flex; justify-content: flex-end; gap: var(--s-2); flex-wrap: wrap; }
 .hv-link { color: var(--accent); font-weight: 600; font-size: var(--fs-sm); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
 @media (max-width: 720px) {
   .atencao-item { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: 'tipo acao' 'texto texto'; }

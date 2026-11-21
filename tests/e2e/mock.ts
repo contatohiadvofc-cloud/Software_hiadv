@@ -29,6 +29,9 @@ export type Cenario = {
   recusarAgente?: string
   atencao?: Array<Record<string, unknown>>
   regras?: Record<string, unknown>
+  duplicados?: Array<Record<string, unknown>>
+  carga?: Array<Record<string, unknown>>
+  falhas?: Array<Record<string, unknown>>
 }
 
 function b64url(o: object) {
@@ -89,6 +92,11 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'integracao_chave_remover') { registrar(); return json(r, { ok: true }) }
       if (nome === 'agentes_listar') return json(r, c.agentes ?? [])
       if (nome === 'atencao_listar') return json(r, c.atencao ?? [])
+      if (nome === 'duplicidades_listar') return json(r, c.duplicados ?? [])
+      if (nome === 'duplicidade_ignorar') { registrar(); return json(r, { ok: true }) }
+      if (nome === 'carga_equipe') return json(r, c.carga ?? [])
+      if (nome === 'falhas_listar') return json(r, c.falhas ?? [])
+      if (nome === 'falha_resolver') { registrar(); return json(r, { ok: true }) }
       if (nome === 'preparo_criar') { registrar(); return json(r, { ok: true, ja: false, tarefa: 't-prep', prazo: '2026-11-23' }) }
       if (nome === 'regras_obter') return json(r, c.regras ?? { parado_dias: 10, preparo_dias: 5, fatal_alerta_dias: 2, parado_ignorar: [] })
       if (nome === 'regras_salvar') { const b = registrar(); return json(r, (b as { p: object }).p) }

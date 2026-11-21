@@ -30,3 +30,14 @@ describe('precisa de atenção', () => {
     expect(validarRegras({ ...REGRAS_PADRAO, fatalAlertaDias: 1.5 })).toMatch(/fatal/)
   })
 })
+
+describe('rodízio e falhas', () => {
+  it('lê o rodízio só com listas', async () => {
+    const { lerRodizio, textoFalha } = await import('../../src/data/atencao')
+    expect(lerRodizio({ trabalhista: ['a@x', 'b@y'], ruim: 'x' })).toEqual({ trabalhista: ['a@x', 'b@y'] })
+    expect(lerRodizio(null)).toEqual({})
+    expect(lerRodizio(['a'])).toEqual({})
+    expect(textoFalha({ detalhe: 'Agente interno não concluiu: modelo ausente' })).toBe('modelo ausente')
+    expect(textoFalha({ detalhe: 'Rodízio não concluiu: ' })).toBe('Erro sem detalhe.')
+  })
+})

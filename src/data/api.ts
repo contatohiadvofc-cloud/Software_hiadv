@@ -1,7 +1,7 @@
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
 import type { Ficha, NovaExigencia } from './ficha'
-import type { ItemAtencao, RegrasAtencao } from './atencao'
+import type { CargaPessoa, Falha, ItemAtencao, ParDuplicado, RegrasAtencao } from './atencao'
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
@@ -85,4 +85,12 @@ export interface Api {
   regrasAtencao(): Promise<RegrasAtencao>
   /** Só o gestor. */
   salvarRegrasAtencao(r: RegrasAtencao): Promise<RegrasAtencao>
+  /** Só o gestor: clientes que parecem repetidos (mesmo CPF, telefone ou nome). */
+  duplicados(): Promise<ParDuplicado[]>
+  ignorarDuplicado(a: string, b: string): Promise<void>
+  /** Tarefas abertas e casos em andamento de cada pessoa da equipe. */
+  cargaEquipe(): Promise<CargaPessoa[]>
+  /** Só o gestor: automações que não concluíram, nos últimos 60 dias. */
+  falhas(): Promise<Falha[]>
+  resolverFalha(id: number): Promise<void>
 }

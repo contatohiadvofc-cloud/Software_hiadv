@@ -46,5 +46,56 @@ test('configurações: regras de atenção validam e vão ao servidor', async ({
   await regras.getByLabel(/Ag\. audiência/i).check()
   await regras.getByRole('button', { name: 'Salvar regras' }).click()
   await expect(page.getByText('Regras salvas.')).toBeVisible()
-  expect(est.rpcs.find((x) => x.nome === 'regras_salvar')?.corpo).toEqual({ p: { parado_dias: 15, preparo_dias: 5, fatal_alerta_dias: 2, parado_ignorar: ['ag. audiência'] } })
+  expect(est.rpcs.find((x) => x.nome === 'regras_salvar')?.corpo).toEqual({ p: { parado_dias: 15, preparo_dias: 5, fatal_alerta_dias: 2, parado_ignorar: ['ag. audiência'], rodizio: {} } })
+})
+
+test('configurações: rodízio por carga e fila de falhas', async ({ page }) => {
+  const est = await simularSupabase(page, {
+    papel: 'master',
+    areas: [{ area: 'trabalhista', nome: 'Trabalhista', ordem: 1 }],
+    etapas: [{ area: 'trabalhista', status: 'pendente', ordem: 1, final: false }],
+    carga: [{ email: 'julia@silvaprado.exemplo.br', nome: 'Júlia', tarefas: 2, casos: 1, total: 3 }, { email: 'marcos@silvaprado.exemplo.br', nome: 'Marcos', tarefas: 4, casos: 2, total: 6 }],
+    falhas: [{ id: 7, caso_id: 'k1', cliente: 'Rosa Maria Lima', area: 'trabalhista', etapa: 'pendente', origem: 'Agente', detalhe: 'Agente interno não concluiu: modelo ausente', em: '2026-11-20T14:05:00Z' }],
+  })
+  await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
+  await page.goto('/configuracoes')
+  const regras = page.getByRole('region', { name: 'Regras de atenção' })
+  await expect(regras.getByText('(3 em aberto)')).toBeVisible()
+  await regras.getByLabel(/Júlia/).check()
+  await regras.getByRole('button', { name: 'Salvar regras' }).click()
+  await expect(page.getByText('Regras salvas.')).toBeVisible()
+  expect((est.rpcs.find((x) => x.nome === 'regras_salvar')?.corpo as { p: { rodizio: object } }).p.rodizio).toEqual({ trabalhista: ['julia@silvaprado.exemplo.br'] })
+
+  const falhas = page.getByRole('region', { name: 'Falhas das automações' })
+  await expect(falhas.getByText(/modelo ausente/)).toBeVisible()
+  await expect(falhas.getByText(/Agente interno não concluiu/)).toHaveCount(0)
+  await falhas.getByRole('button', { name: 'Resolvida' }).click()
+  await expect(page.getByText('Falha marcada como resolvida.')).toBeVisible()
+  expect(est.rpcs.find((x) => x.nome === 'falha_resolver')?.corpo).toEqual({ p_id: 7 })
+})
+
+test('clientes: gestor revisa possíveis duplicados sem juntar nada sozinho', async ({ page }) => {
+  const est = await simularSupabase(page, {
+    papel: 'master',
+    clientes: [{ id: 'c1', nome: 'José da Silva', telefone: null, casos: 1, desde: '2026-01-10' }, { id: 'c2', nome: 'Jose da Silva', telefone: null, casos: 0, desde: '2026-11-01' }],
+    duplicados: [{ a: { id: 'c1', nome: 'José da Silva' }, b: { id: 'c2', nome: 'Jose da Silva' }, motivos: ['mesmo telefone', 'mesmo nome'] }],
+  })
+  await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
+  await page.goto('/clientes')
+  const dup = page.getByRole('region', { name: 'Possíveis duplicados' })
+  await expect(dup.getByText('mesmo telefone · mesmo nome')).toBeVisible()
+  await dup.getByRole('button', { name: 'São pessoas diferentes' }).click()
+  await expect(page.getByText('Marcado como pessoas diferentes.')).toBeVisible()
+  expect(est.rpcs.find((x) => x.nome === 'duplicidade_ignorar')?.corpo).toEqual({ p_a: 'c1', p_b: 'c2' })
+})
+
+test('clientes: colaborador não vê a revisão de duplicados', async ({ page }) => {
+  await simularSupabase(page, { papel: 'colaborador', duplicados: [{ a: { id: 'c1', nome: 'A' }, b: { id: 'c2', nome: 'A' }, motivos: ['mesmo nome'] }] })
+  await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
+  await page.goto('/clientes')
+  await expect(page.getByRole('heading', { name: 'Clientes' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Possíveis duplicados' })).toHaveCount(0)
 })

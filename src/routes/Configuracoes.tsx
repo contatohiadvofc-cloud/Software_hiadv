@@ -3,7 +3,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { AGENTES_EM_BREVE, SERVICOS, faltasDoAgente, type Agente, type Integracao } from '../data/escritorio'
 import { rotuloEtapa } from '../data/quadro'
-import { validarRegras, type RegrasAtencao } from '../data/atencao'
+import { textoFalha, validarRegras, type RegrasAtencao } from '../data/atencao'
+import { useAreas } from '../data/consultas'
+import { FichaCaso } from './FichaCaso'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
@@ -197,6 +199,8 @@ function RegrasDeAtencao() {
   const toast = useToast()
   const q = useQuery({ queryKey: ['regras-atencao', perfil?.escritorioId], queryFn: () => api.regrasAtencao(), enabled: !!perfil })
   const etapas = useQuery({ queryKey: ['etapas-escritorio', perfil?.escritorioId], queryFn: () => api.etapasDoEscritorio(), enabled: !!perfil })
+  const carga = useQuery({ queryKey: ['carga-equipe', perfil?.escritorioId], queryFn: () => api.cargaEquipe(), enabled: !!perfil })
+  const areas = useAreas()
   const [r, setR] = useState<RegrasAtencao | null>(null)
   const [erro, setErro] = useState<string | null>(null)
   const atual = r ?? q.data ?? null
@@ -244,9 +248,64 @@ function RegrasDeAtencao() {
           </div>
         </fieldset>
       )}
+      {(areas.data ?? []).length > 0 && (carga.data ?? []).length > 0 && (
+        <fieldset className="integracao-opcoes">
+          <legend>Distribuição por carga</legend>
+          <p className="muted">Caso novo sem responsável vai para quem, entre as pessoas marcadas na área, tem menos tarefas abertas e casos em andamento. Área sem ninguém marcado fica sem rodízio.</p>
+          {(areas.data ?? []).map((a) => (
+            <div key={a.area} className="agente-etapas">
+              <b>{a.nome}</b>
+              {(carga.data ?? []).map((p) => {
+                const marcados = atual.rodizio[a.area] ?? []
+                return (
+                  <label key={p.email} className="alternar">
+                    <input type="checkbox" checked={marcados.includes(p.email)}
+                      onChange={(e) => setR({ ...atual, rodizio: { ...atual.rodizio, [a.area]: e.target.checked ? [...marcados, p.email] : marcados.filter((x) => x !== p.email) } })} />
+                    {p.nome} <span className="muted">({p.total} em aberto)</span>
+                  </label>
+                )
+              })}
+            </div>
+          ))}
+        </fieldset>
+      )}
       {erro && <p className="hv-error" role="alert">{erro}</p>}
       <div className="catalogo-linha"><Button type="submit" disabled={salvar.isPending}>{salvar.isPending ? 'Salvando…' : 'Salvar regras'}</Button></div>
     </form>
+  )
+}
+
+function Falhas() {
+  const api = useApi()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const { perfil } = useSessao()
+  const [ficha, setFicha] = useState<{ id: string; nome: string } | null>(null)
+  const q = useQuery({ queryKey: ['falhas', perfil?.escritorioId], queryFn: () => api.falhas(), enabled: !!perfil })
+  const resolver = useMutation({
+    mutationFn: (id: number) => api.resolverFalha(id),
+    onSuccess: () => { toast('Falha marcada como resolvida.'); qc.invalidateQueries({ queryKey: ['falhas'] }) },
+    onError: (e) => toast((e as Error).message),
+  })
+  if (q.isLoading) return <p className="hv-panel-body muted" role="status">Carregando…</p>
+  if (q.isError) return <ErrorState onRetry={() => q.refetch()} />
+  if (!q.data?.length) return <Empty title="Nenhuma falha nos últimos 60 dias.">Quando um agente ou o rodízio não conseguir concluir, aparece aqui para você conferir.</Empty>
+  return (
+    <>
+      <ul className="seu-dia-lista">
+        {q.data.map((f) => (
+          <li key={f.id} className="hv-row atencao-item" data-gravidade="alta">
+            <span className="tipo">{f.origem}</span>
+            <span className="texto"><span className="titulo">{f.cliente}</span><span className="sub">{textoFalha(f)}{f.etapa ? ` · em “${rotuloEtapa(f.etapa)}”` : ''} · {dataFmt.format(new Date(f.em))}</span></span>
+            <span className="atencao-acao">
+              <Button size="sm" variant="ghost" onClick={() => setFicha({ id: f.casoId, nome: f.cliente })}>Abrir caso</Button>
+              <Button size="sm" variant="secondary" disabled={resolver.isPending} onClick={() => resolver.mutate(f.id)}>Resolvida</Button>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <FichaCaso casoId={ficha?.id ?? null} nome={ficha?.nome ?? ''} aoFechar={() => setFicha(null)} />
+    </>
   )
 }
 
@@ -267,6 +326,10 @@ export function Configuracoes() {
 
       <Panel title="Regras de atenção" labelId="cfg-regras">
         <RegrasDeAtencao />
+      </Panel>
+
+      <Panel title="Falhas das automações" labelId="cfg-falhas">
+        <Falhas />
       </Panel>
 
       <Panel title="Integrações" labelId="cfg-integ">

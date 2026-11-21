@@ -2,7 +2,7 @@ import type { Api, Area, Escritorio, Perfil } from './api'
 import { CredencialInvalida } from './api'
 import { diaSP, type ItemDia } from './seuDia'
 import { destaquesDoCartao, type CasoCard, type Etapa } from './quadro'
-import { ordenarAtencao, REGRAS_PADRAO, validarRegras, type ItemAtencao, type RegrasAtencao } from './atencao'
+import { ordenarAtencao, REGRAS_PADRAO, validarRegras, type Falha, type ItemAtencao, type ParDuplicado, type RegrasAtencao } from './atencao'
 import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, etapaDeExigencia, prazoInterno, validarExigencia, validarProtocolo, type EventoHistorico, type Ficha } from './ficha'
 import { telaParaValor, validarCampo, type CampoDef } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
@@ -155,6 +155,10 @@ function ler(): boolean { try { return sessionStorage.getItem('hiadv-demo') === 
 function gravar(v: boolean) { try { if (v) sessionStorage.setItem('hiadv-demo', '1'); else sessionStorage.removeItem('hiadv-demo') } catch { /* sem armazenamento */ } }
 
 const PREPAROS = new Set<string>()
+const IGNORADOS = new Set<string>()
+const RESOLVIDAS = new Set<number>()
+const DUPLICADOS: ParDuplicado[] = [{ a: { id: 'c1', nome: 'Paulo Henrique Dias' }, b: { id: 'c9', nome: 'Paulo Henrique Dias' }, motivos: ['mesmo telefone', 'mesmo nome'] }]
+const FALHAS: Falha[] = [{ id: 1, casoId: 'k3', cliente: 'Rosa Maria Lima', area: 'judicial', etapa: 'fazendo inicial', origem: 'Agente', detalhe: 'Agente interno não concluiu: modelo da petição não encontrado na Biblioteca', em: '2026-11-20T14:05:00Z' }]
 let REGRAS_DEMO: RegrasAtencao = { ...REGRAS_PADRAO }
 
 export function criarApiDemo(): Api {
@@ -429,13 +433,23 @@ export function criarApiDemo(): Api {
       }
       return { ja, prazo }
     },
-    async regrasAtencao() { return { ...REGRAS_DEMO, paradoIgnorar: [...REGRAS_DEMO.paradoIgnorar] } },
+    async regrasAtencao() { return { ...REGRAS_DEMO, paradoIgnorar: [...REGRAS_DEMO.paradoIgnorar], rodizio: Object.fromEntries(Object.entries(REGRAS_DEMO.rodizio).map(([k, v]) => [k, [...v]])) } },
     async salvarRegrasAtencao(r) {
       const erro = validarRegras(r)
       if (erro) throw new Error(erro)
-      REGRAS_DEMO = { ...r, paradoIgnorar: [...r.paradoIgnorar] }
+      REGRAS_DEMO = { ...r, paradoIgnorar: [...r.paradoIgnorar], rodizio: Object.fromEntries(Object.entries(r.rodizio).map(([k, v]) => [k, [...v]])) }
       return this.regrasAtencao()
     },
+    async duplicados() { return DUPLICADOS.filter((p) => !IGNORADOS.has(`${p.a.id}|${p.b.id}`)).map((p) => ({ ...p, motivos: [...p.motivos] })) },
+    async ignorarDuplicado(a, b) { const [x, y] = [a, b].sort(); IGNORADOS.add(`${x}|${y}`) },
+    async cargaEquipe() {
+      return EQUIPE.map((p) => {
+        const tarefas = tarefasDemo().filter((t) => t.status === 'aberta' && t.responsavel === p.email).length
+        return { email: p.email, nome: p.nome, tarefas, casos: 0, total: tarefas }
+      }).sort((a, b) => a.total - b.total || a.email.localeCompare(b.email))
+    },
+    async falhas() { return FALHAS.filter((f) => !RESOLVIDAS.has(f.id)).map((f) => ({ ...f })) },
+    async resolverFalha(id) { RESOLVIDAS.add(id) },
     async etapasDoEscritorio() {
       return (AREAS[atual] ?? []).flatMap((a) => (ETAPAS[a.area] ?? []).filter((e) => !e.final).map((e) => ({ area: a.area, areaNome: a.nome, status: e.status })))
     },

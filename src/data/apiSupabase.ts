@@ -2,7 +2,7 @@ import { createClient, type SupabaseClient, type PostgrestError } from '@supabas
 import type { Api, Achado, Area, Escritorio, Papel, Perfil } from './api'
 import { CredencialInvalida, SessaoExpirada } from './api'
 import { diaSP, horaSP, type ItemDia } from './seuDia'
-import { lerItemAtencao, ordenarAtencao, REGRAS_PADRAO, type RegrasAtencao } from './atencao'
+import { lerItemAtencao, lerRodizio, ordenarAtencao, REGRAS_PADRAO, type Falha, type ParDuplicado, type RegrasAtencao } from './atencao'
 import { destaquesDoCartao, type Quadro } from './quadro'
 import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
@@ -34,6 +34,7 @@ function lerRegras(d: Record<string, unknown> | null): RegrasAtencao {
     paradoDias: Number(d.parado_dias ?? REGRAS_PADRAO.paradoDias), preparoDias: Number(d.preparo_dias ?? REGRAS_PADRAO.preparoDias),
     fatalAlertaDias: Number(d.fatal_alerta_dias ?? REGRAS_PADRAO.fatalAlertaDias),
     paradoIgnorar: Array.isArray(d.parado_ignorar) ? d.parado_ignorar.map(String) : [],
+    rodizio: lerRodizio(d.rodizio),
   }
 }
 
@@ -319,9 +320,29 @@ export function criarApiSupabase(url: string, chave: string): Api {
       return lerRegras(r.data as Record<string, unknown> | null)
     },
     async salvarRegrasAtencao(x) {
-      const r = verificar(await sb.rpc('regras_salvar', { p: { parado_dias: x.paradoDias, preparo_dias: x.preparoDias, fatal_alerta_dias: x.fatalAlertaDias, parado_ignorar: x.paradoIgnorar } }))
+      const r = verificar(await sb.rpc('regras_salvar', { p: { parado_dias: x.paradoDias, preparo_dias: x.preparoDias, fatal_alerta_dias: x.fatalAlertaDias, parado_ignorar: x.paradoIgnorar, rodizio: x.rodizio } }))
       return lerRegras(r as Record<string, unknown> | null)
     },
+    async duplicados() {
+      const r = await sb.rpc('duplicidades_listar')
+      if (r.error && /function .*does not exist|Could not find the function/i.test(r.error.message)) return []
+      return ((verificar(r) as ParDuplicado[] | null) ?? []).map((p) => ({ a: { id: String(p.a.id), nome: String(p.a.nome ?? '') }, b: { id: String(p.b.id), nome: String(p.b.nome ?? '') }, motivos: (p.motivos ?? []).map(String) }))
+    },
+    async ignorarDuplicado(a, b) { okOuErro(verificar(await sb.rpc('duplicidade_ignorar', { p_a: a, p_b: b }))) },
+    async cargaEquipe() {
+      const r = await sb.rpc('carga_equipe')
+      if (r.error) return []
+      return ((r.data as Record<string, unknown>[] | null) ?? []).map((x) => ({ email: String(x.email), nome: String(x.nome ?? x.email), tarefas: Number(x.tarefas ?? 0), casos: Number(x.casos ?? 0), total: Number(x.total ?? 0) }))
+    },
+    async falhas() {
+      const r = await sb.rpc('falhas_listar')
+      if (r.error && /function .*does not exist|Could not find the function/i.test(r.error.message)) return []
+      return ((verificar(r) as Record<string, unknown>[] | null) ?? []).map((x): Falha => ({
+        id: Number(x.id), casoId: String(x.caso_id), cliente: String(x.cliente ?? 'Cliente'), area: String(x.area ?? ''), etapa: (x.etapa as string) ?? null,
+        origem: String(x.origem ?? ''), detalhe: String(x.detalhe ?? ''), em: String(x.em ?? ''),
+      }))
+    },
+    async resolverFalha(id) { okOuErro(verificar(await sb.rpc('falha_resolver', { p_id: id }))) },
     async etapasDoEscritorio(): Promise<EtapaEscritorio[]> {
       const areas = await this.areas()
       if (!areas.length) return []

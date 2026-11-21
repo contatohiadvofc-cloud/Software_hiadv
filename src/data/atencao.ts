@@ -15,8 +15,9 @@ export type ItemAtencao = {
   escalado: boolean
 }
 
-export type RegrasAtencao = { paradoDias: number; preparoDias: number; fatalAlertaDias: number; paradoIgnorar: string[] }
-export const REGRAS_PADRAO: RegrasAtencao = { paradoDias: 10, preparoDias: 5, fatalAlertaDias: 2, paradoIgnorar: [] }
+/** rodizio: por área, quem recebe os casos novos sem responsável (vai para quem tem menos carga). */
+export type RegrasAtencao = { paradoDias: number; preparoDias: number; fatalAlertaDias: number; paradoIgnorar: string[]; rodizio: Record<string, string[]> }
+export const REGRAS_PADRAO: RegrasAtencao = { paradoDias: 10, preparoDias: 5, fatalAlertaDias: 2, paradoIgnorar: [], rodizio: {} }
 
 export function rotuloAtencao(it: Pick<ItemAtencao, 'tipo' | 'evento'>): string {
   if (it.tipo === 'prazo') return 'Prazo fatal'
@@ -51,4 +52,21 @@ export function validarRegras(r: RegrasAtencao): string | null {
   if (!inteiro(r.preparoDias, 1, 30)) return 'Preparação de eventos: use de 1 a 30 dias.'
   if (!inteiro(r.fatalAlertaDias, 0, 10)) return 'Aviso de prazo fatal: use de 0 a 10 dias úteis.'
   return null
+}
+
+/** Par de clientes que parecem ser a mesma pessoa (para o gestor revisar; nada é juntado sozinho). */
+export type ParDuplicado = { a: { id: string; nome: string }; b: { id: string; nome: string }; motivos: string[] }
+export type CargaPessoa = { email: string; nome: string; tarefas: number; casos: number; total: number }
+export type Falha = { id: number; casoId: string; cliente: string; area: string; etapa: string | null; origem: string; detalhe: string; em: string }
+
+export function lerRodizio(x: unknown): Record<string, string[]> {
+  if (!x || typeof x !== 'object' || Array.isArray(x)) return {}
+  const r: Record<string, string[]> = {}
+  for (const [k, v] of Object.entries(x as Record<string, unknown>)) if (Array.isArray(v)) r[k] = v.map(String)
+  return r
+}
+
+/** Texto curto da falha (sem o prefixo técnico). */
+export function textoFalha(f: Pick<Falha, 'detalhe'>): string {
+  return f.detalhe.replace(/^(Agente interno não concluiu|Rodízio não concluiu):\s*/i, '').trim() || 'Erro sem detalhe.'
 }
