@@ -5,6 +5,7 @@ import type { CargaPessoa, Falha, ItemAtencao, ParDuplicado, RegrasAtencao } fro
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
+import type { Honorario, Lancamento, NovoHonorario, NovoLancamento } from './financeiro'
 import type { Oabs, PedidoPrazo, Publicacao, ResultadoPrazo } from './publicacoes'
 import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
@@ -45,6 +46,15 @@ export interface Api {
   /** Só o Gestor Master. Devolve as OABs normalizadas. */
   salvarOabs(oabs: string[]): Promise<string[]>
   calcularPrazo(p: PedidoPrazo): Promise<ResultadoPrazo>
+  /** Financeiro (só Gestor Master): lançamentos com vencimento no período e os atrasados de antes. */
+  finLista(de: string, ate: string): Promise<Lancamento[]>
+  finLancar(l: NovoLancamento): Promise<void>
+  /** Marca como pago na data (ou desfaz com null). */
+  finBaixar(id: string, pagoEm: string | null): Promise<void>
+  honorarioCriar(h: NovoHonorario): Promise<void>
+  /** Lança o êxito sobre o valor recebido pelo cliente; devolve o valor do honorário. */
+  honorarioExito(id: string, valorRecebido: number): Promise<number>
+  honorariosCliente(clienteId: string): Promise<Honorario[]>
   /** Só o Gestor Master. Liga ou desliga uma área do catálogo no escritório; os casos ficam guardados. */
   ativarArea(area: string, ativa: boolean): Promise<void>
   busca(q: string): Promise<Achado[]>

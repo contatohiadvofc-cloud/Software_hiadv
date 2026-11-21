@@ -45,6 +45,7 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [x] Áreas de atuação (21/11): o Gestor Master liga e desliga áreas do catálogo (previdenciário administrativo e judicial, trabalhista, cível, bancário, penal, extrajudicial) em Configurações › Áreas de atuação, ou direto no "Novo caso" ("Ligar outra área"), que liga a área e abre o caso de uma vez. Desligar pede confirmação e não apaga nada. No celular, a página Áreas tem "Novo caso" e o atalho para ligar outra área. Usa a função `area_ativar` que já existia no servidor.
 - [x] Publicações e intimações (21/11): tela Publicações (DJEN e andamentos do DataJud dos processos do escritório, por dia, com a tarefa que cada uma gerou e "Calcular prazo e criar tarefa"); OABs acompanhadas em Configurações (até 10, normalizadas). A captura diária já rodava no servidor (Consutar_processos). SQL `hiadv2-publicacoes.sql` no TESTE.
 - [x] Calculadora de prazos (CPC 219/220/224): dias úteis ou corridos, Justiça Federal/Estadual/do Trabalho, disponibilização no DJEN, feriados nacionais/federais e recesso; avisa que feriados estaduais e municipais não entram. Em Publicações e em Tarefas; vira tarefa ligada ao processo.
+- [x] Financeiro de honorários (21/11, só Gestor Master): contrato por cliente (fixo parcelado, só êxito ou fixo + êxito) com prévia das parcelas; êxito calculado sobre o valor que o cliente recebeu; entradas e saídas avulsas; baixa com desfazer; resumo do mês (recebido, a receber, em atraso, despesas, resultado); atrasados com lembrete cordial pronto no WhatsApp (o advogado revisa e envia). Honorários também na página do cliente. SQL `hiadv2-financeiro.sql` no TESTE.
 - [ ] Vitrine em hiadv.com.br (decisão do Felipe em 21/11): quem não está logado vê a apresentação; quem está logado vai direto ao sistema; botões "Quero o HiAdv para o meu escritório" e "Quero o HiAdv como advogado autônomo" abrem o WhatsApp comercial 49 99973-0572 com mensagem pronta; e-mail hiadvofc@gmail.com; sem preços por enquanto; vídeos curtos de demonstração com dados fictícios (um por área) na vitrine e numa área "Aprenda a usar" no sistema. Fazer depois de terminar o sistema e limpar os restos dos apps antigos.
 - [ ] Próximos: agentes com IA (chave do escritório); ZapSign em um clique; Drive.
 - [ ] Execução dos agentes (função no servidor chamando a Claude com a chave do escritório) — depende de chave cadastrada.
@@ -52,7 +53,7 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [ ] Google Drive: pasta compartilhada, mapa de nomes, relacionar pasta ao cliente com aprovação, importar só ativos com aprovação.
 - [ ] Documentos, publicações virando tarefa, novo cliente/novo caso.
 
-Testes: 80 de lógica e 141 de tela, todos passando.
+Testes: 86 de lógica e 153 de tela, todos passando.
 
 ## Para os gestores aprovarem / fazerem
 

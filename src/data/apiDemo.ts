@@ -1,4 +1,5 @@
 import type { Api, Area, Escritorio, Perfil } from './api'
+import { lerValor, previaParcelas, validarHonorario, validarLancamento, type Honorario, type Lancamento } from './financeiro'
 import { oabTela, validarPrazo, type Publicacao } from './publicacoes'
 import { nomeDaArea } from './areas'
 import { PRODUTOS_PREV, areaPrevidenciaria, soDigitos, validarCliente } from './cadastro'
@@ -90,6 +91,16 @@ const CHECK = ['Procuração assinada', 'Documento com foto', 'CTPS digital', 'H
 const CLIENTE_DO_CASO: Record<string, string> = { k1: 'c2', k2: 'c4', k3: 'c5', k4: 'c6', k5: 'c7', k6: 'c1', k7: 'c8', k8: 'c3' }
 const CPFS: Record<string, string> = { c1: '52998224725' }
 const OABS_DEMO: string[] = ['OAB/SP 123.456']
+const mesAtual = () => new Date().toISOString().slice(0, 7)
+const LANCAMENTOS: Lancamento[] = [
+  { id: 'l1', sentido: 'entrada', etiqueta: 'Honorários', titulo: 'Parcela 2/6 · Rita Moura', descricao: null, valor: 500, vencimento: `${mesAtual()}-05`, pagoEm: `${mesAtual()}-05`, clienteId: 'c1', cliente: 'Rita Moura', telefone: '49999110001', honorarioId: 'h1' },
+  { id: 'l2', sentido: 'entrada', etiqueta: 'Honorários', titulo: 'Parcela 1/3 · Bruno Teixeira', descricao: null, valor: 800, vencimento: new Date(Date.now() - 20 * 864e5).toISOString().slice(0, 10), pagoEm: null, clienteId: 'c2', cliente: 'Bruno Teixeira', telefone: '49999110002', honorarioId: null },
+  { id: 'l3', sentido: 'entrada', etiqueta: 'Honorários', titulo: 'Parcela 3/6 · Rita Moura', descricao: null, valor: 500, vencimento: `${mesAtual()}-28`, pagoEm: null, clienteId: 'c1', cliente: 'Rita Moura', telefone: '49999110001', honorarioId: 'h1' },
+  { id: 'l4', sentido: 'saida', etiqueta: 'Despesas', titulo: 'Internet do escritório', descricao: null, valor: 120, vencimento: `${mesAtual()}-10`, pagoEm: `${mesAtual()}-10`, clienteId: null, cliente: null, telefone: null, honorarioId: null },
+]
+const HONORARIOS: (Omit<Honorario, 'recebido' | 'aReceber' | 'atrasado'> & { clienteId: string })[] = [
+  { id: 'h1', clienteId: 'c1', tipo: 'misto', descricao: 'Auxílio-acidente: entrada + êxito', valorFixo: 3000, parcelas: 6, percentualExito: 30, status: 'ativo', criadoEm: '2026-09-01T12:00:00Z' },
+]
 const haDias = (n: number, h = 13) => new Date(Date.now() - n * 864e5).toISOString().slice(0, 10) + `T${String(h).padStart(2, '0')}:00:00Z`
 const PUBLICACOES: Publicacao[] = [
   { id: 1, quando: haDias(0), publicacao: true, titulo: 'Intimação', texto: 'Fica a parte autora intimada para, no prazo de 15 (quinze) dias, manifestar-se sobre o laudo pericial juntado no evento 32.', processoId: 'p1', numeroCnj: '50012345620264047212', clienteId: 'c1', cliente: 'Rita Moura', tarefa: { id: 'tp1', prazo: null, feita: false } },
@@ -495,6 +506,44 @@ export function criarApiDemo(): Api {
       if (p.contagem === 'corridos') { d.setUTCDate(d.getUTCDate() + p.dias); while (!util(d)) d.setUTCDate(d.getUTCDate() + 1) }
       else { let k = 0; while (k < p.dias) { d.setUTCDate(d.getUTCDate() + 1); if (util(d)) k++ } }
       return { publicacao, fim: d.toISOString().slice(0, 10), coberturaAte: '2028-01-20', pulados: [] }
+    },
+    async finLista(de, ate) {
+      return LANCAMENTOS.filter((l) => (l.vencimento >= de && l.vencimento <= ate) || (!l.pagoEm && l.vencimento < de)).map((l) => ({ ...l }))
+    },
+    async finLancar(l) {
+      const erro = validarLancamento(l); if (erro) throw new Error(erro)
+      const cli = CLIENTES.find((c) => c.id === l.cliente)
+      LANCAMENTOS.push({ id: `l${Date.now()}`, sentido: l.sentido, etiqueta: l.etiqueta.trim() || (l.sentido === 'entrada' ? 'Honorários' : 'Despesas'), titulo: l.titulo.trim(), descricao: null,
+        valor: lerValor(l.valor)!, vencimento: l.vencimento, pagoEm: l.pago ? l.vencimento : null, clienteId: cli?.id ?? null, cliente: cli?.nome ?? null, telefone: cli?.telefone ?? null, honorarioId: null })
+    },
+    async finBaixar(id, pagoEm) {
+      const l = LANCAMENTOS.find((x) => x.id === id); if (!l) throw new Error('Lançamento não encontrado.')
+      l.pagoEm = pagoEm
+    },
+    async honorarioCriar(h) {
+      const erro = validarHonorario(h); if (erro) throw new Error(erro)
+      const cli = CLIENTES.find((c) => c.id === h.cliente); if (!cli) throw new Error('Cliente não encontrado.')
+      const id = `h${Date.now()}`
+      HONORARIOS.push({ id, clienteId: cli.id, tipo: h.tipo, descricao: h.descricao.trim() || null, valorFixo: h.tipo === 'exito' ? null : lerValor(h.valorFixo), parcelas: h.tipo === 'exito' ? null : Number(h.parcelas), percentualExito: h.tipo === 'fixo' ? null : lerValor(h.percentualExito), status: 'ativo', criadoEm: new Date().toISOString() })
+      if (h.tipo !== 'exito') {
+        const ps = previaParcelas(lerValor(h.valorFixo)!, Number(h.parcelas), h.primeiroVencimento)
+        ps.forEach((p, i) => LANCAMENTOS.push({ id: `${id}-${i}`, sentido: 'entrada', etiqueta: 'Honorários', titulo: `Parcela ${i + 1}/${ps.length} · ${cli.nome}`, descricao: null, valor: p.valor, vencimento: p.vencimento, pagoEm: null, clienteId: cli.id, cliente: cli.nome, telefone: cli.telefone, honorarioId: id }))
+      }
+    },
+    async honorarioExito(id, valorRecebido) {
+      const h = HONORARIOS.find((x) => x.id === id); if (!h?.percentualExito) throw new Error('Contrato com êxito não encontrado.')
+      const cli = CLIENTES.find((c) => c.id === h.clienteId)!
+      const v = Math.round(valorRecebido * h.percentualExito) / 100
+      LANCAMENTOS.push({ id: `l${Date.now()}`, sentido: 'entrada', etiqueta: 'Honorários', titulo: `Êxito ${h.percentualExito}% · ${cli.nome}`, descricao: null, valor: v, vencimento: diaSP(new Date()), pagoEm: null, clienteId: cli.id, cliente: cli.nome, telefone: cli.telefone, honorarioId: id })
+      return v
+    },
+    async honorariosCliente(clienteId) {
+      const hoje = diaSP(new Date())
+      return HONORARIOS.filter((h) => h.clienteId === clienteId).map(({ clienteId: _c, ...h }) => {
+        const ls = LANCAMENTOS.filter((l) => l.honorarioId === h.id)
+        const soma = (xs: typeof ls) => Math.round(xs.reduce((s, x) => s + x.valor, 0) * 100) / 100
+        return { ...h, recebido: soma(ls.filter((l) => l.pagoEm)), aReceber: soma(ls.filter((l) => !l.pagoEm)), atrasado: soma(ls.filter((l) => !l.pagoEm && l.vencimento < hoje)) }
+      })
     },
     async ativarArea(area, ativa) {
       const lista = AREAS[atual] ?? (AREAS[atual] = [])

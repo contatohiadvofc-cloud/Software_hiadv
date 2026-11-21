@@ -10,6 +10,7 @@ import type { CampoDef, TipoCampo } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
 import { nomeTipo, type Compromisso } from './agenda'
 import { nomeArquivoSeguro, type PacoteBiblioteca, type Agente, type EtapaEscritorio, type Integracao, type ItemBiblioteca, type Servico, type TipoBiblioteca } from './escritorio'
+import { lerValor } from './financeiro'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -378,6 +379,39 @@ export function criarApiSupabase(url: string, chave: string): Api {
     async calcularPrazo(p) {
       const r = okOuErro(verificar(await sb.rpc('hiadv_prazo', { p_inicio: p.inicio, p_dias: p.dias, p_contagem: p.contagem, p_justica: p.justica, p_disponibilizacao: p.disponibilizacao })))
       return { publicacao: String(r.publicacao), fim: String(r.fim), coberturaAte: (r.cobertura_ate as string) ?? null, pulados: (r.pulados as { dia: string; nome: string }[]) ?? [] }
+    },
+    async finLista(de, ate) {
+      const d = verificar(await sb.rpc('hiadv_fin_lista', { p_de: de, p_ate: ate })) as Record<string, unknown>[] | null
+      return (d ?? []).map((x) => ({
+        id: String(x.id), sentido: x.sentido as 'entrada' | 'saida', etiqueta: String(x.etiqueta ?? ''), titulo: String(x.titulo ?? ''), descricao: (x.descricao as string) ?? null,
+        valor: Number(x.valor), vencimento: String(x.vencimento), pagoEm: (x.pago_em as string) ?? null, clienteId: (x.cliente_id as string) ?? null,
+        cliente: (x.cliente as string) ?? null, telefone: (x.telefone as string) ?? null, honorarioId: (x.honorario_id as string) ?? null,
+      }))
+    },
+    async finLancar(l) {
+      okOuErro(verificar(await sb.rpc('hiadv_fin_lancar', { p: { sentido: l.sentido, titulo: l.titulo.trim(), valor: lerValor(l.valor), vencimento: l.vencimento, etiqueta: l.etiqueta.trim() || null, cliente: l.cliente, pago: l.pago } })))
+    },
+    async finBaixar(id, pagoEm) {
+      okOuErro(verificar(await sb.rpc('hiadv_fin_baixar', { p_id: id, p_pago_em: pagoEm })))
+    },
+    async honorarioCriar(h) {
+      okOuErro(verificar(await sb.rpc('hiadv_honorario_criar', { p: {
+        cliente: h.cliente, caso: h.caso, tipo: h.tipo, descricao: h.descricao.trim() || null,
+        valor_fixo: h.tipo === 'exito' ? null : lerValor(h.valorFixo), parcelas: h.tipo === 'exito' ? null : Number(h.parcelas),
+        primeiro_vencimento: h.tipo === 'exito' ? null : h.primeiroVencimento, percentual_exito: h.tipo === 'fixo' ? null : lerValor(h.percentualExito),
+      } })))
+    },
+    async honorarioExito(id, valorRecebido) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_honorario_exito', { p_honorario: id, p_valor_recebido: valorRecebido })))
+      return Number(r.valor)
+    },
+    async honorariosCliente(clienteId) {
+      const d = (verificar(await sb.rpc('hiadv_honorarios_cliente', { p_cliente: clienteId })) ?? []) as Record<string, unknown>[]
+      return d.map((h) => ({
+        id: String(h.id), tipo: h.tipo as 'fixo' | 'exito' | 'misto', descricao: (h.descricao as string) ?? null, valorFixo: h.valor_fixo == null ? null : Number(h.valor_fixo),
+        parcelas: h.parcelas == null ? null : Number(h.parcelas), percentualExito: h.percentual_exito == null ? null : Number(h.percentual_exito),
+        status: h.status as 'ativo' | 'encerrado', criadoEm: String(h.criado_em), recebido: Number(h.recebido), aReceber: Number(h.a_receber), atrasado: Number(h.atrasado),
+      }))
     },
     async ativarArea(area, ativa) {
       okOuErro(verificar(await sb.rpc('area_ativar', { p_area: area, p_ativa: ativa })))

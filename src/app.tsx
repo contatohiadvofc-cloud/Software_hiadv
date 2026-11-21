@@ -16,6 +16,7 @@ const LCliente = lazyRouteComponent(() => import('./routes/Cliente'), 'Cliente')
 const LAgenda = lazyRouteComponent(() => import('./routes/Agenda'), 'Agenda')
 const LBiblioteca = lazyRouteComponent(() => import('./routes/Biblioteca'), 'Biblioteca')
 const LPublicacoes = lazyRouteComponent(() => import('./routes/Publicacoes'), 'Publicacoes')
+const LFinanceiro = lazyRouteComponent(() => import('./routes/Financeiro'), 'Financeiro')
 const LConfiguracoes = lazyRouteComponent(() => import('./routes/Configuracoes'), 'Configuracoes')
 const LAppShell = lazyRouteComponent(() => import('./shell/AppShell'), 'AppShellRota')
 
@@ -45,10 +46,11 @@ const cliente = createRoute({ getParentRoute: () => dentro, path: '/clientes/$id
 const agenda = createRoute({ getParentRoute: () => dentro, path: '/agenda', component: LAgenda, head: () => ({ meta: [{ title: 'Agenda · HiAdv' }] }) })
 const biblioteca = createRoute({ getParentRoute: () => dentro, path: '/biblioteca', component: LBiblioteca, head: () => ({ meta: [{ title: 'Biblioteca · HiAdv' }] }) })
 const publicacoes = createRoute({ getParentRoute: () => dentro, path: '/publicacoes', component: LPublicacoes, head: () => ({ meta: [{ title: 'Publicações · HiAdv' }] }) })
+const financeiro = createRoute({ getParentRoute: () => dentro, path: '/financeiro', component: LFinanceiro, head: () => ({ meta: [{ title: 'Financeiro · HiAdv' }] }) })
 const configuracoes = createRoute({ getParentRoute: () => dentro, path: '/configuracoes', component: LConfiguracoes, head: () => ({ meta: [{ title: 'Configurações · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, configuracoes, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, configuracoes, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

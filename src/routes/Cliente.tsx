@@ -13,12 +13,14 @@ import { ErrorState } from '../design/components/ErrorState'
 import { Badge } from '../design/components/Badge'
 import { FichaCaso } from './FichaCaso'
 import { NovoCasoDialog } from './Cadastro'
+import { HonorariosCliente } from './HonorariosCliente'
 import { Button } from '../design/components/Button'
 
 export function Cliente() {
   const { id } = useParams({ strict: false }) as { id: string }
   const api = useApi()
   const { perfil } = useSessao()
+  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   const areas = useAreas()
   const q = useQuery({ queryKey: ['cliente', perfil?.escritorioId, id], queryFn: () => api.cliente(id), enabled: !!perfil })
   const equipe = useQuery({ queryKey: ['equipe', perfil?.escritorioId], queryFn: () => api.equipe(), enabled: !!perfil, staleTime: 10 * 60_000 })
@@ -78,6 +80,7 @@ export function Cliente() {
           )}
         </Panel>
 
+        {gestor && <HonorariosCliente cliente={{ id: c.id, nome: c.nome }} />}
         <Panel title="Tarefas abertas" labelId="cli-tar">
           {tarefas.length === 0 ? <Empty title="Nenhuma tarefa aberta para este cliente." /> : (
             <ul className="seu-dia-lista">

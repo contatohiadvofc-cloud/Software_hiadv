@@ -7,6 +7,8 @@ export type Cenario = {
   areas?: Array<{ area: string; nome: string; ordem: number }> | 'sem-funcao'
   publicacoes?: Array<Record<string, unknown> & { publicacao: boolean }>
   oabs?: string[]
+  lancamentos?: Array<Record<string, unknown>>
+  honorarios?: Array<Record<string, unknown>>
   escritorios?: Array<{ id: string; nome: string; atual: boolean }>
   areasPorEscritorio?: Record<string, Array<{ area: string; nome: string; ordem: number }>>
   tarefas?: Array<Record<string, unknown>>
@@ -125,6 +127,10 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'agente_configurar') { registrar(); return json(r, c.recusarAgente ? { ok: false, erro: c.recusarAgente } : { ok: true }) }
       if (nome === 'caso_beneficio_salvar') { const v = req.postDataJSON() as { p: object }; estado.beneficios.push(v); return json(r, { ok: true, alterados: Object.keys(v.p).length }) }
       if (nome === 'caso_gate') { estado.gates.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true }) }
+      if (nome === 'hiadv_fin_lista') { registrar(); return json(r, c.lancamentos ?? []) }
+      if (nome === 'hiadv_fin_baixar' || nome === 'hiadv_fin_lancar' || nome === 'hiadv_honorario_criar') { registrar(); return json(r, { ok: true, id: 'novo' }) }
+      if (nome === 'hiadv_honorario_exito') { const b = registrar() as { p_valor_recebido: number }; return json(r, { ok: true, valor: Math.round(b.p_valor_recebido * 30) / 100 }) }
+      if (nome === 'hiadv_honorarios_cliente') { registrar(); return json(r, c.honorarios ?? []) }
       if (nome === 'hiadv_publicacoes') { const b = registrar() as { p_so_publicacoes: boolean }; return json(r, (c.publicacoes ?? []).filter((x) => !b.p_so_publicacoes || x.publicacao)) }
       if (nome === 'hiadv_oabs') return json(r, { oabs: c.oabs ?? [], da_equipe: [] })
       if (nome === 'hiadv_oabs_salvar') { const b = registrar() as { p_oabs: string[] }; c.oabs = b.p_oabs; return json(r, { ok: true, oabs: b.p_oabs }) }

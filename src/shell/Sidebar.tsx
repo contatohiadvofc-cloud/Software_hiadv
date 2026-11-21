@@ -1,4 +1,5 @@
 import { Link } from '@tanstack/react-router'
+import { useSessao } from '../lib/contexto'
 import { useAreas } from '../data/consultas'
 import { Marca } from './Marca'
 import { OfficeSwitcher } from './OfficeSwitcher'
@@ -10,6 +11,8 @@ function Icone({ d }: { d: string }) {
 }
 
 export function Sidebar() {
+  const { perfil } = useSessao()
+  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   const areas = useAreas()
 
   return (
@@ -48,6 +51,11 @@ export function Sidebar() {
         <Link to="/publicacoes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M4 4h12l4 4v12H4zM8 10h8M8 14h8M8 18h5" />Publicações
         </Link>
+        {gestor && (
+          <Link to="/financeiro" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+            <Icone d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />Financeiro
+          </Link>
+        )}
         <Link to="/biblioteca" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />Biblioteca
         </Link>
