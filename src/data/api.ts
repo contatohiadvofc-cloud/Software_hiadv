@@ -14,6 +14,9 @@ import type { EtapaLead, Lead, NovoLead } from './atendimentos'
 import type { NovasHoras, RegistroHoras } from './horas'
 import type { Portal, SituacaoPortal } from './portal'
 import type { Adesao, Cortesia, FormAdesao, Indicacao, PlanoId, Respostas, StatusAdesao } from './adesao'
+import type { PedidoIA } from './iaPrompts'
+import type { ConfigGoogle } from '../lib/drive'
+import type { AssinaturaForm, DetalheCentral, EscritorioCentral, MeusRecursos, NovoEscritorio } from './central'
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
@@ -178,4 +181,21 @@ export interface Api {
   adesoes(): Promise<Adesao[]>
   adesaoAtualizar(id: string, status: StatusAdesao, extra?: { fundador?: boolean; cortesia?: Cortesia; obs?: string }): Promise<void>
   adesaoPlano(id: string, plano: PlanoId): Promise<void>
+  /** O que a pessoa logada pode usar (null = escritório sem assinatura na Central: tudo aberto). */
+  meusRecursos(): Promise<MeusRecursos | null>
+  /** Central HiAdv: só o papel code. */
+  centralEscritorios(): Promise<EscritorioCentral[]>
+  centralEscritorio(id: string): Promise<DetalheCentral>
+  centralAssinatura(id: string, f: AssinaturaForm): Promise<void>
+  centralAjuste(id: string, recurso: string, valor: 'plano' | 'liberado' | 'bloqueado', validoAte: string | null): Promise<void>
+  /** Code em qualquer escritório; o Gestor Master só no próprio. */
+  pessoaAjuste(id: string, email: string, recurso: string, bloquear: boolean, validoAte: string | null): Promise<void>
+  centralNovo(n: NovoEscritorio): Promise<string>
+  /** IA do plano Sênior (chave da Claude do escritório, no servidor). Devolve o rascunho. */
+  iaGerar(p: PedidoIA): Promise<string>
+  iaUsoMes(): Promise<{ usados: number; limite: number | null } | null>
+  /** Identificadores públicos do app do HiAdv no Google (seletor do Drive) e se o Drive está ligado no escritório. */
+  configGoogle(): Promise<{ cfg: ConfigGoogle | null; driveLigado: boolean }>
+  /** Só o papel code. */
+  configGoogleSalvar(cfg: ConfigGoogle): Promise<void>
 }

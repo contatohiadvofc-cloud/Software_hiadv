@@ -16,6 +16,8 @@ import type { Agente, Integracao, ItemBiblioteca } from './escritorio'
 import { validarLead, type Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
 import { validarAdesao, type Adesao } from './adesao'
+import { montarPedidoIA } from './iaPrompts'
+import { validarNovo, type DetalheCentral, type EscritorioCentral } from './central'
 
 const hojeDemo = () => new Date().toISOString().slice(0, 10)
 const LEADS: Lead[] = [
@@ -30,6 +32,25 @@ const PORTAIS = new Map<string, { cliente: string; expira: string; acessos: numb
 let contatoDemo = { cidade: 'Capinzal' as string | null, whatsapp: '49999990000' as string | null }
 let agendaDemo = false
 const ADESOES: Adesao[] = []
+const CENTRAL: (EscritorioCentral & { detalhe: DetalheCentral })[] = [
+  { id: 'demo', nome: 'Silva & Prado Advocacia (demonstração)', cidade: 'Joinville/SC', ativo: true, oabsMaster: ['OAB/SC 00.101'], plano: 'premium', situacao: 'ativo', fundador: true, testeAte: null, pagoAte: null, obs: null,
+    limites: { masters: 3, colaboradores: 8, oabs: 3, iaMensal: 0 }, uso: { masters: 2, colaboradores: 2, oabs: 1, iaMes: 0 }, ajustes: 0,
+    detalhe: { ajustes: [], recursos: [], pessoas: [{ email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: 'master', bloqueios: [] }, { email: 'marcos@silvaprado.exemplo.br', nome: 'Marcos Lima', papel: 'colaborador', bloqueios: [] }], historico: [] } },
+]
+const RECURSOS_PLANO: Record<string, string[]> = {
+  pro: ['casos','atendimentos','clientes','prazos','publicacoes','agenda','acompanhamento','documentos','celular'],
+}
+RECURSOS_PLANO.premium = [...RECURSOS_PLANO.pro, 'financeiro','relatorios','horas','atencao']
+RECURSOS_PLANO.supremo = [...RECURSOS_PLANO.premium, 'drive', 'ia','sara','zapsign','whatsapp','api']
+function recalcular(e: (typeof CENTRAL)[number]) {
+  e.detalhe.recursos = RECURSOS_PLANO.supremo.map((r) => {
+    const aj = e.detalhe.ajustes.find((a) => a.recurso === r)
+    const noPlano = RECURSOS_PLANO[e.plano ?? 'supremo'].includes(r)
+    return { recurso: r, noPlano, liberado: aj ? aj.valor === 'liberado' : noPlano }
+  })
+  e.ajustes = e.detalhe.ajustes.length
+}
+CENTRAL.forEach(recalcular)
 const CODIGO_DEMO = 'ANA7K2Q'
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
@@ -725,6 +746,40 @@ export function criarApiDemo(): Api {
       if (extra?.obs !== undefined) a.obs = extra.obs.trim() || null
     },
     async adesaoPlano(id, plano) { const a = ADESOES.find((x) => x.id === id); if (!a) throw new Error('Pedido não encontrado.'); a.plano = plano },
+    async meusRecursos() { return null },
+    async centralEscritorios() { return CENTRAL.map(({ detalhe: _d, ...e }) => ({ ...e, limites: { ...e.limites }, uso: { ...e.uso } })) },
+    async centralEscritorio(id) { const e = CENTRAL.find((x) => x.id === id); if (!e) throw new Error('Escritório não encontrado.'); return JSON.parse(JSON.stringify(e.detalhe)) },
+    async centralAssinatura(id, f) {
+      const e = CENTRAL.find((x) => x.id === id); if (!e) throw new Error('Escritório não encontrado.')
+      Object.assign(e, { plano: f.plano, situacao: f.situacao, fundador: f.fundador, testeAte: f.testeAte || null, pagoAte: f.pagoAte || null, obs: f.obs.trim() || null })
+      e.detalhe.historico.unshift({ quando: new Date().toISOString(), quem: 'demonstração', acao: `plano ${f.plano}, ${f.situacao}` }); recalcular(e)
+    },
+    async centralAjuste(id, recurso, valor, validoAte) {
+      const e = CENTRAL.find((x) => x.id === id); if (!e) throw new Error('Escritório não encontrado.')
+      e.detalhe.ajustes = e.detalhe.ajustes.filter((a) => a.recurso !== recurso)
+      if (valor !== 'plano') e.detalhe.ajustes.push({ recurso, valor, validoAte })
+      recalcular(e)
+    },
+    async pessoaAjuste(id, email, recurso, bloquear, validoAte) {
+      const e = CENTRAL.find((x) => x.id === id); const p = e?.detalhe.pessoas.find((x) => x.email === email); if (!p) throw new Error('Pessoa não encontrada neste escritório.')
+      p.bloqueios = p.bloqueios.filter((b) => b.recurso !== recurso); if (bloquear) p.bloqueios.push({ recurso, validoAte })
+    },
+    async iaGerar(p) {
+      const { mensagem } = montarPedidoIA(p)
+      await new Promise((r) => setTimeout(r, 400))
+      return `Rascunho de demonstração (${p.acao}). Na versão real, este texto é escrito pela IA com a chave da Claude do escritório e chega aqui para você revisar.\n\nO pedido enviado teria ${mensagem.length} caracteres.`
+    },
+    async iaUsoMes() { return { usados: 3, limite: 300 } },
+    async configGoogle() { return { cfg: null, driveLigado: false } },
+    async configGoogleSalvar() { throw new Error('Na demonstração a configuração do Google não é salva.') },
+    async centralNovo(n) {
+      const erro = validarNovo(n); if (erro) throw new Error(erro)
+      const id = 'demo-' + (CENTRAL.length + 1)
+      const e = { id, nome: n.nome.trim(), cidade: n.cidade.trim() || null, ativo: true, oabsMaster: n.oab.trim() ? [n.oab.trim()] : [], plano: n.plano, situacao: 'teste' as const, fundador: n.fundador,
+        testeAte: null, pagoAte: null, obs: null, limites: { masters: null, colaboradores: null, oabs: null, iaMensal: null }, uso: { masters: 1, colaboradores: 0, oabs: n.oab.trim() ? 1 : 0, iaMes: 0 }, ajustes: 0,
+        detalhe: { ajustes: [], recursos: [], pessoas: [{ email: n.masterEmail.trim().toLowerCase(), nome: n.masterNome.trim(), papel: 'master', bloqueios: [] }], historico: [] } }
+      CENTRAL.push(e); recalcular(e); return id
+    },
     async falhas() { return FALHAS.filter((f) => !RESOLVIDAS.has(f.id)).map((f) => ({ ...f })) },
     async resolverFalha(id) { RESOLVIDAS.add(id) },
     async pacotes() {

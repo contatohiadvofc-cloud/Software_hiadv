@@ -9,6 +9,8 @@ import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
 import { Button } from '../design/components/Button'
 import { PrazoDialog, type PrazoInicial } from './Prazo'
+import { AssistenteIA } from './AssistenteIA'
+import { useRecursos } from '../data/consultas'
 
 const PERIODOS = [{ dias: 7, nome: '7 dias' }, { dias: 30, nome: '30 dias' }, { dias: 90, nome: '90 dias' }]
 
@@ -19,7 +21,7 @@ function rotuloDia(dia: string, hoje: string) {
   return dataTela(dia)
 }
 
-function Item({ p, aoPrazo }: { p: Publicacao; aoPrazo: (p: Publicacao) => void }) {
+function Item({ p, aoPrazo, aoResumir }: { p: Publicacao; aoPrazo: (p: Publicacao) => void; aoResumir?: (p: Publicacao) => void }) {
   const [aberto, setAberto] = useState(false)
   const longo = (p.texto?.length ?? 0) > 220
   return (
@@ -43,6 +45,7 @@ function Item({ p, aoPrazo }: { p: Publicacao; aoPrazo: (p: Publicacao) => void 
               {p.tarefa.feita ? 'Tarefa concluída' : p.tarefa.prazo ? `Virou tarefa · prazo ${dataTela(p.tarefa.prazo)}` : 'Virou tarefa'}
             </Link>
           : p.publicacao && <Button size="sm" variant="secondary" onClick={() => aoPrazo(p)}>Calcular prazo e criar tarefa</Button>}
+        {aoResumir && p.texto && <Button size="sm" variant="ghost" onClick={() => aoResumir(p)}>Resumir com IA</Button>}
       </div>
     </li>
   )
@@ -55,6 +58,8 @@ export function Publicacoes() {
   const [dias, setDias] = useState(30)
   const [so, setSo] = useState(true)
   const [prazo, setPrazo] = useState<PrazoInicial | null>(null)
+  const [resumir, setResumir] = useState<Publicacao | null>(null)
+  const recursos = useRecursos()
   const q = useQuery({ queryKey: ['publicacoes', perfil?.escritorioId, dias, so], queryFn: () => api.publicacoes(dias, so), enabled: !!perfil })
   const oabs = useQuery({ queryKey: ['oabs', perfil?.escritorioId], queryFn: () => api.oabs(), enabled: !!perfil, staleTime: 10 * 60_000 })
   const hoje = diaSP(new Date())
@@ -68,6 +73,7 @@ export function Publicacoes() {
 
   return (
     <div className="pagina">
+      {resumir && <AssistenteIA open onOpenChange={(v) => { if (!v) setResumir(null) }} ctx={{ acao: 'resumo_intimacao', texto: [resumir.titulo, resumir.numeroCnj ? `Processo ${cnjTela(resumir.numeroCnj)}` : '', resumir.texto ?? ''].filter(Boolean).join('\n'), cliente: resumir.clienteId ? { id: resumir.clienteId, nome: resumir.cliente ?? '' } : undefined }} />}
       <div className="pagina-cabeca">
         <div>
           <h1>Publicações</h1>
@@ -103,7 +109,7 @@ export function Publicacoes() {
         {grupos.map((g) => (
           <div key={g.dia}>
             <h3 className="hv-group-title"><span>{rotuloDia(g.dia, hoje)}</span><span>{g.itens.length}</span></h3>
-            <ul className="pub-lista">{g.itens.map((p) => <Item key={p.id} p={p} aoPrazo={abrirPrazo} />)}</ul>
+            <ul className="pub-lista">{g.itens.map((p) => <Item key={p.id} p={p} aoPrazo={abrirPrazo} aoResumir={recursos.pode('ia') ? setResumir : undefined} />)}</ul>
           </div>
         ))}
       </Panel>

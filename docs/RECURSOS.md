@@ -78,21 +78,33 @@ Onde fica: Este aparelho.
 
 ## Para ativar
 
-## Em preparação
+### Assistente de IA (plano Sênior) (Gestor Master)
 
-### IA dos agentes (Claude) (Gestor Master)
-
-Lê documentos, sugere a providência da intimação, prepara minutas e quesitos. Quem decide e assina é o advogado.
+Quesitos, minutas e resumos de intimações e documentos, como rascunho para o advogado revisar. Fica na página do cliente e em Publicações.
 
 Onde fica: Integrações.
 
-- Crie a conta do escritório em console.anthropic.com e cadastre um cartão em Billing.
-- Em API Keys, crie uma chave com o nome "HiAdv".
-- Aqui em Integrações, em Claude, clique em "Cadastrar chave" e cole. A chave vai direto para o cofre: depois de salva, ninguém vê de novo.
-- Defina o limite por mês (opcional) e clique em "Ativar".
-- Quando a leitura por IA for liberada, os agentes que usam a Claude passam a funcionar sozinhos com essa chave. Os agentes sem custo já funcionam hoje.
+1. Crie a conta do escritório em console.anthropic.com e cadastre um cartão em Billing.
+2. Em API Keys, crie uma chave com o nome "HiAdv".
+3. Aqui em Integrações, em Claude, clique em "Cadastrar chave" e cole. A chave vai direto para o cofre: depois de salva, ninguém vê de novo.
+4. Defina o limite por mês (opcional) e clique em "Ativar".
+5. Pronto: o botão "Assistente de IA" aparece na página do cliente e "Resumir com IA" em cada publicação.
 
 Custo: Pago por uso na conta Anthropic do escritório. Dá para definir um limite por mês.
+
+### Google Drive do escritório (Gestor Master)
+
+No Assistente de IA, escolha arquivos do Drive para a IA ler (PDF, Word, Google Docs, fotos) e salve o rascunho de volta na pasta do cliente. Os arquivos não são copiados para o HiAdv.
+
+Onde fica: Integrações.
+
+1. Aqui em Integrações, ligue o Google Drive.
+2. No Assistente de IA, toque em "Escolher arquivos do Drive" e entre com a conta Google do escritório.
+3. O HiAdv só enxerga os arquivos e pastas que você escolher na janela do Google.
+
+Custo: Sem custo.
+
+## Em preparação
 
 ### Assinatura digital (ZapSign) (Gestor Master)
 
@@ -116,14 +128,6 @@ Número oficial do escritório respondendo e qualificando contatos, que entram s
 - Mensagem ao cliente continua sem envio automático; o robô só qualifica e organiza.
 
 Custo: Cobrança da Meta por conversa, na conta do escritório.
-
-### Pastas do Google Drive (Gestor Master)
-
-Relaciona as pastas de clientes do Drive aos cadastros. Nada é lido sem a aprovação de um gestor.
-
-- Quando ligar: compartilhe a pasta de clientes com o HiAdv e aprove cada ligação sugerida.
-
-Custo: Sem custo.
 
 ### Conexão com outros sistemas (API) (Gestor Master)
 

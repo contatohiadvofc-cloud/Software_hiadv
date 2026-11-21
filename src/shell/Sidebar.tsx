@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useSessao } from '../lib/contexto'
-import { useAreas } from '../data/consultas'
+import { useAreas, useRecursos } from '../data/consultas'
 import { Marca } from './Marca'
 import { OfficeSwitcher } from './OfficeSwitcher'
 
@@ -14,6 +14,7 @@ export function Sidebar() {
   const { perfil } = useSessao()
   const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   const areas = useAreas()
+  const { pode } = useRecursos()
 
   return (
     <nav className="lateral" aria-label="Navegação principal">
@@ -23,9 +24,11 @@ export function Sidebar() {
         <Link to="/seu-dia" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" />Seu dia
         </Link>
-        <Link to="/atendimentos" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
-          <Icone d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 9h8M8 13h5" />Atendimentos
-        </Link>
+        {pode('atendimentos') && (
+          <Link to="/atendimentos" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+            <Icone d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 9h8M8 13h5" />Atendimentos
+          </Link>
+        )}
         <Link to="/tarefas" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" />Tarefas
         </Link>
@@ -51,17 +54,24 @@ export function Sidebar() {
       </div>
       <div className="lateral-grupo lateral-rodape">
         <span className="lateral-item lateral-breve" aria-disabled="true">Sara<small>em breve</small></span>
-        <Link to="/publicacoes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
-          <Icone d="M4 4h12l4 4v12H4zM8 10h8M8 14h8M8 18h5" />Publicações
-        </Link>
-        {gestor && (
+        {pode('publicacoes') && (
+          <Link to="/publicacoes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+            <Icone d="M4 4h12l4 4v12H4zM8 10h8M8 14h8M8 18h5" />Publicações
+          </Link>
+        )}
+        {gestor && pode('financeiro') && (
           <Link to="/financeiro" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
             <Icone d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />Financeiro
           </Link>
         )}
-        {gestor && (
+        {gestor && pode('relatorios') && (
           <Link to="/relatorios" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
             <Icone d="M4 20V10M10 20V4M16 20v-7M22 20H2" />Relatórios
+          </Link>
+        )}
+        {perfil?.papel === 'code' && (
+          <Link to="/central" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+            <Icone d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />Central HiAdv
           </Link>
         )}
         {perfil?.papel === 'code' && (

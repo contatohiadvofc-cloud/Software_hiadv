@@ -22,6 +22,7 @@ const LAtendimentos = lazyRouteComponent(() => import('./routes/Atendimentos'), 
 const LAderir = lazyRouteComponent(() => import('./routes/Aderir'), 'Aderir')
 const LIndicar = lazyRouteComponent(() => import('./routes/Indicar'), 'Indicar')
 const LAdesoes = lazyRouteComponent(() => import('./routes/Adesoes'), 'Adesoes')
+const LCentral = lazyRouteComponent(() => import('./routes/Central'), 'Central')
 const LAcompanhar = lazyRouteComponent(() => import('./routes/Acompanhar'), 'Acompanhar')
 const LConfiguracoes = lazyRouteComponent(() => import('./routes/Configuracoes'), 'Configuracoes')
 const LAppShell = lazyRouteComponent(() => import('./shell/AppShell'), 'AppShellRota')
@@ -63,10 +64,11 @@ const aderir = createRoute({
   validateSearch: (s: Record<string, unknown>): { ref?: string } => (typeof s.ref === 'string' ? { ref: s.ref } : {}),
 })
 const indicar = createRoute({ getParentRoute: () => dentro, path: '/indicar', component: LIndicar, head: () => ({ meta: [{ title: 'Indique o HiAdv · HiAdv' }] }) })
+const central = createRoute({ getParentRoute: () => dentro, path: '/central', component: LCentral, head: () => ({ meta: [{ title: 'Central HiAdv · HiAdv' }] }) })
 const adesoes = createRoute({ getParentRoute: () => dentro, path: '/adesoes', component: LAdesoes, head: () => ({ meta: [{ title: 'Adesões · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, configuracoes, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, configuracoes, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

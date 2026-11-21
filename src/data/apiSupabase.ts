@@ -8,6 +8,8 @@ import { destaquesDoCartao, type Quadro } from './quadro'
 import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
+import type { Situacao } from './central'
+import { configCompleta } from '../lib/drive'
 import { nomeTipo, type Compromisso } from './agenda'
 import { nomeArquivoSeguro, type PacoteBiblioteca, type Agente, type EtapaEscritorio, type Integracao, type ItemBiblioteca, type Servico, type TipoBiblioteca } from './escritorio'
 import { lerValor } from './financeiro'
@@ -16,7 +18,7 @@ import type { Relatorio } from './relatorios'
 import type { Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
-import type { Adesao, Indicacao } from './adesao'
+import type { Adesao, Indicacao, PlanoId } from './adesao'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -552,6 +554,74 @@ export function criarApiSupabase(url: string, chave: string): Api {
     },
     async adesaoPlano(id, plano) {
       okOuErro(verificar(await sb.rpc('hiadv_adesao_plano', { p_id: id, p_plano: plano })))
+    },
+    async meusRecursos() {
+      const r = await sb.rpc('hiadv_meus_recursos')
+      if (r.error && /hiadv_meus_recursos|PGRST202/i.test(`${r.error.code} ${r.error.message}`)) return null
+      const d = verificar(r) as Record<string, unknown> | null
+      if (!d || typeof d !== 'object' || Array.isArray(d) || !d.plano) return null
+      return { plano: d.plano as PlanoId, situacao: (d.situacao as Situacao) ?? null, testeAte: (d.teste_ate as string) ?? null, recursos: (d.recursos as string[]) ?? [] }
+    },
+    async centralEscritorios() {
+      const d = (verificar(await sb.rpc('hiadv_central_escritorios')) ?? []) as Record<string, any>[]
+      return d.map((e) => ({
+        id: e.id, nome: e.nome, cidade: e.cidade ?? null, ativo: !!e.ativo, oabsMaster: e.oabs_master ?? [],
+        plano: e.plano ?? null, situacao: e.situacao ?? null, fundador: !!e.fundador, testeAte: e.teste_ate ?? null, pagoAte: e.pago_ate ?? null, obs: e.obs ?? null,
+        limites: { masters: e.limites?.masters ?? null, colaboradores: e.limites?.colaboradores ?? null, oabs: e.limites?.oabs ?? null, iaMensal: e.limites?.ia_mensal ?? null },
+        uso: { masters: Number(e.uso?.masters ?? 0), colaboradores: Number(e.uso?.colaboradores ?? 0), oabs: Number(e.uso?.oabs ?? 0), iaMes: Number(e.uso?.ia_mes ?? 0) },
+        ajustes: Number(e.ajustes ?? 0),
+      }))
+    },
+    async centralEscritorio(id) {
+      const d = verificar(await sb.rpc('hiadv_central_escritorio', { p_id: id })) as Record<string, any>
+      return {
+        ajustes: (d.ajustes ?? []).map((a: any) => ({ recurso: a.recurso, valor: a.valor, validoAte: a.valido_ate ?? null })),
+        recursos: (d.recursos ?? []).map((a: any) => ({ recurso: a.recurso, noPlano: !!a.no_plano, liberado: !!a.liberado })),
+        pessoas: (d.pessoas ?? []).map((p: any) => ({ email: p.email, nome: p.nome, papel: p.papel, bloqueios: (p.bloqueios ?? []).map((b: any) => ({ recurso: b.recurso, validoAte: b.valido_ate ?? null })) })),
+        historico: (d.historico ?? []).map((h: any) => ({ quando: h.quando, quem: h.quem, acao: h.acao })),
+      }
+    },
+    async centralAssinatura(id, f) {
+      okOuErro(verificar(await sb.rpc('hiadv_central_assinatura', { p_id: id, p: {
+        plano: f.plano, situacao: f.situacao, fundador: f.fundador, teste_ate: f.testeAte || null, pago_ate: f.pagoAte || null, obs: f.obs,
+        masters: f.masters || null, colaboradores: f.colaboradores || null, oabs: f.oabs || null, ia_mensal: f.iaMensal || null } })))
+    },
+    async centralAjuste(id, recurso, valor, validoAte) {
+      okOuErro(verificar(await sb.rpc('hiadv_central_ajuste', { p_id: id, p_recurso: recurso, p_valor: valor, p_valido_ate: validoAte })))
+    },
+    async pessoaAjuste(id, email, recurso, bloquear, validoAte) {
+      okOuErro(verificar(await sb.rpc('hiadv_pessoa_ajuste', { p_id: id, p_email: email, p_recurso: recurso, p_bloquear: bloquear, p_valido_ate: validoAte })))
+    },
+    async iaGerar(p) {
+      const { data } = await sb.auth.getSession()
+      if (!data.session) throw new SessaoExpirada()
+      let r: Response
+      try {
+        r = await fetch(`${url}/functions/v1/ia`, { method: 'POST', headers: { apikey: chave, Authorization: `Bearer ${data.session.access_token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(p) })
+      } catch { throw new Error('Sem conexão com o servidor. Tente de novo.') }
+      const d = (await r.json().catch(() => null)) as { ok?: boolean; texto?: string; erro?: string } | null
+      if (!d?.ok) throw new Error(d?.erro ?? 'A IA não conseguiu responder agora.')
+      return String(d.texto ?? '')
+    },
+    async iaUsoMes() {
+      const r = await sb.rpc('hiadv_ia_uso_mes')
+      if (r.error) return null
+      const d = r.data as { usados?: number; limite?: number | null } | null
+      return d ? { usados: Number(d.usados ?? 0), limite: d.limite == null ? null : Number(d.limite) } : null
+    },
+    async configGoogle() {
+      const r = await sb.rpc('hiadv_config_google')
+      if (r.error) return { cfg: null, driveLigado: false }
+      const d = r.data as Record<string, unknown> | null
+      const cfg = { clientId: String(d?.client_id ?? ''), apiKey: String(d?.api_key ?? ''), appId: String(d?.app_id ?? '') }
+      return { cfg: configCompleta(cfg) ? cfg : null, driveLigado: !!d?.drive_ligado }
+    },
+    async configGoogleSalvar(cfg) {
+      okOuErro(verificar(await sb.rpc('hiadv_config_google_salvar', { p: { client_id: cfg.clientId.trim(), api_key: cfg.apiKey.trim(), app_id: cfg.appId.trim() } })))
+    },
+    async centralNovo(n) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_central_novo', { p: { nome: n.nome, cidade: n.cidade, oab: n.oab, master_nome: n.masterNome, master_email: n.masterEmail, plano: n.plano, fundador: n.fundador } })))
+      return String(r.id)
     },
     async falhas() {
       const r = await sb.rpc('falhas_listar')

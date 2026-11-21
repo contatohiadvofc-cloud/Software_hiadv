@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
-import { useAreas } from '../data/consultas'
+import { useAreas, useRecursos } from '../data/consultas'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
@@ -14,6 +14,7 @@ import { NovoCasoDialog } from './Cadastro'
 export function Areas() {
   const areas = useAreas()
   const { perfil } = useSessao()
+  const { pode } = useRecursos()
   const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
   const [novoCaso, setNovoCaso] = useState(false)
   const nav = useNavigate()
@@ -45,13 +46,14 @@ export function Areas() {
       </Panel>
       <Panel title="Do escritório" labelId="areas-mais">
         <ul className="areas-lista">
-          <li><Link to="/atendimentos" className="areas-item">Atendimentos (novos contatos)<span aria-hidden="true">›</span></Link></li>
-          <li><Link to="/publicacoes" className="areas-item">Publicações e intimações<span aria-hidden="true">›</span></Link></li>
-          {gestor && <li><Link to="/relatorios" className="areas-item">Relatórios<span aria-hidden="true">›</span></Link></li>}
-          {gestor && <li><Link to="/financeiro" className="areas-item">Financeiro<span aria-hidden="true">›</span></Link></li>}
+          {pode('atendimentos') && <li><Link to="/atendimentos" className="areas-item">Atendimentos (novos contatos)<span aria-hidden="true">›</span></Link></li>}
+          {pode('publicacoes') && <li><Link to="/publicacoes" className="areas-item">Publicações e intimações<span aria-hidden="true">›</span></Link></li>}
+          {gestor && pode('relatorios') && <li><Link to="/relatorios" className="areas-item">Relatórios<span aria-hidden="true">›</span></Link></li>}
+          {gestor && pode('financeiro') && <li><Link to="/financeiro" className="areas-item">Financeiro<span aria-hidden="true">›</span></Link></li>}
           <li><Link to="/biblioteca" className="areas-item">Biblioteca<span aria-hidden="true">›</span></Link></li>
           <li><Link to="/indicar" className="areas-item">Indique o HiAdv<span aria-hidden="true">›</span></Link></li>
           {perfil?.papel === 'code' && <li><Link to="/adesoes" className="areas-item">Adesões<span aria-hidden="true">›</span></Link></li>}
+          {perfil?.papel === 'code' && <li><Link to="/central" className="areas-item">Central HiAdv<span aria-hidden="true">›</span></Link></li>}
           <li><Link to="/configuracoes" className="areas-item">Configurações<span aria-hidden="true">›</span></Link></li>
         </ul>
       </Panel>

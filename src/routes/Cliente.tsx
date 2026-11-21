@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
-import { useAreas } from '../data/consultas'
+import { useAreas, useRecursos } from '../data/consultas'
 import { linkWhatsapp, telefoneTela, type CasoDoCliente } from '../data/clientes'
 import { rotuloEtapa } from '../data/quadro'
 import { nomeDe } from '../data/tarefas'
@@ -18,6 +18,7 @@ import { DadosCliente } from './DadosCliente'
 import { AcompanhamentoCliente } from './AcompanhamentoCliente'
 import { HorasCliente } from './HorasCliente'
 import { GerarDocumentoDialog } from './GerarDocumento'
+import { AssistenteIA } from './AssistenteIA'
 import { Button } from '../design/components/Button'
 
 export function Cliente() {
@@ -25,12 +26,14 @@ export function Cliente() {
   const api = useApi()
   const { perfil } = useSessao()
   const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const recursos = useRecursos()
   const areas = useAreas()
   const q = useQuery({ queryKey: ['cliente', perfil?.escritorioId, id], queryFn: () => api.cliente(id), enabled: !!perfil })
   const equipe = useQuery({ queryKey: ['equipe', perfil?.escritorioId], queryFn: () => api.equipe(), enabled: !!perfil, staleTime: 10 * 60_000 })
   const [aberto, setAberto] = useState<CasoDoCliente | null>(null)
   const [novoCaso, setNovoCaso] = useState(false)
   const [gerarDoc, setGerarDoc] = useState(false)
+  const [ia, setIa] = useState(false)
   const nomeArea = (a: string) => areas.data?.find((x) => x.area === a)?.nome ?? rotuloEtapa(a)
   const agora = new Date()
 
@@ -52,10 +55,15 @@ export function Cliente() {
           </p>
         </div>
         <div className="pagina-acoes">
+          {recursos.pode('ia') && <Button variant="secondary" onClick={() => setIa(true)}>Assistente de IA</Button>}
           <Button variant="secondary" onClick={() => setGerarDoc(true)}>Gerar documento</Button>
           <Button onClick={() => setNovoCaso(true)}>Novo caso</Button>
         </div>
       </div>
+      {ia && <AssistenteIA open={ia} onOpenChange={setIa} ctx={{
+        cliente: { id: c.id, nome: c.nome },
+        casos: casos.map((k) => ({ id: k.id, descricao: [k.produto, nomeArea(k.area)].filter(Boolean).join(' · '), dados: { 'benefício': k.produto, 'área': nomeArea(k.area), 'etapa': rotuloEtapa(k.status) } })),
+      }} />}
       <GerarDocumentoDialog aberto={gerarDoc} aoFechar={() => setGerarDoc(false)} cliente={{ id: c.id, nome: c.nome }} />
       <NovoCasoDialog aberto={novoCaso} aoFechar={() => setNovoCaso(false)} clienteId={c.id} clienteNome={c.nome}
         aoCriar={(id, area) => { setNovoCaso(false); setAberto({ id, area, status: '', produto: null }) }} />
@@ -90,9 +98,9 @@ export function Cliente() {
         </Panel>
 
         <DadosCliente clienteId={c.id} />
-        {gestor && <HonorariosCliente cliente={{ id: c.id, nome: c.nome }} />}
-        <AcompanhamentoCliente cliente={{ id: c.id, nome: c.nome, telefone: c.telefone }} />
-        <HorasCliente clienteId={c.id} />
+        {gestor && recursos.pode('financeiro') && <HonorariosCliente cliente={{ id: c.id, nome: c.nome }} />}
+        {recursos.pode('acompanhamento') && <AcompanhamentoCliente cliente={{ id: c.id, nome: c.nome, telefone: c.telefone }} />}
+        {recursos.pode('horas') && <HorasCliente clienteId={c.id} />}
         <Panel title="Tarefas abertas" labelId="cli-tar">
           {tarefas.length === 0 ? <Empty title="Nenhuma tarefa aberta para este cliente." /> : (
             <ul className="seu-dia-lista">

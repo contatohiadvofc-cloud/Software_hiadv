@@ -10,6 +10,9 @@ import { BottomBar } from './BottomBar'
 import { CommandSearch } from './CommandSearch'
 import { MenuConta } from './MenuConta'
 import { Kbd } from '../design/components/Kbd'
+import { useRecursos } from '../data/consultas'
+import { avisoAssinatura, recursoDaRota } from '../data/central'
+import { ForaDoPlano } from './ForaDoPlano'
 
 export function AppShell({ children }: { children: ReactNode }) {
   const sessao = useSessao()
@@ -19,6 +22,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const [buscando, setBuscando] = useState(false)
   const indo = useRef(false)
   const [livre, setLivre] = useState(false)
+  const recursos = useRecursos()
 
   // Sem sessão: vai ao login uma única vez, guardando para onde voltar.
   useEffect(() => {
@@ -53,6 +57,11 @@ export function AppShell({ children }: { children: ReactNode }) {
   if (sessao.estado !== 'dentro') return <div className="carregando" role="status">Carregando o HiAdv…</div>
   if (!livre && precisaDesbloquear(sessao.perfil?.email)) return <Travado aoLiberar={() => setLivre(true)} />
 
+  const rota = recursoDaRota(loc.pathname)
+  const bloqueado = rota && recursos.carregado && !recursos.pode(rota) ? rota : null
+  const gestor = sessao.perfil?.papel === 'master' || sessao.perfil?.papel === 'code'
+  const aviso = gestor ? avisoAssinatura(recursos.meus) : null
+
   return (
     <div className="app">
       <Sidebar />
@@ -71,7 +80,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </button>
           <MenuConta />
         </header>
-        <main className="conteudo" id="conteudo"><OfertaDesbloqueio />{children}</main>
+        <main className="conteudo" id="conteudo"><OfertaDesbloqueio />
+          {aviso && <p className="aviso-assinatura" role="status">{aviso}</p>}
+          {bloqueado ? <ForaDoPlano recurso={bloqueado} /> : children}
+        </main>
       </div>
       <BottomBar />
       <CommandSearch open={buscando} onOpenChange={setBuscando} />

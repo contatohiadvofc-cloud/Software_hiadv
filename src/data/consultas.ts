@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { pode } from './central'
 import { useApi, useSessao } from '../lib/contexto'
 
 export function useAreas() {
@@ -22,4 +23,12 @@ export function useItensDoDia() {
     enabled: !!perfil,
     refetchInterval: 5 * 60_000,
   })
+}
+
+/** O que a pessoa logada pode usar (plano do escritório e ajustes da Central). */
+export function useRecursos() {
+  const api = useApi()
+  const { perfil } = useSessao()
+  const q = useQuery({ queryKey: ['meus-recursos', perfil?.escritorioId, perfil?.email], queryFn: () => api.meusRecursos(), enabled: !!perfil, staleTime: 5 * 60_000 })
+  return { meus: q.data ?? null, carregado: q.isSuccess || q.isError, pode: (r: string) => pode(q.data ?? null, r) }
 }

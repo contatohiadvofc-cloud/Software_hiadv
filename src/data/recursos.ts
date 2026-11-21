@@ -32,8 +32,8 @@ export const RECURSOS: Recurso[] = [
 
   // ---------- Em preparação: já dá para deixar a chave guardada ----------
   {
-    id: 'ia', grupo: 'preparo', nome: 'IA dos agentes (Claude)', soGestor: true,
-    resumo: 'Lê documentos, sugere a providência da intimação, prepara minutas e quesitos. Quem decide e assina é o advogado.',
+    id: 'ia', grupo: 'ativar', nome: 'Assistente de IA (plano Sênior)', soGestor: true,
+    resumo: 'Quesitos, minutas e resumos de intimações e documentos, como rascunho para o advogado revisar. Fica na página do cliente e em Publicações.',
     custo: 'Pago por uso na conta Anthropic do escritório. Dá para definir um limite por mês.',
     onde: { rotulo: 'Integrações', to: '/configuracoes', hash: 'integracoes' },
     passos: [
@@ -41,7 +41,7 @@ export const RECURSOS: Recurso[] = [
       'Em API Keys, crie uma chave com o nome "HiAdv".',
       'Aqui em Integrações, em Claude, clique em "Cadastrar chave" e cole. A chave vai direto para o cofre: depois de salva, ninguém vê de novo.',
       'Defina o limite por mês (opcional) e clique em "Ativar".',
-      'Quando a leitura por IA for liberada, os agentes que usam a Claude passam a funcionar sozinhos com essa chave. Os agentes sem custo já funcionam hoje.',
+      'Pronto: o botão "Assistente de IA" aparece na página do cliente e "Resumir com IA" em cada publicação.',
     ],
   },
   {
@@ -69,10 +69,15 @@ export const RECURSOS: Recurso[] = [
     ],
   },
   {
-    id: 'drive', grupo: 'preparo', nome: 'Pastas do Google Drive', soGestor: true,
-    resumo: 'Relaciona as pastas de clientes do Drive aos cadastros. Nada é lido sem a aprovação de um gestor.',
+    id: 'drive', grupo: 'ativar', nome: 'Google Drive do escritório', soGestor: true,
+    resumo: 'No Assistente de IA, escolha arquivos do Drive para a IA ler (PDF, Word, Google Docs, fotos) e salve o rascunho de volta na pasta do cliente. Os arquivos não são copiados para o HiAdv.',
     custo: 'Sem custo.',
-    passos: ['Quando ligar: compartilhe a pasta de clientes com o HiAdv e aprove cada ligação sugerida.'],
+    onde: { rotulo: 'Integrações', to: '/configuracoes', hash: 'integracoes' },
+    passos: [
+      'Aqui em Integrações, ligue o Google Drive.',
+      'No Assistente de IA, toque em "Escolher arquivos do Drive" e entre com a conta Google do escritório.',
+      'O HiAdv só enxerga os arquivos e pastas que você escolher na janela do Google.',
+    ],
   },
   {
     id: 'api', grupo: 'preparo', nome: 'Conexão com outros sistemas (API)', soGestor: true,

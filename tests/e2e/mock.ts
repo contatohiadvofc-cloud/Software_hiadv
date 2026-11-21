@@ -46,6 +46,10 @@ export type Cenario = {
   portal?: Record<string, unknown> | null
   portalAtivo?: boolean
   adesoes?: Array<Record<string, unknown>>
+  meusRecursos?: Record<string, unknown> | null
+  central?: Array<Record<string, unknown>>
+  centralDetalhe?: Record<string, unknown>
+  ia?: Record<string, unknown>
   indicacoes?: Array<Record<string, unknown>>
   vagas?: number
 }
@@ -84,6 +88,11 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
         estado.senhaCriada = true; c.senha = String(b.nova); return json(r, { ok: true })
       }
       return json(r, { ok: false, motivo: 'indisponivel' })
+    }
+    if (p.endsWith('/functions/v1/ia')) {
+      const b = (req.postDataJSON() ?? {}) as Record<string, unknown>
+      estado.rpcs.push({ nome: 'funcao_ia', corpo: b })
+      return json(r, c.ia ?? { ok: true, texto: 'Rascunho de teste.' })
     }
     if (p.endsWith('/auth/v1/user')) return json(r, USER)
     if (p.endsWith('/auth/v1/logout')) return r.fulfill({ status: 204 })
@@ -202,6 +211,13 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'hiadv_indicacao_link') return json(r, { ok: true, codigo: 'ANA7K2Q' })
       if (nome === 'hiadv_indicacoes') return json(r, c.indicacoes ?? [])
       if (nome === 'hiadv_adesoes') return json(r, c.adesoes ?? [])
+      if (nome === 'hiadv_ia_uso_mes') return json(r, { usados: 2, limite: 300 })
+      if (nome === 'hiadv_config_google') return json(r, { client_id: null, api_key: null, app_id: null, drive_ligado: false })
+      if (nome === 'hiadv_meus_recursos') return json(r, c.meusRecursos ?? null)
+      if (nome === 'hiadv_central_escritorios') return json(r, c.central ?? [])
+      if (nome === 'hiadv_central_escritorio') return json(r, c.centralDetalhe ?? { ajustes: [], recursos: [], pessoas: [], historico: [] })
+      if (nome === 'hiadv_central_assinatura' || nome === 'hiadv_central_ajuste' || nome === 'hiadv_pessoa_ajuste') { registrar(); return json(r, { ok: true }) }
+      if (nome === 'hiadv_central_novo') { registrar(); return json(r, { ok: true, id: 'esc-novo' }) }
       if (nome === 'hiadv_adesao_atualizar' || nome === 'hiadv_adesao_plano') { registrar(); return json(r, { ok: true }) }
       if (nome === 'caso_detalhe') return json(r, c.detalhe ?? null)
       if (nome === 'caso_campos_salvar') {
