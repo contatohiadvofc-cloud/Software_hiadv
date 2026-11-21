@@ -36,6 +36,10 @@ export interface Api {
   ficha(id: string): Promise<Ficha>
   /** Grava os campos da área (o servidor confere tipo e opções). Devolve quantos mudaram. */
   salvarCampos(id: string, campos: Record<string, string>): Promise<number>
+  /** Dados do benefício (NB, DIB…) nas áreas previdenciárias. Devolve quantos mudaram. */
+  salvarBeneficio(id: string, dados: Record<string, string>): Promise<number>
+  /** Marca (com a data do documento) ou desmarca (data null) um item do checklist. */
+  marcarChecklist(id: string, item: string, data: string | null): Promise<void>
   /** Pessoas da equipe do escritório em uso. */
   equipe(): Promise<Pessoa[]>
   /** Tarefas abertas; pessoa = e-mail para filtrar, null para todas que o usuário pode ver. */

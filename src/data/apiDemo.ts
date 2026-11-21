@@ -2,7 +2,7 @@ import type { Api, Area, Escritorio, Perfil } from './api'
 import { CredencialInvalida } from './api'
 import { diaSP, type ItemDia } from './seuDia'
 import { destaquesDoCartao, type CasoCard, type Etapa } from './quadro'
-import type { EventoHistorico, Ficha } from './ficha'
+import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type EventoHistorico, type Ficha } from './ficha'
 import { telaParaValor, validarCampo, type CampoDef } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
 import type { ClienteResumo } from './clientes'
@@ -74,6 +74,11 @@ const CAMPOS: Record<string, Record<string, unknown>> = {
   k3: { reclamadas: 'Transportes Sul S.A.', funcao: 'Motorista', fase: 'Conhecimento' },
 }
 const HIST: Record<string, EventoHistorico[]> = {}
+const BENEF: Record<string, Record<string, unknown>> = {
+  k6: { nb: '712.345.678-9', dib: '2025-02-10', data_acidente: '2024-11-03', uf: 'SC', profissao_epoca: 'Auxiliar de produção', causa_acidente: 'Queda de escada no trabalho', sequela: 'Limitação de flexão do punho direito' },
+  k8: { nb: '698.112.334-0', uf: 'SC', profissao_epoca: 'Pedreiro' },
+}
+const MARCADOS: Record<string, Record<string, string>> = {}
 const CHECK = ['Procuração assinada', 'Documento com foto', 'CTPS digital', 'Holerites', 'Termo de rescisão', 'Laudos e exames', 'CNIS']
 
 const CLIENTE_DO_CASO: Record<string, string> = { k1: 'c2', k2: 'c4', k3: 'c5', k4: 'c6', k5: 'c7', k6: 'c1', k7: 'c8', k8: 'c3' }
@@ -176,7 +181,12 @@ export function criarApiDemo(): Api {
       return {
         id, area, cliente: c.cliente, status: c.status, produto: c.produto, numeroCnj: c.numeroCnj,
         campos: { ...(CAMPOS[id] ?? {}) }, defs: DEFS[area] ?? [],
-        checklist: CHECK.slice(0, n).map((r, i) => ({ item: `i${i}`, rotulo: r, feito: i < c.gateOk })),
+        beneficio: AREAS_PREVIDENCIARIAS.includes(area) ? Object.fromEntries(BENEFICIO_DEFS.map((b) => [b.chave, BENEF[id]?.[b.chave] ?? null])) : null,
+        checklist: CHECK.slice(0, n).map((r, i) => {
+          const m = MARCADOS[id]?.[`i${i}`]
+          const feito = m !== undefined ? m !== '' : i < c.gateOk
+          return { item: `i${i}`, rotulo: r, feito, data: feito ? (m || dia(-3)) : null }
+        }),
         historico: [...(HIST[id] ?? []), { evento: 'status', de: null, para: c.status, detalhe: null, quem: 'Ana Prado', em: new Date(Date.now() - c.dias * 86400000).toISOString() }],
         etapas: ETAPAS[area] ?? [],
       }
@@ -196,6 +206,26 @@ export function criarApiDemo(): Api {
       }
       if (mudou.length) (HIST[id] ??= []).unshift({ evento: 'campos', de: null, para: null, detalhe: `Atualizou: ${mudou.join(', ')}`, quem: 'Ana Prado', em: new Date().toISOString() })
       return mudou.length
+    },
+    async salvarBeneficio(id, dados) {
+      const atual = (BENEF[id] ??= {})
+      const mudou: string[] = []
+      for (const [k, v] of Object.entries(dados)) {
+        const d = BENEFICIO_DEFS.find((x) => x.chave === k)
+        if (!d) throw new Error(`Campo "${k}" não pode ser editado aqui.`)
+        if (k === 'uf' && v.trim() && !/^[A-Za-z]{2}$/.test(v.trim())) throw new Error('UF deve ter duas letras.')
+        if (k === 'nb' && v.trim() && !/^[0-9./ -]{6,20}$/.test(v.trim())) throw new Error('NB deve ter só números (pode usar ponto e traço).')
+        atual[k] = v.trim() === '' ? null : k === 'uf' ? v.trim().toUpperCase() : v.trim()
+        mudou.push(d.rotulo)
+      }
+      if (mudou.length) (HIST[id] ??= []).unshift({ evento: 'beneficio', de: null, para: null, detalhe: `Atualizou: ${mudou.join(', ')}`, quem: 'Ana Prado', em: new Date().toISOString() })
+      return mudou.length
+    },
+    async marcarChecklist(id, item, data) {
+      (MARCADOS[id] ??= {})[item] = data ?? ''
+      const c = CASOS.find((x) => x.id === id)
+      if (c) c.gateOk = Math.max(0, Math.min(c.gateTotal, c.gateOk + (data ? 1 : -1)))
+      ;(HIST[id] ??= []).unshift({ evento: 'checklist', de: item, para: data ?? 'desmarcado', detalhe: null, quem: 'Ana Prado', em: new Date().toISOString() })
     },
     async equipe() { return EQUIPE.map((p) => ({ ...p })) },
     async tarefas(pessoa) {

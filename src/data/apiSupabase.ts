@@ -3,7 +3,7 @@ import type { Api, Achado, Area, Escritorio, Papel, Perfil } from './api'
 import { CredencialInvalida, SessaoExpirada } from './api'
 import { diaSP, horaSP, type ItemDia } from './seuDia'
 import { destaquesDoCartao, type Quadro } from './quadro'
-import type { Ficha } from './ficha'
+import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
@@ -136,7 +136,8 @@ export function criarApiSupabase(url: string, chave: string): Api {
         id, area, cliente: String(c.cliente ?? ''), status: String(c.status ?? ''),
         produto: (c.produto as string) ?? null, numeroCnj: (c.numero_cnj as string) ?? null,
         campos: (c.campos as Record<string, unknown>) ?? {}, defs,
-        checklist: ((d?.checklist as any[]) ?? []).map((g) => ({ item: String(g.item), rotulo: String(g.rotulo ?? g.item), feito: !!g.data })),
+        beneficio: AREAS_PREVIDENCIARIAS.includes(area) ? Object.fromEntries(BENEFICIO_DEFS.map((b) => [b.chave, c[b.chave] ?? null])) : null,
+        checklist: ((d?.checklist as any[]) ?? []).map((g) => ({ item: String(g.item), rotulo: String(g.rotulo ?? g.item), feito: !!g.data, data: (g.data as string) ?? null })),
         historico: ((d?.historico as any[]) ?? []).map((h) => ({ evento: String(h.evento ?? ''), de: h.de ?? null, para: h.para ?? null, detalhe: h.detalhe ?? null, quem: h.quem ?? null, em: String(h.em ?? '') })),
         etapas: ((d?.status as any[]) ?? []).map((e, i) => ({ status: String(e.status), ordem: i + 1, final: !!e.final, pedeMotivo: !!e.pede_motivo })),
       }
@@ -145,6 +146,16 @@ export function criarApiSupabase(url: string, chave: string): Api {
       const r = verificar(await sb.rpc('caso_campos_salvar', { p_caso: id, p_campos: campos })) as { ok: boolean; erro?: string; alterados?: number }
       if (!r?.ok) throw new Error(r?.erro ?? 'Não foi possível salvar.')
       return Number(r.alterados ?? 0)
+    },
+    async salvarBeneficio(id, dados) {
+      const r = await sb.rpc('caso_beneficio_salvar', { p_caso: id, p: dados })
+      if (r.error && /caso_beneficio_salvar|PGRST202/i.test(`${r.error.code} ${r.error.message}`)) throw new Error('Esta função ainda não foi ativada no servidor.')
+      const v = verificar(r) as { ok: boolean; erro?: string; alterados?: number }
+      if (!v?.ok) throw new Error(v?.erro ?? 'Não foi possível salvar.')
+      return Number(v.alterados ?? 0)
+    },
+    async marcarChecklist(id, item, data) {
+      verificar(await sb.rpc('caso_gate', { p_caso: id, p_item: item, p_data: data }))
     },
     async equipe(): Promise<Pessoa[]> {
       return (verificar(await sb.from('equipe').select('email, nome').order('nome')) ?? []).map((p) => ({ email: String(p.email), nome: String(p.nome || p.email) }))

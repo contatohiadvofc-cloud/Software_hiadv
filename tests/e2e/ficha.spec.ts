@@ -35,14 +35,14 @@ test('ficha mostra campos da área, checklist e histórico', async ({ page }) =>
 test('editar manda só o que mudou e confere o valor antes', async ({ page }) => {
   const est = await simularSupabase(page, { etapas, casos, detalhe, camposArea })
   const f = await abrirFicha(page)
-  await f.getByRole('button', { name: 'Editar' }).click()
+  await f.getByRole('button', { name: 'Editar dados da área' }).click()
   await f.getByLabel('Último salário').fill('abc')
-  await f.getByRole('button', { name: 'Salvar campos' }).click()
+  await f.getByRole('button', { name: 'Salvar', exact: true }).click()
   await expect(f.getByText('Informe um valor em reais em "Último salário".')).toBeVisible()
   expect(est.salvos).toHaveLength(0)
   await f.getByLabel('Último salário').fill('3.200,50')
   await f.getByLabel('Fase').selectOption('Recurso')
-  await f.getByRole('button', { name: 'Salvar campos' }).click()
+  await f.getByRole('button', { name: 'Salvar', exact: true }).click()
   await expect(page.getByText('2 campos salvos.')).toBeVisible()
   expect(est.salvos[0]).toEqual({ p_caso: 'k1', p_campos: { salario: '3200.50', fase: 'Recurso' } })
 })
@@ -50,11 +50,11 @@ test('editar manda só o que mudou e confere o valor antes', async ({ page }) =>
 test('recusa do servidor aparece e mantém a edição aberta', async ({ page }) => {
   await simularSupabase(page, { etapas, casos, detalhe, camposArea, recusarCampos: 'Valor não permitido em "Fase".' })
   const f = await abrirFicha(page)
-  await f.getByRole('button', { name: 'Editar' }).click()
+  await f.getByRole('button', { name: 'Editar dados da área' }).click()
   await f.getByLabel('Fase').selectOption('Recurso')
-  await f.getByRole('button', { name: 'Salvar campos' }).click()
+  await f.getByRole('button', { name: 'Salvar', exact: true }).click()
   await expect(page.getByText('Não foi possível salvar: Valor não permitido em "Fase".')).toBeVisible()
-  await expect(f.getByRole('button', { name: 'Salvar campos' })).toBeVisible()
+  await expect(f.getByRole('button', { name: 'Salvar', exact: true })).toBeVisible()
 })
 
 test('cartão mostra os campos marcados para o quadro', async ({ page }) => {
@@ -66,4 +66,35 @@ test('cartão mostra os campos marcados para o quadro', async ({ page }) => {
   await expect(cartao).toContainText('Reclamada(s)Metalúrgica Alfa Ltda.')
   await expect(cartao).toContainText('FaseConhecimento')
   await expect(cartao).not.toContainText('3.150')
+})
+
+const detalhePrev = {
+  caso: { id: 'k9', via: 'judicial', status: 'pendente', produto: 'Auxílio-acidente', cliente: 'Rita Moura', campos: {}, nb: '712.345.678-9', dib: null, sequela: 'Limitação do punho' },
+  checklist: [{ item: 'procuracao', rotulo: 'Procuração assinada', data: null }],
+  historico: [], pericias: [], status: etapas,
+}
+const casosPrev = [{ id: 'k9', cliente: 'Rita Moura', status: 'pendente', dias: 1, produto: 'Auxílio-acidente', gate_ok: 0, gate_total: 1 }]
+
+test('previdenciário: dados do benefício editáveis e checklist com data do documento', async ({ page }) => {
+  const est = await simularSupabase(page, { etapas, casos: casosPrev, detalhe: detalhePrev, camposArea: [], areas: [{ area: 'judicial', nome: 'Previdenciário judicial', ordem: 1 }] })
+  await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
+  await page.goto('/area/judicial')
+  await page.getByRole('button', { name: 'Rita Moura' }).click()
+  const f = page.getByRole('dialog', { name: 'Rita Moura' })
+  await expect(f.getByText('712.345.678-9')).toBeVisible()
+  await expect(f.getByText('Limitação do punho')).toBeVisible()
+  await expect(f.getByRole('heading', { name: 'Dados da área' })).toHaveCount(0)
+  await f.getByRole('button', { name: 'Editar dados do benefício' }).click()
+  await f.getByLabel('DIB').fill('2024-03-01')
+  await f.getByLabel('UF').fill('sc')
+  await f.getByRole('button', { name: 'Salvar', exact: true }).click()
+  await expect(page.getByText('2 campos salvos.')).toBeVisible()
+  expect(est.beneficios[0]).toEqual({ p_caso: 'k9', p: { dib: '2024-03-01', uf: 'sc' } })
+
+  await f.getByRole('button', { name: 'Marcar Procuração assinada' }).click()
+  await f.getByLabel('Data do documento').fill('2026-11-10')
+  await f.getByRole('button', { name: 'Confirmar' }).click()
+  await expect(page.getByText('Item marcado.')).toBeVisible()
+  expect(est.gates[0]).toEqual({ p_caso: 'k9', p_item: 'procuracao', p_data: '2026-11-10' })
 })

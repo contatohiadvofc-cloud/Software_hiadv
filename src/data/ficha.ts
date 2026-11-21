@@ -1,7 +1,7 @@
 import { telaParaValor, type CampoDef } from './campos'
 import type { Etapa } from './quadro'
 
-export type ItemChecklist = { item: string; rotulo: string; feito: boolean }
+export type ItemChecklist = { item: string; rotulo: string; feito: boolean; data: string | null }
 export type EventoHistorico = { evento: string; de: string | null; para: string | null; detalhe: string | null; quem: string | null; em: string }
 export type Ficha = {
   id: string
@@ -12,6 +12,8 @@ export type Ficha = {
   numeroCnj: string | null
   campos: Record<string, unknown>
   defs: CampoDef[]
+  /** Só nas áreas previdenciárias: NB, DIB, DCB, acidente, sequela… (colunas próprias do caso) */
+  beneficio: Record<string, unknown> | null
   checklist: ItemChecklist[]
   historico: EventoHistorico[]
   etapas: Etapa[]
@@ -20,6 +22,7 @@ export type Ficha = {
 /** Texto curto de um evento do histórico, para a linha do tempo da ficha. */
 export function textoEvento(h: EventoHistorico): string {
   if (h.evento === 'status' && h.para) return h.de ? `Mudou de “${h.de}” para “${h.para}”` : `Entrou em “${h.para}”`
+  if (h.evento === 'checklist') return h.para === 'desmarcado' ? 'Desmarcou um item do checklist' : 'Marcou um item do checklist'
   if (h.detalhe) return h.detalhe
   return h.evento.charAt(0).toUpperCase() + h.evento.slice(1)
 }
@@ -48,3 +51,18 @@ export function valorParaEdicao(d: CampoDef, v: unknown): string {
   if (d.tipo === 'numero') return String(v).replace('.', ',')
   return String(v)
 }
+
+export const AREAS_PREVIDENCIARIAS = ['administrativo', 'judicial']
+
+/** Campos do benefício (colunas do caso), na ordem em que aparecem na ficha. */
+export const BENEFICIO_DEFS: CampoDef[] = [
+  { chave: 'nb', rotulo: 'NB', tipo: 'texto', opcoes: null, ordem: 1, noCartao: false },
+  { chave: 'protocolo_adm', rotulo: 'Protocolo', tipo: 'texto', opcoes: null, ordem: 2, noCartao: false },
+  { chave: 'dib', rotulo: 'DIB', tipo: 'data', opcoes: null, ordem: 3, noCartao: false },
+  { chave: 'dcb', rotulo: 'DCB', tipo: 'data', opcoes: null, ordem: 4, noCartao: false },
+  { chave: 'data_acidente', rotulo: 'Data do acidente', tipo: 'data', opcoes: null, ordem: 5, noCartao: false },
+  { chave: 'uf', rotulo: 'UF', tipo: 'texto', opcoes: null, ordem: 6, noCartao: false },
+  { chave: 'profissao_epoca', rotulo: 'Profissão na época', tipo: 'texto', opcoes: null, ordem: 7, noCartao: false },
+  { chave: 'causa_acidente', rotulo: 'Causa do acidente', tipo: 'texto', opcoes: null, ordem: 8, noCartao: false },
+  { chave: 'sequela', rotulo: 'Sequela', tipo: 'texto_longo', opcoes: null, ordem: 9, noCartao: false },
+]

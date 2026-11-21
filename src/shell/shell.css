@@ -159,6 +159,9 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
 .ficha-check, .ficha-hist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: var(--s-2); }
 .ficha-check li { color: var(--muted); }
 .ficha-check li[data-feito] { color: var(--ink); }
+.ficha-check-linha { display: flex; justify-content: space-between; align-items: center; gap: var(--s-2); min-height: 36px; }
+.ficha-check-form { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s-2); margin: var(--s-1) 0 var(--s-2) var(--s-4); font-size: var(--fs-sm); color: var(--ink-2); }
+.ficha-check-form .hv-input { width: auto; min-height: 36px; }
 .ficha-hist li { display: flex; flex-direction: column; gap: 2px; padding-left: var(--s-3); border-left: 2px solid var(--line); }
 .ficha-hist .muted { font-size: 0.8rem; }
 @media (max-width: 520px) { .ficha-campos { grid-template-columns: 1fr; } }
