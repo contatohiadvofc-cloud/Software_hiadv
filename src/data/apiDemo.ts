@@ -2,7 +2,7 @@ import type { Api, Area, Escritorio, Perfil } from './api'
 import { CredencialInvalida } from './api'
 import { diaSP, type ItemDia } from './seuDia'
 import { destaquesDoCartao, type CasoCard, type Etapa } from './quadro'
-import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type EventoHistorico, type Ficha } from './ficha'
+import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, etapaDeExigencia, prazoInterno, validarExigencia, validarProtocolo, type EventoHistorico, type Ficha } from './ficha'
 import { telaParaValor, validarCampo, type CampoDef } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
 import type { ClienteResumo } from './clientes'
@@ -262,6 +262,60 @@ export function criarApiDemo(): Api {
       const c = CASOS.find((x) => x.id === id)
       if (c) c.gateOk = Math.max(0, Math.min(c.gateTotal, c.gateOk + (data ? 1 : -1)))
       ;(HIST[id] ??= []).unshift({ evento: 'checklist', de: item, para: data ?? 'desmarcado', detalhe: null, quem: 'Ana Prado', em: new Date().toISOString() })
+    },
+    async protocolar(id, numero, data) {
+      const c = CASOS.find((x) => x.id === id)
+      if (!c) throw new Error('Caso não encontrado.')
+      const area = AREA_DO_CASO[id]
+      const erro = validarProtocolo(area, numero, data, diaSP(new Date()))
+      if (erro) throw new Error(erro)
+      if (!(ETAPAS[area] ?? []).some((e) => e.status === 'protocolado')) throw new Error(`A via ${area} não tem a etapa protocolado.`)
+      Object.assign((CAMPOS[id] ??= {}), { protocolo_numero: numero.trim(), protocolo_data: data })
+      if (area === 'administrativo') (BENEF[id] ??= {}).protocolo_adm = numero.trim()
+      if (area === 'judicial') c.numeroCnj = numero.trim()
+      const de = c.status
+      c.status = 'protocolado'; c.dias = 0
+      const h = (HIST[id] ??= [])
+      h.unshift({ evento: 'marco', de: 'protocolo', para: data, detalhe: numero.trim(), quem: 'Ana Prado', em: new Date().toISOString() })
+      h.unshift({ evento: 'status', de, para: 'protocolado', detalhe: null, quem: 'Ana Prado', em: new Date().toISOString() })
+    },
+    async registrarExigencia(id, e) {
+      const c = CASOS.find((x) => x.id === id)
+      if (!c) throw new Error('Caso não encontrado.')
+      const hoje = diaSP(new Date())
+      const erro = validarExigencia(e, hoje)
+      if (erro) throw new Error(erro)
+      const interno = prazoInterno(e.prazoFatal, e.folga, hoje)
+      tarefasDemo().push({ id: `t${Date.now()}`, titulo: `Cumprir exigência: ${c.cliente}`, detalhe: e.descricao.trim(), prazo: interno, fatal: true, responsavel: e.responsavel || 'ana.prado@silvaprado.exemplo.br', status: 'aberta' })
+      const h = (HIST[id] ??= [])
+      h.unshift({ evento: 'exigencia', de: null, para: e.prazoFatal, detalhe: e.descricao.trim(), quem: 'Ana Prado', em: new Date().toISOString() })
+      const etapas = ETAPAS[AREA_DO_CASO[id]] ?? []
+      const destino = etapaDeExigencia(etapas)
+      if (destino && c.status !== destino && !etapas.find((x) => x.status === c.status)?.final) {
+        h.unshift({ evento: 'status', de: c.status, para: destino, detalhe: 'Exigência registrada.', quem: 'Ana Prado', em: new Date().toISOString() })
+        c.status = destino; c.dias = 0
+      }
+      return { interno, fatal: e.prazoFatal, status: destino }
+    },
+    async mudarVia(id, via, motivo) {
+      const c = CASOS.find((x) => x.id === id)
+      if (!c) throw new Error('Caso não encontrado.')
+      if (via === AREA_DO_CASO[id]) throw new Error('Escolha uma via diferente da atual.')
+      if (!(AREAS[atual] ?? []).some((a) => a.area === via)) throw new Error('Essa via não está ativa no escritório.')
+      const novoId = `${id}-${via}`
+      if (CASOS.some((x) => x.id === novoId)) return novoId
+      const inicio = (ETAPAS[via] ?? [])[0]?.status
+      if (!inicio) throw new Error(`A via ${via} não tem etapas.`)
+      CASOS.push({ ...c, id: novoId, status: inicio, dias: 0, numeroCnj: via === 'judicial' ? null : c.numeroCnj })
+      AREA_DO_CASO[novoId] = via
+      const { protocolo_numero: _n, protocolo_data: _d, ...resto } = CAMPOS[id] ?? {}
+      CAMPOS[novoId] = { ...resto }
+      if (RELATOS[id]) RELATOS[novoId] = RELATOS[id]
+      if (BENEF[id]) BENEF[novoId] = { ...BENEF[id] }
+      const agora = new Date().toISOString()
+      HIST[novoId] = [{ evento: 'criado', de: null, para: inicio, detalhe: `Aberto a partir do caso em ${AREA_DO_CASO[id]} · ${c.status}${motivo.trim() ? ` · ${motivo.trim()}` : ''}`, quem: 'Ana Prado', em: agora }]
+      ;(HIST[id] ??= []).unshift({ evento: 'via', de: AREA_DO_CASO[id], para: via, detalhe: `Caso novo aberto em ${via}${motivo.trim() ? ` · ${motivo.trim()}` : ''}`, quem: 'Ana Prado', em: agora })
+      return novoId
     },
     async equipe() { return EQUIPE.map((p) => ({ ...p })) },
     async tarefas(pessoa) {

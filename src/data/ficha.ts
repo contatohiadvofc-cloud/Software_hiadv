@@ -21,10 +21,15 @@ export type Ficha = {
   etapas: Etapa[]
 }
 
+const dataBR = (d: string | null) => d && /^\d{4}-\d{2}-\d{2}/.test(d) ? `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}` : (d ?? '')
+
 /** Texto curto de um evento do histórico, para a linha do tempo da ficha. */
 export function textoEvento(h: EventoHistorico): string {
   if (h.evento === 'status' && h.para) return h.de ? `Mudou de “${h.de}” para “${h.para}”` : `Entrou em “${h.para}”`
   if (h.evento === 'agente' && h.detalhe) return h.de && h.de !== 'erro' ? `${h.de}: ${h.detalhe}` : h.detalhe
+  if (h.evento === 'marco' && h.de === 'protocolo') return `Protocolo registrado: ${h.detalhe ?? ''}`.trim()
+  if (h.evento === 'exigencia') return `Exigência registrada (prazo fatal ${dataBR(h.para)}): ${h.detalhe ?? ''}`
+  if (h.evento === 'via' && h.para) return `Aberto um caso novo na via “${h.para}”${h.detalhe?.includes(' · ') ? ` (${h.detalhe.split(' · ').slice(1).join(' · ')})` : ''}`
   if (h.evento === 'checklist') return h.para === 'desmarcado' ? 'Desmarcou um item do checklist' : 'Marcou um item do checklist'
   if (h.detalhe) return h.detalhe
   return h.evento.charAt(0).toUpperCase() + h.evento.slice(1)
@@ -69,3 +74,55 @@ export const BENEFICIO_DEFS: CampoDef[] = [
   { chave: 'causa_acidente', rotulo: 'Causa do acidente', tipo: 'texto', opcoes: null, ordem: 8, noCartao: false },
   { chave: 'sequela', rotulo: 'Sequela', tipo: 'texto_longo', opcoes: null, ordem: 9, noCartao: false },
 ]
+
+/** Protocolo registrado no caso (número e data), venha de onde vier. */
+export type Protocolo = { numero: string; data: string | null }
+export function protocoloDoCaso(f: Pick<Ficha, 'campos' | 'beneficio' | 'numeroCnj'>): Protocolo | null {
+  const n = f.campos.protocolo_numero
+  if (typeof n === 'string' && n) return { numero: n, data: typeof f.campos.protocolo_data === 'string' ? f.campos.protocolo_data : null }
+  const adm = f.beneficio?.protocolo_adm
+  if (typeof adm === 'string' && adm) return { numero: adm, data: null }
+  return null
+}
+
+const soDigitos = (s: string) => s.replace(/\D/g, '')
+
+/** Confere o protocolo antes de mandar ao servidor (que confere de novo). */
+export function validarProtocolo(area: string, numero: string, data: string, hoje: string): string | null {
+  const n = numero.trim()
+  if (!n) return 'Informe o número do protocolo.'
+  if (!/^[0-9A-Za-z./ -]{4,40}$/.test(n)) return 'Use só letras, números, ponto, barra e traço (4 a 40 caracteres).'
+  if (area === 'judicial' && soDigitos(n).length !== 20) return 'No judicial, informe o número CNJ (20 dígitos).'
+  if (!data) return 'Informe a data do protocolo.'
+  if (data > hoje) return 'A data do protocolo não pode ser futura.'
+  return null
+}
+
+/** A etapa de exigência da via, se houver (o caso vai para ela ao registrar uma exigência). */
+export function etapaDeExigencia(etapas: Etapa[]): string | null {
+  return etapas.find((e) => !e.final && /exig/i.test(e.status))?.status ?? null
+}
+
+export type NovaExigencia = { descricao: string; prazoFatal: string; folga: number; responsavel: string | null }
+
+export function validarExigencia(e: NovaExigencia, hoje: string): string | null {
+  if (e.descricao.trim().length < 3) return 'Descreva o que foi exigido.'
+  if (!e.prazoFatal) return 'Informe o prazo fatal.'
+  if (e.prazoFatal < hoje) return 'O prazo fatal já passou; confira a data.'
+  if (!Number.isInteger(e.folga) || e.folga < 0 || e.folga > 10) return 'A folga vai de 0 a 10 dias úteis.'
+  return null
+}
+
+/** Prévia do prazo interno: volta `folga` dias úteis (seg. a sex.) a partir do fatal, sem passar de hoje.
+ *  O servidor faz a conta final já descontando os feriados. */
+export function prazoInterno(fatal: string, folga: number, hoje: string): string {
+  const d = new Date(`${fatal}T12:00:00Z`)
+  let k = 0
+  while (k < folga) {
+    d.setUTCDate(d.getUTCDate() - 1)
+    const s = d.getUTCDay()
+    if (s !== 0 && s !== 6) k++
+  }
+  const r = d.toISOString().slice(0, 10)
+  return r < hoje ? hoje : r
+}

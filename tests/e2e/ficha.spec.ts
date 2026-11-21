@@ -109,3 +109,52 @@ test('relato do cliente: escreve e salva no caso', async ({ page }) => {
   await expect(page.getByText('Relato salvo.')).toBeVisible()
   expect(est.rpcs.find((x) => x.nome === 'caso_relato_salvar')!.corpo).toEqual({ p_caso: 'k1', p_relato: 'Foi dispensado sem receber as verbas rescisórias.' })
 })
+
+test('andamento: registrar protocolo confere a data e manda número e data', async ({ page }) => {
+  const est = await simularSupabase(page, { etapas, casos, detalhe, camposArea })
+  const f = await abrirFicha(page)
+  await expect(f.getByText('Sem protocolo registrado.')).toBeVisible()
+  await f.getByRole('button', { name: 'Registrar protocolo' }).click()
+  await f.getByLabel('Número do protocolo').fill('')
+  await f.getByRole('button', { name: 'Confirmar' }).click()
+  await expect(f.getByRole('alert')).toContainText('número')
+  await f.getByLabel('Número do protocolo').fill('ATOrd 0001234')
+  await f.getByLabel('Data do protocolo').fill('2026-11-20')
+  await f.getByRole('button', { name: 'Confirmar' }).click()
+  await expect(page.getByText('Protocolo registrado. O caso foi para Protocolado.')).toBeVisible()
+  expect(est.rpcs.find((x) => x.nome === 'caso_protocolar')?.corpo).toEqual({ p_caso: 'k1', p_numero: 'ATOrd 0001234', p_data: '2026-11-20' })
+})
+
+test('andamento: exigência cria a tarefa com folga e mostra o prazo interno', async ({ page }) => {
+  const est = await simularSupabase(page, { etapas, casos, detalhe, camposArea })
+  const f = await abrirFicha(page)
+  await f.getByRole('button', { name: 'Registrar exigência' }).click()
+  await f.getByLabel('O que foi exigido').fill('Juntar comprovante de endereço atualizado.')
+  await f.getByLabel('Prazo fatal').fill('2099-12-01')
+  await expect(f.getByText(/Prazo interno previsto: 27\/11\/2099/)).toBeVisible()
+  await f.getByRole('button', { name: 'Confirmar' }).click()
+  await expect(page.getByText(/Exigência registrada\. Tarefa criada com prazo interno 27\/11\/2026/)).toBeVisible()
+  const corpo = est.rpcs.find((x) => x.nome === 'caso_exigencia')?.corpo
+  expect(corpo).toMatchObject({ p_caso: 'k1', p_prazo_fatal: '2099-12-01', p_folga: 2 })
+})
+
+test('andamento: mudar de via abre o caso novo ligado ao de origem', async ({ page }) => {
+  const est = await simularSupabase(page, {
+    etapas, casos, detalhe, camposArea,
+    areas: [{ area: 'trabalhista', nome: 'Trabalhista', ordem: 10 }, { area: 'civel', nome: 'Cível', ordem: 20 }],
+  })
+  const f = await abrirFicha(page)
+  await f.getByRole('button', { name: 'Mudar de via' }).click()
+  await expect(f.getByLabel('Nova via')).toHaveValue('civel')
+  await f.getByLabel('Motivo (opcional)').fill('Cobrança de verbas fora da CLT')
+  await f.getByRole('button', { name: 'Abrir caso na nova via' }).click()
+  await expect(page.getByText('Caso aberto em Cível. O caso de origem continua onde está.')).toBeVisible()
+  expect(est.rpcs.find((x) => x.nome === 'caso_mudar_via')?.corpo).toEqual({ p_caso: 'k1', p_via: 'civel', p_motivo: 'Cobrança de verbas fora da CLT' })
+})
+
+test('andamento: sem outra via ativa, não oferece mudar de via', async ({ page }) => {
+  await simularSupabase(page, { etapas, casos, detalhe, camposArea })
+  const f = await abrirFicha(page)
+  await expect(f.getByRole('button', { name: 'Registrar exigência' })).toBeVisible()
+  await expect(f.getByRole('button', { name: 'Mudar de via' })).toHaveCount(0)
+})

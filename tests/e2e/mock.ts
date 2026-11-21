@@ -76,6 +76,9 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'tarefa_criar') { estado.tarefasCriadas.push(req.postDataJSON() as Record<string, unknown>); return json(r, { id: 'novo' }) }
       const registrar = () => { const corpo = (req.postDataJSON() ?? {}) as Record<string, unknown>; estado.rpcs.push({ nome, corpo }); return corpo }
       if (nome === 'caso_relato_salvar') { registrar(); return json(r, { ok: true, alterado: true }) }
+      if (nome === 'caso_protocolar') { registrar(); return json(r, { ok: true }) }
+      if (nome === 'caso_exigencia') { const b = registrar(); return json(r, { ok: true, tarefa: 't-ex', interno: '2026-11-27', fatal: b.p_prazo_fatal, status: null }) }
+      if (nome === 'caso_mudar_via') { registrar(); return json(r, { ok: true, id: 'k1-novo' }) }
       if (nome === 'biblioteca_salvar') { registrar(); return json(r, { ok: true, id: 'novo' }) }
       if (nome === 'biblioteca_retirar') { registrar(); return json(r, { ok: true }) }
       if (nome === 'integracoes_listar') return json(r, c.integracoes ?? [])

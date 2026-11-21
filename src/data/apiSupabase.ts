@@ -167,6 +167,18 @@ export function criarApiSupabase(url: string, chave: string): Api {
     async marcarChecklist(id, item, data) {
       verificar(await sb.rpc('caso_gate', { p_caso: id, p_item: item, p_data: data }))
     },
+    async protocolar(id, numero, data) {
+      okOuErro(verificar(await sb.rpc('caso_protocolar', { p_caso: id, p_numero: numero.trim(), p_data: data })))
+    },
+    async registrarExigencia(id, e) {
+      const r = okOuErro(verificar(await sb.rpc('caso_exigencia', { p_caso: id, p_descricao: e.descricao.trim(), p_prazo_fatal: e.prazoFatal, p_folga: e.folga, p_responsavel: e.responsavel || null }))) as Record<string, unknown>
+      if (r.ja) throw new Error('Essa exigência já foi registrada.')
+      return { interno: String(r.interno ?? ''), fatal: String(r.fatal ?? e.prazoFatal), status: (r.status as string) ?? null }
+    },
+    async mudarVia(id, via, motivo) {
+      const r = okOuErro(verificar(await sb.rpc('caso_mudar_via', { p_caso: id, p_via: via, p_motivo: motivo.trim() || null }))) as Record<string, unknown>
+      return String(r.id)
+    },
     async equipe(): Promise<Pessoa[]> {
       return (verificar(await sb.from('equipe').select('email, nome').order('nome')) ?? []).map((p) => ({ email: String(p.email), nome: String(p.nome || p.email) }))
     },

@@ -1,6 +1,6 @@
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
-import type { Ficha } from './ficha'
+import type { Ficha, NovaExigencia } from './ficha'
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
 import type { Compromisso } from './agenda'
@@ -42,6 +42,12 @@ export interface Api {
   salvarBeneficio(id: string, dados: Record<string, string>): Promise<number>
   /** Marca (com a data do documento) ou desmarca (data null) um item do checklist. */
   marcarChecklist(id: string, item: string, data: string | null): Promise<void>
+  /** Registra o protocolo (número e data) e leva o caso para "protocolado". No judicial, o número é o CNJ e liga o processo. */
+  protocolar(id: string, numero: string, data: string): Promise<void>
+  /** Cria a tarefa da exigência (prazo interno e fatal) e leva o caso para a etapa de exigência da via, se houver. */
+  registrarExigencia(id: string, e: NovaExigencia): Promise<{ interno: string; fatal: string; status: string | null }>
+  /** Abre o caso em outra via, ligado ao de origem (que fica onde está). Devolve o id do caso novo. */
+  mudarVia(id: string, via: string, motivo: string): Promise<string>
   /** Pessoas da equipe do escritório em uso. */
   equipe(): Promise<Pessoa[]>
   /** Tarefas abertas; pessoa = e-mail para filtrar, null para todas que o usuário pode ver. */

@@ -272,3 +272,4 @@ li.hv-row.cliente-caso { cursor: default; }
 }
 .agente-selo { display: inline-block; margin-left: var(--s-2); padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent-soft-ink); font-size: var(--fs-xs); font-weight: 600; vertical-align: 2px; }
 .agente-selo-breve { background: var(--surface-2); color: var(--ink-2); }
+.ficha-protocolo { margin: 0 0 var(--s-3); }

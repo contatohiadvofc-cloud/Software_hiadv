@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { Dialog } from '../design/components/Dialog'
@@ -7,7 +7,8 @@ import { Badge } from '../design/components/Badge'
 import { ErrorState } from '../design/components/ErrorState'
 import { useToast } from '../design/components/Toast'
 import { validarCampo, valorParaTela, type CampoDef } from '../data/campos'
-import { BENEFICIO_DEFS, diferencas, textoEvento, valorParaEdicao, type Ficha } from '../data/ficha'
+import { BENEFICIO_DEFS, diferencas, etapaDeExigencia, prazoInterno, protocoloDoCaso, textoEvento, validarExigencia, validarProtocolo, valorParaEdicao, type Ficha } from '../data/ficha'
+import { useAreas } from '../data/consultas'
 import { diaSP } from '../data/seuDia'
 import { rotuloEtapa } from '../data/quadro'
 
@@ -180,7 +181,133 @@ function Relato({ f, aoSalvo }: { f: Ficha; aoSalvo: () => void }) {
   )
 }
 
-function Conteudo({ f }: { f: Ficha }) {
+type Acao = 'protocolo' | 'exigencia' | 'via' | null
+
+function Andamento({ f, aoMudar, aoAbrirCaso }: { f: Ficha; aoMudar: () => void; aoAbrirCaso: (id: string) => void }) {
+  const api = useApi()
+  const toast = useToast()
+  const qc = useQueryClient()
+  const { perfil } = useSessao()
+  const areas = useAreas()
+  const hoje = diaSP(new Date())
+  const [acao, setAcao] = useState<Acao>(null)
+  const [erro, setErro] = useState<string | null>(null)
+  const [numero, setNumero] = useState('')
+  const [data, setData] = useState(hoje)
+  const [descricao, setDescricao] = useState('')
+  const [fatal, setFatal] = useState('')
+  const [folga, setFolga] = useState(2)
+  const [via, setVia] = useState('')
+  const [motivo, setMotivo] = useState('')
+
+  const protocolo = protocoloDoCaso(f)
+  const temProtocolado = f.etapas.some((e) => e.status === 'protocolado')
+  const etapaExig = etapaDeExigencia(f.etapas)
+  const outras = (areas.data ?? []).filter((a) => a.area !== f.area)
+  const abrir = (a: Acao) => { setErro(null); setAcao(a); setNumero(''); setData(hoje); setDescricao(''); setFatal(''); setFolga(2); setVia(outras[0]?.area ?? ''); setMotivo('') }
+  const falhou = (e: unknown) => setErro((e as Error).message)
+
+  const protocolar = useMutation({
+    mutationFn: () => api.protocolar(f.id, numero, data),
+    onSuccess: () => { toast('Protocolo registrado. O caso foi para Protocolado.'); setAcao(null); aoMudar() },
+    onError: falhou,
+  })
+  const exigir = useMutation({
+    mutationFn: () => api.registrarExigencia(f.id, { descricao, prazoFatal: fatal, folga, responsavel: null }),
+    onSuccess: (r) => {
+      const [a, m, d] = r.interno.split('-')
+      toast(`Exigência registrada. Tarefa criada com prazo interno ${d}/${m}/${a}.`)
+      setAcao(null); aoMudar(); qc.invalidateQueries({ queryKey: ['tarefas', perfil?.escritorioId] })
+    },
+    onError: falhou,
+  })
+  const mudar = useMutation({
+    mutationFn: () => api.mudarVia(f.id, via, motivo),
+    onSuccess: (novo) => {
+      toast(`Caso aberto em ${outras.find((a) => a.area === via)?.nome ?? via}. O caso de origem continua onde está.`)
+      setAcao(null); aoMudar(); qc.invalidateQueries({ queryKey: ['quadro', perfil?.escritorioId, via] }); aoAbrirCaso(novo)
+    },
+    onError: falhou,
+  })
+
+  function enviar(e: FormEvent) {
+    e.preventDefault()
+    if (acao === 'protocolo') { const v = validarProtocolo(f.area, numero, data, hoje); if (v) return setErro(v); protocolar.mutate() }
+    if (acao === 'exigencia') { const v = validarExigencia({ descricao, prazoFatal: fatal, folga, responsavel: null }, hoje); if (v) return setErro(v); exigir.mutate() }
+    if (acao === 'via') { if (!via) return setErro('Escolha a via.'); mudar.mutate() }
+  }
+  const ocupado = protocolar.isPending || exigir.isPending || mudar.isPending
+
+  return (
+    <section aria-labelledby="ficha-andamento">
+      <div className="ficha-secao-cabeca"><h3 id="ficha-andamento">Andamento</h3></div>
+      <p className="ficha-protocolo">
+        {protocolo
+          ? <>Protocolo <strong>{protocolo.numero}</strong>{protocolo.data && <span className="muted"> · {dataCurta(protocolo.data)}</span>}</>
+          : <span className="muted">Sem protocolo registrado.</span>}
+      </p>
+      {acao === null && (
+        <div className="catalogo-linha">
+          {temProtocolado && f.status !== 'protocolado' && <Button size="sm" variant="secondary" onClick={() => abrir('protocolo')}>Registrar protocolo</Button>}
+          <Button size="sm" variant="secondary" onClick={() => abrir('exigencia')}>Registrar exigência</Button>
+          {outras.length > 0 && <Button size="sm" variant="ghost" onClick={() => abrir('via')}>Mudar de via</Button>}
+        </div>
+      )}
+      {acao !== null && (
+        <form className="ficha-form" onSubmit={enviar} noValidate>
+          {acao === 'protocolo' && <>
+            <div className="hv-field">
+              <label htmlFor="prot-num">{f.area === 'judicial' ? 'Número do processo (CNJ)' : 'Número do protocolo'}</label>
+              <input id="prot-num" className="hv-input" value={numero} maxLength={40} autoFocus onChange={(e) => setNumero(e.target.value)}
+                placeholder={f.area === 'judicial' ? '0000000-00.0000.0.00.0000' : ''} />
+            </div>
+            <div className="hv-field">
+              <label htmlFor="prot-data">Data do protocolo</label>
+              <input id="prot-data" type="date" className="hv-input" value={data} max={hoje} onChange={(e) => setData(e.target.value)} />
+            </div>
+            <p className="hv-hint">O caso vai para Protocolado com esta prova registrada no histórico.</p>
+          </>}
+          {acao === 'exigencia' && <>
+            <div className="hv-field">
+              <label htmlFor="exig-desc">O que foi exigido</label>
+              <textarea id="exig-desc" className="hv-input textarea" rows={3} maxLength={1500} value={descricao} autoFocus onChange={(e) => setDescricao(e.target.value)} />
+            </div>
+            <div className="hv-field">
+              <label htmlFor="exig-fatal">Prazo fatal</label>
+              <input id="exig-fatal" type="date" className="hv-input" value={fatal} min={hoje} onChange={(e) => setFatal(e.target.value)} />
+            </div>
+            <div className="hv-field">
+              <label htmlFor="exig-folga">Folga antes do fatal (dias úteis)</label>
+              <input id="exig-folga" type="number" className="hv-input" min={0} max={10} value={folga} onChange={(e) => setFolga(Number(e.target.value))} />
+              {fatal && fatal >= hoje && <span className="hv-hint">Prazo interno previsto: {dataCurta(prazoInterno(fatal, folga, hoje))} (o servidor também desconta feriados).</span>}
+            </div>
+            <p className="hv-hint">{etapaExig ? `Cria a tarefa e leva o caso para “${rotuloEtapa(etapaExig)}”.` : 'Cria a tarefa com os dois prazos; o caso fica na etapa atual.'}</p>
+          </>}
+          {acao === 'via' && <>
+            <div className="hv-field">
+              <label htmlFor="via-nova">Nova via</label>
+              <select id="via-nova" className="hv-input" value={via} onChange={(e) => setVia(e.target.value)}>
+                {outras.map((a) => <option key={a.area} value={a.area}>{a.nome}</option>)}
+              </select>
+            </div>
+            <div className="hv-field">
+              <label htmlFor="via-motivo">Motivo (opcional)</label>
+              <input id="via-motivo" className="hv-input" value={motivo} maxLength={500} onChange={(e) => setMotivo(e.target.value)} />
+            </div>
+            <p className="hv-hint">Abre um caso novo na via escolhida, ligado a este e com os dados e o relato já preenchidos. Este caso continua onde está.</p>
+          </>}
+          {erro && <p className="hv-error" role="alert">{erro}</p>}
+          <div className="catalogo-linha">
+            <Button type="submit" disabled={ocupado}>{ocupado ? 'Registrando…' : acao === 'via' ? 'Abrir caso na nova via' : 'Confirmar'}</Button>
+            <Button variant="ghost" onClick={() => setAcao(null)}>Cancelar</Button>
+          </div>
+        </form>
+      )}
+    </section>
+  )
+}
+
+function Conteudo({ f, aoAbrirCaso }: { f: Ficha; aoAbrirCaso: (id: string) => void }) {
   const api = useApi()
   const { perfil } = useSessao()
   const qc = useQueryClient()
@@ -196,6 +323,8 @@ function Conteudo({ f }: { f: Ficha }) {
         {f.produto && <span className="muted">{f.produto}</span>}
         {f.numeroCnj && <span className="muted">Processo {f.numeroCnj}</span>}
       </div>
+
+      <Andamento key={`an-${f.id}`} f={f} aoMudar={atualizar} aoAbrirCaso={aoAbrirCaso} />
 
       <Relato key={`r-${f.id}`} f={f} aoSalvo={atualizar} />
 
@@ -228,12 +357,14 @@ function Conteudo({ f }: { f: Ficha }) {
 export function FichaCaso({ casoId, nome, aoFechar }: { casoId: string | null; nome: string; aoFechar: () => void }) {
   const api = useApi()
   const { perfil } = useSessao()
-  const q = useQuery({ queryKey: ['ficha', perfil?.escritorioId, casoId], queryFn: () => api.ficha(casoId!), enabled: !!casoId })
+  const [aberto, setAberto] = useState(casoId)
+  useEffect(() => { setAberto(casoId) }, [casoId])
+  const q = useQuery({ queryKey: ['ficha', perfil?.escritorioId, aberto], queryFn: () => api.ficha(aberto!), enabled: !!aberto })
   return (
-    <Dialog open={!!casoId} onOpenChange={(v) => !v && aoFechar()} title={q.data?.cliente ?? nome} variant="painel">
+    <Dialog open={!!aberto} onOpenChange={(v) => !v && aoFechar()} title={q.data?.cliente ?? nome} variant="painel">
       {q.isLoading && <p className="hv-dialog-body muted" role="status">Abrindo a ficha…</p>}
       {q.isError && <div className="hv-dialog-body"><ErrorState onRetry={() => q.refetch()} /></div>}
-      {q.data && <Conteudo f={q.data} />}
+      {q.data && <Conteudo f={q.data} aoAbrirCaso={setAberto} />}
     </Dialog>
   )
 }
