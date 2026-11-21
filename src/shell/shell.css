@@ -72,14 +72,14 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
   .conteudo { padding: var(--s-4) var(--s-3) calc(84px + env(safe-area-inset-bottom)); }
   .resumo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .inferior {
-    display: grid; grid-template-columns: repeat(3, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+    display: grid; grid-template-columns: repeat(5, 1fr); position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
     background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom);
   }
   .inferior-item {
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
     min-height: 60px; border: 0; background: none; color: var(--ink-2); text-decoration: none; font-size: var(--fs-xs); font-weight: 600; cursor: pointer;
   }
-  .inferior-item[aria-current='page'] { color: var(--accent); }
+  .inferior-item[aria-current='page'] { color: var(--accent); box-shadow: inset 0 3px 0 var(--brand-deep); }
 }
 
 /* ---------- busca ---------- */
@@ -207,6 +207,8 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
   .hv-row.tarefa { grid-template-columns: 26px minmax(0, 1fr) auto; grid-template-areas: 'check texto quando' 'check quem quem'; column-gap: var(--s-3); }
   .hv-row.tarefa .tarefa-check { grid-area: check; align-self: start; margin-top: 2px; }
   .hv-row.tarefa .quem { text-align: left; }
+  .hv-row.tarefa .titulo { white-space: normal; }
+  .tarefa-fatal { display: inline-block; margin: 2px 0 0; }
 }
 .tarefa-check {
   width: 26px; height: 26px; border-radius: 999px; border: 2px solid var(--line-strong); background: var(--surface);
@@ -231,4 +233,13 @@ li.hv-row.cliente-caso { cursor: default; }
   .hv-row.cliente-linha .quem { display: none; }
   .hv-row.cliente-caso { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: none; }
   .cliente-grade { grid-template-columns: 1fr; }
+}
+
+/* ---------- agenda ---------- */
+.hv-row.agenda-item { grid-template-columns: 56px minmax(0, 1fr) 96px; }
+.agenda-hora { font-weight: 600; font-variant-numeric: tabular-nums; }
+.hv-group-title[data-hoje='true'] { color: var(--accent-soft-ink); background: var(--accent-soft); }
+@media (max-width: 720px) {
+  .hv-row.agenda-item { grid-template-columns: 48px minmax(0, 1fr); grid-template-areas: none; }
+  .hv-row.agenda-item .quem { display: none; }
 }

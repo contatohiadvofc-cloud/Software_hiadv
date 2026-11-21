@@ -6,6 +6,7 @@ import { destaquesDoCartao, type Quadro } from './quadro'
 import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
+import { nomeTipo, type Compromisso } from './agenda'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -195,6 +196,21 @@ export function criarApiSupabase(url: string, chave: string): Api {
         processos: (verificar(ps) ?? []).map((x) => ({ id: x.id as string, numeroCnj: (x.numero_cnj as string) ?? null, classe: (x.classe as string) ?? null, orgao: (x.orgao_julgador as string) ?? null, ativo: x.ativo !== false })),
         tarefas: (verificar(ts) ?? []).map((t) => ({ id: t.id as string, titulo: t.titulo as string, detalhe: (t.detalhe as string) ?? null, prazo: ((t.prazo_fatal ?? t.prazo) as string | null) ?? null, fatal: !!t.prazo_fatal, responsavel: (t.responsavel as string) ?? null })),
       }
+    },
+    async agenda(): Promise<Compromisso[]> {
+      const [pe, au] = await Promise.all([sb.rpc('pericias_lista', { p_dias: 1 }), sb.rpc('audiencias_lista', { p_dias: 1 })])
+      const fora: Compromisso[] = []
+      const ok = (x: Record<string, unknown>) => x.data_hora && x.status !== 'cancelada' && x.status !== 'realizada'
+      for (const p of ((verificar(pe) as Array<Record<string, unknown>> | null) ?? []).filter(ok)) {
+        const d = new Date(p.data_hora as string)
+        fora.push({ id: `p:${p.id}`, tipo: 'pericia', titulo: `Perícia ${nomeTipo(p.tipo as string, '').toLowerCase()}`.trim(), cliente: String(p.cliente ?? ''), clienteId: (p.cliente_id as string) ?? null, dia: diaSP(d), hora: horaSP(d), local: String(p.local ?? ''), quem: String(p.responsavel ?? '') })
+      }
+      for (const a of ((verificar(au) as Array<Record<string, unknown>> | null) ?? []).filter(ok)) {
+        const d = new Date(a.data_hora as string)
+        const local = [a.modo === 'virtual' ? 'Virtual' : null, a.local].filter(Boolean).join(' · ')
+        fora.push({ id: `a:${a.id}`, tipo: 'audiencia', titulo: `Audiência ${nomeTipo(a.tipo as string, '').toLowerCase()}`.trim(), cliente: String(a.cliente ?? ''), clienteId: (a.cliente_id as string) ?? null, dia: diaSP(d), hora: horaSP(d), local, quem: String(a.responsavel ?? '') })
+      }
+      return fora
     },
   }
 }

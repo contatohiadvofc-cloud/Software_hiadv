@@ -21,8 +21,14 @@ Testes: 12 de lógica (Vitest) e 25 de tela no computador e no celular (Playwrig
 - [x] Quadro de casos por área com as etapas do banco (`fluxo_status` + `casos_quadro`): arrastar e soltar no computador, "Mover para…" em todo cartão (teclado e celular), etapas de encerramento escondidas por padrão, alerta de caso parado há 15 dias ou mais, checklist no cartão, visão em lista.
 - [x] Mudança de etapa pelo `caso_status` (fica no histórico do caso); etapa de encerramento pede confirmação e, quando a etapa exige, motivo obrigatório; se o servidor recusar, o cartão volta e o motivo aparece.
 - [x] Ficha do caso (painel lateral): campos próprios da área editáveis, checklist e histórico. Campos trabalhistas aplicados no teste e no oficial (21/11).
-- [ ] Campos marcados "no cartão" aparecendo no quadro (precisa casos_quadro devolver campos).
-- [ ] Clientes, tarefas, prazos, agenda, documentos, publicações virando tarefa.
+- [x] Campos marcados "no cartão" aparecem no quadro (lidos de casos.campos à parte).
+- [x] Visual: toques de verde-escuro; quadro no celular com abas de etapa (uma por vez).
+- [x] Tarefas: minhas / equipe / por pessoa, nova tarefa, concluir com desfazer (tarefa_criar, tarefa_atualizar).
+- [x] Clientes: lista com filtro e página do cliente (casos, processos, tarefas); busca abre o cliente.
+- [x] Agenda: perícias e audiências dos próximos 30 dias por dia, com filtro.
+- [x] Ficha: dados do benefício nas áreas previdenciárias (caso_beneficio_salvar) e checklist marcável com data (caso_gate).
+- [ ] caso_beneficio_salvar: aplicado no TESTE; falta aplicar no OFICIAL (aguarda OK do Felipe).
+- [ ] Documentos, publicações virando tarefa, novo cliente/novo caso.
 
 Testes: 18 de lógica e 33 de tela, todos passando.
 

@@ -63,7 +63,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </header>
         <main className="conteudo" id="conteudo">{children}</main>
       </div>
-      <BottomBar onBuscar={() => setBuscando(true)} />
+      <BottomBar />
       <CommandSearch open={buscando} onOpenChange={setBuscando} />
     </div>
   )

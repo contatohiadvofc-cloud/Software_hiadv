@@ -3,6 +3,7 @@ import type { Quadro } from './quadro'
 import type { Ficha } from './ficha'
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 import type { ClienteFicha, ClienteResumo } from './clientes'
+import type { Compromisso } from './agenda'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
 export type Perfil = { email: string; nome: string; papel: Papel | null; escritorioId: string | null; escritorioNome: string }
@@ -50,4 +51,6 @@ export interface Api {
   /** Até 100 clientes, em ordem alfabética; termo filtra pelo nome. */
   clientes(termo: string): Promise<ClienteResumo[]>
   cliente(id: string): Promise<ClienteFicha>
+  /** Perícias e audiências não canceladas nem realizadas. */
+  agenda(): Promise<Compromisso[]>
 }

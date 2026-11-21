@@ -26,6 +26,9 @@ export function Sidebar() {
         <Link to="/tarefas" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" />Tarefas
         </Link>
+        <Link to="/agenda" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+          <Icone d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />Agenda
+        </Link>
         <Link to="/clientes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8" />Clientes
         </Link>
@@ -44,7 +47,6 @@ export function Sidebar() {
         </ul>
       </div>
       <div className="lateral-grupo lateral-rodape">
-        <span className="lateral-item lateral-breve" aria-disabled="true">Agenda<small>em breve</small></span>
         <span className="lateral-item lateral-breve" aria-disabled="true">Sara<small>em breve</small></span>
         {gestor && <span className="lateral-item lateral-breve" aria-disabled="true">Gestão<small>em breve</small></span>}
       </div>

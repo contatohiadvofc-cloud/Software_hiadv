@@ -6,6 +6,7 @@ import { AREAS_PREVIDENCIARIAS, BENEFICIO_DEFS, type EventoHistorico, type Ficha
 import { telaParaValor, validarCampo, type CampoDef } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
 import type { ClienteResumo } from './clientes'
+import type { Compromisso } from './agenda'
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
 const ESCRITORIOS: Escritorio[] = [
@@ -251,6 +252,17 @@ export function criarApiDemo(): Api {
       const processos = id === 'c2' ? [{ id: 'p2', numeroCnj: '0000123-45.2026.5.12.0001', classe: 'Ação trabalhista', orgao: '2ª Vara do Trabalho de Exemplo', ativo: true }] : []
       const tarefas = tarefasDemo().filter((t) => t.status === 'aberta' && t.detalhe?.includes(c.nome)).map(({ status: _s, ...t }) => ({ ...t }))
       return { cliente: { ...c }, casos, processos, tarefas }
+    },
+    async agenda(): Promise<Compromisso[]> {
+      const x = (id: string, tipo: Compromisso['tipo'], titulo: string, cid: string, n: number, hora: string, local: string, quem: string): Compromisso =>
+        ({ id, tipo, titulo, cliente: CLIENTES.find((c) => c.id === cid)!.nome, clienteId: cid, dia: dia(n), hora, local, quem })
+      return [
+        x('p1', 'pericia', 'Perícia médica', 'c1', 0, '09:30', 'Central de Perícias · Joaçaba', 'Ana'),
+        x('a1', 'audiencia', 'Audiência inicial', 'c5', 0, '14:00', 'Virtual · 1ª Vara do Trabalho', 'Rafael'),
+        x('a2', 'audiencia', 'Audiência de instrução', 'c7', 6, '10:00', '2ª Vara do Trabalho', 'Ana'),
+        x('p2', 'pericia', 'Perícia médica', 'c3', 3, '13:15', 'JEF · sala 2', 'Ana'),
+        x('p3', 'pericia', 'Perícia social', 'c8', 12, '08:00', 'Visita domiciliar', 'Júlia'),
+      ]
     },
   }
 }

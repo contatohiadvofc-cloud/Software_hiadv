@@ -21,6 +21,8 @@ export type Cenario = {
   clientes?: Array<Record<string, unknown>>
   casosCliente?: Array<Record<string, unknown>>
   processos?: Array<Record<string, unknown>>
+  pericias?: Array<Record<string, unknown>>
+  audienciasLista?: Array<Record<string, unknown>>
 }
 
 function b64url(o: object) {
@@ -55,7 +57,8 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'hiadv_escritorios_disponiveis') return json(r, (c.escritorios ?? []).map((e) => ({ ...e, atual: e.id === estado.atual })))
       if (nome === 'hiadv_trocar_escritorio') { estado.atual = (req.postDataJSON() as { p_escritorio: string }).p_escritorio; return json(r, { ok: true }) }
       if (nome === 'busca_geral') { estado.chamadasBusca++; return json(r, c.busca ?? []) }
-      if (nome === 'pericias_lista') return json(r, [])
+      if (nome === 'pericias_lista') return json(r, c.pericias ?? [])
+      if (nome === 'audiencias_lista') return json(r, c.audienciasLista ?? [])
       if (nome === 'casos_quadro') return json(r, c.casos ?? [])
       if (nome === 'caso_status') {
         if (c.recusarMover) return json(r, { code: 'P0001', message: 'Só o jurídico move nesta etapa.' }, 400)
