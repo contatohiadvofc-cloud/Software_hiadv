@@ -4,6 +4,7 @@ import { diaSP, type ItemDia } from './seuDia'
 import { destaquesDoCartao, type CasoCard, type Etapa } from './quadro'
 import type { EventoHistorico, Ficha } from './ficha'
 import { telaParaValor, validarCampo, type CampoDef } from './campos'
+import type { Pessoa, Tarefa } from './tarefas'
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
 const ESCRITORIOS: Escritorio[] = [
@@ -73,6 +74,24 @@ const CAMPOS: Record<string, Record<string, unknown>> = {
 }
 const HIST: Record<string, EventoHistorico[]> = {}
 const CHECK = ['Procuração assinada', 'Documento com foto', 'CTPS digital', 'Holerites', 'Termo de rescisão', 'Laudos e exames', 'CNIS']
+
+const EQUIPE: Pessoa[] = [
+  { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado' }, { email: 'rafael@silvaprado.exemplo.br', nome: 'Rafael Souza' },
+  { email: 'marcos@silvaprado.exemplo.br', nome: 'Marcos Lima' }, { email: 'julia@silvaprado.exemplo.br', nome: 'Júlia Reis' },
+]
+let TAREFAS: Array<Tarefa & { status: string }> | null = null
+function tarefasDemo() {
+  TAREFAS ??= [
+    { id: 't1', titulo: 'Pedir CTPS ao cliente', detalhe: 'Carla Mendes · trabalhista', prazo: dia(-2), fatal: false, responsavel: EQUIPE[2].email, status: 'aberta' },
+    { id: 't2', titulo: 'Contestação', detalhe: 'Bruno Teixeira x Metalúrgica Alfa', prazo: dia(-1), fatal: true, responsavel: EQUIPE[1].email, status: 'aberta' },
+    { id: 't3', titulo: 'Manifestação sobre o laudo', detalhe: 'José Lima · previdenciário', prazo: dia(0), fatal: true, responsavel: EQUIPE[0].email, status: 'aberta' },
+    { id: 't4', titulo: 'Conferir documentos recebidos', detalhe: 'Paula Nunes', prazo: dia(0), fatal: false, responsavel: EQUIPE[3].email, status: 'aberta' },
+    { id: 't5', titulo: 'Recurso ordinário', detalhe: 'Diego Alves x Comércio Beta', prazo: dia(4), fatal: true, responsavel: EQUIPE[1].email, status: 'aberta' },
+    { id: 't6', titulo: 'Calcular verbas rescisórias', detalhe: 'Lúcia Farias', prazo: dia(12), fatal: false, responsavel: EQUIPE[0].email, status: 'aberta' },
+    { id: 't7', titulo: 'Organizar pasta do cliente', detalhe: 'Marcos Dias', prazo: null, fatal: false, responsavel: null, status: 'aberta' },
+  ]
+  return TAREFAS
+}
 
 function dia(n: number): string {
   return diaSP(new Date(Date.now() + n * 86400000))
@@ -164,6 +183,19 @@ export function criarApiDemo(): Api {
       }
       if (mudou.length) (HIST[id] ??= []).unshift({ evento: 'campos', de: null, para: null, detalhe: `Atualizou: ${mudou.join(', ')}`, quem: 'Ana Prado', em: new Date().toISOString() })
       return mudou.length
+    },
+    async equipe() { return EQUIPE.map((p) => ({ ...p })) },
+    async tarefas(pessoa) {
+      return tarefasDemo().filter((t) => t.status === 'aberta' && (!pessoa || t.responsavel === pessoa)).map(({ status: _s, ...t }) => ({ ...t }))
+    },
+    async criarTarefa(n) {
+      if (n.titulo.trim().length < 2) throw new Error('Escreva o que precisa ser feito.')
+      tarefasDemo().push({ id: `t${Date.now()}`, titulo: n.titulo.trim(), detalhe: n.detalhe.trim() || null, prazo: n.prazo || null, fatal: false, responsavel: n.responsavel || null, status: 'aberta' })
+    },
+    async mudarTarefa(id, status) {
+      const t = tarefasDemo().find((x) => x.id === id)
+      if (!t) throw new Error('Tarefa não encontrada.')
+      t.status = status
     },
   }
 }

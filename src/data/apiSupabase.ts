@@ -5,6 +5,7 @@ import { diaSP, horaSP, type ItemDia } from './seuDia'
 import { destaquesDoCartao, type Quadro } from './quadro'
 import type { Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
+import type { Pessoa, Tarefa } from './tarefas'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
   if (r.error) {
@@ -143,6 +144,23 @@ export function criarApiSupabase(url: string, chave: string): Api {
       const r = verificar(await sb.rpc('caso_campos_salvar', { p_caso: id, p_campos: campos })) as { ok: boolean; erro?: string; alterados?: number }
       if (!r?.ok) throw new Error(r?.erro ?? 'Não foi possível salvar.')
       return Number(r.alterados ?? 0)
+    },
+    async equipe(): Promise<Pessoa[]> {
+      return (verificar(await sb.from('equipe').select('email, nome').order('nome')) ?? []).map((p) => ({ email: String(p.email), nome: String(p.nome || p.email) }))
+    },
+    async tarefas(pessoa): Promise<Tarefa[]> {
+      let q = sb.from('tarefas').select('id, titulo, detalhe, prazo, prazo_fatal, responsavel').eq('status', 'aberta').limit(500)
+      if (pessoa) q = q.eq('responsavel', pessoa)
+      return (verificar(await q) ?? []).map((t) => ({
+        id: t.id as string, titulo: t.titulo as string, detalhe: (t.detalhe as string) ?? null,
+        prazo: ((t.prazo_fatal ?? t.prazo) as string | null) ?? null, fatal: !!t.prazo_fatal, responsavel: (t.responsavel as string) ?? null,
+      }))
+    },
+    async criarTarefa(n) {
+      verificar(await sb.rpc('tarefa_criar', { p_titulo: n.titulo.trim(), p_responsavel: n.responsavel || null, p_prazo: n.prazo || null, p_detalhe: n.detalhe.trim() || null }))
+    },
+    async mudarTarefa(id, status) {
+      verificar(await sb.rpc('tarefa_atualizar', { p_id: id, p_status: status }))
     },
   }
 }

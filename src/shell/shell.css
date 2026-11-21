@@ -196,3 +196,18 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
   .coluna-vazia { padding: var(--s-4) var(--s-2); color: var(--ink-2); font-size: var(--fs-sm); }
 }
 @media (min-width: 721px) { .coluna-vazia { display: none; } }
+
+/* ---------- tarefas ---------- */
+.filtro .hv-input { min-height: 40px; }
+.hv-row.tarefa { grid-template-columns: 26px minmax(0, 1fr) 120px 96px; }
+@media (max-width: 720px) {
+  .hv-row.tarefa { grid-template-columns: 26px minmax(0, 1fr) auto; grid-template-areas: 'check texto quando' 'check quem quem'; column-gap: var(--s-3); }
+  .hv-row.tarefa .tarefa-check { grid-area: check; align-self: start; margin-top: 2px; }
+  .hv-row.tarefa .quem { text-align: left; }
+}
+.tarefa-check {
+  width: 26px; height: 26px; border-radius: 999px; border: 2px solid var(--line-strong); background: var(--surface);
+  color: transparent; display: grid; place-items: center; cursor: pointer; flex: none; padding: 0;
+}
+.tarefa-check:hover, .tarefa-check:focus-visible { border-color: var(--accent); color: var(--accent); }
+.tarefa-fatal { margin-left: var(--s-2); padding: 1px 6px; border-radius: var(--r-sm); background: var(--danger-soft); color: var(--danger); font-size: var(--fs-xs); font-weight: 600; vertical-align: 1px; }

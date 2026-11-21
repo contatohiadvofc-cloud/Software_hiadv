@@ -27,7 +27,8 @@ const TOKEN = `${b64url({ alg: 'HS256', typ: 'JWT' })}.${b64url({ sub: 'u1', ema
 const USER = { id: 'u1', aud: 'authenticated', role: 'authenticated', email: 'ana@silvaprado.exemplo.br', app_metadata: {}, user_metadata: {}, created_at: '2026-01-01T00:00:00Z' }
 
 export async function simularSupabase(page: Page, c: Cenario = {}) {
-  const estado = { atual: c.escritorios?.find((e) => e.atual)?.id ?? 'esc-1', falhas: c.falharSeuDia ?? 0, chamadasBusca: 0, movidos: [] as Array<Record<string, unknown>>, salvos: [] as Array<Record<string, unknown>> }
+  const estado = { atual: c.escritorios?.find((e) => e.atual)?.id ?? 'esc-1', falhas: c.falharSeuDia ?? 0, chamadasBusca: 0, movidos: [] as Array<Record<string, unknown>>, salvos: [] as Array<Record<string, unknown>>, tarefasMudadas: [] as Array<Record<string, unknown>>, tarefasCriadas: [] as Array<Record<string, unknown>> }
+  const feitas = new Set<string>()
   const json = (r: Route, corpo: unknown, status = 200) => r.fulfill({ status, contentType: 'application/json', body: JSON.stringify(corpo) })
 
   await page.route('**/*.supabase.co/**', async (r) => {
@@ -57,6 +58,12 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
         if (c.recusarMover) return json(r, { code: 'P0001', message: 'Só o jurídico move nesta etapa.' }, 400)
         estado.movidos.push(req.postDataJSON() as Record<string, unknown>); return json(r, { ok: true })
       }
+      if (nome === 'tarefa_atualizar') {
+        const v = req.postDataJSON() as { p_id: string; p_status: string }
+        estado.tarefasMudadas.push(v); if (v.p_status === 'feita') feitas.add(v.p_id); else feitas.delete(v.p_id)
+        return json(r, { ok: true })
+      }
+      if (nome === 'tarefa_criar') { estado.tarefasCriadas.push(req.postDataJSON() as Record<string, unknown>); return json(r, { id: 'novo' }) }
       if (nome === 'caso_detalhe') return json(r, c.detalhe ?? null)
       if (nome === 'caso_campos_salvar') {
         const corpo = req.postDataJSON() as Record<string, unknown>
@@ -64,6 +71,9 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
         estado.salvos.push(corpo); return json(r, { ok: true, alterados: Object.keys(corpo.p_campos as object).length })
       }
       return json(r, null)
+    }
+    if (p.endsWith('/rest/v1/equipe') && !(req.headers()['accept'] ?? '').includes('vnd.pgrst.object') && url.searchParams.get('select')?.includes('email')) {
+      return json(r, [{ email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado' }, { email: 'rafael@silvaprado.exemplo.br', nome: 'Rafael Souza' }])
     }
     if (p.endsWith('/rest/v1/equipe')) {
       const linha = { nome: 'Ana Prado', papel: c.papel ?? 'master', escritorio_id: estado.atual }
@@ -75,7 +85,7 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
     }
     if (p.endsWith('/rest/v1/tarefas')) {
       if (estado.falhas > 0) { estado.falhas--; return json(r, { message: 'erro' }, 500) }
-      return json(r, c.tarefas ?? [])
+      return json(r, (c.tarefas ?? []).filter((t) => !feitas.has(t.id as string)))
     }
     if (p.endsWith('/rest/v1/audiencias')) return json(r, [])
     if (p.endsWith('/rest/v1/casos')) return json(r, c.camposCasos ?? [])

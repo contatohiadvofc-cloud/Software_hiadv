@@ -1,12 +1,16 @@
 import { Link } from '@tanstack/react-router'
 
-/** Barra inferior do celular: Seu dia · Áreas · Buscar. */
+/** Barra inferior do celular: Seu dia · Tarefas · Áreas · Buscar. */
 export function BottomBar({ onBuscar }: { onBuscar: () => void }) {
   return (
     <nav className="inferior" aria-label="Navegação do celular">
       <Link to="/seu-dia" className="inferior-item" activeProps={{ 'aria-current': 'page' }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2" /></svg>
         <span>Seu dia</span>
+      </Link>
+      <Link to="/tarefas" className="inferior-item" activeProps={{ 'aria-current': 'page' }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><path d="M9 11l3 3 8-8M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h9" /></svg>
+        <span>Tarefas</span>
       </Link>
       
         <Link to="/areas" className="inferior-item" activeProps={{ 'aria-current': 'page' }}>

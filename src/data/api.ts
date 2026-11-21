@@ -1,6 +1,7 @@
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
 import type { Ficha } from './ficha'
+import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
 export type Perfil = { email: string; nome: string; papel: Papel | null; escritorioId: string | null; escritorioNome: string }
@@ -34,4 +35,11 @@ export interface Api {
   ficha(id: string): Promise<Ficha>
   /** Grava os campos da área (o servidor confere tipo e opções). Devolve quantos mudaram. */
   salvarCampos(id: string, campos: Record<string, string>): Promise<number>
+  /** Pessoas da equipe do escritório em uso. */
+  equipe(): Promise<Pessoa[]>
+  /** Tarefas abertas; pessoa = e-mail para filtrar, null para todas que o usuário pode ver. */
+  tarefas(pessoa: string | null): Promise<Tarefa[]>
+  criarTarefa(n: NovaTarefa): Promise<void>
+  /** 'feita' conclui; 'aberta' desfaz a conclusão. */
+  mudarTarefa(id: string, status: 'feita' | 'aberta'): Promise<void>
 }
