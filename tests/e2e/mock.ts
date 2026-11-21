@@ -18,6 +18,9 @@ export type Cenario = {
   camposArea?: Array<Record<string, unknown>>
   recusarCampos?: string
   camposCasos?: Array<{ id: string; campos: Record<string, unknown> }>
+  clientes?: Array<Record<string, unknown>>
+  casosCliente?: Array<Record<string, unknown>>
+  processos?: Array<Record<string, unknown>>
 }
 
 function b64url(o: object) {
@@ -88,7 +91,15 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       return json(r, (c.tarefas ?? []).filter((t) => !feitas.has(t.id as string)))
     }
     if (p.endsWith('/rest/v1/audiencias')) return json(r, [])
-    if (p.endsWith('/rest/v1/casos')) return json(r, c.camposCasos ?? [])
+    if (p.endsWith('/rest/v1/casos')) return json(r, url.searchParams.has('cliente_id') ? c.casosCliente ?? [] : c.camposCasos ?? [])
+    if (p.endsWith('/rest/v1/processos')) return json(r, c.processos ?? [])
+    if (p.endsWith('/rest/v1/clientes')) {
+      const lista = c.clientes ?? []
+      const id = url.searchParams.get('id')?.replace('eq.', '')
+      const nome = url.searchParams.get('nome')?.replace(/^ilike\.\*?%?|%$|\*$/g, '').replace(/%/g, '').toLowerCase()
+      const fil = id ? lista.filter((x) => x.id === id) : nome ? lista.filter((x) => String(x.nome).toLowerCase().includes(nome)) : lista
+      return json(r, (req.headers()['accept'] ?? '').includes('vnd.pgrst.object') ? fil[0] ?? null : fil)
+    }
     if (p.endsWith('/rest/v1/area_campos')) return json(r, c.camposArea ?? [])
     if (p.endsWith('/rest/v1/fluxo_status')) return json(r, c.etapas ?? [])
     return json(r, [])

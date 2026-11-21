@@ -61,7 +61,7 @@ test('Seu dia com erro mostra Tentar de novo e depois a lista', async ({ page })
 })
 
 test('busca: Ctrl+K abre, 1 letra não busca, setas e Enter abrem', async ({ page, isMobile }) => {
-  const est = await simularSupabase(page, { busca: [{ tipo: 'cliente', titulo: 'Rita Moura', trecho: 'Previdenciário' }, { tipo: 'cliente', titulo: 'Rita Souza', trecho: 'Trabalhista' }] })
+  const est = await simularSupabase(page, { busca: [{ tipo: 'cliente', titulo: 'Rita Moura', trecho: 'Previdenciário', cliente_id: 'c1' }, { tipo: 'cliente', titulo: 'Rita Souza', trecho: 'Trabalhista', cliente_id: 'c2' }] })
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)
   if (isMobile) await page.getByRole('navigation', { name: 'Navegação do celular' }).getByRole('button', { name: 'Buscar', exact: true }).dispatchEvent('click')
@@ -76,7 +76,7 @@ test('busca: Ctrl+K abre, 1 letra não busca, setas e Enter abrem', async ({ pag
   await page.keyboard.press('ArrowDown')
   await expect(page.getByRole('option').nth(1)).toHaveAttribute('aria-selected', 'true')
   await page.keyboard.press('Enter')
-  await expect(page.getByText(/Rita Souza: a ficha completa/)).toBeVisible()
+  await expect(page).toHaveURL(/\/clientes\/c2$/)
   await expect(campo).toHaveCount(0)
 })
 

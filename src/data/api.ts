@@ -2,6 +2,7 @@ import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
 import type { Ficha } from './ficha'
 import type { NovaTarefa, Pessoa, Tarefa } from './tarefas'
+import type { ClienteFicha, ClienteResumo } from './clientes'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
 export type Perfil = { email: string; nome: string; papel: Papel | null; escritorioId: string | null; escritorioNome: string }
@@ -42,4 +43,7 @@ export interface Api {
   criarTarefa(n: NovaTarefa): Promise<void>
   /** 'feita' conclui; 'aberta' desfaz a conclusão. */
   mudarTarefa(id: string, status: 'feita' | 'aberta'): Promise<void>
+  /** Até 100 clientes, em ordem alfabética; termo filtra pelo nome. */
+  clientes(termo: string): Promise<ClienteResumo[]>
+  cliente(id: string): Promise<ClienteFicha>
 }

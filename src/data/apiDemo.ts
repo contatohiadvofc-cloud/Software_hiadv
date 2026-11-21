@@ -5,6 +5,7 @@ import { destaquesDoCartao, type CasoCard, type Etapa } from './quadro'
 import type { EventoHistorico, Ficha } from './ficha'
 import { telaParaValor, validarCampo, type CampoDef } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
+import type { ClienteResumo } from './clientes'
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
 const ESCRITORIOS: Escritorio[] = [
@@ -74,6 +75,18 @@ const CAMPOS: Record<string, Record<string, unknown>> = {
 }
 const HIST: Record<string, EventoHistorico[]> = {}
 const CHECK = ['Procuração assinada', 'Documento com foto', 'CTPS digital', 'Holerites', 'Termo de rescisão', 'Laudos e exames', 'CNIS']
+
+const CLIENTE_DO_CASO: Record<string, string> = { k1: 'c2', k2: 'c4', k3: 'c5', k4: 'c6', k5: 'c7', k6: 'c1', k7: 'c8', k8: 'c3' }
+const CLIENTES: ClienteResumo[] = [
+  { id: 'c1', nome: 'Rita Moura', telefone: '49999110001', origem: 'site', desde: '2026-08-02T12:00:00Z' },
+  { id: 'c2', nome: 'Bruno Teixeira', telefone: '49999110002', origem: 'whatsapp', desde: '2026-09-10T12:00:00Z' },
+  { id: 'c3', nome: 'José Lima', telefone: null, origem: 'indicação', desde: '2026-05-21T12:00:00Z' },
+  { id: 'c4', nome: 'Carla Mendes', telefone: '49999110004', origem: 'whatsapp', desde: '2026-10-01T12:00:00Z' },
+  { id: 'c5', nome: 'Ana Ribeiro', telefone: '49999110005', origem: 'site', desde: '2026-07-15T12:00:00Z' },
+  { id: 'c6', nome: 'Diego Alves', telefone: '49999110006', origem: 'whatsapp', desde: '2026-06-30T12:00:00Z' },
+  { id: 'c7', nome: 'Lúcia Farias', telefone: '49999110007', origem: 'site', desde: '2026-11-03T12:00:00Z' },
+  { id: 'c8', nome: 'Paula Nunes', telefone: '49999110008', origem: 'chatbot', desde: '2026-11-12T12:00:00Z' },
+]
 
 const EQUIPE: Pessoa[] = [
   { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado' }, { email: 'rafael@silvaprado.exemplo.br', nome: 'Rafael Souza' },
@@ -196,6 +209,18 @@ export function criarApiDemo(): Api {
       const t = tarefasDemo().find((x) => x.id === id)
       if (!t) throw new Error('Tarefa não encontrada.')
       t.status = status
+    },
+    async clientes(termo) {
+      const t = termo.trim().toLowerCase()
+      return CLIENTES.filter((c) => t.length < 2 || c.nome.toLowerCase().includes(t)).sort((a, b) => a.nome.localeCompare(b.nome)).map((c) => ({ ...c }))
+    },
+    async cliente(id) {
+      const c = CLIENTES.find((x) => x.id === id)
+      if (!c) throw new Error('Cliente não encontrado.')
+      const casos = CASOS.filter((k) => CLIENTE_DO_CASO[k.id] === id).map((k) => ({ id: k.id, area: AREA_DO_CASO[k.id], status: k.status, produto: k.produto }))
+      const processos = id === 'c2' ? [{ id: 'p2', numeroCnj: '0000123-45.2026.5.12.0001', classe: 'Ação trabalhista', orgao: '2ª Vara do Trabalho de Exemplo', ativo: true }] : []
+      const tarefas = tarefasDemo().filter((t) => t.status === 'aberta' && t.detalhe?.includes(c.nome)).map(({ status: _s, ...t }) => ({ ...t }))
+      return { cliente: { ...c }, casos, processos, tarefas }
     },
   }
 }

@@ -211,3 +211,21 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
 }
 .tarefa-check:hover, .tarefa-check:focus-visible { border-color: var(--accent); color: var(--accent); }
 .tarefa-fatal { margin-left: var(--s-2); padding: 1px 6px; border-radius: var(--r-sm); background: var(--danger-soft); color: var(--danger); font-size: var(--fs-xs); font-weight: 600; vertical-align: 1px; }
+
+/* ---------- clientes ---------- */
+.filtro-largo { max-width: 420px; margin-bottom: var(--s-4); }
+.hv-row.cliente-linha { grid-template-columns: 36px minmax(0, 1fr) auto; }
+.cliente-inicial { width: 36px; height: 36px; border-radius: 999px; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent-soft-ink); font-weight: 600; }
+.hv-row.cliente-caso { grid-template-columns: minmax(0, 1fr) auto; width: 100%; background: none; border-left: 0; border-right: 0; border-bottom: 0; font: inherit; text-align: left; cursor: pointer; }
+li.hv-row.cliente-caso { cursor: default; }
+.cliente-grade { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--s-4); align-items: start; }
+.migalha { margin: 0 0 var(--s-2); font-size: var(--fs-sm); }
+.migalha a { color: var(--accent); text-decoration: none; font-weight: 600; }
+.migalha a::before { content: '‹ '; }
+.cliente-contato a { color: var(--accent); font-weight: 600; }
+@media (max-width: 720px) {
+  .hv-row.cliente-linha { grid-template-columns: 36px minmax(0, 1fr); grid-template-areas: none; }
+  .hv-row.cliente-linha .quem { display: none; }
+  .hv-row.cliente-caso { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: none; }
+  .cliente-grade { grid-template-columns: 1fr; }
+}

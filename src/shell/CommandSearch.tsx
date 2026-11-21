@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Dialog } from '../design/components/Dialog'
 import { useApi, useSessao } from '../lib/contexto'
 import { useToast } from '../design/components/Toast'
+import { useNavigate } from '@tanstack/react-router'
 
 export const ESPERA_MS = 250
 export const MIN_LETRAS = 2
@@ -17,6 +18,7 @@ export function CommandSearch({ open, onOpenChange }: { open: boolean; onOpenCha
   const api = useApi()
   const { perfil } = useSessao()
   const toast = useToast()
+  const nav = useNavigate()
   const [q, setQ] = useState('')
   const [sel, setSel] = useState(0)
   const termo = useAtraso(q.trim(), ESPERA_MS)
@@ -35,8 +37,8 @@ export function CommandSearch({ open, onOpenChange }: { open: boolean; onOpenCha
     const it = itens[i]
     if (!it) return
     onOpenChange(false)
-    // A ficha do cliente e do processo chega na Fase 1.
-    toast(`${it.titulo}: a ficha completa chega na próxima etapa do HiAdv 2.`)
+    if (it.clienteId) nav({ to: '/clientes/$id', params: { id: it.clienteId } })
+    else toast(`${it.titulo}: não está ligado a um cliente.`)
   }
 
   return (

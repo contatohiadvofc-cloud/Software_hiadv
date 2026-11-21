@@ -11,6 +11,8 @@ import { Area } from './routes/Area'
 import { Areas } from './routes/Areas'
 import { Catalogo } from './routes/Catalogo'
 import { Tarefas } from './routes/Tarefas'
+import { Clientes } from './routes/Clientes'
+import { Cliente } from './routes/Cliente'
 
 const raiz = createRootRoute({ component: () => <Outlet />, head: () => ({ meta: [{ title: 'HiAdv' }] }) })
 const inicio = createRoute({ getParentRoute: () => raiz, path: '/', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
@@ -24,9 +26,11 @@ const seuDia = createRoute({ getParentRoute: () => dentro, path: '/seu-dia', com
 const area = createRoute({ getParentRoute: () => dentro, path: '/area/$slug', component: Area, head: () => ({ meta: [{ title: 'Área · HiAdv' }] }) })
 const listaAreas = createRoute({ getParentRoute: () => dentro, path: '/areas', component: Areas, head: () => ({ meta: [{ title: 'Áreas · HiAdv' }] }) })
 const tarefas = createRoute({ getParentRoute: () => dentro, path: '/tarefas', component: Tarefas, head: () => ({ meta: [{ title: 'Tarefas · HiAdv' }] }) })
+const clientes = createRoute({ getParentRoute: () => dentro, path: '/clientes', component: Clientes, head: () => ({ meta: [{ title: 'Clientes · HiAdv' }] }) })
+const cliente = createRoute({ getParentRoute: () => dentro, path: '/clientes/$id', component: Cliente, head: () => ({ meta: [{ title: 'Cliente · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, tarefas, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, dentro.addChildren([seuDia, tarefas, clientes, cliente, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

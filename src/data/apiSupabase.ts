@@ -6,6 +6,7 @@ import { destaquesDoCartao, type Quadro } from './quadro'
 import type { Ficha } from './ficha'
 import type { CampoDef, TipoCampo } from './campos'
 import type { Pessoa, Tarefa } from './tarefas'
+import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
   if (r.error) {
@@ -161,6 +162,28 @@ export function criarApiSupabase(url: string, chave: string): Api {
     },
     async mudarTarefa(id, status) {
       verificar(await sb.rpc('tarefa_atualizar', { p_id: id, p_status: status }))
+    },
+    async clientes(termo): Promise<ClienteResumo[]> {
+      let q = sb.from('clientes').select('id, nome, telefone, origem, criado_em').order('nome').limit(100)
+      const t = termoBusca(termo)
+      if (t.length >= 2) q = q.ilike('nome', `%${t}%`)
+      return (verificar(await q) ?? []).map((c) => ({ id: c.id as string, nome: String(c.nome ?? ''), telefone: (c.telefone as string) ?? null, origem: (c.origem as string) ?? null, desde: (c.criado_em as string) ?? null }))
+    },
+    async cliente(id): Promise<ClienteFicha> {
+      const [c, cs, ps, ts] = await Promise.all([
+        sb.from('clientes').select('id, nome, telefone, origem, criado_em').eq('id', id).maybeSingle(),
+        sb.from('casos').select('id, via, status, produto').eq('cliente_id', id).order('criado_em', { ascending: false }),
+        sb.from('processos').select('id, numero_cnj, classe, orgao_julgador, ativo').eq('cliente_id', id).order('criado_em', { ascending: false }),
+        sb.from('tarefas').select('id, titulo, detalhe, prazo, prazo_fatal, responsavel').eq('cliente_id', id).eq('status', 'aberta').limit(100),
+      ])
+      const cl = verificar(c)
+      if (!cl) throw new Error('Cliente não encontrado.')
+      return {
+        cliente: { id, nome: String(cl.nome ?? ''), telefone: (cl.telefone as string) ?? null, origem: (cl.origem as string) ?? null, desde: (cl.criado_em as string) ?? null },
+        casos: (verificar(cs) ?? []).map((x) => ({ id: x.id as string, area: String(x.via ?? ''), status: String(x.status ?? ''), produto: (x.produto as string) ?? null })),
+        processos: (verificar(ps) ?? []).map((x) => ({ id: x.id as string, numeroCnj: (x.numero_cnj as string) ?? null, classe: (x.classe as string) ?? null, orgao: (x.orgao_julgador as string) ?? null, ativo: x.ativo !== false })),
+        tarefas: (verificar(ts) ?? []).map((t) => ({ id: t.id as string, titulo: t.titulo as string, detalhe: (t.detalhe as string) ?? null, prazo: ((t.prazo_fatal ?? t.prazo) as string | null) ?? null, fatal: !!t.prazo_fatal, responsavel: (t.responsavel as string) ?? null })),
+      }
     },
   }
 }
