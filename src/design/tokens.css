@@ -1,51 +1,52 @@
-/* HiAdv · tokens do design system (direção A · Registro).
+/* HiAdv · tokens do design system (identidade vinho, 2026-11).
    Trocar a identidade visual = mudar só este arquivo. */
 :root,
 [data-theme='light'] {
-  --font: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-marca: 'Source Serif 4', Georgia, 'Times New Roman', serif; /* só no nome HiAdv e nos títulos de página */
 
-  /* superfícies */
-  --bg: #f5f6f8;
+  /* superfícies: papel */
+  --bg: #f8f5f2;
   --surface: #ffffff;
-  --surface-2: #eef2f5;
-  --line: #e1e5ea;
-  --line-strong: #c9d0d8;
+  --surface-2: #f1ece8;
+  --line: #e6ddd8;
+  --line-strong: #d3c7c1;
 
-  /* texto */
-  --ink: #16202e;
-  --ink-2: #4f5a68;
-  --ink-3: #5c6571;
+  /* texto: grafite */
+  --ink: #221b1e;
+  --ink-2: #5a4f53;
+  --ink-3: #6b5f63;
 
-  /* marca e ação */
-  --accent: #1a5446;
-  --accent-hover: #12402f;
+  /* marca e ação: vinho. Vinho é só marca, botão e item escolhido; nunca alerta. */
+  --accent: #7a1f33;
+  --accent-hover: #631828;
   --accent-ink: #ffffff;
-  --accent-soft: #e6f0ec;
-  --accent-soft-ink: #174d40;
-  --brand-mark: #14463a;   /* verde-escuro da marca */
+  --accent-soft: #f5e6e9;
+  --accent-soft-ink: #6b1a2c;
+  --brand-mark: #7a1f33;
   --brand-mark-ink: #ffffff;
-  --brand-dot: #4fae93;    /* ponto menta do monograma */
-  --brand-deep: #0f3a30;   /* toques: faixa do topo, item ativo */
+  --brand-dot: #f0b7c2;    /* ponto rosé do "i" */
+  --brand-deep: #5c1626;   /* toques: faixa do topo, item ativo */
 
-  /* estados (diferem também em claridade, não só em matiz) */
+  /* estados: alerta em vermelho-alaranjado e aviso em âmbar, longe do vinho */
   --info: #1f5fbf;    --info-soft: #e8f0fc;
   --success: #1f7a4d; --success-soft: #e5f4ec;
-  --warning: #a8530a; --warning-soft: #fcefe1;
-  --danger: #b42318;  --danger-soft: #fdecea; --danger-solid: #b42318;
+  --warning: #8a6100; --warning-soft: #fbf2d9;
+  --danger: #b43a0a;  --danger-soft: #fdede3; --danger-solid: #b43a0a;
 
   /* tipos de item */
-  --t-prazo: #c4620f;
+  --t-prazo: #946000;
   --t-audiencia: #2f6fd6;
-  --t-pericia: #7a4cd9;
-  --t-tarefa: #8a94a3;
+  --t-pericia: #6a4cc9;
+  --t-tarefa: #8c8084;
 
   /* forma e ritmo */
   --r-sm: 6px;
-  --r: 8px;
-  --r-lg: 12px;
+  --r: 10px;
+  --r-lg: 14px;
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px;
-  --shadow-pop: 0 12px 32px -12px rgb(22 32 46 / 0.28);
-  --focus: 0 0 0 3px rgb(29 92 77 / 0.35);
+  --shadow-pop: 0 12px 32px -12px rgb(34 27 30 / 0.28);
+  --focus: 0 0 0 3px rgb(122 31 51 / 0.32);
   --sidebar-w: 248px;
   --touch: 44px;
 
@@ -58,33 +59,33 @@
 }
 
 [data-theme='dark'] {
-  --bg: #0f1419;
-  --surface: #161c23;
-  --surface-2: #1d242d;
-  --line: #27303a;
-  --line-strong: #36414d;
-  --ink: #e8ecf0;
-  --ink-2: #b2bbc5;
-  --ink-3: #8f99a4;
-  --accent: #4fae93;
-  --accent-hover: #63c1a6;
-  --accent-ink: #0b1a15;
-  --accent-soft: #1b2e29;
-  --accent-soft-ink: #8fd6c0;
-  --brand-mark: #2f7d68;
-  --brand-mark-ink: #ffffff;
-  --brand-dot: #8fd6c0;
-  --brand-deep: #4fae93;
+  --bg: #170b10;
+  --surface: #20121a;
+  --surface-2: #2a1820;
+  --line: #3a2730;
+  --line-strong: #4d3640;
+  --ink: #f2e8e5;
+  --ink-2: #cdbfc0;
+  --ink-3: #a8989b;
+  --accent: #d4677b;
+  --accent-hover: #e07d8f;
+  --accent-ink: #170b10;
+  --accent-soft: #3a1a24;
+  --accent-soft-ink: #f0b7c2;
+  --brand-mark: #d4677b;
+  --brand-mark-ink: #170b10;
+  --brand-dot: #f2e8e5;
+  --brand-deep: #d4677b;
   --info: #79a9f2;    --info-soft: #1a2638;
   --success: #6cc89a; --success-soft: #16291f;
-  --warning: #eda25e; --warning-soft: #33240f;
-  --danger: #f2887e;  --danger-soft: #361a17; --danger-solid: #b8382c;
-  --t-prazo: #eb9450;
+  --warning: #e8b34a; --warning-soft: #33280f;
+  --danger: #ff8a50;  --danger-soft: #3a1c10; --danger-solid: #c2410c;
+  --t-prazo: #e0a33c;
   --t-audiencia: #7aa8f5;
   --t-pericia: #ad8df0;
-  --t-tarefa: #8f99a4;
+  --t-tarefa: #a8989b;
   --shadow-pop: 0 12px 32px -12px rgb(0 0 0 / 0.6);
-  --focus: 0 0 0 3px rgb(79 174 147 / 0.45);
+  --focus: 0 0 0 3px rgb(212 103 123 / 0.45);
   color-scheme: dark;
 }
 

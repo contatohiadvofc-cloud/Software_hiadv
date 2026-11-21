@@ -5,42 +5,43 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const raiz = fileURLToPath(new URL('..', import.meta.url))
-const fonte = (p) => `data:font/woff2;base64,${readFileSync(`${raiz}node_modules/@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-${p}-normal.woff2`).toString('base64')}`
+const fonte = (fam, p) => `data:font/woff2;base64,${readFileSync(`${raiz}node_modules/@fontsource/${fam}/files/${fam}-latin-${p}-normal.woff2`).toString('base64')}`
 
-export const COR = { verde: '#14463a', fundo: '#0f3a30', menta: '#4fae93', tinta: '#ffffff', papel: '#f4f6f3' }
+export const COR = { vinho: '#7a1f33', fundo: '#5c1626', rose: '#f0b7c2', tinta: '#ffffff', papel: '#f8f5f2', linho: '#f2e8e5' }
 
-// Monograma: duas barras unidas (as duas partes de um processo) e o ponto de encontro.
+// Monograma "Hi": a perna direita do H vira um i, com o ponto rosé.
 const glifo = (s, x = 0, y = 0) => `
   <g transform="translate(${x} ${y}) scale(${s / 32})">
-    <path d="M10 8v16M22 8v16M10 16h12" stroke="${COR.tinta}" stroke-width="2.6" stroke-linecap="round" fill="none"/>
-    <circle cx="16" cy="16" r="2.4" fill="${COR.menta}"/>
+    <path d="M10 7.5v17M22 13.5v11M10 16h12" stroke="${COR.tinta}" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <circle cx="22" cy="8" r="2.1" fill="${COR.rose}"/>
   </g>`
 
 const icone = (lado, { cheio = false, margem = 0 } = {}) => {
   const r = cheio ? 0 : lado * 0.22
   const g = lado * (1 - 2 * margem)
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${lado}" height="${lado}" viewBox="0 0 ${lado} ${lado}">
-    <rect width="${lado}" height="${lado}" rx="${r}" fill="${COR.verde}"/>${glifo(g, lado * margem, lado * margem)}</svg>`
+    <rect width="${lado}" height="${lado}" rx="${r}" fill="${COR.vinho}"/>${glifo(g, lado * margem, lado * margem)}</svg>`
 }
 
 const og = `<!doctype html><html><head><style>
-  @font-face { font-family: Plex; font-weight: 600; src: url(${fonte(600)}) format('woff2'); }
-  @font-face { font-family: Plex; font-weight: 700; src: url(${fonte(700)}) format('woff2'); }
+  @font-face { font-family: Marca; font-weight: 600; src: url(${fonte('source-serif-4', 600)}) format('woff2'); }
+  @font-face { font-family: Texto; font-weight: 500; src: url(${fonte('inter-tight', 500)}) format('woff2'); }
+  @font-face { font-family: Texto; font-weight: 600; src: url(${fonte('inter-tight', 600)}) format('woff2'); }
   html, body { margin: 0; width: 1200px; height: 630px; }
-  body { background: ${COR.fundo}; color: ${COR.tinta}; font-family: Plex, sans-serif; position: relative; overflow: hidden; }
-  .grade { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.05) 1px, transparent 1px); background-size: 100% 42px; }
-  .faixa { position: absolute; left: 0; top: 0; bottom: 0; width: 14px; background: ${COR.menta}; }
-  .conteudo { position: absolute; left: 96px; top: 92px; right: 96px; }
-  .marca { display: flex; align-items: center; gap: 28px; }
-  .nome { font-size: 112px; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
-  h1 { margin: 64px 0 0; font-size: 50px; font-weight: 600; line-height: 1.2; max-width: 900px; letter-spacing: -0.01em; }
-  p { margin: 28px 0 0; font-size: 30px; font-weight: 600; color: ${COR.menta}; }
-</style></head><body><div class="grade"></div><div class="faixa"></div>
+  body { background: ${COR.vinho}; color: ${COR.tinta}; font-family: Texto, sans-serif; position: relative; overflow: hidden; }
+  .papel { position: absolute; right: 0; top: 0; bottom: 0; width: 18px; background: ${COR.rose}; }
+  .conteudo { position: absolute; left: 96px; top: 96px; right: 120px; }
+  .marca { display: flex; align-items: center; gap: 30px; }
+  .nome { font-family: Marca; font-size: 120px; font-weight: 600; letter-spacing: -0.015em; line-height: 1; }
+  h1 { margin: 76px 0 0; font-size: 50px; font-weight: 600; line-height: 1.15; letter-spacing: -0.015em; max-width: 1010px; }
+  p { margin: 22px 0 0; font-size: 28px; font-weight: 500; color: ${COR.linho}; opacity: .85; }
+  .url { position: absolute; left: 96px; bottom: 60px; font-size: 26px; font-weight: 600; color: ${COR.rose}; }
+</style></head><body><div class="papel"></div>
   <div class="conteudo">
-    <div class="marca">${icone(120).replace('<svg ', '<svg style="display:block;box-shadow:0 0 0 2px rgba(255,255,255,.18);border-radius:26px" ')}<span class="nome">HiAdv</span></div>
-    <h1>Casos, prazos e equipe do escritório num só lugar.</h1>
-    <p>hiadv.com.br</p>
-  </div></body></html>`
+    <div class="marca">${icone(128).replace('<svg ', '<svg style="display:block;box-shadow:0 0 0 2px rgba(255,255,255,.22);border-radius:28px" ')}<span class="nome">HiAdv</span></div>
+    <h1>Seus processos, prazos e peças sob controle.</h1>
+    <p>Gestão e fluxo jurídico para advogados.</p>
+  </div><div class="url">hiadv.com.br</div></body></html>`
 
 const b = await chromium.launch()
 async function png(html, w, h, arquivo, transparente = false) {

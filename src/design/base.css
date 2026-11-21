@@ -1,7 +1,8 @@
-@import '@fontsource/ibm-plex-sans/latin-400.css';
-@import '@fontsource/ibm-plex-sans/latin-500.css';
-@import '@fontsource/ibm-plex-sans/latin-600.css';
-@import '@fontsource/ibm-plex-sans/latin-700.css';
+@import '@fontsource/inter-tight/latin-400.css';
+@import '@fontsource/inter-tight/latin-500.css';
+@import '@fontsource/inter-tight/latin-600.css';
+@import '@fontsource/inter-tight/latin-700.css';
+@import '@fontsource/source-serif-4/latin-600.css';
 @import './tokens.css';
 @import './components.css';
 
@@ -17,7 +18,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 h1, h2, h3 { margin: 0; font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
-h1 { font-size: var(--fs-2xl); }
+h1 { font-size: var(--fs-2xl); font-family: var(--font-marca); font-weight: 600; letter-spacing: -0.01em; }
 h2 { font-size: var(--fs-lg); }
 p { margin: 0; }
 a { color: var(--accent); }

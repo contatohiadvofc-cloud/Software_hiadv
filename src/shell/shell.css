@@ -5,7 +5,7 @@
 
 /* ---------- marca ---------- */
 .marca { display: inline-flex; align-items: center; gap: 10px; }
-.marca-nome { font-weight: 700; font-size: 19px; letter-spacing: -0.02em; color: var(--ink); }
+.marca-nome { font-family: var(--font-marca); font-weight: 600; font-size: 21px; letter-spacing: -0.01em; color: var(--ink); }
 
 /* ---------- barra lateral ---------- */
 .lateral {
@@ -279,7 +279,7 @@ li.hv-row.cliente-caso { cursor: default; }
 
 /* ---------- Seu dia · Precisa de atenção ---------- */
 .atencao-item { grid-template-columns: 136px minmax(0, 1fr) auto; }
-.atencao-item[data-gravidade='alta'] { box-shadow: inset 3px 0 0 var(--danger, #b3261e); }
+.atencao-item[data-gravidade='alta'] { box-shadow: inset 3px 0 0 var(--danger); }
 .atencao-item .hv-dot[data-tipo='prazo'] { background: var(--t-prazo); }
 .atencao-item .hv-dot[data-tipo='parado'] { background: var(--ink-3); }
 .atencao-item .hv-dot[data-tipo='preparo'] { background: var(--t-pericia); }
