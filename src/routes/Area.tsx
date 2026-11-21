@@ -49,10 +49,13 @@ export function Area() {
   const [motivo, setMotivo] = useState('')
   const [alvo, setAlvo] = useState<string | null>(null)
   const [aberto, setAberto] = useState<CasoCard | null>(null)
+  const [etapaCel, setEtapaCel] = useState<string | null>(null)
   const chave = ['quadro', perfil?.escritorioId, slug]
 
   const q = useQuery({ queryKey: chave, queryFn: () => api.quadro(slug), enabled: !!area })
   const colunas = useMemo(() => (q.data ? montarColunas(q.data.etapas, q.data.casos, finais) : []), [q.data, finais])
+  // No celular, uma etapa por vez: começa pela primeira que tem casos.
+  const ativa = colunas.some((c) => c.etapa.status === etapaCel) ? etapaCel : (colunas.find((c) => c.casos.length > 0) ?? colunas[0])?.etapa.status ?? null
 
   const mover = useMutation({
     mutationFn: (v: { id: string; status: string; motivo?: string }) => api.moverCaso(v.id, v.status, v.motivo),
@@ -110,18 +113,29 @@ export function Area() {
       {q.isSuccess && q.data.etapas.length === 0 && <Panel><Empty title="Esta área ainda não tem etapas configuradas." /></Panel>}
 
       {q.isSuccess && q.data.etapas.length > 0 && visao === 'quadro' && (
+        <>
+        <div className="etapas-abas" role="tablist" aria-label="Etapas">
+          {colunas.map((col) => (
+            <button key={col.etapa.status} type="button" role="tab" className="etapa-aba" aria-selected={ativa === col.etapa.status}
+              data-vazia={col.casos.length === 0 ? 'true' : undefined} onClick={() => setEtapaCel(col.etapa.status)}>
+              {rotuloEtapa(col.etapa.status)} <span className="etapa-aba-n">{col.casos.length}</span>
+            </button>
+          ))}
+        </div>
         <div className="quadro" role="region" aria-label="Quadro de casos" tabIndex={0}>
           {colunas.map((col) => (
-            <section key={col.etapa.status} className="coluna" data-alvo={alvo === col.etapa.status ? 'true' : undefined} data-final={col.etapa.final ? 'true' : undefined}
+            <section key={col.etapa.status} className="coluna" data-ativa={ativa === col.etapa.status ? 'true' : undefined} data-alvo={alvo === col.etapa.status ? 'true' : undefined} data-final={col.etapa.final ? 'true' : undefined}
               aria-label={`${rotuloEtapa(col.etapa.status)}: ${col.casos.length}`}
               onDragOver={(e) => { e.preventDefault(); setAlvo(col.etapa.status) }} onDragLeave={() => setAlvo(null)} onDrop={(e) => soltar(e, col.etapa.status)}>
               <h2 className="coluna-titulo"><span>{rotuloEtapa(col.etapa.status)}</span><span className="coluna-n">{col.casos.length}</span></h2>
               <ul className="coluna-lista">
                 {col.casos.map((c) => <Cartao key={c.id} c={c} etapas={q.data.etapas} aoMover={pedirMudanca} aoAbrir={setAberto} />)}
               </ul>
+              {col.casos.length === 0 && <p className="coluna-vazia">Nenhum caso nesta etapa.</p>}
             </section>
           ))}
         </div>
+        </>
       )}
 
       {q.isSuccess && q.data.etapas.length > 0 && visao === 'lista' && (

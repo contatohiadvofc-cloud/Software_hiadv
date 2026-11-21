@@ -55,7 +55,7 @@ export function SeuDia() {
 
       <div className="resumo" aria-label="Resumo">
         {[['Atrasados', g.atrasados.length], ['Para hoje', g.hoje.length], ['Próximos 7 dias', g.proximos7.length], ['Sem data', g.semPrazo.length]].map(([r, n]) => (
-          <div key={r} className="resumo-item" data-alerta={r === 'Atrasados' && Number(n) > 0 ? 'true' : undefined}>
+          <div key={r} className="resumo-item" data-alerta={r === 'Atrasados' && Number(n) > 0 ? 'true' : undefined} data-destaque={r === 'Para hoje' ? 'true' : undefined}>
             <span className="resumo-rotulo">{r}</span><span className="resumo-n">{q.isSuccess ? n : '–'}</span>
           </div>
         ))}

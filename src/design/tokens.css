@@ -17,13 +17,14 @@
   --ink-3: #6b7480;
 
   /* marca e ação */
-  --accent: #1d5c4d;
-  --accent-hover: #164a3e;
+  --accent: #1a5446;
+  --accent-hover: #12402f;
   --accent-ink: #ffffff;
   --accent-soft: #e6f0ec;
   --accent-soft-ink: #174d40;
-  --brand-mark: #16202e;
+  --brand-mark: #14463a;   /* verde-escuro da marca */
   --brand-mark-ink: #ffffff;
+  --brand-deep: #0f3a30;   /* toques: faixa do topo, item ativo */
 
   /* estados (diferem também em claridade, não só em matiz) */
   --info: #1f5fbf;    --info-soft: #e8f0fc;
@@ -69,8 +70,9 @@
   --accent-ink: #0b1a15;
   --accent-soft: #1b2e29;
   --accent-soft-ink: #8fd6c0;
-  --brand-mark: #e8ecf0;
-  --brand-mark-ink: #0f1419;
+  --brand-mark: #2f7d68;
+  --brand-mark-ink: #ffffff;
+  --brand-deep: #4fae93;
   --info: #79a9f2;    --info-soft: #1a2638;
   --success: #6cc89a; --success-soft: #16291f;
   --warning: #eda25e; --warning-soft: #33240f;
