@@ -24,6 +24,7 @@ export type Ficha = {
 /** Texto curto de um evento do histórico, para a linha do tempo da ficha. */
 export function textoEvento(h: EventoHistorico): string {
   if (h.evento === 'status' && h.para) return h.de ? `Mudou de “${h.de}” para “${h.para}”` : `Entrou em “${h.para}”`
+  if (h.evento === 'agente' && h.detalhe) return h.de && h.de !== 'erro' ? `${h.de}: ${h.detalhe}` : h.detalhe
   if (h.evento === 'checklist') return h.para === 'desmarcado' ? 'Desmarcou um item do checklist' : 'Marcou um item do checklist'
   if (h.detalhe) return h.detalhe
   return h.evento.charAt(0).toUpperCase() + h.evento.slice(1)

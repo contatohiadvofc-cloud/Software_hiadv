@@ -19,6 +19,9 @@ describe('diferencas', () => {
 })
 
 describe('textoEvento', () => {
+  it('mostra o nome do agente', () => {
+    expect(textoEvento({ evento: 'agente', de: 'Acompanhamento', para: 'protocolado', detalhe: 'Agendou retorno para 25/11/2026', quem: 'sistema', em: '' })).toBe('Acompanhamento: Agendou retorno para 25/11/2026')
+  })
   it('descreve mudança de etapa', () => {
     expect(textoEvento({ evento: 'status', de: 'pendente', para: 'protocolado', detalhe: null, quem: null, em: '' })).toBe('Mudou de “pendente” para “protocolado”')
   })

@@ -274,12 +274,13 @@ export function criarApiSupabase(url: string, chave: string): Api {
       if (r.error && /agentes_listar|PGRST202/i.test(`${r.error.code} ${r.error.message}`)) return []
       return ((verificar(r) as Array<Record<string, unknown>> | null) ?? []).map((a) => ({
         agente: a.agente as string, nome: a.nome as string, descricao: a.descricao as string, areas: (a.areas as string[]) ?? null,
-        precisa: (a.precisa as string[]) ?? [], usaModelo: !!a.usa_modelo, ativo: !!a.ativo, etapas: (a.etapas as string[]) ?? [],
+        precisa: (a.precisa as string[]) ?? [], usaModelo: !!a.usa_modelo, semCusto: !!a.sem_custo, ativo: !!a.ativo, etapas: (a.etapas as string[]) ?? [],
+        parametros: (a.parametros as Record<string, unknown>) ?? {},
         modeloId: (a.modelo_id as string) ?? null, modeloTitulo: (a.modelo_titulo as string) ?? null,
       }))
     },
-    async configurarAgente(agente, ativo, etapas, modeloId) {
-      okOuErro(verificar(await sb.rpc('agente_configurar', { p_agente: agente, p_ativo: ativo, p_etapas: etapas, p_modelo: modeloId })))
+    async configurarAgente(agente, ativo, etapas, modeloId, parametros) {
+      okOuErro(verificar(await sb.rpc('agente_configurar', { p_agente: agente, p_ativo: ativo, p_etapas: etapas, p_modelo: modeloId, p_parametros: parametros ?? {} })))
     },
     async etapasDoEscritorio(): Promise<EtapaEscritorio[]> {
       const areas = await this.areas()

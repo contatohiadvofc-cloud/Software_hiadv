@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
-import { SERVICOS, faltasDoAgente, type Agente, type Integracao } from '../data/escritorio'
+import { AGENTES_EM_BREVE, SERVICOS, faltasDoAgente, type Agente, type Integracao } from '../data/escritorio'
 import { rotuloEtapa } from '../data/quadro'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
@@ -112,12 +112,14 @@ function LinhaAgente({ a, integracoes, aoMudar }: { a: Agente; integracoes: Inte
   const [aberto, setAberto] = useState(false)
   const [etapas, setEtapas] = useState<string[]>(a.etapas)
   const [modelo, setModelo] = useState<string | null>(a.modeloId)
+  const [dias, setDias] = useState(String(a.parametros?.dias ?? 5))
+  const emBreve = AGENTES_EM_BREVE.includes(a.agente)
   const [erro, setErro] = useState<string | null>(null)
   const etapasQ = useQuery({ queryKey: ['etapas-escritorio', perfil?.escritorioId], queryFn: () => api.etapasDoEscritorio(), enabled: aberto })
   const bib = useQuery({ queryKey: ['biblioteca', perfil?.escritorioId], queryFn: () => api.biblioteca(), enabled: aberto && a.usaModelo })
   const faltas = faltasDoAgente(a, integracoes, a.modeloId)
   const salvar = useMutation({
-    mutationFn: (ativo: boolean) => api.configurarAgente(a.agente, ativo, etapas, modelo),
+    mutationFn: (ativo: boolean) => api.configurarAgente(a.agente, ativo, etapas, modelo, a.agente === 'acompanhamento' ? { dias: Number(dias) } : {}),
     onSuccess: (_d, ativo) => { toast(ativo ? `${a.nome}: ligado.` : `${a.nome}: desligado.`); setAberto(false); aoMudar() },
     onError: (e) => { setErro((e as Error).message); toast(`Não foi possível: ${(e as Error).message}`, 'danger') },
   })
@@ -129,15 +131,16 @@ function LinhaAgente({ a, integracoes, aoMudar }: { a: Agente; integracoes: Inte
     <li className="agente">
       <div className="agente-topo">
         <div>
-          <h3>{a.nome}</h3>
+          <h3>{a.nome} {a.semCusto && !emBreve && <span className="agente-selo">Sem custo · funciona sem chave</span>}{emBreve && <span className="agente-selo agente-selo-breve">Em breve</span>}</h3>
           <p className="muted">{a.descricao}</p>
           {a.ativo && a.etapas.length > 0 && <p className="agente-quando">Entra quando o caso vai para: {a.etapas.map(rotuloEtapa).join(', ')}</p>}
           {a.ativo && a.modeloTitulo && <p className="agente-quando">Modelo: {a.modeloTitulo}</p>}
-          {!a.ativo && faltas.length > 0 && <p className="agente-falta">Para ligar: {faltas.join(' · ')}</p>}
+          {a.ativo && a.agente === 'acompanhamento' && <p className="agente-quando">Retorno em {String(a.parametros?.dias ?? 5)} dias úteis</p>}
+          {!a.ativo && !emBreve && faltas.length > 0 && <p className="agente-falta">Para ligar: {faltas.join(' · ')}</p>}
         </div>
         <span className="agente-acoes">
           <Badge tone={a.ativo ? 'success' : 'neutral'}>{a.ativo ? 'Ligado' : 'Desligado'}</Badge>
-          <Button size="sm" variant="ghost" onClick={() => { setEtapas(a.etapas); setModelo(a.modeloId); setErro(null); setAberto(true) }} aria-label={`Configurar ${a.nome}`}>Configurar</Button>
+          {!emBreve && <Button size="sm" variant="ghost" onClick={() => { setEtapas(a.etapas); setModelo(a.modeloId); setDias(String(a.parametros?.dias ?? 5)); setErro(null); setAberto(true) }} aria-label={`Configurar ${a.nome}`}>Configurar</Button>}
         </span>
       </div>
 
@@ -166,6 +169,12 @@ function LinhaAgente({ a, integracoes, aoMudar }: { a: Agente; integracoes: Inte
                 {(bib.data ?? []).filter((b) => b.tipo === 'modelo').map((b) => <option key={b.id} value={b.id}>{b.titulo}</option>)}
               </select>
               {bib.isSuccess && !bib.data.some((b) => b.tipo === 'modelo') && <span className="hv-hint">Inclua um modelo na Biblioteca primeiro.</span>}
+            </div>
+          )}
+          {a.agente === 'acompanhamento' && (
+            <div className="hv-field integracao-limite">
+              <label htmlFor="acomp-dias">Retorno em quantos dias úteis</label>
+              <input id="acomp-dias" className="hv-input" type="number" min={1} max={60} value={dias} onChange={(e) => setDias(e.target.value)} />
             </div>
           )}
           {erro && <p className="hv-error" role="alert">{erro}</p>}
@@ -203,7 +212,7 @@ export function Configuracoes() {
       </Panel>
 
       <Panel title="Agentes" labelId="cfg-agentes">
-        <p className="hv-panel-body muted">Os agentes preparam; quem decide e assina é o advogado. Tudo o que fazem fica no histórico do caso.</p>
+        <p className="hv-panel-body muted">Os agentes preparam; quem decide e assina é o advogado. Tudo o que fazem fica no histórico do caso. Os marcados “Sem custo” funcionam por regras, sem IA, e podem ser ligados já.</p>
         {ag.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {ag.isError && <ErrorState onRetry={() => ag.refetch()} />}
         {ag.isSuccess && ag.data.length === 0 && <Empty title="Os agentes ainda não foram ativados no servidor." />}

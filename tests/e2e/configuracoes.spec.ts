@@ -46,3 +46,22 @@ test('colaborador não vê as configurações', async ({ page }) => {
   await abrir(page)
   await expect(page.getByText('Só o Gestor Master acessa as configurações do escritório.')).toBeVisible()
 })
+
+test('agente sem custo: liga só com a etapa e manda os dias do acompanhamento', async ({ page }) => {
+  const est = await simularSupabase(page, {
+    integracoes,
+    agentes: [{ agente: 'acompanhamento', nome: 'Acompanhamento', descricao: 'Agenda retorno.', areas: null, precisa: [], usa_modelo: false, sem_custo: true, ativo: false, etapas: [], modelo_id: null, modelo_titulo: null, parametros: {} }],
+    etapas: [{ status: 'protocolado', ordem: 5, final: false, pede_motivo: false }],
+  })
+  await abrir(page)
+  const r = page.locator('.agente', { hasText: 'Acompanhamento' })
+  await expect(r.getByText('Sem custo · funciona sem chave')).toBeVisible()
+  await expect(r.getByText('Para ligar: Escolher em quais etapas entra')).toBeVisible()
+  await r.getByRole('button', { name: 'Configurar Acompanhamento' }).click()
+  const d = page.getByRole('dialog', { name: 'Configurar: Acompanhamento' })
+  await d.getByLabel('Protocolado').check()
+  await d.getByLabel('Retorno em quantos dias úteis').fill('7')
+  await d.getByRole('button', { name: 'Salvar e ligar' }).click()
+  await expect(page.getByText('Acompanhamento: ligado.')).toBeVisible()
+  expect(est.rpcs.find((x) => x.nome === 'agente_configurar')!.corpo).toEqual({ p_agente: 'acompanhamento', p_ativo: true, p_etapas: ['protocolado'], p_modelo: null, p_parametros: { dias: 7 } })
+})

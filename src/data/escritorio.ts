@@ -27,8 +27,14 @@ export const SERVICOS: Record<Servico, { nome: string; descricao: string; usaCha
 
 export type Agente = {
   agente: string; nome: string; descricao: string; areas: string[] | null; precisa: string[]; usaModelo: boolean
+  /** Funciona por regras, sem IA e sem custo: liga sem chave. */
+  semCusto: boolean
   ativo: boolean; etapas: string[]; modeloId: string | null; modeloTitulo: string | null
+  parametros: Record<string, unknown>
 }
+
+/** Agentes que ainda não estão prontos para ligar. */
+export const AGENTES_EM_BREVE = ['organizadora', 'verbas']
 export type EtapaEscritorio = { area: string; areaNome: string; status: string }
 
 /** O que falta para o agente poder ser ligado (mostrado como aviso, o servidor confere de novo). */
@@ -37,6 +43,7 @@ export function faltasDoAgente(a: Agente, integracoes: Integracao[], modeloEscol
   const claude = integracoes.find((i) => i.servico === 'claude')
   if (a.precisa.includes('claude') && !(claude?.ativo && claude.temChave)) f.push('Ativar a Claude em Integrações')
   if (a.usaModelo && !modeloEscolhido) f.push('Escolher o modelo da Biblioteca')
+  if (a.semCusto && !AGENTES_EM_BREVE.includes(a.agente) && a.etapas.length === 0) f.push('Escolher em quais etapas entra')
   return f
 }
 

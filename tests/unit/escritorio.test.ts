@@ -1,12 +1,17 @@
 import { faltasDoAgente, nomeArquivoSeguro, tamanhoTela, validarArquivo, type Agente, type Integracao } from '../../src/data/escritorio'
 
-const redatora: Agente = { agente: 'redatora', nome: 'Redatora', descricao: '', areas: null, precisa: ['claude', 'relato', 'modelo'], usaModelo: true, ativo: false, etapas: [], modeloId: null, modeloTitulo: null }
+const redatora: Agente = { agente: 'redatora', nome: 'Redatora', descricao: '', areas: null, precisa: ['claude', 'relato', 'modelo'], usaModelo: true, semCusto: false, ativo: false, etapas: [], modeloId: null, modeloTitulo: null, parametros: {} }
 const claude = (ativo: boolean, temChave: boolean): Integracao => ({ servico: 'claude', ativo, modo: null, limiteMensal: null, temChave, chaveFinal: null, configuradoEm: null, configuradoPor: null })
 
 describe('escritorio', () => {
   it('diz o que falta para ligar o agente', () => {
     expect(faltasDoAgente(redatora, [claude(false, true)], null)).toEqual(['Ativar a Claude em Integrações', 'Escolher o modelo da Biblioteca'])
     expect(faltasDoAgente(redatora, [claude(true, true)], 'm1')).toEqual([])
+  })
+  it('agente sem custo só pede as etapas', () => {
+    const conf = { ...redatora, agente: 'conferente_dados', precisa: [], usaModelo: false, semCusto: true }
+    expect(faltasDoAgente(conf, [claude(false, false)], null)).toEqual(['Escolher em quais etapas entra'])
+    expect(faltasDoAgente({ ...conf, etapas: ['protocolado'] }, [], null)).toEqual([])
   })
   it('nome de arquivo seguro', () => {
     expect(nomeArquivoSeguro('Petição inicial — auxílio (1).docx')).toBe('Peticao_inicial_auxilio_1_.docx')

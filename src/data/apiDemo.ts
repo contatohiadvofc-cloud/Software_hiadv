@@ -110,20 +110,23 @@ const INTEGRACOES: Integracao[] = [
   { servico: 'zapsign', ativo: false, modo: 'um_clique', limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null },
   { servico: 'google_drive', ativo: false, modo: null, limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null },
 ]
-const CATALOGO: Array<Omit<Agente, 'ativo' | 'etapas' | 'modeloId' | 'modeloTitulo'>> = [
-  { agente: 'triagem', nome: 'Triagem', descricao: 'Lê o relato e os documentos do lead e aponta se o caso parece viável e o que falta. A decisão é do advogado.', areas: null, precisa: ['claude', 'relato'], usaModelo: false },
-  { agente: 'leitora', nome: 'Leitora de documentos', descricao: 'Extrai de laudos, exames e atestados as datas, CID, sequela e médico, montando a linha do tempo clínica do caso.', areas: null, precisa: ['claude'], usaModelo: false },
-  { agente: 'cnis', nome: 'Analista de CNIS', descricao: 'Confere qualidade de segurado, carência, vínculo na data do fato e lacunas de contribuição.', areas: ['administrativo', 'judicial'], precisa: ['claude'], usaModelo: false },
-  { agente: 'redatora', nome: 'Redatora', descricao: 'Escreve a minuta da peça a partir do modelo do escritório, do relato e das provas do caso. Entrega para revisão; nunca protocola.', areas: null, precisa: ['claude', 'relato', 'modelo'], usaModelo: true },
-  { agente: 'quesitos', nome: 'Quesitos periciais', descricao: 'Prepara quesitos citando a documentação médica com datas, no padrão do escritório.', areas: ['administrativo', 'judicial', 'trabalhista'], precisa: ['claude', 'modelo'], usaModelo: true },
-  { agente: 'laudo', nome: 'Análise de laudo', descricao: 'Compara o laudo pericial com os documentos do caso e prepara a base da manifestação ou impugnação.', areas: ['judicial', 'trabalhista'], precisa: ['claude'], usaModelo: false },
-  { agente: 'conferente', nome: 'Conferente', descricao: 'Revisa toda minuta: destaca citação que não está na Biblioteca, dado que não bate com o caso e formatação fora do padrão.', areas: null, precisa: ['claude'], usaModelo: false },
-  { agente: 'mensageira', nome: 'Mensageira', descricao: 'Escreve atualizações ao cliente em linguagem simples. Nada sai sem um clique da equipe.', areas: null, precisa: ['claude'], usaModelo: false },
-  { agente: 'intimacoes', nome: 'Leitor de intimações', descricao: 'Transforma publicações e movimentações em tarefas com prazo sugerido, para alguém da equipe conferir.', areas: null, precisa: ['claude'], usaModelo: false },
-  { agente: 'organizadora', nome: 'Organizadora de pastas', descricao: 'Nomeia arquivos com data aaaa_mm_dd e organiza documentos constitutivos e por benefício.', areas: null, precisa: [], usaModelo: false },
-  { agente: 'verbas', nome: 'Cálculo de verbas', descricao: 'Monta a planilha de verbas rescisórias a partir dos dados do contrato (fórmulas fixas, sem IA).', areas: ['trabalhista'], precisa: [], usaModelo: false },
+const CATALOGO: Array<Omit<Agente, 'ativo' | 'etapas' | 'modeloId' | 'modeloTitulo' | 'parametros'>> = [
+  { agente: 'conferente_dados', nome: 'Conferente de dados', descricao: 'Quando o caso entra na etapa escolhida, confere relato, dados do benefício ou da área e checklist. Se faltar algo, cria uma tarefa dizendo exatamente o quê.', areas: null, precisa: [], usaModelo: false, semCusto: true },
+  { agente: 'pedido_documentos', nome: 'Pedido de documentos', descricao: 'Quando o caso entra na etapa escolhida, cria uma tarefa com os documentos que faltam e a mensagem pronta para enviar ao cliente. Nada é enviado sozinho.', areas: null, precisa: [], usaModelo: false, semCusto: true },
+  { agente: 'acompanhamento', nome: 'Acompanhamento', descricao: 'Quando o caso entra na etapa escolhida, agenda uma tarefa de retorno em alguns dias úteis, para o caso não ficar parado.', areas: null, precisa: [], usaModelo: false, semCusto: true },
+  { agente: 'triagem', nome: 'Triagem', descricao: 'Lê o relato e os documentos do lead e aponta se o caso parece viável e o que falta. A decisão é do advogado.', areas: null, precisa: ['claude', 'relato'], usaModelo: false, semCusto: false },
+  { agente: 'leitora', nome: 'Leitora de documentos', descricao: 'Extrai de laudos, exames e atestados as datas, CID, sequela e médico, montando a linha do tempo clínica do caso.', areas: null, precisa: ['claude'], usaModelo: false, semCusto: false },
+  { agente: 'cnis', nome: 'Analista de CNIS', descricao: 'Confere qualidade de segurado, carência, vínculo na data do fato e lacunas de contribuição.', areas: ['administrativo', 'judicial'], precisa: ['claude'], usaModelo: false, semCusto: false },
+  { agente: 'redatora', nome: 'Redatora', descricao: 'Escreve a minuta da peça a partir do modelo do escritório, do relato e das provas do caso. Entrega para revisão; nunca protocola.', areas: null, precisa: ['claude', 'relato', 'modelo'], usaModelo: true, semCusto: false },
+  { agente: 'quesitos', nome: 'Quesitos periciais', descricao: 'Prepara quesitos citando a documentação médica com datas, no padrão do escritório.', areas: ['administrativo', 'judicial', 'trabalhista'], precisa: ['claude', 'modelo'], usaModelo: true, semCusto: false },
+  { agente: 'laudo', nome: 'Análise de laudo', descricao: 'Compara o laudo pericial com os documentos do caso e prepara a base da manifestação ou impugnação.', areas: ['judicial', 'trabalhista'], precisa: ['claude'], usaModelo: false, semCusto: false },
+  { agente: 'conferente', nome: 'Conferente', descricao: 'Revisa toda minuta: destaca citação que não está na Biblioteca, dado que não bate com o caso e formatação fora do padrão.', areas: null, precisa: ['claude'], usaModelo: false, semCusto: false },
+  { agente: 'mensageira', nome: 'Mensageira', descricao: 'Escreve atualizações ao cliente em linguagem simples. Nada sai sem um clique da equipe.', areas: null, precisa: ['claude'], usaModelo: false, semCusto: false },
+  { agente: 'intimacoes', nome: 'Leitor de intimações', descricao: 'Transforma publicações e movimentações em tarefas com prazo sugerido, para alguém da equipe conferir.', areas: null, precisa: ['claude'], usaModelo: false, semCusto: false },
+  { agente: 'organizadora', nome: 'Organizadora de pastas', descricao: 'Nomeia arquivos com data aaaa_mm_dd e organiza documentos constitutivos e por benefício.', areas: null, precisa: [], usaModelo: false, semCusto: true },
+  { agente: 'verbas', nome: 'Cálculo de verbas', descricao: 'Monta a planilha de verbas rescisórias a partir dos dados do contrato (fórmulas fixas, sem IA).', areas: ['trabalhista'], precisa: [], usaModelo: false, semCusto: true },
 ]
-const CONFIG_AGENTES: Record<string, { ativo: boolean; etapas: string[]; modeloId: string | null }> = {}
+const CONFIG_AGENTES: Record<string, { ativo: boolean; etapas: string[]; modeloId: string | null; parametros: Record<string, unknown> }> = {}
 
 const EQUIPE: Pessoa[] = [
   { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado' }, { email: 'rafael@silvaprado.exemplo.br', nome: 'Rafael Souza' },
@@ -329,17 +332,21 @@ export function criarApiDemo(): Api {
     async agentes() {
       const ativas = (AREAS[atual] ?? []).map((a) => a.area)
       return CATALOGO.filter((c) => !c.areas || c.areas.some((a) => ativas.includes(a))).map((c) => {
-        const cfg = CONFIG_AGENTES[`${atual}:${c.agente}`] ?? { ativo: false, etapas: [], modeloId: null }
+        const cfg = CONFIG_AGENTES[`${atual}:${c.agente}`] ?? { ativo: false, etapas: [], modeloId: null, parametros: {} }
         return { ...c, ...cfg, modeloTitulo: BIBLIOTECA.find((b) => b.id === cfg.modeloId)?.titulo ?? null }
       })
     },
-    async configurarAgente(agente, ativo, etapas, modeloId) {
+    async configurarAgente(agente, ativo, etapas, modeloId, parametros) {
       const c = CATALOGO.find((x) => x.agente === agente)
       if (!c) throw new Error('Agente desconhecido.')
+      if (ativo && ['organizadora', 'verbas'].includes(agente)) throw new Error('Este agente chega na próxima etapa do HiAdv.')
+      if (ativo && c.semCusto && etapas.length === 0) throw new Error('Escolha ao menos uma etapa.')
+      const dias = Number(parametros?.dias ?? 5)
+      if (agente === 'acompanhamento' && (!Number.isInteger(dias) || dias < 1 || dias > 60)) throw new Error('Informe de 1 a 60 dias úteis.')
       const claude = INTEGRACOES[0]
       if (ativo && c.precisa.includes('claude') && !(claude.ativo && claude.temChave)) throw new Error('Ative a Claude em Integrações antes de ligar este agente.')
       if (ativo && c.usaModelo && !modeloId) throw new Error('Escolha o modelo da Biblioteca que este agente vai usar.')
-      CONFIG_AGENTES[`${atual}:${agente}`] = { ativo, etapas, modeloId }
+      CONFIG_AGENTES[`${atual}:${agente}`] = { ativo, etapas, modeloId, parametros: agente === 'acompanhamento' ? { dias } : {} }
     },
     async etapasDoEscritorio() {
       return (AREAS[atual] ?? []).flatMap((a) => (ETAPAS[a.area] ?? []).filter((e) => !e.final).map((e) => ({ area: a.area, areaNome: a.nome, status: e.status })))

@@ -68,7 +68,7 @@ export interface Api {
   salvarChave(servico: Servico, chave: string): Promise<string>
   removerChave(servico: Servico): Promise<void>
   agentes(): Promise<Agente[]>
-  configurarAgente(agente: string, ativo: boolean, etapas: string[], modeloId: string | null): Promise<void>
+  configurarAgente(agente: string, ativo: boolean, etapas: string[], modeloId: string | null, parametros?: Record<string, unknown>): Promise<void>
   /** Etapas das áreas ativas, para escolher quando cada agente entra. */
   etapasDoEscritorio(): Promise<EtapaEscritorio[]>
 }
