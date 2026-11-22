@@ -57,3 +57,23 @@ test('áreas de atuação: as abas trocam o caminho do caso', async ({ page }) =
   await page.keyboard.press('ArrowRight')
   await expect(page.getByRole('tab', { name: 'Previdenciário' })).toHaveAttribute('aria-selected', 'true')
 })
+
+test('por dentro do HiAdv: cada tela tem título e abre em tamanho grande', async ({ page }) => {
+  await page.goto('/')
+  const secao = page.locator('#por-dentro')
+  await expect(secao.getByRole('heading', { level: 2, name: 'Por dentro do HiAdv' })).toBeVisible()
+  const itens = secao.locator('.sv-gal > li')
+  expect(await itens.count()).toBeGreaterThanOrEqual(15)
+  for (const li of await itens.all()) {
+    await expect(li.locator('h4')).not.toBeEmpty()
+    await expect(li.locator('p')).not.toBeEmpty()
+  }
+  await secao.getByRole('button', { name: 'Ampliar a tela Financeiro' }).click()
+  const dlg = page.getByRole('dialog', { name: 'Financeiro' })
+  await expect(dlg).toBeVisible()
+  await expect(dlg.locator('img')).toHaveAttribute('src', '/site/tela-financeiro.webp')
+  await expect.poll(() => dlg.locator('img').evaluate((i: HTMLImageElement) => i.naturalWidth)).toBe(1280)
+  await dlg.getByRole('button', { name: 'Fechar' }).click()
+  await expect(dlg).toBeHidden()
+  await expect(secao.getByRole('button', { name: 'Ampliar a tela Financeiro' })).toBeFocused()
+})

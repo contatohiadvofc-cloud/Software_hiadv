@@ -89,3 +89,8 @@ Pendente (próxima atualização): envio do kit pela ZapSign (com prévia e conf
 ## Próximo: Fase 1
 
 Quadro, lista e ficha do caso por área; área trabalhista completa; clientes; tarefas, prazos e agenda; documentos e checklist; publicações virando tarefa.
+
+## 22/11/2026 — Site: "Por dentro do HiAdv"
+- [x] Nova seção com 17 telas reais do sistema (dados de demonstração) em 5 grupos, cada uma com título e subtítulo; clique abre a tela grande (dialog acessível, foco volta ao botão).
+- [x] Link "Telas" no menu do site. Imagens em public/site/tela-*.webp (miniatura 640x400 e grande 1280x800).
+- [x] Teste e2e em tests/e2e/site.spec.ts (computador e celular) + axe sem violações.

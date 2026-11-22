@@ -32,6 +32,7 @@ export function montarSite(doc: Document, win: Window) {
   montarTour(doc)
   montarAreas(doc)
   montarVideo(doc, win)
+  montarGaleria(doc)
   montarInstalar(doc, win)
 
   // Deixa o aplicativo pronto para abrir rápido (e instalável) depois que a página termina de carregar.
@@ -110,6 +111,28 @@ function montarVideo(doc: Document, win: Window) {
   doc.getElementById('fechar-video')?.addEventListener('click', fechar)
   dlg.addEventListener('close', () => v.pause())
   dlg.addEventListener('click', (e) => { if (e.target === dlg) fechar() })
+}
+
+export function montarGaleria(doc: Document) {
+  const dlg = doc.getElementById('dialogo-tela') as HTMLDialogElement | null
+  const img = doc.getElementById('tela-grande') as HTMLImageElement | null
+  const titulo = doc.getElementById('t-ampliar')
+  if (!dlg || !img || !titulo) return
+  let origem: HTMLElement | null = null
+  doc.querySelectorAll<HTMLButtonElement>('[data-ampliar]').forEach((b) => {
+    b.addEventListener('click', () => {
+      const nome = b.closest('li')?.querySelector('h4')?.textContent?.trim() ?? 'Tela do HiAdv'
+      img.src = b.dataset.ampliar ?? ''
+      img.alt = `Tela ${nome} do HiAdv em tamanho grande`
+      titulo.textContent = nome
+      origem = b
+      if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '')
+    })
+  })
+  const fechar = () => { if (dlg.open) dlg.close(); else dlg.removeAttribute('open') }
+  doc.getElementById('fechar-tela')?.addEventListener('click', fechar)
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) fechar() })
+  dlg.addEventListener('close', () => { origem?.focus() })
 }
 
 function montarInstalar(doc: Document, win: Window) {
