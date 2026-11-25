@@ -11,7 +11,7 @@ test('o site de apresentação abre em hiadv.com.br e leva ao questionário e ao
   await page.getByRole('button', { name: 'Fechar' }).click()
   // botão de instalar só aparece quando o navegador oferece
   for (const b of await page.locator('[data-instalar]').all()) await expect(b).toBeHidden()
-  await page.getByRole('link', { name: 'Já tenho acesso' }).click()
+  await page.getByRole('link', { name: 'Entrar', exact: true }).first().click()
   await expect(page).toHaveURL(/\/login$/)
   await expect(page.getByRole('heading', { name: 'Entrar no HiAdv' })).toBeVisible()
 })

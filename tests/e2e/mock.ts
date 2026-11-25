@@ -217,6 +217,10 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'hiadv_central_escritorios') return json(r, c.central ?? [])
       if (nome === 'hiadv_central_escritorio') return json(r, c.centralDetalhe ?? { ajustes: [], recursos: [], pessoas: [], historico: [] })
       if (nome === 'hiadv_central_assinatura' || nome === 'hiadv_central_ajuste' || nome === 'hiadv_pessoa_ajuste') { registrar(); return json(r, { ok: true }) }
+      if (nome === 'hiadv_central_painel') return json(r, { inicio: '2026-11-01', fim: '2026-11-30', recebido: 397.5, previsto: 595.4, em_atraso: 0, dias: Array.from({ length: 30 }, (_, i) => ({ dia: i + 1, recebido: i === 4 ? 397.5 : 0, previsto: 0 })) })
+      if (nome === 'hiadv_central_pagamentos') return json(r, [])
+      if (nome === 'hiadv_central_pagamento') { registrar(); return json(r, { ok: true, proximo_vencimento: '2026-12-20' }) }
+      if (nome === 'hiadv_central_motivo') { registrar(); return json(r, null) }
       if (nome === 'hiadv_central_novo') { registrar(); return json(r, { ok: true, id: 'esc-novo' }) }
       if (nome === 'hiadv_adesao_atualizar' || nome === 'hiadv_adesao_plano') { registrar(); return json(r, { ok: true }) }
       if (nome === 'caso_detalhe') return json(r, c.detalhe ?? null)

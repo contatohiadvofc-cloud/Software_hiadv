@@ -570,6 +570,8 @@ export function criarApiSupabase(url: string, chave: string): Api {
         limites: { masters: e.limites?.masters ?? null, colaboradores: e.limites?.colaboradores ?? null, oabs: e.limites?.oabs ?? null, iaMensal: e.limites?.ia_mensal ?? null },
         uso: { masters: Number(e.uso?.masters ?? 0), colaboradores: Number(e.uso?.colaboradores ?? 0), oabs: Number(e.uso?.oabs ?? 0), iaMes: Number(e.uso?.ia_mes ?? 0) },
         ajustes: Number(e.ajustes ?? 0),
+        preco: e.preco == null ? null : Number(e.preco), saude: e.saude == null ? null : Number(e.saude),
+        ultimoAcesso: e.ultimo_acesso ?? null, masterNome: e.master_nome ?? null, casos: Number(e.casos ?? 0),
       }))
     },
     async centralEscritorio(id) {
@@ -623,6 +625,20 @@ export function criarApiSupabase(url: string, chave: string): Api {
       const r = okOuErro(verificar(await sb.rpc('hiadv_central_novo', { p: { nome: n.nome, cidade: n.cidade, oab: n.oab, master_nome: n.masterNome, master_email: n.masterEmail, plano: n.plano, fundador: n.fundador } })))
       return String(r.id)
     },
+    async centralPainel(mes) {
+      const d = verificar(await sb.rpc('hiadv_central_painel', mes ? { p_mes: mes } : {})) as Record<string, any>
+      return { inicio: d.inicio, fim: d.fim, recebido: Number(d.recebido ?? 0), previsto: Number(d.previsto ?? 0), emAtraso: Number(d.em_atraso ?? 0),
+        dias: (d.dias ?? []).map((x: any) => ({ dia: Number(x.dia), recebido: Number(x.recebido ?? 0), previsto: Number(x.previsto ?? 0) })) }
+    },
+    async centralPagamento(id, valor, pagoEm, forma) {
+      const r = okOuErro(verificar(await sb.rpc('hiadv_central_pagamento', { p_id: id, p_valor: valor, p_pago_em: pagoEm, p_forma: forma })))
+      return String(r.proximo_vencimento ?? '')
+    },
+    async centralPagamentos(id) {
+      const d = (verificar(await sb.rpc('hiadv_central_pagamentos', { p_id: id })) ?? []) as Record<string, any>[]
+      return d.map((x) => ({ competencia: x.competencia, valor: Number(x.valor), pagoEm: x.pago_em, forma: x.forma ?? '' }))
+    },
+    async centralMotivo(id, texto) { verificar(await sb.rpc('hiadv_central_motivo', { p_id: id, p_texto: texto })) },
     async falhas() {
       const r = await sb.rpc('falhas_listar')
       if (r.error && /function .*does not exist|Could not find the function/i.test(r.error.message)) return []

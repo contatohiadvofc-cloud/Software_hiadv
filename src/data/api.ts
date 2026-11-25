@@ -16,7 +16,7 @@ import type { Portal, SituacaoPortal } from './portal'
 import type { Adesao, Cortesia, FormAdesao, Indicacao, PlanoId, Respostas, StatusAdesao } from './adesao'
 import type { PedidoIA } from './iaPrompts'
 import type { ConfigGoogle } from '../lib/drive'
-import type { AssinaturaForm, DetalheCentral, EscritorioCentral, MeusRecursos, NovoEscritorio } from './central'
+import type { AssinaturaForm, DetalheCentral, EscritorioCentral, MeusRecursos, NovoEscritorio, PagamentoCentral, PainelCentral } from './central'
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
@@ -191,6 +191,10 @@ export interface Api {
   /** Code em qualquer escritório; o Gestor Master só no próprio. */
   pessoaAjuste(id: string, email: string, recurso: string, bloquear: boolean, validoAte: string | null): Promise<void>
   centralNovo(n: NovoEscritorio): Promise<string>
+  centralPainel(mes?: string): Promise<PainelCentral>
+  centralPagamento(id: string, valor: number, pagoEm: string, forma: string): Promise<string>
+  centralPagamentos(id: string): Promise<PagamentoCentral[]>
+  centralMotivo(id: string, texto: string): Promise<void>
   /** IA do plano Sênior (chave da Claude do escritório, no servidor). Devolve o rascunho. */
   iaGerar(p: PedidoIA): Promise<string>
   iaUsoMes(): Promise<{ usados: number; limite: number | null } | null>

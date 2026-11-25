@@ -32,3 +32,20 @@ describe('Central HiAdv', () => {
     expect(validarNovo({ nome: 'Rocha', cidade: '', oab: '', masterNome: 'Ana', masterEmail: 'ana@rocha.co', plano: 'pro', fundador: false })).toBeNull()
   })
 })
+
+import { dataIso, faixaSaude, isoParaTela, mascaraData } from '../../src/data/central'
+describe('Central v2: datas e saúde', () => {
+  it('máscara deixa as barras fixas', () => {
+    expect(mascaraData('05112026')).toBe('05/11/2026')
+    expect(mascaraData('0511')).toBe('05/11')
+    expect(mascaraData('ab05/11/2026999')).toBe('05/11/2026')
+  })
+  it('converte e recusa data que não existe', () => {
+    expect(dataIso('05/11/2026')).toBe('2026-11-05')
+    expect(dataIso('31/02/2026')).toBeNull()
+    expect(isoParaTela('2026-11-05T10:00')).toBe('05/11/2026')
+  })
+  it('faixas da barra de saúde', () => {
+    expect(faixaSaude(82).tom).toBe('ok'); expect(faixaSaude(55).tom).toBe('atencao'); expect(faixaSaude(10).tom).toBe('risco'); expect(faixaSaude(null).tom).toBe('sem')
+  })
+})

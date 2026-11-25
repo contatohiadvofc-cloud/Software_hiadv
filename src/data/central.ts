@@ -72,7 +72,32 @@ export type EscritorioCentral = {
   limites: { masters: number | null; colaboradores: number | null; oabs: number | null; iaMensal: number | null }
   uso: { masters: number; colaboradores: number; oabs: number; iaMes: number }
   ajustes: number
+  preco?: number | null; saude?: number | null; ultimoAcesso?: string | null; masterNome?: string | null; casos?: number
 }
+export type PainelCentral = { inicio: string; fim: string; dias: { dia: number; recebido: number; previsto: number }[]; recebido: number; previsto: number; emAtraso: number }
+export type PagamentoCentral = { competencia: string; valor: number; pagoEm: string; forma: string }
+
+/** Faixa da barra de saúde (0 a 100): uso real do sistema nos últimos dias. */
+export function faixaSaude(n: number | null | undefined): { tom: 'ok' | 'atencao' | 'risco' | 'sem'; rotulo: string } {
+  if (n == null) return { tom: 'sem', rotulo: 'Sem dados' }
+  if (n >= 70) return { tom: 'ok', rotulo: 'Usando bem' }
+  if (n >= 40) return { tom: 'atencao', rotulo: 'Uso moderado' }
+  return { tom: 'risco', rotulo: 'Pouco uso' }
+}
+
+/** Data digitada só com números: as barras ficam fixas (dd/mm/aaaa). */
+export function mascaraData(v: string): string {
+  const d = v.replace(/\D/g, '').slice(0, 8)
+  return [d.slice(0, 2), d.slice(2, 4), d.slice(4, 8)].filter(Boolean).join('/')
+}
+/** dd/mm/aaaa → aaaa-mm-dd (ou null se a data não existe). */
+export function dataIso(v: string): string | null {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v); if (!m) return null
+  const [, d, mo, a] = m; const dt = new Date(Date.UTC(+a, +mo - 1, +d))
+  if (dt.getUTCFullYear() !== +a || dt.getUTCMonth() !== +mo - 1 || dt.getUTCDate() !== +d) return null
+  return `${a}-${mo}-${d}`
+}
+export const isoParaTela = (iso: string | null | undefined) => (iso ? iso.slice(0, 10).split('-').reverse().join('/') : '')
 export type DetalheCentral = {
   ajustes: { recurso: string; valor: 'liberado' | 'bloqueado'; validoAte: string | null }[]
   recursos: { recurso: string; noPlano: boolean; liberado: boolean }[]

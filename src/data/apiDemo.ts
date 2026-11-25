@@ -35,7 +35,7 @@ let agendaDemo = false
 const ADESOES: Adesao[] = []
 const CENTRAL: (EscritorioCentral & { detalhe: DetalheCentral })[] = [
   { id: 'demo', nome: 'Silva & Prado Advocacia (demonstração)', cidade: 'Joinville/SC', ativo: true, oabsMaster: ['OAB/SC 00.101'], plano: 'premium', situacao: 'ativo', fundador: true, testeAte: null, pagoAte: null, obs: null,
-    limites: { masters: 3, colaboradores: 8, oabs: 3, iaMensal: 0 }, uso: { masters: 2, colaboradores: 2, oabs: 1, iaMes: 0 }, ajustes: 0,
+    limites: { masters: 3, colaboradores: 8, oabs: 3, iaMensal: 0 }, uso: { masters: 2, colaboradores: 2, oabs: 1, iaMes: 0 }, ajustes: 0, preco: 397.5, saude: 82, ultimoAcesso: new Date().toISOString(), masterNome: 'Ana Prado', casos: 48,
     detalhe: { ajustes: [], recursos: [], pessoas: [{ email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: 'master', bloqueios: [] }, { email: 'marcos@silvaprado.exemplo.br', nome: 'Marcos Lima', papel: 'colaborador', bloqueios: [] }], historico: [] } },
 ]
 const RECURSOS_PLANO: Record<string, string[]> = RECURSOS_POR_PLANO
@@ -49,6 +49,7 @@ function recalcular(e: (typeof CENTRAL)[number]) {
 }
 CENTRAL.forEach(recalcular)
 const CODIGO_DEMO = 'ANA7K2Q'
+const PAGAMENTOS_DEMO: { competencia: string; valor: number; pagoEm: string; forma: string }[] = []
 
 /** Modo demonstração: tudo fictício, sem servidor. Senha de qualquer conta: "demo". */
 const ESCRITORIOS: Escritorio[] = [
@@ -777,6 +778,29 @@ export function criarApiDemo(): Api {
         testeAte: null, pagoAte: null, obs: null, limites: { masters: null, colaboradores: null, oabs: null, iaMensal: null }, uso: { masters: 1, colaboradores: 0, oabs: n.oab.trim() ? 1 : 0, iaMes: 0 }, ajustes: 0,
         detalhe: { ajustes: [], recursos: [], pessoas: [{ email: n.masterEmail.trim().toLowerCase(), nome: n.masterNome.trim(), papel: 'master', bloqueios: [] }], historico: [] } }
       CENTRAL.push(e); recalcular(e); return id
+    },
+    async centralPainel() {
+      const h = new Date(); const fim = new Date(h.getFullYear(), h.getMonth() + 1, 0).getDate()
+      const dias = Array.from({ length: fim }, (_, i) => ({ dia: i + 1, recebido: PAGAMENTOS_DEMO.filter((p) => +p.pagoEm.slice(8, 10) === i + 1 && p.pagoEm.slice(0, 7) === h.toISOString().slice(0, 7)).reduce((a, p) => a + p.valor, 0), previsto: 0 }))
+      const ym = h.toISOString().slice(0, 7)
+      return { inicio: `${ym}-01`, fim: `${ym}-${String(fim).padStart(2, '0')}`, dias, recebido: dias.reduce((a, d) => a + d.recebido, 0),
+        previsto: CENTRAL.filter((e) => e.situacao === 'ativo' || e.situacao === 'atraso').reduce((a, e) => a + (e.preco ?? 0), 0),
+        emAtraso: CENTRAL.filter((e) => e.situacao === 'atraso').reduce((a, e) => a + (e.preco ?? 0), 0) }
+    },
+    async centralPagamento(id, valor, pagoEm, forma) {
+      const e = CENTRAL.find((x) => x.id === id); if (!e) throw new Error('Escritório não encontrado.')
+      if (!(valor > 0)) throw new Error('Valor inválido.')
+      const base = e.pagoAte ?? pagoEm; const d = new Date(base + 'T12:00:00'); d.setMonth(d.getMonth() + 1)
+      e.pagoAte = d.toISOString().slice(0, 10); if (e.situacao !== 'suspenso') e.situacao = 'ativo'
+      PAGAMENTOS_DEMO.unshift({ competencia: base, valor, pagoEm, forma })
+      e.detalhe.historico.unshift({ quando: new Date().toISOString(), quem: 'demonstração', acao: `registrou pagamento de R$ ${valor.toFixed(2).replace('.', ',')} (${forma})` })
+      return e.pagoAte
+    },
+    async centralPagamentos() { return PAGAMENTOS_DEMO.map((p) => ({ ...p })) },
+    async centralMotivo(id, texto) {
+      const e = CENTRAL.find((x) => x.id === id); if (!e) throw new Error('Escritório não encontrado.')
+      if (texto.trim().length < 3) throw new Error('Informe o motivo.')
+      e.detalhe.historico.unshift({ quando: new Date().toISOString(), quem: 'demonstração', acao: `motivo: ${texto.trim()}` })
     },
     async falhas() { return FALHAS.filter((f) => !RESOLVIDAS.has(f.id)).map((f) => ({ ...f })) },
     async resolverFalha(id) { RESOLVIDAS.add(id) },
