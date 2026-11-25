@@ -7,6 +7,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useSessao } from '../lib/contexto'
 import { SessaoExpirada } from '../data/api'
 import { Sidebar } from './Sidebar'
+import { AvisosConversas } from './AvisosConversas'
 import { BottomBar } from './BottomBar'
 import { CommandSearch } from './CommandSearch'
 import { MenuConta } from './MenuConta'
@@ -88,6 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </main>
       </div>
       <BottomBar />
+      <AvisosConversas />
       <CommandSearch open={buscando} onOpenChange={setBuscando} />
     </div>
   )

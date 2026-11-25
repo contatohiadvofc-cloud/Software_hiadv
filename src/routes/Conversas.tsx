@@ -1,16 +1,17 @@
-import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { useToast } from '../design/components/Toast'
 import { Dialog } from '../design/components/Dialog'
 import { Button } from '../design/components/Button'
 import {
-  INTERVALOS, LIMITE_AUDIO_SEG, linkWhatsApp, nomesComApelidos, normalizarTelefone, telefoneTela, type Contato, type PessoaEquipe, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
+  INTERVALOS, LIMITE_AUDIO_SEG, linkWhatsApp, nomesComApelidos, dataHoraCompleta, trecho, normalizarTelefone, telefoneTela, type Contato, type PessoaEquipe, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
   primeiroNome, publicoComunidade, quandoCurto, resumo, tamanhoTela, tipoAnexo, tituloConversa, validarArquivo, validarComunidade,
   type Anexo, type Comunidade, type ComunidadeForm, type Conversa, type Mensagem,
 } from '../data/conversas'
 import { Chamada } from './Chamada'
 import { abrirMicLimpo, type MicLimpo } from '../lib/audioLimpo'
+import { SONS, lerPrefs, marcarAberta, salvarPrefs, tocar, type PrefsAvisos } from '../lib/avisos'
 
 type Sel = { tipo: 'conv'; id: string } | { tipo: 'com'; id: string } | { tipo: 'pessoa'; id: string } | { tipo: 'contato'; id: string } | { tipo: 'novo-contato'; id: '' } | null
 type Aba = 'equipe' | 'comunidades' | 'contatos'
@@ -33,6 +34,8 @@ const I = {
   arquivo: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6',
   grupo: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
   predio: 'M3 21h18M5 21V7l7-4 7 4v14M9 9h1M14 9h1M9 13h1M14 13h1M10 21v-4h4v4',
+  sino: 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
+  texto: 'M4 6h16M4 12h16M4 18h10',
   balao: 'M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z',
   agenda: 'M4 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM7 17a5 5 0 0 1 10 0',
   telefone: 'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z',
@@ -58,7 +61,10 @@ export function Conversas() {
   const { perfil } = useSessao()
   const eu = perfil?.email ?? ''
   const [aba, setAba] = useState<Aba>(() => (new URLSearchParams(location.search).get('aba') === 'comunidades' ? 'comunidades' : 'equipe'))
-  const [sel, setSel] = useState<Sel>(null)
+  const params = new URLSearchParams(location.search)
+  const [sel, setSel] = useState<Sel>(() => (params.get('c') ? { tipo: 'conv', id: params.get('c')! } : null))
+  const [atender] = useState(() => params.get('atender'))
+  const [ajustes, setAjustes] = useState(false)
   const [busca, setBusca] = useState('')
   const [nova, setNova] = useState(false)
   const [moderar, setModerar] = useState<Comunidade | 'nova' | null>(null)
@@ -79,6 +85,8 @@ export function Conversas() {
   }, [aba, convs.data, coms.data, sel])
 
   const termo = busca.trim().toLowerCase()
+  const termoBusca = useDeferredValue(termo)
+  const achados = useQuery({ queryKey: ['chat-busca', termoBusca], queryFn: () => api.chatBuscar(termoBusca), enabled: aba === 'equipe' && termoBusca.length >= 3, staleTime: 30_000 })
   const listaConv = (convs.data ?? []).filter((c) => !termo || tituloConversa(c, eu, nomes).toLowerCase().includes(termo))
   const listaCom = (coms.data ?? []).filter((c) => !termo || c.nome.toLowerCase().includes(termo))
   const conv = sel?.tipo === 'conv' ? convs.data?.find((c) => c.id === sel.id) : undefined
@@ -89,6 +97,7 @@ export function Conversas() {
       <aside className="cv-lado" aria-label="Lista de conversas">
         <div className="cv-lado-cabeca">
           <h1>Conversas</h1>
+          <button type="button" className="cv-icone-bt cv-sino" aria-label="Sons e avisos" title="Sons e avisos" onClick={() => setAjustes(true)}><Ic d={I.sino} /></button>
           {aba === 'equipe'
             ? <button type="button" className="cv-icone-bt" aria-label="Nova conversa" title="Nova conversa" onClick={() => setNova(true)}><Ic d={I.novo} /></button>
             : aba === 'contatos'
@@ -100,7 +109,7 @@ export function Conversas() {
           <button type="button" role="tab" aria-selected={aba === 'comunidades'} onClick={() => { setAba('comunidades'); setSel(null) }}>Comunidades{naoCom > 0 && <b className="cv-badge">{naoCom}</b>}</button>
           <button type="button" role="tab" aria-selected={aba === 'contatos'} onClick={() => { setAba('contatos'); setSel(null) }}>Contatos</button>
         </div>
-        <label className="cv-busca"><Ic d={I.busca} t={17} /><input placeholder={aba === 'equipe' ? 'Buscar conversa' : aba === 'contatos' ? 'Buscar nome ou número' : 'Buscar comunidade'} aria-label="Buscar" value={busca} onChange={(e) => setBusca(e.target.value)} /></label>
+        <label className="cv-busca"><Ic d={I.busca} t={17} /><input placeholder={aba === 'equipe' ? 'Buscar conversa ou o que foi dito' : aba === 'contatos' ? 'Buscar nome ou número' : 'Buscar comunidade'} aria-label="Buscar" value={busca} onChange={(e) => setBusca(e.target.value)} /></label>
         <ul className="cv-lista" role="list">
           {aba === 'equipe' && convs.isLoading && <li className="cv-vazio">Carregando…</li>}
           {aba === 'equipe' && convs.isError && <li className="cv-vazio">Não deu para carregar as conversas. <button type="button" className="cv-link" onClick={() => convs.refetch()}>Tentar de novo</button></li>}
@@ -119,7 +128,29 @@ export function Conversas() {
               </button>
             </li>
           ))}
-          {aba === 'equipe' && convs.isSuccess && listaConv.length === 0 && <li className="cv-vazio">{termo ? 'Nenhuma conversa com esse nome.' : 'Nenhuma conversa ainda.'}</li>}
+          {aba === 'equipe' && convs.isSuccess && listaConv.length === 0 && !(termo.length >= 3) && <li className="cv-vazio">{termo ? 'Nenhuma conversa com esse nome.' : 'Nenhuma conversa ainda.'}</li>}
+          {aba === 'equipe' && termo.length >= 3 && (
+            <>
+              <li className="cv-sep">Mensagens e áudios com “{busca.trim()}”</li>
+              {achados.isFetching && !achados.data && <li className="cv-vazio">Procurando no histórico…</li>}
+              {achados.data?.map((r) => {
+                const conversa = convs.data?.find((c) => c.id === r.conversaId)
+                const onde = conversa ? tituloConversa(conversa, eu, nomes) : (r.titulo ?? 'Conversa')
+                const falado = !(r.texto ?? '').toLowerCase().includes(termo) && !!r.transcricao
+                return (
+                  <li key={r.id}>
+                    <button type="button" className="cv-item cv-achado" onClick={() => setSel({ tipo: 'conv', id: r.conversaId })}>
+                      <span className="cv-item-meio">
+                        <span className="cv-item-nome">{onde}<small>{dataHoraCompleta(r.criadoEm)}</small></span>
+                        <span className="cv-achado-txt">{r.autor === eu ? 'Você' : primeiroNome(nomes.get(r.autor) ?? r.autor)}{falado ? ' (áudio)' : ''}: {trecho(falado ? r.transcricao! : (r.texto ?? ''), busca.trim())}</span>
+                      </span>
+                    </button>
+                  </li>
+                )
+              })}
+              {achados.isSuccess && achados.data.length === 0 && <li className="cv-vazio">Nada encontrado no que foi escrito ou falado (áudios transcritos).</li>}
+            </>
+          )}
           {aba === 'comunidades' && coms.isLoading && <li className="cv-vazio">Carregando…</li>}
           {aba === 'comunidades' && listaCom.map((c) => (
             <li key={c.id}>
@@ -144,7 +175,7 @@ export function Conversas() {
       </aside>
 
       <section className="cv-conversa" aria-label="Conversa aberta">
-        {conv && <ConversaEquipe key={conv.id} c={conv} eu={eu} nomes={nomes} voltar={() => setSel(null)} />}
+        {conv && <ConversaEquipe key={conv.id} c={conv} eu={eu} nomes={nomes} voltar={() => setSel(null)} atender={atender} />}
         {comu && <ConversaComunidade key={comu.id} c={comu} eu={eu} voltar={() => setSel(null)} moderar={() => setModerar(comu)} />}
         {(sel?.tipo === 'pessoa' || sel?.tipo === 'contato' || sel?.tipo === 'novo-contato') && (
           <PainelContato key={sel.tipo + sel.id} sel={sel} eu={eu} pessoas={pessoas.data ?? []} contatos={contatos.data ?? []} nomes={nomes}
@@ -168,6 +199,7 @@ export function Conversas() {
         )}
       </section>
 
+      {ajustes && <AjustesAvisos aoFechar={() => setAjustes(false)} />}
       {nova && <NovaConversa eu={eu} aoAbrir={(id) => { setNova(false); setSel({ tipo: 'conv', id }) }} aoFechar={() => setNova(false)} />}
       {moderar && <Moderacao c={moderar === 'nova' ? null : moderar} aoFechar={() => setModerar(null)} />}
     </div>
@@ -175,7 +207,7 @@ export function Conversas() {
 }
 
 // ---------- conversa da equipe ----------
-function ConversaEquipe({ c, eu, nomes, voltar }: { c: Conversa; eu: string; nomes: Map<string, string>; voltar: () => void }) {
+function ConversaEquipe({ c, eu, nomes, voltar, atender }: { c: Conversa; eu: string; nomes: Map<string, string>; voltar: () => void; atender?: string | null }) {
   const api = useApi()
   const qc = useQueryClient()
   const toast = useToast()
@@ -184,6 +216,12 @@ function ConversaEquipe({ c, eu, nomes, voltar }: { c: Conversa; eu: string; nom
   const [chamada, setChamada] = useState<{ id: string; video: boolean } | null>(null)
   const ativa = useQuery({ queryKey: ['reuniao', c.id], queryFn: () => api.reuniaoAtiva(c.id), refetchInterval: 15000 })
   const titulo = tituloConversa(c, eu, nomes)
+  // veio do aviso "Atender": entra direto na chamada
+  const atendida = useRef(false)
+  useEffect(() => {
+    if (atender && !atendida.current && ativa.data?.id === atender) { atendida.current = true; setChamada({ id: ativa.data.id, video: ativa.data.video }) }
+  }, [atender, ativa.data])
+  useEffect(() => { marcarAberta(c.id); return () => marcarAberta(null) }, [c.id])
   const sub = c.tipo === 'equipe' ? 'Toda a equipe do escritório' : c.tipo === 'grupo' ? c.membros.map((m) => primeiroNome(nomes.get(m) ?? m)).join(', ') : 'Conversa direta'
   async function ligar(video: boolean) {
     try { const id = await api.reuniaoIniciar(c.id, video); setChamada({ id, video }); qc.invalidateQueries({ queryKey: ['reuniao', c.id] }) }
@@ -357,8 +395,9 @@ function Balao(p: {
           onDoubleClick={() => p.reagir('❤️')}>
           {p.citada && <div className="cv-citada"><b>{p.nomeCitada(p.citada)}</b><span>{resumo(p.citada)}</span></div>}
           {m.anexo && <AnexoView a={m.anexo} onde={p.onde} meu={p.meu} />}
+          {m.anexo && p.onde === 'chat' && tipoAnexo(m.anexo.tipo) === 'audio' && !m.enviando && <Transcricao m={m} meu={p.meu} />}
           {m.texto && <p className="cv-texto">{m.texto}</p>}
-          <span className="cv-hora">{m.enviando ? 'enviando…' : horaMensagem(m.criadoEm)}{m.editadoEm && ' · editada'}</span>
+          <span className="cv-hora" title={m.enviando ? undefined : dataHoraCompleta(m.criadoEm)}>{m.enviando ? 'enviando…' : horaMensagem(m.criadoEm)}{m.editadoEm && ' · editada'}</span>
         </div>
         {reac.length > 0 && (
           <div className="cv-reacoes">{reac.map(([e, n, meu]) => <button key={e} type="button" data-meu={meu || undefined} aria-label={`${e} ${n}`} onClick={(ev) => { ev.stopPropagation(); p.reagir(e) }}>{e}{n > 1 && <small>{n}</small>}</button>)}</div>
@@ -395,6 +434,43 @@ function useUrl(onde: 'chat' | 'comunidade', path: string) {
     return () => { vivo = false }
   }, [api, onde, path])
   return { url, erro }
+}
+
+/** Texto do áudio: o próprio áudio é transcrito sozinho logo após o envio; nos outros, um toque pede a transcrição. */
+const tentados = new Set<string>()
+function Transcricao({ m, meu }: { m: Mensagem; meu: boolean }) {
+  const api = useApi()
+  const qc = useQueryClient()
+  const [texto, setTexto] = useState(m.transcricao ?? null)
+  const [aberta, setAberta] = useState(false)
+  const [estado, setEstado] = useState<'parado' | 'indo' | 'erro'>('parado')
+  const [erro, setErro] = useState<string | null>(null)
+  async function transcrever() {
+    if (!m.anexo || tentados.has(m.id) && estado !== 'erro') return
+    tentados.add(m.id); setEstado('indo')
+    const r = await api.chatTranscrever(m.id, m.anexo.path)
+    if (r.ok && r.texto) { setTexto(r.texto); setAberta(true); setEstado('parado'); void qc.invalidateQueries({ queryKey: ['chat-msgs'] }) }
+    else { setEstado(r.configurada === false ? 'parado' : 'erro'); setErro(r.erro ?? 'Não deu para transcrever.') }
+  }
+  useEffect(() => { setTexto(m.transcricao ?? null) }, [m.transcricao])
+  // meu áudio recém-enviado: transcreve sozinho
+  useEffect(() => {
+    if (meu && !m.transcricao && Date.now() - new Date(m.criadoEm).getTime() < 3 * 60_000 && !tentados.has(m.id)) void transcrever()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  if (texto) return (
+    <div className="cv-transcricao">
+      <button type="button" className="cv-transcricao-bt" aria-expanded={aberta} onClick={() => setAberta(!aberta)}><Ic d={I.texto} t={14} />{aberta ? 'Ocultar texto' : 'Ver texto do áudio'}</button>
+      {aberta && <p>{texto}</p>}
+    </div>
+  )
+  return (
+    <div className="cv-transcricao">
+      <button type="button" className="cv-transcricao-bt" disabled={estado === 'indo'} onClick={() => { setErro(null); tentados.delete(m.id); void transcrever() }}>
+        <Ic d={I.texto} t={14} />{estado === 'indo' ? 'Transcrevendo…' : 'Transcrever'}
+      </button>
+      {erro && <small className="cv-transcricao-erro">{erro}</small>}
+    </div>
+  )
 }
 
 function AnexoView({ a, onde, meu }: { a: Anexo; onde: 'chat' | 'comunidade'; meu: boolean }) {
@@ -608,6 +684,38 @@ function NovaConversa({ eu, aoAbrir, aoFechar }: { eu: string; aoAbrir: (id: str
           {pessoas.isSuccess && outros.length === 0 && <li className="cv-vazio">Ninguém com esse nome na equipe.</li>}
         </ul>
         {modo === 'grupo' && <div className="cv-nova-fim"><span>{escolhidos.length} {escolhidos.length === 1 ? 'pessoa' : 'pessoas'}</span><Button disabled={nome.trim().length < 2 || !escolhidos.length} loading={grupo.isPending} onClick={() => grupo.mutate()}>Criar grupo</Button></div>}
+      </div>
+    </Dialog>
+  )
+}
+
+// ---------- sons e avisos ----------
+function AjustesAvisos({ aoFechar }: { aoFechar: () => void }) {
+  const [p, setP] = useState<PrefsAvisos>(lerPrefs)
+  const [perm, setPerm] = useState(typeof Notification === 'undefined' ? 'indisponivel' : Notification.permission)
+  const mudar = (n: PrefsAvisos) => { setP(n); salvarPrefs(n) }
+  return (
+    <Dialog open onOpenChange={(v) => { if (!v) aoFechar() }} title="Sons e avisos" variant="painel">
+      <div className="hv-dialog-body cv-mod">
+        <fieldset className="cv-mod-grupo">
+          <legend>Som de mensagem nova</legend>
+          <div className="cv-seg">
+            {SONS.map((s) => <button key={s.id} type="button" aria-pressed={p.som === s.id} onClick={() => { mudar({ ...p, som: s.id }); tocar(s.id) }}>{s.nome}</button>)}
+          </div>
+          <p className="cv-mod-dica">Toque num som para ouvir.</p>
+        </fieldset>
+        <fieldset className="cv-mod-grupo">
+          <legend>Avisos</legend>
+          <label className="cv-chave"><span>Janelinha na tela<small>Mostra quem mandou, em qualquer tela do HiAdv</small></span><input type="checkbox" role="switch" checked={p.popup} onChange={(e) => mudar({ ...p, popup: e.target.checked })} /></label>
+          <label className="cv-chave"><span>Toque de chamada<small>Toca e mostra Atender ou Recusar quando alguém liga</small></span><input type="checkbox" role="switch" checked={p.chamada} onChange={(e) => mudar({ ...p, chamada: e.target.checked })} /></label>
+          <label className="cv-chave"><span>Notificação do aparelho<small>Quando o HiAdv está em segundo plano</small></span><input type="checkbox" role="switch" checked={p.sistema && perm === 'granted'} disabled={perm === 'indisponivel' || perm === 'denied'}
+            onChange={async (e) => {
+              if (e.target.checked && perm !== 'granted') { const r = await Notification.requestPermission(); setPerm(r); mudar({ ...p, sistema: r === 'granted' }) }
+              else mudar({ ...p, sistema: e.target.checked })
+            }} /></label>
+          {perm === 'denied' && <p className="cv-mod-dica">As notificações estão bloqueadas neste navegador. Libere nas configurações do site (cadeado ao lado do endereço).</p>}
+          {perm === 'indisponivel' && <p className="cv-mod-dica">Neste aparelho, a notificação funciona com o HiAdv instalado na tela inicial.</p>}
+        </fieldset>
       </div>
     </Dialog>
   )

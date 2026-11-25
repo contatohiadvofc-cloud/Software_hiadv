@@ -22,3 +22,14 @@ test('prévia: contatos — cadastra número externo e mostra WhatsApp', async (
   await page.getByRole('button', { name: 'Salvar' }).click()
   await expect(page.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', 'https://wa.me/5549988887777')
 })
+
+test('prévia: busca no que foi dito e ajustes de som', async ({ page }) => {
+  await page.goto('/experimentar')
+  await page.getByRole('link', { name: /^Conversas/ }).first().click()
+  await page.getByRole('textbox', { name: 'Buscar' }).fill('CTPS')
+  await expect(page.getByText(/Mensagens e áudios com/)).toBeVisible()
+  await expect(page.locator('.cv-achado').first()).toContainText('CTPS')
+  await page.getByRole('button', { name: 'Sons e avisos' }).click()
+  await page.getByRole('button', { name: 'Sino' }).click()
+  await expect(page.getByRole('button', { name: 'Sino' })).toHaveAttribute('aria-pressed', 'true')
+})

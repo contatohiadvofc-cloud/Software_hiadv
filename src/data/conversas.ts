@@ -15,6 +15,8 @@ export type Mensagem = {
   reacoes: Reacoes
   criadoEm: string
   editadoEm: string | null
+  /** Texto do áudio, quando transcrito. */
+  transcricao?: string | null
   /** só na tela, enquanto o envio não termina */
   enviando?: boolean
 }
@@ -244,4 +246,16 @@ export function nomesComApelidos(pessoas: { email: string; nome: string }[], con
   const m = new Map(pessoas.map((p) => [p.email, p.nome]))
   for (const c of contatos) if (c.tipo === 'equipe' && c.email) m.set(c.email, c.nome)
   return m
+}
+
+export type ResultadoBusca = { id: string; conversaId: string; autor: string; texto: string | null; transcricao: string | null; anexo: Anexo | null; criadoEm: string; tipo: TipoConversa; titulo: string | null }
+export type ChamadaAtiva = { id: string; conversaId: string; video: boolean; iniciadaPor: string; inicio: string; participantes: string[] }
+/** Data e hora completas (para o registro de cada mensagem). */
+export const dataHoraCompleta = (iso: string) => new Date(iso).toLocaleString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+/** Trecho em volta do termo encontrado, para mostrar na busca. */
+export function trecho(texto: string, termo: string, raio = 50): string {
+  const i = texto.toLowerCase().indexOf(termo.toLowerCase())
+  if (i < 0) return texto.length > raio * 2 ? texto.slice(0, raio * 2) + '…' : texto
+  const ini = Math.max(0, i - raio), fim = Math.min(texto.length, i + termo.length + raio)
+  return (ini > 0 ? '…' : '') + texto.slice(ini, fim) + (fim < texto.length ? '…' : '')
 }

@@ -1,4 +1,4 @@
-import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, Contato, ContatoForm, PedidoEntrada, PessoaComunidade, PessoaEquipe } from './conversas'
+import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, ChamadaAtiva, Contato, ContatoForm, PedidoEntrada, ResultadoBusca, PessoaComunidade, PessoaEquipe } from './conversas'
 import type { CanalChamada } from './chamada'
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
@@ -230,6 +230,12 @@ export interface Api {
   comPessoas(id: string): Promise<PessoaComunidade[]>
   comPedirEntrada(id: string): Promise<void>
   contatoLista(): Promise<Contato[]>
+  /** Transcreve um áudio da conversa da equipe e guarda o texto. */
+  chatTranscrever(msg: string, path: string): Promise<{ ok: boolean; texto?: string; erro?: string; configurada?: boolean }>
+  /** Busca no que foi escrito ou falado nas conversas da equipe. */
+  chatBuscar(termo: string): Promise<ResultadoBusca[]>
+  /** Chamadas acontecendo agora nas minhas conversas. */
+  reuniaoMinhasAtivas(): Promise<ChamadaAtiva[]>
   contatoSalvar(f: ContatoForm): Promise<string>
   contatoApagar(id: string): Promise<void>
   comPedidos(id: string): Promise<PedidoEntrada[]>

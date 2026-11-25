@@ -1164,3 +1164,35 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .cv-contato-acoes a:hover, .cv-contato-acoes button:hover { border-color:var(--gold) }
 .cv-contato-quem { color:var(--muted); font-size:.78rem }
 .cv-contato-conf { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center }
+
+/* Transcrição de áudio */
+.cv-transcricao { margin-top:6px; max-width:300px }
+.cv-transcricao-bt { display:inline-flex; align-items:center; gap:5px; padding:3px 8px; border:0; border-radius:999px; background:rgb(127 127 127 / .14); color:inherit; font:inherit; font-size:.75rem; font-weight:600; cursor:pointer }
+.cv-transcricao-bt:disabled { opacity:.7; cursor:progress }
+.cv-transcricao p { margin:6px 0 0; font-size:.88rem; line-height:1.45; white-space:pre-wrap }
+.cv-transcricao-erro { display:block; margin-top:4px; font-size:.72rem; opacity:.8 }
+
+.cv-achado .cv-item-nome { display:flex; justify-content:space-between; gap:8px }
+.cv-achado .cv-item-nome small { font-weight:400; color:var(--muted); font-size:.72rem; white-space:nowrap }
+.cv-achado-txt { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; font-size:.82rem; color:var(--muted); line-height:1.35 }
+
+/* Avisos de mensagem e chamada */
+.av-pilha { position:fixed; z-index:90; right:16px; bottom:calc(16px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:8px; width:min(360px, calc(100vw - 24px)) }
+@media (max-width: 760px) { .av-pilha { right:12px; left:12px; width:auto; top:calc(10px + env(safe-area-inset-top)); bottom:auto } }
+.av-card { display:flex; align-items:center; gap:10px; padding:12px 12px 12px 14px; border-radius:16px; background:var(--surface, #1b1b1a); color:var(--text); border:1px solid var(--line); border-left:4px solid var(--accent); box-shadow:0 10px 30px rgb(0 0 0 / .35); animation:av-entra .2s ease-out }
+@keyframes av-entra { from { transform:translateY(8px); opacity:0 } to { transform:none; opacity:1 } }
+@media (prefers-reduced-motion: reduce) { .av-card { animation:none } .av-pulso { animation:none !important } }
+.av-abrir { flex:1; min-width:0; display:flex; border:0; background:none; color:inherit; font:inherit; text-align:left; cursor:pointer; padding:0 }
+.av-txt { display:flex; flex-direction:column; min-width:0 }
+.av-txt b { font-size:.9rem }
+.av-txt span { font-size:.82rem; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.av-fechar { border:0; background:none; color:var(--muted); font-size:22px; line-height:1; cursor:pointer; padding:0 4px }
+.av-chamada { border-left-color:var(--gold); flex-wrap:wrap }
+.av-chamada .av-txt { flex:1 }
+.av-pulso { width:12px; height:12px; border-radius:50%; background:#2fbf71; animation:av-pulsa 1.2s infinite }
+@keyframes av-pulsa { 0% { box-shadow:0 0 0 0 rgb(47 191 113 / .6) } 100% { box-shadow:0 0 0 12px rgb(47 191 113 / 0) } }
+.av-bts { display:flex; gap:8px }
+.av-bts button { border:0; border-radius:999px; padding:9px 16px; font:inherit; font-weight:700; cursor:pointer }
+.av-recusar { background:#e0303a; color:#fff }
+.av-atender { background:#2fbf71; color:#0b0b0b }
+.cv-lado-cabeca .cv-sino { margin-left:auto }

@@ -37,7 +37,7 @@ export function useRecursos() {
 export function useNaoLidas(): number {
   const api = useApi()
   const { perfil } = useSessao()
-  const c = useQuery({ queryKey: ['chat-lista', perfil?.escritorioId], queryFn: () => api.chatLista(), enabled: !!perfil, refetchInterval: 30_000, retry: false })
+  const c = useQuery({ queryKey: ['chat-lista', perfil?.escritorioId], queryFn: () => api.chatLista(), enabled: !!perfil, refetchInterval: 10_000, retry: false })
   const m = useQuery({ queryKey: ['com-lista'], queryFn: () => api.comLista(), enabled: !!perfil, refetchInterval: 60_000, retry: false })
   return (c.data ?? []).reduce((s, x) => s + x.naoLidas, 0) + (m.data ?? []).reduce((s, x) => s + x.naoLidas, 0)
 }

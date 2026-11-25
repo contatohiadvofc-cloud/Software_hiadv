@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { NOMES_STATUS, PERGUNTAS, PLANOS, plano, type Adesao, type Cortesia, type PlanoId, type StatusAdesao } from '../data/adesao'
@@ -26,6 +26,9 @@ function Pedido({ a }: { a: Adesao }) {
   const qc = useQueryClient()
   const toast = useToast()
   const [obs, setObs] = useState(a.obs ?? '')
+  // marca na hora (sem esperar o servidor); volta ao valor do servidor quando ele responde
+  const [fundador, setFundador] = useState(a.fundador)
+  useEffect(() => { setFundador(a.fundador) }, [a.fundador])
   const ok = (m: string) => { toast(m); qc.invalidateQueries({ queryKey: ['adesoes'] }) }
   const erro = (e: unknown) => toast((e as Error).message, 'danger')
   const status = useMutation({ mutationFn: (v: { s: StatusAdesao; fundador?: boolean; cortesia?: Cortesia; obs?: string }) => api.adesaoAtualizar(a.id, v.s, { fundador: v.fundador, cortesia: v.cortesia, obs: v.obs }), onSuccess: () => ok('Pedido atualizado.'), onError: erro })
@@ -52,7 +55,7 @@ function Pedido({ a }: { a: Adesao }) {
             {(Object.keys(NOMES_STATUS) as StatusAdesao[]).map((s) => <option key={s} value={s}>{NOMES_STATUS[s]}</option>)}
           </select>
         </label>
-        <label className="alternar"><input type="checkbox" checked={a.fundador} onChange={(e) => status.mutate({ s: a.status, fundador: e.target.checked })} /> Fundador</label>
+        <label className="alternar"><input type="checkbox" checked={fundador} onChange={(e) => { setFundador(e.target.checked); status.mutate({ s: a.status, fundador: e.target.checked }) }} /> Fundador</label>
         {a.indicadorEmail && (
           <label className="adm-campo"><span>Cortesia de quem indicou</span>
             <select className="hv-input" value={a.cortesia} onChange={(e) => status.mutate({ s: a.status, cortesia: e.target.value as Cortesia })}>

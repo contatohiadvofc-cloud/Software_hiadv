@@ -20,7 +20,7 @@ import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
-import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato } from './conversas'
+import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato, type ResultadoBusca, type ChamadaAtiva } from './conversas'
 import { ICE, type Presenca, type Sinal } from './chamada'
 
 function lerAnexo(a: unknown): Anexo | null {
@@ -33,7 +33,7 @@ function lerAnexo(a: unknown): Anexo | null {
 function lerMensagem(m: Record<string, unknown>): Mensagem {
   return { id: String(m.id), autor: String(m.autor), autorNome: (m.autor_nome as string) ?? null, autorEscritorio: (m.autor_esc as string) ?? null,
     texto: (m.texto as string) ?? null, anexo: lerAnexo(m.anexo), respostaA: (m.resposta_a as string) ?? null,
-    reacoes: (m.reacoes as Record<string, string>) ?? {}, criadoEm: String(m.criado_em), editadoEm: (m.editado_em as string) ?? null }
+    reacoes: (m.reacoes as Record<string, string>) ?? {}, criadoEm: String(m.criado_em), editadoEm: (m.editado_em as string) ?? null, transcricao: (m.transcricao as string) ?? null }
 }
 function lerConversa(c: Record<string, unknown>): Conversa {
   const u = c.ultima as Record<string, unknown> | null
@@ -765,6 +765,25 @@ export function criarApiSupabase(url: string, chave: string): Api {
     async comPessoas(id) {
       const r = (verificar(await sb.rpc('comunidade_pessoas', { p_id: id })) ?? []) as Record<string, unknown>[]
       return r.map((p) => ({ email: String(p.email), nome: String(p.nome), escritorio: (p.escritorio as string) ?? null, silenciadoAte: (p.silenciado_ate as string) ?? null }))
+    },
+    async chatTranscrever(msg, path) {
+      try {
+        const r = await sb.functions.invoke('transcrever', { body: { msg, path } })
+        const d = r.data as { ok?: boolean; texto?: string; erro?: string; configurada?: boolean } | null
+        if (d) return { ok: !!d.ok, texto: d.texto, erro: d.erro, configurada: d.configurada }
+        return { ok: false, erro: 'Não deu para transcrever agora.' }
+      } catch { return { ok: false, erro: 'Não deu para transcrever agora.' } }
+    },
+    async chatBuscar(termo) {
+      const r = await sb.rpc('chat_buscar', { p_termo: termo })
+      if (r.error && /function|does not exist/i.test(r.error.message)) return []
+      return ((verificar(r) ?? []) as Record<string, unknown>[]).map((x) => ({ id: String(x.id), conversaId: String(x.conversa_id), autor: String(x.autor), texto: (x.texto as string) ?? null,
+        transcricao: (x.transcricao as string) ?? null, anexo: lerAnexo(x.anexo), criadoEm: String(x.criado_em), tipo: x.tipo as ResultadoBusca['tipo'], titulo: (x.titulo as string) ?? null }))
+    },
+    async reuniaoMinhasAtivas() {
+      const r = await sb.rpc('reuniao_minhas_ativas')
+      if (r.error) return []
+      return ((r.data ?? []) as Record<string, unknown>[]).map((x) => ({ id: String(x.id), conversaId: String(x.conversa_id), video: !!x.video, iniciadaPor: String(x.iniciada_por), inicio: String(x.inicio), participantes: (x.participantes as string[]) ?? [] }) satisfies ChamadaAtiva)
     },
     async contatoLista() {
       const r = await sb.rpc('contato_lista')

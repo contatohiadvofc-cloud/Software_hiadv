@@ -85,7 +85,7 @@ function responder(c: Conv) {
 }
 
 type ConversasApi = Pick<Api, 'chatLista' | 'chatPessoas' | 'chatMensagens' | 'chatEnviar' | 'chatDireta' | 'chatGrupo' | 'chatLido' | 'chatReagir' | 'chatApagar' | 'chatSubir' | 'chatUrl' | 'chatAssinar'
-  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'contatoLista' | 'contatoSalvar' | 'contatoApagar' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
+  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'contatoLista' | 'chatTranscrever' | 'chatBuscar' | 'reuniaoMinhasAtivas' | 'contatoSalvar' | 'contatoApagar' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
 
 export function conversasDemo(): ConversasApi {
   const reagir = (lista: Mensagem[], id: string, e: string) => {
@@ -142,6 +142,14 @@ export function conversasDemo(): ConversasApi {
     async comSalvar() { throw new Error('Na prévia, as comunidades não podem ser alteradas.') },
     async comPessoas() { return [] },
     async comSilenciar() { throw new Error('Na prévia, a moderação não está disponível.') },
+    async chatTranscrever() { return { ok: false, configurada: false, erro: 'Na prévia, a transcrição fica desligada. No seu escritório, o áudio vira texto em segundos.' } },
+    async chatBuscar(termo) {
+      const t = termo.toLowerCase()
+      return CONVERSAS.flatMap((c) => c.msgs.filter((m) => (m.texto ?? '').toLowerCase().includes(t) || (m.transcricao ?? '').toLowerCase().includes(t))
+        .map((m) => ({ id: m.id, conversaId: c.id, autor: m.autor, texto: m.texto, transcricao: m.transcricao ?? null, anexo: m.anexo, criadoEm: m.criadoEm, tipo: c.tipo, titulo: c.titulo })))
+        .sort((a, b) => b.criadoEm.localeCompare(a.criadoEm))
+    },
+    async reuniaoMinhasAtivas() { return [] },
     async contatoLista() { return CONTATOS.map((c) => ({ ...c })) },
     async contatoSalvar(f) {
       const tel = f.tipo === 'externo' ? normalizarTelefone(f.telefone ?? '') : null
