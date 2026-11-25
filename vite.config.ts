@@ -107,7 +107,7 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/app.html',
         // o site de apresentação e os vídeos não passam pelo aplicativo
-        navigateFallbackDenylist: [/^\/$/, /^\/index\.html$/, /^\/video\//],
+        navigateFallbackDenylist: [/^\/$/, /^\/index\.html$/, /^\/video\//, ...PAGINAS_SEO.map((p) => new RegExp(`^/${p}(/|$)`))],
         // Dados do escritório nunca ficam no cache do aparelho: só os arquivos do aplicativo.
         runtimeCaching: [],
         globPatterns: ['**/*.{js,css,html,woff2,png,svg}'],

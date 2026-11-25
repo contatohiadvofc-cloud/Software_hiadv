@@ -93,6 +93,56 @@ export const PAGINAS: Pagina[] = [
     ],
   },
   {
+    slug: 'software-trabalhista',
+    titulo: 'Software para advocacia trabalhista | HiAdv',
+    descricao: 'Sistema para advogado trabalhista: reclamatórias em etapas, audiências e prazos em dias úteis, publicações pela OAB, cálculo de verbas e acompanhamento do cliente pelo celular.',
+    h1: 'Software para advocacia trabalhista',
+    abertura: 'A área trabalhista vem pronta no HiAdv, com as etapas que a reclamatória percorre do primeiro contato até o pagamento, as audiências na agenda da equipe e as publicações das OABs virando prazo.',
+    blocos: [
+      ['Reclamatórias em etapas', 'Novo caso, documentos, inicial, audiência, recurso e pagamento, cada etapa com checklist e responsável, num quadro só da área trabalhista.'],
+      ['Audiências sem susto', 'Audiência inicial, de instrução e perícia entram na agenda de quem vai, com lembrete e o que levar.'],
+      ['Cálculo de verbas', 'O agente de cálculo monta a planilha de verbas rescisórias a partir dos dados do contrato, com fórmulas fixas e sem IA, para o advogado conferir.'],
+      ['O cliente sabe em que pé está', 'O cliente acompanha a fase do processo e a data da audiência por um link pessoal, sem ligar para o escritório.'],
+    ],
+    perguntas: [
+      ['Serve para escritório que atua em trabalhista e previdenciário?', 'Sim. O escritório liga as áreas que atende, e cada uma tem o seu quadro e as suas etapas.'],
+      ['Quanto custa?', 'A partir de R$ 119,90 por mês no plano Júnior, com teste grátis de 14 dias.'],
+    ],
+  },
+  {
+    slug: 'programa-para-escritorio-de-advocacia',
+    titulo: 'Programa para escritório de advocacia online | HiAdv',
+    descricao: 'Programa online para escritório de advocacia: processos, prazos, clientes, tarefas da equipe, honorários e relatórios, no navegador, no celular e no computador, sem instalar servidor.',
+    h1: 'Programa para escritório de advocacia, direto no navegador',
+    abertura: 'O HiAdv é um programa jurídico 100% online. Não precisa instalar servidor nem comprar licença por máquina: a equipe entra pelo navegador ou instala como aplicativo no celular e no computador, e todo mundo vê a mesma informação.',
+    blocos: [
+      ['Sem instalação complicada', 'Abre no Chrome, Edge ou Safari e se instala como aplicativo em um toque. As atualizações chegam sozinhas.'],
+      ['Toda a rotina num lugar', 'Atendimentos, clientes, casos por área, prazos, agenda, publicações, documentos, honorários e relatórios.'],
+      ['Cada pessoa com o próprio acesso', 'O Gestor Master define quem vê o quê, e as ações importantes ficam registradas.'],
+      ['Preço por escritório', 'Planos mensais por escritório, de R$ 119,90 a R$ 524,50, com teste grátis de 14 dias.'],
+    ],
+    perguntas: [
+      ['Funciona sem internet?', 'As telas abrem como aplicativo, mas os dados ficam no servidor, então é preciso conexão para ver e salvar informações atualizadas.'],
+      ['Dá para importar meus clientes?', 'Sim. Os clientes podem ser importados por planilha, com aviso de cadastro duplicado.'],
+    ],
+  },
+  {
+    slug: 'gestao-de-escritorio-de-advocacia',
+    titulo: 'Gestão de escritório de advocacia: equipe, prazos e honorários | HiAdv',
+    descricao: 'Gestão de escritório de advocacia com indicadores: casos parados por etapa, carga de cada pessoa, prazos cumpridos, honorários a receber e funil de atendimentos.',
+    h1: 'Gestão de escritório de advocacia com números de verdade',
+    abertura: 'Gerir o escritório é saber onde os casos param, quem está sobrecarregado e quanto entra no mês. O HiAdv mostra isso sem planilha paralela, a partir do que a equipe já faz no sistema.',
+    blocos: [
+      ['Onde os casos param', 'Relatório de gargalos por etapa e tempo médio até o encerramento, por área.'],
+      ['Carga da equipe', 'Tarefas abertas e casos de cada pessoa, com distribuição automática de casos novos por carga.'],
+      ['Honorários sob controle', 'Fixos, de êxito ou mistos, com parcelas, atrasos e lembrete pronto para o WhatsApp.'],
+      ['Funil de atendimentos', 'De onde vêm os clientes que fecham e em que etapa os contatos param.'],
+    ],
+    perguntas: [
+      ['Os relatórios estão em qual plano?', 'Relatórios, financeiro e rodízio da equipe estão a partir do plano Pleno, de R$ 197,90 por mês.'],
+    ],
+  },
+  {
     slug: 'sobre',
     titulo: 'Sobre o HiAdv: software jurídico feito por advogados | HiAdv',
     descricao: 'Conheça o HiAdv, software jurídico brasileiro criado por advogados para organizar prazos, casos e atendimentos de escritórios de advocacia, com sigilo, LGPD e ética da OAB desde o começo.',

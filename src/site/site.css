@@ -416,3 +416,15 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 /* bordô primária: todo botão principal do site */
 .sv-btn-claro { background: #9e2b48; color: #ffffff !important; font-weight: 700; }
 .sv-btn-claro:hover { background: #b3354f; }
+
+body.sv { overflow-x: clip; }
+.sv-exp-tela, .sv-exp-lista { min-width: 0; }
+.sv-exp-tela .sv-janela { width: 100%; margin-left: 0; }
+
+/* Algum destes é o seu dia */
+.sv-dores-grade { display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:16px; margin-top:28px }
+.sv-dores-grade article { background:#1b1b1a; border:1px solid #333331; border-radius:0 14px 14px 14px; padding:22px; box-shadow:inset 0 3px 0 #9e2b48 }
+.sv-dores-grade h3 { font-size:19px; line-height:1.3; color:#f2f2f0 }
+.sv-dores-grade p { color:#cfcfca; margin:12px 0 0; font-size:16px; line-height:1.55 }
+.sv-dores-fim { margin:24px 0 0; color:#a9a9a4 }
+.sv-dores-fim a { color:#e48ca0 }
