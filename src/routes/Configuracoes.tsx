@@ -225,58 +225,76 @@ function RegrasDeAtencao() {
     if (v) return setErro(v)
     setErro(null); salvar.mutate(atual!)
   }
+  const base = q.data!
+  const alterado = JSON.stringify(atual) !== JSON.stringify(base)
+  const iniciais = (n: string) => n.split(/\s+/).filter(Boolean).slice(0, 2).map((x) => x[0]!.toUpperCase()).join('')
+  const numero = (id: string, k: 'fatalAlertaDias' | 'paradoDias' | 'preparoDias', rotulo: string, titulo: string, dica: string, min: number, max: number, unidade: string) => (
+    <div className="rg-linha">
+      <div className="rg-texto"><label htmlFor={id} className="rg-titulo">{titulo}</label><span className="rg-dica">{dica}</span></div>
+      <div className="rg-passo">
+        <button type="button" aria-label={`Diminuir: ${titulo}`} onClick={() => mudar(k, Math.max(min, atual[k] - 1))} disabled={atual[k] <= min}>−</button>
+        <input id={id} aria-label={rotulo} type="number" inputMode="numeric" min={min} max={max} value={atual[k]} onChange={(e) => mudar(k, Number(e.target.value))} />
+        <button type="button" aria-label={`Aumentar: ${titulo}`} onClick={() => mudar(k, Math.min(max, atual[k] + 1))} disabled={atual[k] >= max}>+</button>
+        <span className="rg-unidade">{unidade}</span>
+      </div>
+    </div>
+  )
   return (
-    <form className="hv-panel-body ficha-form" onSubmit={enviar} noValidate>
-      <p className="muted">Define o que aparece em “Precisa de atenção” no Seu dia. Cada pessoa vê o que é dela; o gestor vê o escritório todo.</p>
-      <div className="hv-field">
-        <label htmlFor="rg-fatal">Avisar do prazo fatal com quantos dias úteis de antecedência</label>
-        <input id="rg-fatal" type="number" className="hv-input" min={0} max={10} value={atual.fatalAlertaDias} onChange={(e) => mudar('fatalAlertaDias', Number(e.target.value))} />
-      </div>
-      <div className="hv-field">
-        <label htmlFor="rg-parado">Caso parado: dias na mesma etapa</label>
-        <input id="rg-parado" type="number" className="hv-input" min={2} max={90} value={atual.paradoDias} onChange={(e) => mudar('paradoDias', Number(e.target.value))} />
-      </div>
-      <div className="hv-field">
-        <label htmlFor="rg-preparo">Perícias e audiências: pedir preparação com quantos dias de antecedência</label>
-        <input id="rg-preparo" type="number" className="hv-input" min={1} max={30} value={atual.preparoDias} onChange={(e) => mudar('preparoDias', Number(e.target.value))} />
+    <form className="hv-panel-body rg" onSubmit={enviar} noValidate>
+      <div className="rg-grupo">
+        <h3 className="rg-grupo-t">Avisos no Seu dia</h3>
+        {numero('rg-fatal', 'fatalAlertaDias', 'Avisar do prazo fatal com quantos dias úteis de antecedência', 'Prazo fatal', 'Antecedência do aviso', 0, 10, 'dias úteis')}
+        {numero('rg-parado', 'paradoDias', 'Caso parado: dias na mesma etapa', 'Caso parado', 'Tempo na mesma etapa', 2, 90, 'dias')}
+        {numero('rg-preparo', 'preparoDias', 'Perícias e audiências: pedir preparação com quantos dias de antecedência', 'Perícia e audiência', 'Pedir preparação antes', 1, 30, 'dias')}
       </div>
       {statuses.length > 0 && (
-        <fieldset className="integracao-opcoes">
-          <legend>Etapas que esperam terceiros (não contam como caso parado)</legend>
-          <div className="agente-etapas">
+        <fieldset className="rg-grupo">
+          <legend className="rg-grupo-t">Etapas que aguardam terceiros</legend>
+          <p className="rg-dica">As marcadas não contam como caso parado.</p>
+          <div className="rg-chips">
             {statuses.map((st) => (
-              <label key={st} className="alternar">
+              <label key={st} className="rg-chip">
                 <input type="checkbox" checked={atual.paradoIgnorar.includes(st)}
                   onChange={(e) => setR({ ...atual, paradoIgnorar: e.target.checked ? [...atual.paradoIgnorar, st] : atual.paradoIgnorar.filter((x) => x !== st) })} />
-                {rotuloEtapa(st)}
+                <span>{rotuloEtapa(st)}</span>
               </label>
             ))}
           </div>
         </fieldset>
       )}
       {(areas.data ?? []).length > 0 && (carga.data ?? []).length > 0 && (
-        <fieldset className="integracao-opcoes">
-          <legend>Distribuição por carga</legend>
-          <p className="muted">Caso novo sem responsável vai para quem, entre as pessoas marcadas na área, tem menos tarefas abertas e casos em andamento. Área sem ninguém marcado fica sem rodízio.</p>
-          {(areas.data ?? []).map((a) => (
-            <div key={a.area} className="agente-etapas">
-              <b>{a.nome}</b>
-              {(carga.data ?? []).map((p) => {
-                const marcados = atual.rodizio[a.area] ?? []
-                return (
-                  <label key={p.email} className="alternar">
-                    <input type="checkbox" checked={marcados.includes(p.email)}
-                      onChange={(e) => setR({ ...atual, rodizio: { ...atual.rodizio, [a.area]: e.target.checked ? [...marcados, p.email] : marcados.filter((x) => x !== p.email) } })} />
-                    {p.nome} <span className="muted">({p.total} em aberto)</span>
-                  </label>
-                )
-              })}
-            </div>
-          ))}
+        <fieldset className="rg-grupo">
+          <legend className="rg-grupo-t">Distribuição por carga</legend>
+          <p className="rg-dica">Caso novo sem responsável vai para quem tem menos trabalho em aberto entre as pessoas escolhidas.</p>
+          <div className="rg-areas">
+            {(areas.data ?? []).map((a) => {
+              const marcados = atual.rodizio[a.area] ?? []
+              return (
+                <div key={a.area} className="rg-area">
+                  <div className="rg-area-cabeca"><b>{a.nome}</b><span>{marcados.length ? `${marcados.length} no rodízio` : 'Sem rodízio'}</span></div>
+                  <div className="rg-pessoas">
+                    {(carga.data ?? []).map((p) => (
+                      <label key={p.email} className="rg-pessoa">
+                        <input type="checkbox" checked={marcados.includes(p.email)}
+                          onChange={(e) => setR({ ...atual, rodizio: { ...atual.rodizio, [a.area]: e.target.checked ? [...marcados, p.email] : marcados.filter((x) => x !== p.email) } })} />
+                        <span className="rg-av" aria-hidden="true">{iniciais(p.nome)}</span>
+                        <span className="rg-pessoa-nome">{p.nome}</span>
+                        <span className="rg-carga">{p.total} em aberto</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </fieldset>
       )}
       {erro && <p className="hv-error" role="alert">{erro}</p>}
-      <div className="catalogo-linha"><Button type="submit" disabled={salvar.isPending}>{salvar.isPending ? 'Salvando…' : 'Salvar regras'}</Button></div>
+      <div className="rg-salvar" data-alterado={alterado || undefined}>
+        <span>{alterado ? 'Há alterações não salvas.' : 'Tudo salvo.'}</span>
+        {alterado && <Button type="button" variant="ghost" onClick={() => { setR(null); setErro(null) }}>Descartar</Button>}
+        <Button type="submit" disabled={salvar.isPending || !alterado}>{salvar.isPending ? 'Salvando…' : 'Salvar regras'}</Button>
+      </div>
     </form>
   )
 }

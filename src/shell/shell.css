@@ -791,7 +791,7 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .cfg-atalhos a { font-size:var(--fs-sm); padding:4px 10px; border:1px solid var(--line); border-radius:999px; color:var(--ink-2); text-decoration:none }
 .cfg-atalhos a:hover { border-color:var(--accent-text); color:var(--ink) }
 .cfg-bloco { scroll-margin-top:84px }
-.cfg-dica { margin:-4px var(--s-4) var(--s-3); color:var(--ink-3); font-size:var(--fs-sm) }
+.cfg-dica { margin:0; color:var(--ink-3); font-size:var(--fs-sm) }
 .cfg-linha { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:var(--s-3) }
 .cfg-estado { font-weight:600; display:inline-flex; align-items:center; gap:8px }
 .cfg-estado::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--ink-3) }
@@ -844,3 +844,43 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .previa-cta-curto { display:none }
 @media (max-width: 700px) { .previa-cta-longo { display:none } .previa-cta-curto { display:inline } }
 .ad-consent a { color: var(--accent-text); }
+
+/* Regras de atenção: linhas de ajuste, chips e pessoas (no lugar de listas de caixinhas) */
+.rg { display:flex; flex-direction:column; gap:var(--s-5) }
+.rg-grupo { border:0; margin:0; padding:0; display:flex; flex-direction:column; gap:var(--s-2); min-width:0 }
+.rg-grupo-t { font-size:var(--fs-sm); font-weight:700; color:var(--ink-3); margin:0 0 2px; padding:0 }
+.rg-dica { color:var(--ink-3); font-size:var(--fs-sm); margin:0 }
+.rg-linha { display:flex; align-items:center; justify-content:space-between; gap:var(--s-4); padding:12px 0; border-bottom:1px solid var(--line) }
+.rg-linha:last-child { border-bottom:0 }
+.rg-texto { display:flex; flex-direction:column; gap:2px; min-width:0 }
+.rg-titulo { font-weight:700; color:var(--ink) }
+.rg-passo { display:flex; align-items:center; gap:0; flex:none }
+.rg-passo button { width:36px; height:38px; border:1px solid var(--line-strong); background:var(--surface-2); color:var(--ink); font-size:18px; cursor:pointer }
+.rg-passo button:first-child { border-radius:10px 0 0 10px } .rg-passo button:nth-of-type(2) { border-radius:0 10px 10px 0 }
+.rg-passo button:disabled { opacity:.4; cursor:default }
+.rg-passo input { width:56px; height:38px; text-align:center; border:1px solid var(--line-strong); border-left:0; border-right:0; background:var(--surface); color:var(--ink); font:inherit; font-weight:700; -moz-appearance:textfield }
+.rg-passo input::-webkit-inner-spin-button { -webkit-appearance:none }
+.rg-unidade { margin-left:10px; color:var(--ink-3); font-size:var(--fs-sm); min-width:64px }
+.rg-chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px }
+.rg-chip, .rg-pessoa { position:relative; cursor:pointer }
+.rg-chip input, .rg-pessoa input { position:absolute; opacity:0; inset:0; margin:0; cursor:pointer }
+.rg-chip span { display:inline-flex; align-items:center; gap:6px; padding:7px 12px; border:1px solid var(--line-strong); border-radius:999px; font-size:var(--fs-sm); color:var(--ink-2); background:var(--surface) }
+.rg-chip input:checked + span { background:var(--accent-soft); border-color:var(--accent); color:var(--accent-soft-ink); font-weight:600 }
+.rg-chip input:checked + span::before { content:'✓'; font-weight:800 }
+.rg-chip input:focus-visible + span, .rg-pessoa:has(input:focus-visible) { outline:2px solid var(--gold); outline-offset:2px }
+.rg-areas { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:var(--s-3); margin-top:4px }
+.rg-area { border:1px solid var(--line); border-radius:0 12px 12px 12px; background:var(--surface-2); padding:12px; box-shadow:inset 0 3px 0 var(--gold) }
+.rg-area-cabeca { display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:8px }
+.rg-area-cabeca span { font-size:var(--fs-xs); color:var(--ink-3) }
+.rg-pessoas { display:flex; flex-direction:column; gap:4px }
+.rg-pessoa { display:flex; align-items:center; gap:10px; padding:8px; border-radius:10px; border:1px solid transparent }
+.rg-pessoa:hover { background:var(--surface) }
+.rg-av { width:30px; height:30px; flex:none; display:grid; place-items:center; border-radius:50%; background:var(--surface); border:1px solid var(--line-strong); font-size:11px; font-weight:800; color:var(--ink-2) }
+.rg-pessoa-nome { flex:1; min-width:0; font-weight:600; font-size:var(--fs-sm); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.rg-carga { font-size:var(--fs-xs); color:var(--ink-3); flex:none }
+.rg-pessoa:has(input:checked) { background:var(--accent-soft); border-color:var(--accent) }
+.rg-pessoa:has(input:checked) .rg-av { background:var(--accent); border-color:var(--accent); color:var(--accent-ink) }
+.rg-salvar { position:sticky; bottom:0; z-index:5; display:flex; align-items:center; justify-content:flex-end; gap:var(--s-2); margin:0 calc(var(--s-4) * -1) calc(var(--s-4) * -1); padding:12px var(--s-4); background:var(--surface); border-top:1px solid var(--line); border-radius:0 0 var(--r-lg) var(--r-lg) }
+.rg-salvar span { margin-right:auto; color:var(--ink-3); font-size:var(--fs-sm) }
+.rg-salvar[data-alterado] span { color:var(--ink); font-weight:600 }
+@media (max-width: 600px) { .rg-linha { flex-direction:column; align-items:flex-start; gap:8px } .rg-salvar { bottom:64px } }

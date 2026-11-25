@@ -24,7 +24,7 @@ export function ContatoEscritorio() {
   })
   return (
     <form className="hv-panel-body ficha-form" onSubmit={(e: FormEvent) => { e.preventDefault(); salvar.mutate() }} noValidate>
-      <p className="muted">O WhatsApp do escritório aparece para o cliente na página de acompanhamento, no botão “Falar com o escritório”.</p>
+      <p className="cfg-dica">Aparece para o cliente no botão “Falar com o escritório”.</p>
       <div className="ficha-campos">
         <Field label="WhatsApp do escritório" inputMode="tel" maxLength={20} placeholder="(49) 99999-0000" value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} />
         <Field label="Cidade" maxLength={80} value={cidade} onChange={(e) => setCidade(e.target.value)} />

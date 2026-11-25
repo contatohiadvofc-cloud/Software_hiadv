@@ -34,7 +34,7 @@ export function OabsAcompanhadas() {
 
   return (
     <div className="hv-panel-body">
-      <p className="muted">O HiAdv busca uma vez por dia, no Diário de Justiça Eletrônico Nacional (DJEN), as publicações dessas OABs. Processos novos entram sozinhos, e intimação com prazo vira tarefa. Sem custo.</p>
+      <p className="cfg-dica">Publicações do DJEN buscadas todo dia, sem custo. Intimação com prazo vira tarefa.</p>
       {lista.length > 0 && (
         <ul className="oab-lista">
           {lista.map((o) => (

@@ -61,7 +61,7 @@ test('configurações: rodízio por carga e fila de falhas', async ({ page }) =>
   await expect(page).toHaveURL(/\/seu-dia$/)
   await page.goto('/configuracoes#regras')
   const regras = page.getByRole('region', { name: 'Regras de atenção' })
-  await expect(regras.getByText('(3 em aberto)')).toBeVisible()
+  await expect(regras.getByText('3 em aberto')).toBeVisible()
   await regras.getByLabel(/Júlia/).check()
   await regras.getByRole('button', { name: 'Salvar regras' }).click()
   await expect(page.getByText('Regras salvas.')).toBeVisible()

@@ -38,7 +38,7 @@ export function AreasDeAtuacao() {
 
   return (
     <div className="hv-panel-body">
-      <p className="muted">Ligue as áreas em que o escritório atua. Cada área já vem com as etapas prontas e ganha quadro próprio. Pegou um caso de outra área? Ligue aqui ou direto no "Novo caso".</p>
+      <p className="cfg-dica">Cada área ligada ganha quadro próprio com as etapas prontas.</p>
       <ul className="area-catalogo">
         {CATALOGO_AREAS.map((a) => {
           const ligada = ativas.has(a.area)
