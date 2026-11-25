@@ -21,8 +21,8 @@ if (location.pathname === '/experimentar') {
 
 try {
   const t = localStorage.getItem('hiadv-tema')
-  if (t === 'dark' || t === 'light') document.documentElement.dataset.theme = t
-} catch { /* sem armazenamento */ }
+  document.documentElement.dataset.theme = t === 'light' ? 'light' : 'dark'
+} catch { document.documentElement.dataset.theme = 'dark' }
 
 const pediuDemo = new URLSearchParams(location.search).has('demo')
 try { if (pediuDemo) sessionStorage.setItem('hiadv-modo-demo', '1') } catch { /* sem armazenamento */ }

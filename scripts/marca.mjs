@@ -1,61 +1,43 @@
-// Gera os ícones do app e a imagem de compartilhamento (prévia do link) a partir da marca.
-// Uso: node scripts/marca.mjs   (precisa do Playwright instalado; os arquivos vão para public/)
+// Gera os ícones do app e a imagem de compartilhamento a partir da marca (Identidade D · Pasta).
+// Uso: node scripts/marca.mjs   (precisa do Playwright; os arquivos vão para public/)
 import { chromium } from 'playwright'
 import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 const raiz = fileURLToPath(new URL('..', import.meta.url))
-const fonte = (fam, p) => `data:font/woff2;base64,${readFileSync(`${raiz}node_modules/@fontsource/${fam}/files/${fam}-latin-${p}-normal.woff2`).toString('base64')}`
+const fonte = (p) => `data:font/woff2;base64,${readFileSync(`${raiz}node_modules/@fontsource/public-sans/files/public-sans-latin-${p}-normal.woff2`).toString('base64')}`
+export const COR = { fundo: '#0e0e0e', grafite: '#161616', pasta: '#232322', ouro: '#c9a872', texto: '#f2f2f0', apoio: '#a9a9a4' }
+const css = `@font-face{font-family:P;font-weight:800;src:url(${fonte(800)}) format('woff2')}@font-face{font-family:P;font-weight:400;src:url(${fonte(400)}) format('woff2')}
+html,body{margin:0;background:transparent}body{font-family:P,sans-serif}`
 
-export const COR = { vinho: '#7a1f33', fundo: '#5c1626', rose: '#f0b7c2', tinta: '#ffffff', papel: '#f8f5f2', linho: '#f2e8e5' }
+// Pasta ouro com "Hi" dentro: aba no alto à esquerda e corpo com o canto superior esquerdo reto.
+const pasta = (l) => `<div style="position:relative;width:${l * .64}px;height:${l * .5}px;margin-top:${l * .07}px">
+  <div style="position:absolute;left:0;top:-${l * .07}px;width:${l * .26}px;height:${l * .08}px;background:${COR.ouro};border-radius:${l * .04}px ${l * .04}px 0 0"></div>
+  <div style="position:absolute;inset:0;background:${COR.ouro};border-radius:0 ${l * .07}px ${l * .07}px ${l * .07}px;display:grid;place-items:center;color:${COR.grafite};font-weight:800;font-size:${l * .34}px;letter-spacing:-.05em;line-height:1">Hi</div></div>`
+const icone = (l, { cheio = false } = {}) => `<!doctype html><html><head><style>${css}</style></head><body>
+  <div style="width:${l}px;height:${l}px;border-radius:${cheio ? 0 : l * .22}px;background:${COR.fundo};display:grid;place-items:center">${pasta(cheio ? l * .82 : l)}</div></body></html>`
 
-// Monograma "Hi": a perna direita do H vira um i, com o ponto rosé.
-const glifo = (s, x = 0, y = 0) => `
-  <g transform="translate(${x} ${y}) scale(${s / 32})">
-    <path d="M10 7.5v17M22 13.5v11M10 16h12" stroke="${COR.tinta}" stroke-width="3" stroke-linecap="round" fill="none"/>
-    <circle cx="22" cy="8" r="2.1" fill="${COR.rose}"/>
-  </g>`
-
-const icone = (lado, { cheio = false, margem = 0 } = {}) => {
-  const r = cheio ? 0 : lado * 0.22
-  const g = lado * (1 - 2 * margem)
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${lado}" height="${lado}" viewBox="0 0 ${lado} ${lado}">
-    <rect width="${lado}" height="${lado}" rx="${r}" fill="${COR.vinho}"/>${glifo(g, lado * margem, lado * margem)}</svg>`
-}
-
-const og = `<!doctype html><html><head><style>
-  @font-face { font-family: Marca; font-weight: 600; src: url(${fonte('source-serif-4', 600)}) format('woff2'); }
-  @font-face { font-family: Texto; font-weight: 500; src: url(${fonte('inter-tight', 500)}) format('woff2'); }
-  @font-face { font-family: Texto; font-weight: 600; src: url(${fonte('inter-tight', 600)}) format('woff2'); }
-  html, body { margin: 0; width: 1200px; height: 630px; }
-  body { background: ${COR.vinho}; color: ${COR.tinta}; font-family: Texto, sans-serif; position: relative; overflow: hidden; }
-  .papel { position: absolute; right: 0; top: 0; bottom: 0; width: 18px; background: ${COR.rose}; }
-  .conteudo { position: absolute; left: 96px; top: 96px; right: 120px; }
-  .marca { display: flex; align-items: center; gap: 30px; }
-  .nome { font-family: Marca; font-size: 120px; font-weight: 600; letter-spacing: -0.015em; line-height: 1; }
-  h1 { margin: 76px 0 0; font-size: 50px; font-weight: 600; line-height: 1.15; letter-spacing: -0.015em; max-width: 1010px; }
-  p { margin: 22px 0 0; font-size: 28px; font-weight: 500; color: ${COR.linho}; opacity: .85; }
-  .url { position: absolute; left: 96px; bottom: 60px; font-size: 26px; font-weight: 600; color: ${COR.rose}; }
-</style></head><body><div class="papel"></div>
-  <div class="conteudo">
-    <div class="marca">${icone(128).replace('<svg ', '<svg style="display:block;box-shadow:0 0 0 2px rgba(255,255,255,.22);border-radius:28px" ')}<span class="nome">HiAdv</span></div>
-    <h1>Seus processos, prazos e peças sob controle.</h1>
-    <p>Gestão e fluxo jurídico para advogados.</p>
-  </div><div class="url">hiadv.com.br</div></body></html>`
+const og = `<!doctype html><html><head><style>${css}
+  body{width:1200px;height:630px;background:${COR.fundo};color:${COR.texto};position:relative;overflow:hidden}
+  .c{position:absolute;left:96px;top:92px;right:110px}.m{display:flex;align-items:center;gap:6px;font-weight:800;font-size:96px;letter-spacing:-.05em}
+  h1{margin:70px 0 0;font-size:56px;font-weight:800;line-height:1.08;letter-spacing:-.035em;max-width:980px}
+  p{margin:22px 0 0;font-size:28px;color:${COR.apoio}}.u{position:absolute;left:96px;bottom:58px;font-size:26px;font-weight:800;color:${COR.ouro}}
+  .f{position:absolute;right:0;top:0;bottom:0;width:16px;background:${COR.ouro}}
+</style></head><body><div class="f"></div><div class="c"><div class="m">${pasta(170)}<span>Adv</span></div>
+  <h1>Software jurídico para escritórios de advocacia</h1><p>Prazos, publicações, casos, atendimentos e financeiro num só lugar.</p></div><div class="u">hiadv.com.br</div></body></html>`
 
 const b = await chromium.launch()
 async function png(html, w, h, arquivo, transparente = false) {
   const p = await b.newPage({ viewport: { width: w, height: h } })
-  await p.setContent(html.startsWith('<svg') ? `<html><body style="margin:0;background:transparent">${html}</body></html>` : html)
-  await p.evaluate(() => document.fonts.ready)
+  await p.setContent(html); await p.evaluate(() => document.fonts.ready)
   await p.screenshot({ path: `${raiz}public/${arquivo}`, omitBackground: transparente, clip: { x: 0, y: 0, width: w, height: h } })
   await p.close()
 }
 await png(icone(512), 512, 512, 'icons/icon-512.png', true)
 await png(icone(192), 192, 192, 'icons/icon-192.png', true)
 await png(icone(48), 48, 48, 'icons/favicon-48.png', true)
-await png(icone(512, { cheio: true, margem: 0.12 }), 512, 512, 'icons/maskable-512.png')
-await png(icone(180, { cheio: true, margem: 0.06 }), 180, 180, 'icons/apple-touch-icon.png')
+await png(icone(512, { cheio: true }), 512, 512, 'icons/maskable-512.png')
+await png(icone(180, { cheio: true }), 180, 180, 'icons/apple-touch-icon.png')
 await png(og, 1200, 630, 'og-hiadv.png')
 await b.close()
 console.log('ok')

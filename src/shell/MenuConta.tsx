@@ -8,7 +8,7 @@ function iniciais(nome: string) {
 }
 
 function lerTema(): 'light' | 'dark' {
-  try { return (localStorage.getItem('hiadv-tema') as 'light' | 'dark') || 'light' } catch { return 'light' }
+  try { return (localStorage.getItem('hiadv-tema') as 'light' | 'dark') || 'dark' } catch { return 'dark' }
 }
 
 export function aplicarTema(t: 'light' | 'dark') {

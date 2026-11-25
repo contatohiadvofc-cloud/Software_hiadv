@@ -3,7 +3,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import type { Plugin } from 'vite'
-import { writeFileSync } from 'node:fs'
+import { writeFileSync, readFileSync } from 'node:fs'
+
+// páginas de busca geradas por scripts/paginas-seo.ts
+const PAGINAS_SEO: string[] = JSON.parse(readFileSync(new URL('./scripts/paginas-seo.json', import.meta.url), 'utf8'))
 
 /** Desempenho na primeira visita (PageSpeed):
  *  - o CSS vai dentro do index.html (sem pedido extra que trava a pintura);
@@ -16,7 +19,7 @@ function primeiraPintura(): Plugin {
     generateBundle(_o, bundle) {
       // as duas páginas: o site de apresentação (index.html) e o aplicativo (app.html)
       const css = Object.entries(bundle).filter(([nome, item]) => item.type === 'asset' && nome.endsWith('.css'))
-      for (const pagina of ['index.html', 'app.html']) {
+      for (const pagina of ['index.html', 'app.html', ...PAGINAS_SEO.map((p) => `${p}/index.html`)]) {
         const html = bundle[pagina]
         if (!html || html.type !== 'asset') continue
         let fonte = String(html.source)
@@ -40,7 +43,7 @@ function primeiraPintura(): Plugin {
 function rotasDoApp(): Plugin {
   const reescrever = (req: { url?: string }, _res: unknown, next: () => void) => {
     const caminho = (req.url ?? '/').split('?')[0]
-    if (caminho !== '/' && caminho !== '/index.html' && caminho !== '/CNAME' && !/\.[a-z0-9]+$/i.test(caminho) && !caminho.startsWith('/@') && !caminho.startsWith('/src/') && !caminho.startsWith('/node_modules/')) req.url = '/app.html' + (req.url?.slice(caminho.length) ?? '')
+    if (PAGINAS_SEO.some((p) => caminho === `/${p}` || caminho === `/${p}/`)) { if (!caminho.endsWith('/')) req.url = `${caminho}/`; req.url += 'index.html' } else if (caminho !== '/' && caminho !== '/index.html' && caminho !== '/CNAME' && !/\.[a-z0-9]+$/i.test(caminho) && !caminho.startsWith('/@') && !caminho.startsWith('/src/') && !caminho.startsWith('/node_modules/')) req.url = '/app.html' + (req.url?.slice(caminho.length) ?? '')
     next()
   }
   return {
@@ -73,7 +76,7 @@ export default defineConfig({
   } : undefined,
   base: previa ? './' : '/',
   appType: 'mpa',
-  build: { rollupOptions: { input: previa ? { app: 'app.html' } : { index: 'index.html', app: 'app.html' } } },
+  build: { rollupOptions: { input: previa ? { app: 'app.html' } : { index: 'index.html', app: 'app.html', ...Object.fromEntries(PAGINAS_SEO.map((p) => [p, `${p}/index.html`])) } } },
   plugins: [
     react(),
     rotasDoApp(),
@@ -93,8 +96,8 @@ export default defineConfig({
         start_url: '/app.html?origem=app',
         scope: '/',
         display: 'standalone',
-        background_color: '#170b10',
-        theme_color: '#170b10',
+        background_color: '#0e0e0e',
+        theme_color: '#0e0e0e',
         icons: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' },

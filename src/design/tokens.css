@@ -1,32 +1,32 @@
-/* HiAdv · tokens do design system (identidade vinho, 2026-11).
+/* HiAdv · tokens do design system (Identidade D · Pasta (ouro sobre grafite), 2026-11).
    Trocar a identidade visual = mudar só este arquivo. */
 :root,
 [data-theme='light'] {
-  --font: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-marca: 'Source Serif 4', Georgia, 'Times New Roman', serif; /* só no nome HiAdv e nos títulos de página */
+  --font: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-marca: 'Public Sans', system-ui, sans-serif; /* só no nome HiAdv e nos títulos de página */
 
   /* superfícies: papel */
-  --bg: #f8f5f2;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --surface-2: #f1ece8;
-  --line: #e6ddd8;
-  --line-strong: #d3c7c1;
+  --surface-2: #f1f0ec;
+  --line: #e4e2dc;
+  --line-strong: #cfccc4;
 
   /* texto: grafite */
-  --ink: #221b1e;
-  --ink-2: #5a4f53;
-  --ink-3: #6b5f63;
+  --ink: #161616;
+  --ink-2: #4a4a47;
+  --ink-3: #5f5f5a;
 
   /* marca e ação: vinho. Vinho é só marca, botão e item escolhido; nunca alerta. */
-  --accent: #7a1f33;
-  --accent-hover: #631828;
+  --accent: #8f6f33;
+  --accent-hover: #765b29;
   --accent-ink: #ffffff;
-  --accent-soft: #f5e6e9;
-  --accent-soft-ink: #6b1a2c;
-  --brand-mark: #7a1f33;
-  --brand-mark-ink: #ffffff;
-  --brand-dot: #f0b7c2;    /* ponto rosé do "i" */
-  --brand-deep: #5c1626;   /* toques: faixa do topo, item ativo */
+  --accent-soft: #f4ecdc;
+  --accent-soft-ink: #6b5226;
+  --brand-mark: #c9a872;
+  --brand-mark-ink: #161616;
+  --brand-dot: #161616;    /* ponto rosé do "i" */
+  --brand-deep: #8f6f33;   /* toques: faixa do topo, item ativo */
 
   /* estados: alerta em vermelho-alaranjado e aviso em âmbar, longe do vinho */
   --info: #1f5fbf;    --info-soft: #e8f0fc;
@@ -46,7 +46,7 @@
   --r-lg: 14px;
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px;
   --shadow-pop: 0 12px 32px -12px rgb(34 27 30 / 0.28);
-  --focus: 0 0 0 3px rgb(122 31 51 / 0.32);
+  --focus: 0 0 0 3px rgb(143 111 51 / 0.35);
   --sidebar-w: 248px;
   --touch: 44px;
 
@@ -59,33 +59,33 @@
 }
 
 [data-theme='dark'] {
-  --bg: #170b10;
-  --surface: #20121a;
-  --surface-2: #2a1820;
-  --line: #3a2730;
-  --line-strong: #4d3640;
-  --ink: #f2e8e5;
-  --ink-2: #cdbfc0;
-  --ink-3: #a8989b;
-  --accent: #d4677b;
-  --accent-hover: #e07d8f;
-  --accent-ink: #170b10;
-  --accent-soft: #3a1a24;
-  --accent-soft-ink: #f0b7c2;
-  --brand-mark: #d4677b;
-  --brand-mark-ink: #170b10;
-  --brand-dot: #f2e8e5;
-  --brand-deep: #d4677b;
-  --info: #79a9f2;    --info-soft: #1a2638;
-  --success: #6cc89a; --success-soft: #16291f;
-  --warning: #e8b34a; --warning-soft: #33280f;
+  --bg: #0e0e0e;
+  --surface: #232322;
+  --surface-2: #1b1b1a;
+  --line: #333331;
+  --line-strong: #4a4a47;
+  --ink: #f2f2f0;
+  --ink-2: #cfcfca;
+  --ink-3: #a9a9a4;
+  --accent: #c9a872;
+  --accent-hover: #d8bc86;
+  --accent-ink: #161616;
+  --accent-soft: #2e281d;
+  --accent-soft-ink: #efd7a8;
+  --brand-mark: #c9a872;
+  --brand-mark-ink: #161616;
+  --brand-dot: #161616;
+  --brand-deep: #c9a872;
+  --info: #9cc3e4;    --info-soft: #1f2a33;
+  --success: #a9d19f; --success-soft: #22301f;
+  --warning: #e8c38a; --warning-soft: #332a1a;
   --danger: #ff8a50;  --danger-soft: #3a1c10; --danger-solid: #c2410c;
   --t-prazo: #e0a33c;
   --t-audiencia: #7aa8f5;
   --t-pericia: #ad8df0;
   --t-tarefa: #a8989b;
   --shadow-pop: 0 12px 32px -12px rgb(0 0 0 / 0.6);
-  --focus: 0 0 0 3px rgb(212 103 123 / 0.45);
+  --focus: 0 0 0 3px rgb(201 168 114 / 0.45);
   color-scheme: dark;
 }
 

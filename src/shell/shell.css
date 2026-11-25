@@ -720,7 +720,7 @@ button.hv-kpi:focus-visible { box-shadow: var(--focus); }
 .hv-kpi[data-tom="ok"] strong { color: var(--success); }
 .hv-chips { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .hv-chip { border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2); border-radius: 999px; padding: 6px 12px; min-height: 36px; font: 600 var(--fs-sm)/1 var(--font); cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
-.hv-chip[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.hv-chip[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-soft-ink); border-color: var(--accent); font-weight: 700; }
 .hv-chip:focus-visible { box-shadow: var(--focus); outline: none; }
 .hv-chip-qtd { font-variant-numeric: tabular-nums; opacity: .75; }
 .hv-barra { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; justify-content: space-between; padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line); }
@@ -757,3 +757,15 @@ button.hv-kpi:focus-visible { box-shadow: var(--focus); }
 .man-legenda-n { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #9b1c3c; color: #fff; font-weight: 700; font-size: var(--fs-sm); }
 .man-passos { margin: 0; padding-left: 1.3em; display: grid; gap: 6px; }
 .cfg-manual { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; justify-content: space-between; } .cfg-manual p { margin: 0; max-width: 60ch; } a.hv-btn { text-decoration: none; display: inline-flex; align-items: center; }
+
+/* ===== Identidade D · Pasta ===== */
+.marca { display:inline-flex; align-items:center; font-weight:800; font-size:22px; letter-spacing:-0.04em; color:var(--ink); line-height:1 }
+.marca-pasta { background:var(--brand-mark); color:var(--brand-mark-ink); border-radius:0 6px 6px 6px; padding:3px 5px 2px; position:relative; margin-top:4px }
+.marca-pasta::before { content:''; position:absolute; left:0; top:-4px; width:12px; height:4px; background:var(--brand-mark); border-radius:3px 3px 0 0 }
+.marca-nome { font-family:var(--font); margin-left:2px }
+h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacing:-0.035em }
+/* abas em forma de pasta */
+.hv-abas, .ct-abas, .etapas-abas { gap:4px !important; border-bottom:0 !important }
+.hv-abas > *, .ct-abas > *, .etapas-abas > * { border-radius:10px 10px 0 0 !important; background:var(--surface-2); color:var(--ink-3); border:0 !important }
+.hv-abas > [aria-selected="true"], .ct-abas > [aria-selected="true"], .etapas-abas > [aria-selected="true"],
+.hv-abas > .ativo, .ct-abas > .ativo, .etapas-abas > .ativo { background:var(--surface); color:var(--ink); font-weight:700; box-shadow:inset 0 3px 0 var(--accent) }
