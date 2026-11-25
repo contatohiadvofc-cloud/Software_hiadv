@@ -46,12 +46,32 @@ export type Comunidade = {
   ultimaEm: string
   podePostar: boolean
   moderador: boolean
+  /** Segundos mínimos entre mensagens da mesma pessoa (0 = livre). */
+  intervaloSeg: number
+  /** Aceita links externos. */
+  links: boolean
+  /** Escritório só entra depois de aprovado pela moderação. */
+  aprovacao: boolean
+  /** O escritório de quem está vendo já participa. */
+  participo: boolean
+  /** Situação do pedido de entrada deste escritório. */
+  entrada: 'pendente' | 'aprovado' | 'recusado' | null
+  /** Pedidos esperando decisão (só a moderação vê). */
+  pedidos: number
 }
 
 export type ComunidadeForm = {
   id?: string; nome: string; descricao: string; areas: string[]; soMasters: boolean
   quemPosta: 'todos' | 'moderadores'; anexos: boolean; audios: boolean; ativa: boolean
+  intervaloSeg: number; links: boolean; aprovacao: boolean
 }
+export type PedidoEntrada = { escritorioId: string; escritorio: string; status: 'pendente' | 'aprovado' | 'recusado'; pedidoPor: string | null; pedidoEm: string }
+/** Até quantas pessoas por chamada: acima disso a qualidade cai em internet de celular. */
+export const LIMITE_CHAMADA = 6
+export const INTERVALOS = [{ seg: 0, rotulo: 'Livre' }, { seg: 30, rotulo: '30 s' }, { seg: 120, rotulo: '2 min' }, { seg: 600, rotulo: '10 min' }] as const
+const LINK = /(https?:\/\/|www\.|[a-z0-9-]+\.(com|br|net|org|io|me|app|site|link|ly)(\/|\s|$))/i
+/** Mesmo critério do servidor: avisa antes de enviar. */
+export const temLink = (t: string) => LINK.test(t)
 export type PessoaComunidade = { email: string; nome: string; escritorio: string | null; silenciadoAte: string | null }
 export type PessoaEquipe = { email: string; nome: string; papel: string | null }
 

@@ -9,6 +9,8 @@ export class ChamadaMotor {
   local: MediaStream | null = null
   tela: MediaStream | null = null
   private pares = new Map<string, Par>()
+  /** Servidores de conexão (STUN e, quando configurado, TURN para atravessar redes de operadora e firewalls). */
+  iceServers: RTCIceServer[] = ICE
   private aoMudar: () => void
 
   constructor(private canal: CanalChamada, private eu: { email: string; nome: string }, aoMudar: () => void) {
@@ -66,7 +68,7 @@ export class ChamadaMotor {
   private enviar(para: string, dados: Partial<Sinal>) { this.canal.enviar({ de: this.meuId, para, email: this.eu.email, ...dados }) }
 
   private criar(id: string, email: string, nome: string): Par {
-    const pc = new RTCPeerConnection({ iceServers: ICE, bundlePolicy: 'max-bundle' })
+    const pc = new RTCPeerConnection({ iceServers: this.iceServers, bundlePolicy: 'max-bundle' })
     const p: Par = { pc, email, nome, fazendoOferta: false, ignorar: false, educado: this.meuId < id, stream: null, visto: false }
     this.local?.getTracks().forEach((t) => pc.addTrack(t, this.local!))
     if (this.tela) pc.addTrack(this.tela.getVideoTracks()[0]!, this.tela)
@@ -125,6 +127,16 @@ export class ChamadaMotor {
   private ajustarQualidade() {
     const q = qualidadeVideo(this.pares.size)
     this.pares.forEach((p) => p.pc.getSenders().forEach((s) => {
+      if (s.track?.kind === 'audio') {
+        // voz em primeiro lugar: Opus a 32 kbps com prioridade alta, mesmo se a internet apertar
+        const pa = s.getParameters()
+        if (!pa.encodings?.length) pa.encodings = [{}]
+        pa.encodings[0]!.maxBitrate = 32_000
+        ;(pa.encodings[0] as RTCRtpEncodingParameters & { priority?: string; networkPriority?: string }).priority = 'high'
+        ;(pa.encodings[0] as RTCRtpEncodingParameters & { networkPriority?: string }).networkPriority = 'high'
+        s.setParameters(pa).catch(() => {})
+        return
+      }
       if (!s.track || s.track.kind !== 'video' || (this.tela && s.track === this.tela.getVideoTracks()[0])) return
       const par = s.getParameters()
       if (!par.encodings?.length) par.encodings = [{}]

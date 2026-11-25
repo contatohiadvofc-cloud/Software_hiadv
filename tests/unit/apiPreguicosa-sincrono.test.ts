@@ -1,6 +1,6 @@
 
 import { it as it2, expect as expect2, vi as vi2 } from 'vitest'
-import { criarApiPreguicosa as criar2 } from './apiPreguicosa'
+import { criarApiPreguicosa as criar2 } from '../../src/data/apiPreguicosa'
 it2('canal da chamada e assinatura do chat respondem na hora, sem promessa', async () => {
   const aoSinal = vi2.fn(); const parar = vi2.fn()
   const api = criar2(async () => ({ reuniaoCanal: () => ({ aoSinal, aoPresenca() {}, async entrar() {}, enviar() {}, sair() {} }), chatAssinar: () => parar }) as never, () => true)

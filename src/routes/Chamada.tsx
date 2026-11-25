@@ -44,7 +44,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
     const m = new ChamadaMotor(canal, eu, atualizar)
     motor.current = m
     let trava: { release: () => Promise<void> } | null = null
-    m.iniciar(video).then(async () => {
+    api.reuniaoIce().then((ice) => { if (ice.length) m.iceServers = ice }).catch(() => {}).then(() => m.iniciar(video)).then(async () => {
       setPronta(true)
       try { trava = await (navigator as Navigator & { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } }).wakeLock?.request('screen') ?? null } catch { /* sem suporte */ }
     }).catch((e: Error) => {

@@ -36,7 +36,7 @@ const CONVERSAS: Conv[] = [
 
 type Com = Comunidade & { msgs: Mensagem[] }
 const com = (id: string, nome: string, descricao: string, areas: string[] | null, soMasters: boolean, quemPosta: 'todos' | 'moderadores', msgs: Mensagem[], naoLidas = 0): Com =>
-  ({ id, nome, descricao, areas, soMasters, quemPosta, anexos: true, audios: true, ativa: true, ordem: 0, ultima: null, naoLidas, ultimaEm: '', podePostar: quemPosta === 'todos', moderador: false, msgs })
+  ({ id, nome, descricao, areas, soMasters, quemPosta, anexos: true, audios: true, ativa: true, ordem: 0, ultima: null, naoLidas, ultimaEm: '', podePostar: quemPosta === 'todos', moderador: false, intervaloSeg: 0, links: false, aprovacao: false, participo: true, entrada: null, pedidos: 0, msgs })
 const de = (nome: string, esc: string, texto: string, ha: number, extra: Partial<Mensagem> = {}) =>
   msg(`${nome.split(' ')[0]!.toLowerCase()}@exemplo.br`, texto, ha, { autorNome: nome, autorEscritorio: esc, ...extra })
 const COMUNIDADES: Com[] = [
@@ -80,7 +80,7 @@ function responder(c: Conv) {
 }
 
 type ConversasApi = Pick<Api, 'chatLista' | 'chatPessoas' | 'chatMensagens' | 'chatEnviar' | 'chatDireta' | 'chatGrupo' | 'chatLido' | 'chatReagir' | 'chatApagar' | 'chatSubir' | 'chatUrl' | 'chatAssinar'
-  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal'>
+  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
 
 export function conversasDemo(): ConversasApi {
   const reagir = (lista: Mensagem[], id: string, e: string) => {
@@ -137,9 +137,13 @@ export function conversasDemo(): ConversasApi {
     async comSalvar() { throw new Error('Na prévia, as comunidades não podem ser alteradas.') },
     async comPessoas() { return [] },
     async comSilenciar() { throw new Error('Na prévia, a moderação não está disponível.') },
+    async comPedirEntrada() { throw new Error('Na prévia, os pedidos de entrada não estão disponíveis.') },
+    async comPedidos() { return [] },
+    async comDecidirEntrada() { throw new Error('Na prévia, a moderação não está disponível.') },
     async reuniaoAtiva() { return null },
     async reuniaoIniciar() { throw new Error('Na prévia não há chamada de verdade. No seu escritório, a chamada de voz e vídeo abre aqui mesmo.') },
     async reuniaoEncerrar() {},
     reuniaoCanal() { return null },
+    async reuniaoIce() { return [] },
   }
 }

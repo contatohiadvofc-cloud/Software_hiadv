@@ -5,7 +5,7 @@ import { useToast } from '../design/components/Toast'
 import { Dialog } from '../design/components/Dialog'
 import { Button } from '../design/components/Button'
 import {
-  LIMITE_AUDIO_SEG, LIMITE_TEXTO, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
+  INTERVALOS, LIMITE_AUDIO_SEG, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
   primeiroNome, publicoComunidade, quandoCurto, resumo, tamanhoTela, tipoAnexo, tituloConversa, validarArquivo, validarComunidade,
   type Anexo, type Comunidade, type ComunidadeForm, type Conversa, type Mensagem,
 } from '../data/conversas'
@@ -157,6 +157,8 @@ function ConversaEquipe({ c, eu, nomes, voltar }: { c: Conversa; eu: string; nom
   const api = useApi()
   const qc = useQueryClient()
   const toast = useToast()
+  const papel = useSessao().perfil?.papel
+  const gestor = papel === 'master' || papel === 'code'
   const [chamada, setChamada] = useState<{ id: string; video: boolean } | null>(null)
   const ativa = useQuery({ queryKey: ['reuniao', c.id], queryFn: () => api.reuniaoAtiva(c.id), refetchInterval: 15000 })
   const titulo = tituloConversa(c, eu, nomes)
@@ -171,7 +173,7 @@ function ConversaEquipe({ c, eu, nomes, voltar }: { c: Conversa; eu: string; nom
         chave={['chat-msgs', c.id]} titulo={titulo} subtitulo={sub} avatar={<Avatar nome={titulo} tipo={c.tipo === 'direta' ? 'pessoa' : c.tipo} tam={40} />}
         voltar={voltar} eu={eu} mostrarAutor={c.tipo !== 'direta'} nomeDe={(m) => nomes.get(m.autor) ?? m.autor}
         carregar={() => api.chatMensagens(c.id)} enviar={(t, a, r) => api.chatEnviar(c.id, t, a, r).then(() => {})}
-        reagir={(id, e) => api.chatReagir(id, e)} apagar={(id) => api.chatApagar(id)} podeApagar={(m) => m.autor === eu}
+        reagir={(id, e) => api.chatReagir(id, e)} apagar={(id) => api.chatApagar(id)} podeApagar={(m) => m.autor === eu || (gestor && c.tipo !== 'direta')}
         lido={() => api.chatLido(c.id).then(() => qc.invalidateQueries({ queryKey: ['chat-lista'] }))}
         assinar={(fn) => api.chatAssinar(c.id, fn)} onde="chat" pasta={c.id} permite={{ anexos: true, audios: true, postar: true }}
         acoes={<>
@@ -181,7 +183,9 @@ function ConversaEquipe({ c, eu, nomes, voltar }: { c: Conversa; eu: string; nom
         faixa={ativa.data && !chamada ? (
           <div className="cv-faixa-chamada">
             <span><i className="cv-pulso" aria-hidden="true" />{ativa.data.video ? 'Chamada de vídeo' : 'Chamada de voz'} em andamento · {ativa.data.participantes.map((p) => primeiroNome(nomes.get(p) ?? p)).join(', ')}</span>
-            <button type="button" onClick={() => setChamada({ id: ativa.data!.id, video: ativa.data!.video })}>Entrar</button>
+            {ativa.data.participantes.length >= LIMITE_CHAMADA && !ativa.data.participantes.includes(eu)
+              ? <button type="button" disabled title={`A chamada comporta até ${LIMITE_CHAMADA} pessoas por vez`}>Cheia ({LIMITE_CHAMADA}/{LIMITE_CHAMADA})</button>
+              : <button type="button" onClick={() => setChamada({ id: ativa.data!.id, video: ativa.data!.video })}>Entrar</button>}
           </div>
         ) : null}
       />
@@ -194,13 +198,37 @@ function ConversaEquipe({ c, eu, nomes, voltar }: { c: Conversa; eu: string; nom
 function ConversaComunidade({ c, eu, voltar, moderar }: { c: Comunidade; eu: string; voltar: () => void; moderar: () => void }) {
   const api = useApi()
   const qc = useQueryClient()
+  const toast = useToast()
+  const pedir = useMutation({
+    mutationFn: () => api.comPedirEntrada(c.id),
+    onSuccess: () => { toast('Pedido enviado. A moderação do HiAdv vai analisar.'); qc.invalidateQueries({ queryKey: ['com-lista'] }) },
+    onError: (e) => toast((e as Error).message, 'danger'),
+  })
+  if (!c.participo) return (
+    <div className="cv-entrada">
+      <header className="cv-fio-cabeca">
+        <button type="button" className="cv-icone-bt cv-so-cel" aria-label="Voltar para a lista" onClick={voltar}><Ic d={I.voltar} /></button>
+        <div className="cv-fio-tit"><h2>{c.nome}</h2><p>{publicoComunidade(c)}</p></div>
+      </header>
+      <div className="cv-entrada-corpo">
+        <span className="cv-av cv-av-com" style={{ width: 64, height: 64 }} aria-hidden="true"><Ic d={I.escudo} t={26} /></span>
+        <h2>Comunidade com entrada aprovada</h2>
+        {c.descricao && <p>{c.descricao}</p>}
+        {c.entrada === 'pendente' ? <p className="cv-entrada-status">Pedido enviado. Aguardando a moderação do HiAdv.</p>
+          : c.entrada === 'recusado' ? <p className="cv-entrada-status">A moderação não aprovou a entrada do seu escritório por enquanto.</p>
+          : <Button loading={pedir.isPending} onClick={() => pedir.mutate()}>Pedir entrada do escritório</Button>}
+        <small>O pedido é feito por um Gestor Master e vale para a equipe do escritório.</small>
+      </div>
+    </div>
+  )
   const bloqueio = !c.podePostar ? (c.quemPosta === 'moderadores' ? 'Nesta comunidade só a moderação do HiAdv publica.' : 'Seu envio nesta comunidade está pausado pela moderação.') : null
   return (
     <Fio
       chave={['com-msgs', c.id]} titulo={c.nome} subtitulo={publicoComunidade(c)}
       avatar={<span className="cv-av cv-av-com" style={{ width: 40, height: 40 }} aria-hidden="true">{c.quemPosta === 'moderadores' ? <Ic d={I.megafone} t={18} /> : iniciais(c.nome.replace(/HiAdv|Masters/g, '').trim() || c.nome)}</span>}
       voltar={voltar} eu={eu} mostrarAutor nomeDe={(m) => m.autorNome ?? m.autor} escritorioDe={(m) => m.autorEscritorio ?? null}
-      carregar={() => api.comMensagens(c.id)} enviar={(t, a, r) => api.comEnviar(c.id, t, a, r)}
+      carregar={() => api.comMensagens(c.id)}
+      enviar={(t, a, r) => (!c.links && !c.moderador && t && temLink(t) ? Promise.reject(new Error('Esta comunidade não aceita links externos.')) : api.comEnviar(c.id, t, a, r))}
       reagir={(id, e) => api.comReagir(id, e)} apagar={(id) => api.comApagar(id)} podeApagar={(m) => m.autor === eu || c.moderador}
       lido={() => api.comLido(c.id).then(() => qc.invalidateQueries({ queryKey: ['com-lista'] }))}
       intervalo={6000} onde="comunidade" pasta={c.id} permite={{ anexos: c.anexos, audios: c.audios, postar: c.podePostar }} bloqueio={bloqueio}
@@ -562,15 +590,21 @@ function NovaConversa({ eu, aoAbrir, aoFechar }: { eu: string; aoAbrir: (id: str
 }
 
 // ---------- moderação (Coder) ----------
-const VAZIA: ComunidadeForm = { nome: '', descricao: '', areas: [], soMasters: true, quemPosta: 'todos', anexos: true, audios: true, ativa: true }
+const VAZIA: ComunidadeForm = { nome: '', descricao: '', areas: [], soMasters: true, quemPosta: 'todos', anexos: true, audios: true, ativa: true, intervaloSeg: 30, links: false, aprovacao: false }
 
 function Moderacao({ c, aoFechar }: { c: Comunidade | null; aoFechar: () => void }) {
   const api = useApi()
   const qc = useQueryClient()
   const toast = useToast()
-  const [f, setF] = useState<ComunidadeForm>(c ? { id: c.id, nome: c.nome, descricao: c.descricao ?? '', areas: c.areas ?? [], soMasters: c.soMasters, quemPosta: c.quemPosta, anexos: c.anexos, audios: c.audios, ativa: c.ativa } : VAZIA)
+  const [f, setF] = useState<ComunidadeForm>(c ? { id: c.id, nome: c.nome, descricao: c.descricao ?? '', areas: c.areas ?? [], soMasters: c.soMasters, quemPosta: c.quemPosta, anexos: c.anexos, audios: c.audios, ativa: c.ativa, intervaloSeg: c.intervaloSeg, links: c.links, aprovacao: c.aprovacao } : VAZIA)
   const [erro, setErro] = useState<string | null>(null)
   const pessoas = useQuery({ queryKey: ['com-pessoas', c?.id], queryFn: () => api.comPessoas(c!.id), enabled: !!c })
+  const pedidos = useQuery({ queryKey: ['com-pedidos', c?.id], queryFn: () => api.comPedidos(c!.id), enabled: !!c && f.aprovacao })
+  const decidir = useMutation({
+    mutationFn: (x: { esc: string; ok: boolean }) => api.comDecidirEntrada(c!.id, x.esc, x.ok),
+    onSuccess: (_r, x) => { toast(x.ok ? 'Escritório aprovado.' : 'Pedido recusado.'); qc.invalidateQueries({ queryKey: ['com-pedidos', c?.id] }); qc.invalidateQueries({ queryKey: ['com-lista'] }) },
+    onError: (e) => toast((e as Error).message, 'danger'),
+  })
   const salvar = useMutation({
     mutationFn: () => api.comSalvar(f),
     onSuccess: () => { toast(c ? 'Comunidade atualizada.' : 'Comunidade criada.'); qc.invalidateQueries({ queryKey: ['com-lista'] }); aoFechar() },
@@ -608,9 +642,35 @@ function Moderacao({ c, aoFechar }: { c: Comunidade | null; aoFechar: () => void
           </div>
           <label className="cv-chave"><span>Arquivos e fotos</span><input type="checkbox" role="switch" checked={f.anexos} onChange={(e) => chave('anexos', e.target.checked)} /></label>
           <label className="cv-chave"><span>Áudios</span><input type="checkbox" role="switch" checked={f.audios} onChange={(e) => chave('audios', e.target.checked)} /></label>
+          <label className="cv-chave"><span>Links externos<small>Desligado evita propaganda e captação entre escritórios</small></span><input type="checkbox" role="switch" checked={f.links} onChange={(e) => chave('links', e.target.checked)} /></label>
+          <p className="cv-mod-dica">Intervalo entre mensagens da mesma pessoa:</p>
+          <div className="cv-seg">
+            {INTERVALOS.map((i) => <button key={i.seg} type="button" aria-pressed={f.intervaloSeg === i.seg} onClick={() => setF({ ...f, intervaloSeg: i.seg })}>{i.rotulo}</button>)}
+          </div>
+        </fieldset>
+        <fieldset className="cv-mod-grupo">
+          <legend>Entrada</legend>
+          <label className="cv-chave"><span>Aprovar quem entra<small>Cada escritório pede entrada e a moderação aprova</small></span><input type="checkbox" role="switch" checked={f.aprovacao} onChange={(e) => chave('aprovacao', e.target.checked)} /></label>
           <label className="cv-chave"><span>Comunidade ativa</span><input type="checkbox" role="switch" checked={f.ativa} onChange={(e) => chave('ativa', e.target.checked)} /></label>
         </fieldset>
         {erro && <p className="hv-error" role="alert">{erro}</p>}
+        {c && f.aprovacao && !!pedidos.data?.length && (
+          <fieldset className="cv-mod-grupo">
+            <legend>Pedidos de entrada</legend>
+            <ul className="cv-mod-pessoas" role="list">
+              {pedidos.data.map((x) => (
+                <li key={x.escritorioId}>
+                  <Avatar nome={x.escritorio} tam={32} />
+                  <span className="cv-mod-nome">{x.escritorio}<small>{x.status === 'pendente' ? `pediu em ${new Date(x.pedidoEm).toLocaleDateString('pt-BR')}` : x.status === 'aprovado' ? 'participa' : 'recusado'}</small></span>
+                  <span className="cv-mod-bts" role="group" aria-label={`Decidir entrada de ${x.escritorio}`}>
+                    {x.status !== 'aprovado' && <button type="button" onClick={() => decidir.mutate({ esc: x.escritorioId, ok: true })}>Aprovar</button>}
+                    {x.status !== 'recusado' && <button type="button" onClick={() => decidir.mutate({ esc: x.escritorioId, ok: false })}>{x.status === 'aprovado' ? 'Remover' : 'Recusar'}</button>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </fieldset>
+        )}
         <Button type="submit" loading={salvar.isPending}>{c ? 'Salvar alterações' : 'Criar comunidade'}</Button>
         {c && (
           <fieldset className="cv-mod-grupo">

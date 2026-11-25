@@ -20,8 +20,8 @@ import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
-import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem } from './conversas'
-import type { Presenca, Sinal } from './chamada'
+import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada } from './conversas'
+import { ICE, type Presenca, type Sinal } from './chamada'
 
 function lerAnexo(a: unknown): Anexo | null {
   if (!a || typeof a !== 'object') return null
@@ -47,7 +47,9 @@ function lerComunidade(c: Record<string, unknown>): Comunidade {
     soMasters: !!c.so_masters, quemPosta: c.quem_posta === 'moderadores' ? 'moderadores' : 'todos', anexos: c.anexos !== false, audios: c.audios !== false,
     ativa: c.ativa !== false, ordem: Number(c.ordem ?? 0),
     ultima: u ? { autorNome: (u.autor_nome as string) ?? null, texto: (u.texto as string) ?? null, anexo: lerAnexo(u.anexo), criadoEm: String(u.criado_em) } : null,
-    naoLidas: Number(c.nao_lidas ?? 0), ultimaEm: String(c.ultima_em), podePostar: !!c.pode_postar, moderador: !!c.moderador }
+    naoLidas: Number(c.nao_lidas ?? 0), ultimaEm: String(c.ultima_em), podePostar: !!c.pode_postar, moderador: !!c.moderador,
+    intervaloSeg: Number(c.intervalo_seg ?? 0), links: c.links !== false, aprovacao: !!c.aprovacao, participo: c.participo !== false,
+    entrada: (c.entrada as Comunidade['entrada']) ?? null, pedidos: Number(c.pedidos ?? 0) }
 }
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
@@ -757,13 +759,19 @@ export function criarApiSupabase(url: string, chave: string): Api {
     async comReagir(msg, emoji) { okOuErro(verificar(await sb.rpc('comunidade_reagir', { p_msg: msg, p_emoji: emoji }))) },
     async comApagar(msg) { okOuErro(verificar(await sb.rpc('comunidade_apagar', { p_msg: msg }))) },
     async comSalvar(f) {
-      const r = okOuErro(verificar(await sb.rpc('comunidade_salvar', { p: { id: f.id ?? null, nome: f.nome, descricao: f.descricao, areas: f.areas, so_masters: f.soMasters, quem_posta: f.quemPosta, anexos: f.anexos, audios: f.audios, ativa: f.ativa } })))
+      const r = okOuErro(verificar(await sb.rpc('comunidade_salvar', { p: { id: f.id ?? null, nome: f.nome, descricao: f.descricao, areas: f.areas, so_masters: f.soMasters, quem_posta: f.quemPosta, anexos: f.anexos, audios: f.audios, ativa: f.ativa, intervalo_seg: f.intervaloSeg, links: f.links, aprovacao: f.aprovacao } })))
       return String(r.id)
     },
     async comPessoas(id) {
       const r = (verificar(await sb.rpc('comunidade_pessoas', { p_id: id })) ?? []) as Record<string, unknown>[]
       return r.map((p) => ({ email: String(p.email), nome: String(p.nome), escritorio: (p.escritorio as string) ?? null, silenciadoAte: (p.silenciado_ate as string) ?? null }))
     },
+    async comPedirEntrada(id) { okOuErro(verificar(await sb.rpc('comunidade_pedir_entrada', { p_id: id }))) },
+    async comPedidos(id) {
+      const r = (verificar(await sb.rpc('comunidade_pedidos', { p_id: id })) ?? []) as Record<string, unknown>[]
+      return r.map((x) => ({ escritorioId: String(x.escritorio_id), escritorio: String(x.escritorio ?? 'Escritório'), status: x.status as PedidoEntrada['status'], pedidoPor: (x.pedido_por as string) ?? null, pedidoEm: String(x.pedido_em) }))
+    },
+    async comDecidirEntrada(id, esc, aprovar) { okOuErro(verificar(await sb.rpc('comunidade_decidir_entrada', { p_id: id, p_escritorio: esc, p_aprovar: aprovar }))) },
     async comSilenciar(id, email, horas) { okOuErro(verificar(await sb.rpc('comunidade_silenciar', { p_id: id, p_email: email, p_horas: horas }))) },
     async reuniaoAtiva(conversa) {
       const r = verificar(await sb.rpc('reuniao_ativa', { p_conversa: conversa })) as Record<string, unknown> | null
@@ -771,6 +779,13 @@ export function criarApiSupabase(url: string, chave: string): Api {
     },
     async reuniaoIniciar(conversa, video) { return String(okOuErro(verificar(await sb.rpc('reuniao_iniciar', { p_conversa: conversa, p_video: video }))).id) },
     async reuniaoEncerrar(id) { okOuErro(verificar(await sb.rpc('reuniao_encerrar', { p_reuniao: id }))) },
+    async reuniaoIce() {
+      try {
+        const r = await sb.functions.invoke('chamada-ice', { body: {} })
+        const lista = (r.data as { iceServers?: RTCIceServer[] } | null)?.iceServers
+        return lista?.length ? lista : ICE
+      } catch { return ICE }
+    },
     reuniaoCanal(id) {
       let ch: ReturnType<typeof sb.channel> | null = null
       let aoSinal: (s: Sinal) => void = () => {}

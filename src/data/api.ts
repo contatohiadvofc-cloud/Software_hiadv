@@ -1,4 +1,4 @@
-import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, PessoaComunidade, PessoaEquipe } from './conversas'
+import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, PedidoEntrada, PessoaComunidade, PessoaEquipe } from './conversas'
 import type { CanalChamada } from './chamada'
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
@@ -228,6 +228,9 @@ export interface Api {
   comApagar(msg: string): Promise<void>
   comSalvar(f: ComunidadeForm): Promise<string>
   comPessoas(id: string): Promise<PessoaComunidade[]>
+  comPedirEntrada(id: string): Promise<void>
+  comPedidos(id: string): Promise<PedidoEntrada[]>
+  comDecidirEntrada(id: string, escritorio: string, aprovar: boolean): Promise<void>
   /** horas: null = até liberar; 0 = liberar. */
   comSilenciar(id: string, email: string, horas: number | null): Promise<void>
   reuniaoAtiva(conversa: string): Promise<{ id: string; video: boolean; iniciadaPor: string; participantes: string[] } | null>
@@ -235,4 +238,6 @@ export interface Api {
   reuniaoEncerrar(id: string): Promise<void>
   /** Canal de sinalização da chamada (voz e vídeo vão direto entre os aparelhos). null na prévia. */
   reuniaoCanal(id: string): CanalChamada | null
+  /** Servidores de conexão da chamada; sem TURN configurado, volta aos públicos (STUN). */
+  reuniaoIce(): Promise<RTCIceServer[]>
 }
