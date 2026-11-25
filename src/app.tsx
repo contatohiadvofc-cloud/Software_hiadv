@@ -23,6 +23,7 @@ const LAderir = lazyRouteComponent(() => import('./routes/Aderir'), 'Aderir')
 const LIndicar = lazyRouteComponent(() => import('./routes/Indicar'), 'Indicar')
 const LAdesoes = lazyRouteComponent(() => import('./routes/Adesoes'), 'Adesoes')
 const LCentral = lazyRouteComponent(() => import('./routes/Central'), 'Central')
+const LManual = lazyRouteComponent(() => import('./routes/Manual'), 'Manual')
 const LAcompanhar = lazyRouteComponent(() => import('./routes/Acompanhar'), 'Acompanhar')
 const LIntegracoes = lazyRouteComponent(() => import('./routes/Integracoes'), 'Integracoes')
 const LConfiguracoes = lazyRouteComponent(() => import('./routes/Configuracoes'), 'Configuracoes')
@@ -67,10 +68,11 @@ const aderir = createRoute({
 })
 const indicar = createRoute({ getParentRoute: () => dentro, path: '/indicar', component: LIndicar, head: () => ({ meta: [{ title: 'Indique o HiAdv · HiAdv' }] }) })
 const central = createRoute({ getParentRoute: () => dentro, path: '/central', component: LCentral, head: () => ({ meta: [{ title: 'Central HiAdv · HiAdv' }] }) })
+const manual = createRoute({ getParentRoute: () => dentro, path: '/manual', component: LManual, head: () => ({ meta: [{ title: 'Manual · HiAdv' }] }) })
 const adesoes = createRoute({ getParentRoute: () => dentro, path: '/adesoes', component: LAdesoes, head: () => ({ meta: [{ title: 'Adesões · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, integracoes, configuracoes, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, integracoes, configuracoes, manual, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

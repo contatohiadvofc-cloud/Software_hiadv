@@ -34,3 +34,20 @@ describe('site de apresentação', () => {
     expect(temSessao(st(['hiadv-tema']))).toBe(false)
   })
 })
+
+import { MANUAL } from '../../src/data/manual'
+import POS from '../../src/data/manualPosicoes.json'
+describe('manual', () => {
+  it('toda parte do manual tem imagem e todos os marcadores acharam o lugar na tela', () => {
+    for (const p of MANUAL) {
+      const pos = (POS as Record<string, { m: Record<string, unknown> }>)[p.id]
+      expect(pos, p.id).toBeTruthy()
+      for (const k of p.marcadores) expect(pos.m[String(k.n)], `${p.id} #${k.n}`).toBeTruthy()
+      expect(readFileSync(`public/manual/${p.id}.jpg`).length).toBeGreaterThan(10000)
+    }
+  })
+  it('o site mostra as telas explicadas, geradas do mesmo manual', () => {
+    for (const id of ['hoje', 'casos', 'publicacoes']) expect(html).toContain(MANUAL.find((p) => p.id === id)!.titulo.replace(/&/g, '&amp;'))
+    expect(html).toContain('id="como-funciona"')
+  })
+})

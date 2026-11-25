@@ -10,6 +10,7 @@ import { Button } from '../design/components/Button'
 import { Dialog } from '../design/components/Dialog'
 import { useToast } from '../design/components/Toast'
 import { PrazoDialog } from './Prazo'
+import { Filtros, Indicadores } from '../design/components/Padrao'
 
 const VAZIA: NovaTarefa = { titulo: '', responsavel: '', prazo: '', detalhe: '' }
 
@@ -36,6 +37,7 @@ export function Tarefas() {
   const toast = useToast()
   const gestor = perfil?.papel === 'master' || !!perfil?.code
   const [quem, setQuem] = useState<string>('minhas')
+  const [grupo, setGrupo] = useState<string | null>(null)
   const [novaAberta, setNovaAberta] = useState(false)
   const [prazoAberto, setPrazoAberto] = useState(false)
   const [nova, setNova] = useState<NovaTarefa>(VAZIA)
@@ -103,24 +105,31 @@ export function Tarefas() {
           {q.isSuccess && <p className="muted">{total} {total === 1 ? 'aberta' : 'abertas'}</p>}
         </div>
         <div className="pagina-acoes">
-          <label className="filtro">
-            <span className="sr-only">Mostrar tarefas de</span>
-            <select className="hv-input" value={quem} onChange={(e) => setQuem(e.target.value)}>
-              <option value="minhas">Minhas</option>
-              <option value="todas">{gestor ? 'Toda a equipe' : 'Minhas e da equipe'}</option>
-              {gestor && pessoas.filter((p) => p.email !== perfil?.email).map((p) => <option key={p.email} value={p.email}>{p.nome}</option>)}
-            </select>
-          </label>
           <Button variant="secondary" onClick={() => setPrazoAberto(true)}>Calcular prazo</Button>
           <Button onClick={abrirNova}>Nova tarefa</Button>
         </div>
       </div>
 
+      {q.isSuccess && total > 0 && (
+        <Indicadores rotulo="Tarefas por prazo" ativo={grupo} aoEscolher={setGrupo} itens={[
+          { id: 'Atrasadas', rotulo: 'Atrasadas', valor: g.atrasadas.length, tom: g.atrasadas.length ? 'risco' : undefined },
+          { id: 'Hoje', rotulo: 'Para hoje', valor: g.hoje.length, tom: g.hoje.length ? 'atencao' : undefined },
+          { id: 'Próximos 7 dias', rotulo: 'Próximos 7 dias', valor: g.semana.length },
+          { id: 'Sem data', rotulo: 'Sem data', valor: g.semData.length },
+        ]} />
+      )}
       <Panel>
+        <div className="hv-barra">
+          <Filtros rotulo="Mostrar tarefas de" valor={quem} aoMudar={setQuem} opcoes={[
+            { id: 'minhas', rotulo: 'Minhas' }, { id: 'todas', rotulo: gestor ? 'Toda a equipe' : 'Minhas e da equipe' },
+            ...(gestor ? pessoas.filter((p) => p.email !== perfil?.email).map((p) => ({ id: p.email, rotulo: p.nome.split(' ')[0] })) : []),
+          ]} />
+          {grupo && <Button size="sm" variant="ghost" onClick={() => setGrupo(null)}>Mostrar todos os prazos</Button>}
+        </div>
         {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && total === 0 && <Empty title="Nenhuma tarefa aberta aqui.">Crie uma em “Nova tarefa”.</Empty>}
-        {q.isSuccess && total > 0 && grupos.map(([titulo, itens, urgente]) => itens.length > 0 && (
+        {q.isSuccess && total > 0 && grupos.filter(([titulo]) => !grupo || grupo === titulo).map(([titulo, itens, urgente]) => itens.length > 0 && (
           <div key={titulo}>
             <h3 className="hv-group-title"><span>{titulo}</span><span>{itens.length}</span></h3>
             <ul className="seu-dia-lista">{itens.map((t) => <Linha key={t.id} t={t} equipe={pessoas} urgente={urgente} agora={agora} aoConcluir={concluir} />)}</ul>

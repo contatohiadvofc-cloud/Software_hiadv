@@ -7,6 +7,7 @@ import { diaSP } from '../data/seuDia'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
+import { Filtros, Indicadores } from '../design/components/Padrao'
 import { Button } from '../design/components/Button'
 import { PrazoDialog, type PrazoInicial } from './Prazo'
 import { AssistenteIA } from './AssistenteIA'
@@ -84,14 +85,17 @@ export function Publicacoes() {
         </div>
       </div>
 
-      <div className="pub-filtros" role="group" aria-label="Filtros">
-        <div className="segmentos" role="group" aria-label="Mostrar">
-          <button type="button" aria-pressed={so} onClick={() => setSo(true)}>Publicações</button>
-          <button type="button" aria-pressed={!so} onClick={() => setSo(false)}>Tudo (com andamentos)</button>
-        </div>
-        <div className="segmentos" role="group" aria-label="Período">
-          {PERIODOS.map((x) => <button key={x.dias} type="button" aria-pressed={dias === x.dias} onClick={() => setDias(x.dias)}>{x.nome}</button>)}
-        </div>
+      {q.isSuccess && q.data.length > 0 && (
+        <Indicadores rotulo="Resumo das publicações" itens={[
+          { id: 'itens', rotulo: so ? 'Publicações' : 'Itens', valor: q.data.length, dica: `últimos ${dias} dias` },
+          { id: 'hoje', rotulo: 'Chegaram hoje', valor: (q.data ?? []).filter((p) => diaSP(new Date(p.quando)) === hoje).length },
+          { id: 'semtarefa', rotulo: 'Sem tarefa', valor: semTarefa, tom: semTarefa ? 'atencao' : 'ok', dica: semTarefa ? 'crie o prazo de cada uma' : 'tudo com tarefa' },
+        ]} />
+      )}
+
+      <div className="pub-filtros hv-barra-solta" role="group" aria-label="Filtros">
+        <Filtros rotulo="Mostrar" valor={so ? 'pub' : 'tudo'} aoMudar={(v) => setSo(v === 'pub')} opcoes={[{ id: 'pub', rotulo: 'Publicações' }, { id: 'tudo', rotulo: 'Tudo (com andamentos)' }]} />
+        <Filtros rotulo="Período" valor={String(dias)} aoMudar={(v) => setDias(Number(v))} opcoes={PERIODOS.map((x) => ({ id: String(x.dias), rotulo: x.nome }))} />
       </div>
 
       {oabs.isSuccess && oabs.data.oabs.length === 0 && (

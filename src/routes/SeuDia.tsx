@@ -12,6 +12,8 @@ import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
 
+import { Filtros, Indicadores } from '../design/components/Padrao'
+
 const ROTULO: Record<ItemDia['tipo'], string> = { prazo: 'Prazo', tarefa: 'Tarefa', pericia: 'Perícia', audiencia: 'Audiência' }
 const COR: Record<ItemDia['tipo'], string> = { prazo: 'var(--t-prazo)', tarefa: 'var(--t-tarefa)', pericia: 'var(--t-pericia)', audiencia: 'var(--t-audiencia)' }
 
@@ -95,6 +97,11 @@ export function SeuDia() {
   const primeiroNome = (perfil?.nome ?? '').split(' ')[0]
   const data = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'America/Sao_Paulo' }).format(agora)
   const total = g.atrasados.length + g.hoje.length + g.proximos7.length + g.semPrazo.length
+  const [faixa, setFaixa] = useState<string | null>(null)
+  const [tipo, setTipo] = useState<'todos' | ItemDia['tipo']>('todos')
+  const filtra = (l: ItemDia[]) => (tipo === 'todos' ? l : l.filter((x) => x.tipo === tipo))
+  const conta = (t: ItemDia['tipo']) => [...g.atrasados, ...g.hoje, ...g.proximos7, ...g.semPrazo].filter((x) => x.tipo === t).length
+  const mostra = (f: string) => !faixa || faixa === f
 
   return (
     <div className="pagina">
@@ -105,26 +112,33 @@ export function SeuDia() {
         </div>
       </div>
 
-      <div className="resumo" aria-label="Resumo">
-        {[['Atrasados', g.atrasados.length], ['Para hoje', g.hoje.length], ['Próximos 7 dias', g.proximos7.length], ['Sem data', g.semPrazo.length]].map(([r, n]) => (
-          <div key={r} className="resumo-item" data-alerta={r === 'Atrasados' && Number(n) > 0 ? 'true' : undefined} data-destaque={r === 'Para hoje' ? 'true' : undefined}>
-            <span className="resumo-rotulo">{r}</span><span className="resumo-n">{q.isSuccess ? n : '–'}</span>
-          </div>
-        ))}
-      </div>
+      <Indicadores rotulo="Resumo do seu dia" ativo={faixa} aoEscolher={setFaixa} itens={[
+        { id: 'atrasados', rotulo: 'Atrasados', valor: q.isSuccess ? g.atrasados.length : '–', tom: g.atrasados.length ? 'risco' : undefined },
+        { id: 'hoje', rotulo: 'Para hoje', valor: q.isSuccess ? g.hoje.length : '–', tom: g.hoje.length ? 'atencao' : undefined },
+        { id: 'semana', rotulo: 'Próximos 7 dias', valor: q.isSuccess ? g.proximos7.length : '–' },
+        { id: 'sem', rotulo: 'Sem data', valor: q.isSuccess ? g.semPrazo.length : '–' },
+      ]} />
 
       <Atencao />
 
       <Panel title="Sua agenda" labelId="h-agenda">
+        {q.isSuccess && total > 0 && (
+          <div className="hv-barra">
+            <Filtros rotulo="Tipo" valor={tipo} aoMudar={setTipo} opcoes={[
+              { id: 'todos', rotulo: 'Tudo', qtd: total },
+              ...(['prazo', 'tarefa', 'pericia', 'audiencia'] as const).map((t) => ({ id: t, rotulo: ROTULO[t] + 's', qtd: conta(t) })).filter((o) => o.qtd > 0),
+            ]} />
+          </div>
+        )}
         {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && total === 0 && <Empty title="Nada pendente para hoje.">Quando chegarem prazos, perícias, audiências ou tarefas para você, eles aparecem aqui.</Empty>}
         {q.isSuccess && total > 0 && (
           <>
-            <Grupo titulo="Atrasados" itens={g.atrasados} urgente agora={agora} />
-            <Grupo titulo="Hoje" itens={g.hoje} agora={agora} />
-            <Grupo titulo="Próximos 7 dias" itens={g.proximos7} agora={agora} />
-            <Grupo titulo="Sem data" itens={g.semPrazo} agora={agora} />
+            {mostra('atrasados') && <Grupo titulo="Atrasados" itens={filtra(g.atrasados)} urgente agora={agora} />}
+            {mostra('hoje') && <Grupo titulo="Hoje" itens={filtra(g.hoje)} agora={agora} />}
+            {mostra('semana') && <Grupo titulo="Próximos 7 dias" itens={filtra(g.proximos7)} agora={agora} />}
+            {mostra('sem') && <Grupo titulo="Sem data" itens={filtra(g.semPrazo)} agora={agora} />}
           </>
         )}
       </Panel>

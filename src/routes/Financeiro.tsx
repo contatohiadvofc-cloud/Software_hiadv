@@ -7,6 +7,7 @@ import { lerValor, limitesDoMes, mensagemCobranca, mesVizinho, moeda, nomeDoMes,
 import { dataTela } from '../data/publicacoes'
 import { linkWhatsapp } from '../data/clientes'
 import { diaSP } from '../data/seuDia'
+import { Indicadores } from '../design/components/Padrao'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
@@ -179,9 +180,7 @@ export function Financeiro() {
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
       {q.isSuccess && (
         <>
-          <dl className="fin-cartoes">
-            {cartoes.map(([rot, v, tom]) => <div key={rot} className="fin-cartao" data-tom={tom && v > 0 ? tom : undefined}><dt>{rot}</dt><dd>{moeda(v)}</dd></div>)}
-          </dl>
+          <Indicadores rotulo={`Resumo de ${nomeDoMes(mes)}`} itens={cartoes.map(([rot, v, tom]) => ({ id: rot, rotulo: rot, valor: moeda(v), tom: tom && v > 0 ? 'risco' as const : undefined }))} />
           {r.atrasados.length > 0 && (
             <Panel title={`Em atraso (${r.atrasados.length})`} labelId="fin-atraso">
               <ul className="fin-lista">{r.atrasados.map((l) => <Linha key={l.id} l={l} hoje={hoje} escritorio={escritorio} aoBaixar={aoBaixar} />)}</ul>

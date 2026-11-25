@@ -8,6 +8,7 @@ import { PRODUTOS_PREV, areaPrevidenciaria } from '../data/cadastro'
 import { linkWhatsapp, telefoneTela } from '../data/clientes'
 import { dataTela } from '../data/publicacoes'
 import { diaSP } from '../data/seuDia'
+import { Indicadores } from '../design/components/Padrao'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
@@ -261,6 +262,12 @@ export function Atendimentos() {
         <Panel><Empty title="Nenhum atendimento ainda." action={<Button onClick={() => setNovo(true)}>Incluir o primeiro</Button>}>Inclua aqui cada pessoa que chamar no WhatsApp, Instagram ou telefone, para ninguém ficar sem resposta.</Empty></Panel>
       )}
       {q.isSuccess && q.data.length > 0 && <>
+        <Indicadores rotulo="Resumo dos atendimentos" itens={[
+          { id: 'and', rotulo: 'Em andamento', valor: abertos },
+          ...ETAPAS_ABERTAS.slice(0, 2).map((e) => ({ id: e, rotulo: nomeEtapaLead(e), valor: cols[e].length })),
+          { id: 'ct', rotulo: 'Viraram clientes (60 dias)', valor: cols.contratou.length, tom: 'ok' as const },
+          { id: 'pd', rotulo: 'Não fecharam (60 dias)', valor: cols.perdido.length },
+        ]} />
         <div className="etapas-abas" role="tablist" aria-label="Etapas do atendimento">
           {ETAPAS_ABERTAS.map((e) => (
             <button key={e} type="button" role="tab" className="etapa-aba" aria-selected={aba === e} data-vazia={cols[e].length === 0 ? 'true' : undefined} onClick={() => setAba(e)}>

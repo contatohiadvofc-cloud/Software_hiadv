@@ -20,7 +20,7 @@ async function abrir(page: import('@playwright/test').Page, rota: string) {
 test('financeiro: resumo do mês, atraso com lembrete cordial e baixa com desfazer', async ({ page }) => {
   const estado = await simularSupabase(page, { lancamentos, clientes })
   await abrir(page, '/financeiro')
-  const cartao = (rot: string) => page.locator('.fin-cartao', { hasText: rot }).locator('dd')
+  const cartao = (rot: string) => page.locator('.hv-kpi', { hasText: rot }).locator('strong')
   await expect(cartao('Em atraso')).toHaveText(/800,00/)
   await expect(cartao('Despesas do mês')).toHaveText(/120,00/)
   const atraso = page.getByRole('region', { name: /Em atraso/ })
@@ -86,7 +86,7 @@ test('financeiro sem violações sérias de acessibilidade', async ({ page }) =>
   const { default: AxeBuilder } = await import('@axe-core/playwright')
   await simularSupabase(page, { lancamentos, clientes })
   await abrir(page, '/financeiro')
-  await expect(page.locator('.fin-cartao').first()).toBeVisible()
+  await expect(page.locator('.hv-kpi').first()).toBeVisible()
   const r = await new AxeBuilder({ page }).include('main').analyze()
   expect(r.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical')).toEqual([])
 })

@@ -9,6 +9,7 @@ import { telefoneTela } from '../data/clientes'
 import { Button } from '../design/components/Button'
 import { useToast } from '../design/components/Toast'
 import { ImportarClientesDialog, NovoClienteDialog } from './Cadastro'
+import { AlternarVisao, type Visao } from '../design/components/Padrao'
 
 const desdeFmt = new Intl.DateTimeFormat('pt-BR', { month: 'short', year: 'numeric', timeZone: 'America/Sao_Paulo' })
 
@@ -49,6 +50,7 @@ export function Clientes() {
   const { perfil } = useSessao()
   const [texto, setTexto] = useState('')
   const [termo, setTermo] = useState('')
+  const [visao, setVisao] = useState<Visao>('lista')
   const [dialogo, setDialogo] = useState<'novo' | 'importar' | null>(null)
   const nav = useNavigate()
   useEffect(() => { const t = setTimeout(() => setTermo(texto.trim()), 250); return () => clearTimeout(t) }, [texto])
@@ -66,17 +68,32 @@ export function Clientes() {
       </div>
       <NovoClienteDialog aberto={dialogo === 'novo'} aoFechar={() => setDialogo(null)} aoCriar={(id) => { setDialogo(null); nav({ to: '/clientes/$id', params: { id } }) }} />
       {gestor && <ImportarClientesDialog aberto={dialogo === 'importar'} aoFechar={() => setDialogo(null)} />}
-      <div className="hv-field filtro-largo">
-        <label htmlFor="cli-busca" className="sr-only">Filtrar clientes pelo nome</label>
-        <input id="cli-busca" className="hv-input" type="search" placeholder="Filtrar pelo nome" value={texto} onChange={(e) => setTexto(e.target.value)} />
-      </div>
       {gestor && <Duplicados />}
 
       <Panel>
+        <div className="hv-barra">
+          <label htmlFor="cli-busca" className="sr-only">Filtrar clientes pelo nome</label>
+          <input id="cli-busca" className="hv-input" type="search" placeholder="Filtrar pelo nome" value={texto} onChange={(e) => setTexto(e.target.value)} />
+          <AlternarVisao valor={visao} aoMudar={setVisao} />
+        </div>
         {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && q.data.length === 0 && <Empty title={termo.length >= 2 ? 'Nenhum cliente com esse nome.' : 'Nenhum cliente cadastrado ainda.'} />}
-        {q.isSuccess && q.data.length > 0 && (
+        {q.isSuccess && q.data.length > 0 && visao === 'cartoes' && (
+          <ul className="hv-cartoes">
+            {q.data.map((c) => (
+              <li key={c.id}>
+                <Link to="/clientes/$id" params={{ id: c.id }} className="hv-cartao">
+                  <span className="cliente-inicial" aria-hidden="true">{c.nome.charAt(0)}</span>
+                  <span className="fin-titulo">{c.nome}</span>
+                  {c.telefone && <span className="fin-sub">{telefoneTela(c.telefone)}</span>}
+                  {c.desde && <span className="fin-sub">Desde {desdeFmt.format(new Date(c.desde)).replace('.', '')}</span>}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+        {q.isSuccess && q.data.length > 0 && visao === 'lista' && (
           <ul className="seu-dia-lista">
             {q.data.map((c) => (
               <li key={c.id}>

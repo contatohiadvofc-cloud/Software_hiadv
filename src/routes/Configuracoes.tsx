@@ -331,6 +331,7 @@ export function Configuracoes() {
   if (perfil && !gestor) return (
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Configurações</h1></div></div>
+      <section id="manual"><Panel title="Manual do HiAdv" labelId="cfg-manual"><div className="hv-panel-body cfg-manual"><p>O que cada área, etapa e função faz, com as telas explicadas por setas e o passo a passo. Bom para quem está começando e para tirar dúvidas.</p><Link to="/manual" className="hv-btn" data-variant="primary">Abrir o manual</Link></div></Panel></section>
       <section id="recursos"><Panel title="Recursos do HiAdv" labelId="cfg-recursos"><RecursosDoHiAdv /></Panel></section>
       {aparelho}
       <Panel><Empty title="As configurações do escritório ficam com o Gestor Master." /></Panel>
@@ -341,6 +342,7 @@ export function Configuracoes() {
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Configurações</h1><p className="muted">{perfil?.escritorioNome}. Cada escritório tem as suas chaves, os seus custos e os seus agentes.</p></div></div>
 
+      <section id="manual"><Panel title="Manual do HiAdv" labelId="cfg-manual"><div className="hv-panel-body cfg-manual"><p>O que cada área, etapa e função faz, com as telas explicadas por setas e o passo a passo. Bom para quem está começando e para tirar dúvidas.</p><Link to="/manual" className="hv-btn" data-variant="primary">Abrir o manual</Link></div></Panel></section>
       <section id="recursos"><Panel title="Recursos do HiAdv" labelId="cfg-recursos"><RecursosDoHiAdv /></Panel></section>
 
       {aparelho}

@@ -312,3 +312,20 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 .sv-gal-item:hover .sv-gal-moldura { transform: translateY(-3px); }
 .sv-tela-grande { display: block; width: 100%; height: auto; max-height: calc(100dvh - 90px); object-fit: contain; background: #fff; }
 @media (prefers-reduced-motion: reduce) { .sv-gal-moldura { transition: none; } .sv-gal-item:hover .sv-gal-moldura { transform: none; } }
+
+/* Veja por dentro: telas do manual com setas */
+.sv-mans { display: grid; gap: 48px; margin-top: 32px; }
+.sv-man { margin: 0; }
+.sv-man h3 { font-size: 24px; margin: 0 0 6px; }
+.sv-man > p { margin: 0 0 14px; max-width: 70ch; }
+.man-quadro { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--linha); box-shadow: 0 20px 50px rgb(0 0 0 / .18); }
+.man-quadro img { display: block; width: 100%; height: auto; }
+.man-setas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.man-caixa { fill: rgb(155 28 60 / .06); stroke: #9b1c3c; stroke-width: 3; }
+.man-linha { stroke: #9b1c3c; stroke-width: 3; }
+.man-ponta { fill: #9b1c3c; }
+.man-bola { fill: #9b1c3c; stroke: #fff; stroke-width: 3; }
+.man-num { fill: #fff; font: 700 18px/1 var(--texto); }
+.man-legenda { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 20px; }
+.man-legenda li { display: flex; gap: 8px; align-items: baseline; }
+.man-legenda-n { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #9b1c3c; color: #fff; font-weight: 700; font-size: 13px; }

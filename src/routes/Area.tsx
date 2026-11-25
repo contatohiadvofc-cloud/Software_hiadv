@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAreas } from '../data/consultas'
 import { useApi, useSessao } from '../lib/contexto'
 import { exigenciaDaMudanca, montarColunas, rotuloEtapa, type CasoCard, type Etapa, type Quadro } from '../data/quadro'
+import { Indicadores } from '../design/components/Padrao'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 import { ErrorState } from '../design/components/ErrorState'
@@ -116,6 +117,18 @@ export function Area() {
         </div>
       </div>
 
+      {q.isSuccess && total > 0 && (() => {
+        const ab = q.data.casos.filter((c) => !q.data.etapas.find((e) => e.status === c.status)?.final)
+        const parados = ab.filter((c) => c.dias >= PARADO_DIAS).length
+        const prontos = ab.filter((c) => c.gateTotal > 0 && c.gateOk === c.gateTotal).length
+        const hoje = ab.filter((c) => c.dias === 0).length
+        return <Indicadores rotulo="Resumo da área" itens={[
+          { id: 'abertos', rotulo: 'Casos em andamento', valor: ab.length },
+          { id: 'hoje', rotulo: 'Entraram na etapa hoje', valor: hoje },
+          { id: 'parados', rotulo: `Parados há ${PARADO_DIAS}+ dias`, valor: parados, tom: parados ? 'atencao' : 'ok' },
+          { id: 'prontos', rotulo: 'Checklist completo', valor: prontos, dica: 'prontos para avançar' },
+        ]} />
+      })()}
       {q.isLoading && <p className="muted" role="status">Carregando os casos…</p>}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
       {q.isSuccess && q.data.etapas.length === 0 && <Panel><Empty title="Esta área ainda não tem etapas configuradas." /></Panel>}
