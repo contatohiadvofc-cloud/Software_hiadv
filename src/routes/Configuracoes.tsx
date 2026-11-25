@@ -319,7 +319,7 @@ export function Configuracoes() {
   const api = useApi()
   const { perfil } = useSessao()
   const qc = useQueryClient()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const integ = useQuery({ queryKey: ['integracoes', perfil?.escritorioId], queryFn: () => api.integracoes(), enabled: !!perfil && gestor })
   const ag = useQuery({ queryKey: ['agentes', perfil?.escritorioId], queryFn: () => api.agentes(), enabled: !!perfil && gestor })
   const atualizar = () => { qc.invalidateQueries({ queryKey: ['integracoes'] }); qc.invalidateQueries({ queryKey: ['agentes'] }) }

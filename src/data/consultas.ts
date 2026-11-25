@@ -11,7 +11,7 @@ export function useAreas() {
 export function useEscritorios() {
   const api = useApi()
   const { perfil } = useSessao()
-  return useQuery({ queryKey: ['escritorios'], queryFn: () => api.escritorios(), enabled: perfil?.papel === 'code', staleTime: 5 * 60_000 })
+  return useQuery({ queryKey: ['escritorios'], queryFn: () => api.escritorios(), enabled: !!perfil?.code, staleTime: 5 * 60_000 })
 }
 
 export function useItensDoDia() {

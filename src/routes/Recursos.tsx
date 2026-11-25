@@ -17,7 +17,7 @@ function Onde({ r }: { r: Recurso }) {
 export function RecursosDoHiAdv() {
   const api = useApi()
   const { perfil } = useSessao()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const integ = useQuery({ queryKey: ['integracoes', perfil?.escritorioId], queryFn: () => api.integracoes(), enabled: !!perfil && gestor })
   const oabs = useQuery({ queryKey: ['oabs', perfil?.escritorioId], queryFn: () => api.oabs(), enabled: !!perfil && gestor })
   const contato = useQuery({ queryKey: ['contato', perfil?.escritorioId], queryFn: () => api.contatoEscritorio(), enabled: !!perfil && gestor })

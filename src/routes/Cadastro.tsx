@@ -68,7 +68,7 @@ export function NovoCasoDialog({ aberto, aoFechar, aoCriar, clienteId, clienteNo
   const { perfil } = useSessao()
   const areas = useAreas()
   const ligarArea = useLigarArea()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const equipe = useQuery({ queryKey: ['equipe', perfil?.escritorioId], queryFn: () => api.equipe(), enabled: !!perfil && aberto, staleTime: 10 * 60_000 })
   const [modo, setModo] = useState<'buscar' | 'novo'>('buscar')
   const [busca, setBusca] = useState('')

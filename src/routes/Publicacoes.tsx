@@ -65,7 +65,7 @@ export function Publicacoes() {
   const hoje = diaSP(new Date())
   const grupos = porDia(q.data ?? [])
   const semTarefa = (q.data ?? []).filter((p) => p.publicacao && !p.tarefa).length
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
 
   function abrirPrazo(p: Publicacao) {
     setPrazo({ inicio: diaSP(new Date(p.quando)), dias: prazoNoTexto(p.texto), disponibilizacao: true, titulo: `${p.titulo}${p.cliente ? ` · ${p.cliente}` : ''}`.slice(0, 160), detalhe: (p.texto ?? '').slice(0, 900), processoId: p.processoId })

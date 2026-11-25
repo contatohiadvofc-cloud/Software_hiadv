@@ -37,7 +37,7 @@ function Detalhe({ c, gestor }: { c: Conector; gestor: boolean }) {
 
 export function Integracoes() {
   const { perfil } = useSessao()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const api = useApi()
   const integ = useQuery({ queryKey: ['integracoes', perfil?.escritorioId], queryFn: () => api.integracoes(), enabled: !!perfil && gestor })
   const [busca, setBusca] = useState('')

@@ -248,7 +248,7 @@ export function criarApiDemo(): Api {
     },
     aoMudarSessao(fn) { ouvintes.add(fn); return () => ouvintes.delete(fn) },
     async perfil(): Promise<Perfil> {
-      return { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: 'code', escritorioId: atual, escritorioNome: ESCRITORIOS.find((e) => e.id === atual)!.nome }
+      return { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: 'code', code: true, escritorioId: atual, escritorioNome: ESCRITORIOS.find((e) => e.id === atual)!.nome }
     },
     async escritorios() { return ESCRITORIOS.map((e) => ({ ...e, atual: e.id === atual })) },
     async trocarEscritorio(id) { atual = id },
@@ -730,7 +730,7 @@ export function criarApiDemo(): Api {
       ADESOES.unshift({ id: `ad${Date.now()}`, nome: p.nome.trim(), email: p.email.trim().toLowerCase(), whatsapp: p.whatsapp.replace(/\D/g, '').replace(/^55(?=\d{10,11}$)/, ''),
         oab: p.oab || null, escritorio: p.escritorio || null, cidade: p.cidade || null, uf: p.uf.toUpperCase() || null, plano: p.plano, recomendado: p.recomendado, respostas: p.respostas,
         indicadorEmail: ref ? 'ana@silvaprado.exemplo.br' : null, indicadorEscritorio: ref ? 'Silva & Prado Advocacia' : null, status: 'nova', fundador: false, cortesia: 'nenhuma', obs: null, criadoEm: new Date().toISOString() })
-      return { lista: p.plano === 'supremo' }
+      return { lista: p.plano === 'supremo' || p.plano === 'senior' }
     },
     async indicacaoCodigo() { return CODIGO_DEMO },
     async indicacoes() {
@@ -739,7 +739,7 @@ export function criarApiDemo(): Api {
     async adesoes() { return ADESOES.map((a) => ({ ...a })) },
     async adesaoAtualizar(id, status, extra) {
       const a = ADESOES.find((x) => x.id === id); if (!a) throw new Error('Pedido não encontrado.')
-      if (status === 'ativada' && a.plano === 'supremo') throw new Error('O Sênior ainda não está liberado: ative em outro plano ou mantenha na lista.')
+      if (status === 'ativada' && (a.plano === 'supremo' || a.plano === 'senior')) throw new Error('O Sênior ainda não está liberado: ative em outro plano ou mantenha na lista.')
       a.status = status; if (extra?.fundador !== undefined) a.fundador = extra.fundador
       if (extra?.cortesia) a.cortesia = extra.cortesia; else if (status === 'ativada' && a.indicadorEmail && a.cortesia === 'nenhuma') a.cortesia = 'pendente'
       if (extra?.obs !== undefined) a.obs = extra.obs.trim() || null

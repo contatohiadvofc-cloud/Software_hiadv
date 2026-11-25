@@ -56,7 +56,7 @@ function Pedido({ a }: { a: Adesao }) {
         {a.indicadorEmail && (
           <label className="adm-campo"><span>Cortesia de quem indicou</span>
             <select className="hv-input" value={a.cortesia} onChange={(e) => status.mutate({ s: a.status, cortesia: e.target.value as Cortesia })}>
-              <option value="nenhuma">Nenhuma</option><option value="pendente">50% a aplicar</option><option value="aplicada">50% aplicado</option>
+              <option value="nenhuma">Nenhuma</option><option value="pendente">20% a aplicar</option><option value="aplicada">20% aplicado</option>
             </select>
           </label>
         )}
@@ -74,13 +74,13 @@ function Pedido({ a }: { a: Adesao }) {
 export function Adesoes() {
   const api = useApi()
   const { perfil } = useSessao()
-  const code = perfil?.papel === 'code'
+  const code = !!perfil?.code
   const q = useQuery({ queryKey: ['adesoes'], queryFn: () => api.adesoes(), enabled: !!perfil && code })
   const vagas = useQuery({ queryKey: ['adesao-vagas'], queryFn: () => api.adesaoVagas(), enabled: !!perfil && code })
   const [filtro, setFiltro] = useState<Filtro>('abertas')
-  const lista = useMemo(() => (q.data ?? []).filter((a) => filtro === 'todas' ? true : filtro === 'supremo' ? a.plano === 'supremo' && a.status !== 'ativada'
-    : filtro === 'ativada' ? a.status === 'ativada' : (a.status === 'nova' || a.status === 'em_contato') && a.plano !== 'supremo'), [q.data, filtro])
-  const supremo = (q.data ?? []).filter((a) => a.plano === 'supremo' && a.status !== 'recusada').length
+  const lista = useMemo(() => (q.data ?? []).filter((a) => filtro === 'todas' ? true : filtro === 'supremo' ? (a.plano === 'supremo' || a.plano === 'senior') && a.status !== 'ativada'
+    : filtro === 'ativada' ? a.status === 'ativada' : (a.status === 'nova' || a.status === 'em_contato') && a.plano !== 'supremo' && a.plano !== 'senior'), [q.data, filtro])
+  const supremo = (q.data ?? []).filter((a) => (a.plano === 'supremo' || a.plano === 'senior') && a.status !== 'recusada').length
   if (perfil && !code) return <div className="pagina"><Panel><Empty title="Esta tela é da administração do HiAdv." /></Panel></div>
   return (
     <div className="pagina">

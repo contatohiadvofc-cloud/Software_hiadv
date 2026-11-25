@@ -137,7 +137,7 @@ export function Financeiro() {
   const toast = useToast()
   const invalidar = useInvalidarFinanceiro()
   const { perfil } = useSessao()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const hoje = diaSP(new Date())
   const [mes, setMes] = useState(hoje.slice(0, 7))
   const [dialogo, setDialogo] = useState<'contrato' | 'lancamento' | null>(null)

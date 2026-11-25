@@ -96,7 +96,7 @@ export function criarApiSupabase(url: string, chave: string): Api {
       const { data: u } = await sb.auth.getUser()
       const email = u.user?.email?.toLowerCase()
       if (!email) throw new SessaoExpirada()
-      const eq = verificar(await sb.from('equipe').select('nome, papel, escritorio_id').eq('email', email).maybeSingle())
+      const eq = verificar(await sb.from('equipe').select('nome, papel, escritorio_id, acesso_code').eq('email', email).maybeSingle())
       const escId = (eq?.escritorio_id as string | null) ?? null
       let escritorioNome = ''
       if (escId) {
@@ -104,7 +104,7 @@ export function criarApiSupabase(url: string, chave: string): Api {
         escritorioNome = (e?.nome as string) ?? ''
       }
       const papel = PAPEIS.includes(eq?.papel as Papel) ? (eq?.papel as Papel) : null
-      return { email, nome: (eq?.nome as string) || email, papel, escritorioId: escId, escritorioNome }
+      return { email, nome: (eq?.nome as string) || email, papel, code: papel === 'code' || eq?.acesso_code === true, escritorioId: escId, escritorioNome }
     },
     async escritorios(): Promise<Escritorio[]> {
       return (verificar(await sb.rpc('hiadv_escritorios_disponiveis')) as Escritorio[] | null) ?? []

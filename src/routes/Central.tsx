@@ -354,7 +354,7 @@ type Vista = 'cartoes' | 'tabela'
 export function Central() {
   const api = useApi()
   const { perfil } = useSessao()
-  const code = perfil?.papel === 'code'
+  const code = !!perfil?.code
   const q = useQuery({ queryKey: ['central'], queryFn: () => api.centralEscritorios(), enabled: !!perfil && code })
   const [aberto, setAberto] = useState<string | null>(null)
   const [novo, setNovo] = useState(false)

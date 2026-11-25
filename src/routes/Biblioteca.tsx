@@ -58,7 +58,7 @@ export function Biblioteca() {
   const qc = useQueryClient()
   const toast = useToast()
   const areas = useAreas()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const [tipo, setTipo] = useState<TipoBiblioteca>('modelo')
   const [filtro, setFiltro] = useState('')
   const [aberto, setAberto] = useState<{ id: string | null } | null>(null)

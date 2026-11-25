@@ -1,5 +1,5 @@
 // Adesão ao HiAdv: questionário curto, plano recomendado e pedido. Também as indicações com cortesia.
-export type PlanoId = 'pro' | 'premium' | 'supremo'
+export type PlanoId = 'pro' | 'premium' | 'senior' | 'supremo'
 export type Respostas = { atuacao?: string; processos?: string; oabs?: string; areas?: string[]; prioridades?: string[] }
 
 export type Pergunta = { id: keyof Respostas; titulo: string; dica?: string; multipla?: boolean; max?: number; opcoes: { valor: string; rotulo: string }[] }
@@ -45,8 +45,10 @@ export const PLANOS: Plano[] = [
     destaques: ['Casos por área, em etapas, com o que falta para avançar', 'Prazos com feriados dos tribunais', 'Publicações pela OAB e Escavador ou JUDIT conectados', 'Atendimentos, do contato até virar cliente', 'Link de acompanhamento para o cliente'] },
   { id: 'premium', nome: 'Pleno', preco: 197.9, fundador: 197.9, resumo: 'Para o escritório com equipe e financeiro.', limites: 'Até 3 acessos Master, 8 colaboradores e 3 OABs',
     destaques: ['Tudo do Júnior', 'Financeiro, honorários e cobrança pelo Asaas', 'Calculadoras de cada área, inclusive Bancário', 'Assinatura digital (ZapSign, Clicksign ou D4Sign)', 'Relatórios, horas e rodízio da equipe'] },
-  { id: 'supremo', nome: 'Sênior', preco: 397.5, fundador: 397.5, resumo: 'Tudo do HiAdv, com IA e leitura no seu Google Drive.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
-    destaques: ['Tudo do Pleno', 'IA para minutas, quesitos e leitura de intimações', 'Google Drive com identificador e leitor de documentos', 'Sara executando ações pedidas pela equipe', 'WhatsApp oficial e implantação assistida'] },
+  { id: 'senior', nome: 'Sênior', preco: 397.5, fundador: 397.5, resumo: 'Tudo do HiAdv para escritórios maiores, sem a IA.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
+    destaques: ['Tudo do Pleno', 'Google Drive com identificador e leitor de documentos', 'WhatsApp oficial e acesso à API', 'Mais acessos e OABs acompanhadas', 'Implantação assistida'] },
+  { id: 'supremo', nome: 'Sênior + Sara', preco: 524.5, fundador: 524.5, resumo: 'O Sênior com a Sara, a assistente de IA que trabalha com o advogado.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs, com uso de IA incluído', emBreve: true,
+    destaques: ['Tudo do Sênior', 'Sara executando as ações pedidas pela equipe, com registro', 'Minutas para revisão a partir dos modelos do escritório', 'Teses com fonte oficial verificada, marcadas para conferência', 'Leitura de intimações e laudos com resumo do que fazer'] },
 ]
 export const plano = (id: PlanoId) => PLANOS.find((p) => p.id === id)!
 
@@ -59,7 +61,7 @@ export function recomendar(r: Respostas): { plano: PlanoId; motivos: string[]; c
   const motivos: string[] = []
   const temEquipe = r.atuacao === 'equipe' || r.atuacao === 'grande'
   if (pr.includes('ia')) {
-    motivos.push('Você quer usar IA nas peças e documentos, que é o centro do Sênior.')
+    motivos.push('Você quer usar IA nas peças e documentos: isso é a Sara, que vem no Sênior + Sara.')
     if (temEquipe) motivos.push('Com equipe, o financeiro e os relatórios do Pleno já ajudam desde o primeiro dia.')
     return { plano: 'supremo', motivos, comecarCom: temEquipe || pr.includes('financeiro') ? 'premium' : 'pro' }
   }
@@ -103,7 +105,7 @@ export function alternar(lista: string[] | undefined, valor: string, max?: numbe
 }
 
 // ---------- Indicações ----------
-export const REGRA_CORTESIA = 'A cada escritório que aderir pelo seu link e pagar a primeira mensalidade, o seu escritório ganha 50% de desconto em uma mensalidade, até 12 descontos por ano.'
+export const REGRA_CORTESIA = 'Cada escritório que aderir pelo seu link e pagar a primeira mensalidade vale 20% de desconto em uma mensalidade do seu escritório. Os descontos somam mês a mês: quem indica 3 tem 3 mensalidades com 20% de desconto, até 12 por ano.'
 export const WHATSAPP_HIADV = '49999730572'
 
 export function codigoValido(c: string): boolean {
@@ -122,7 +124,7 @@ export type Indicacao = { id: string; primeiroNome: string; plano: PlanoId; stat
 export type StatusAdesao = 'nova' | 'em_contato' | 'ativada' | 'recusada'
 export type Cortesia = 'nenhuma' | 'pendente' | 'aplicada'
 export const NOMES_STATUS: Record<StatusAdesao, string> = { nova: 'Pedido recebido', em_contato: 'Em contato', ativada: 'Ativado', recusada: 'Não seguiu' }
-export const NOMES_CORTESIA: Record<Cortesia, string> = { nenhuma: '', pendente: '50% de desconto a aplicar', aplicada: '50% de desconto aplicado' }
+export const NOMES_CORTESIA: Record<Cortesia, string> = { nenhuma: '', pendente: '20% de desconto a aplicar', aplicada: '20% de desconto aplicado' }
 
 export function resumoIndicacoes(l: Pick<Indicacao, 'status' | 'cortesia'>[]): { total: number; ativadas: number; meses: number } {
   return { total: l.length, ativadas: l.filter((x) => x.status === 'ativada').length, meses: l.filter((x) => x.cortesia !== 'nenhuma').length }

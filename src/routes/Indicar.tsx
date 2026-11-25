@@ -14,7 +14,7 @@ export function Indicar() {
   const api = useApi()
   const toast = useToast()
   const { perfil } = useSessao()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const cod = useQuery({ queryKey: ['indicacao-codigo', perfil?.email], queryFn: () => api.indicacaoCodigo(), enabled: !!perfil, staleTime: Infinity })
   const lista = useQuery({ queryKey: ['indicacoes', perfil?.escritorioId], queryFn: () => api.indicacoes(), enabled: !!perfil })
   const link = cod.data ? linkIndicacao(window.location.origin + window.location.pathname.replace(/\/indicar.*$/, ''), cod.data, import.meta.env.VITE_PREVIA === '1') : ''
@@ -51,7 +51,7 @@ export function Indicar() {
           <dl className="fin-cartoes ind-resumo">
             <div className="fin-cartao"><dt>Indicados</dt><dd>{res.total}</dd></div>
             <div className="fin-cartao"><dt>Ativados</dt><dd>{res.ativadas}</dd></div>
-            <div className="fin-cartao"><dt>Descontos de 50%</dt><dd>{res.meses}</dd></div>
+            <div className="fin-cartao"><dt>Mensalidades com 20%</dt><dd>{res.meses}</dd></div>
           </dl>
           <ul className="fin-lista">
             {lista.data.map((x) => (

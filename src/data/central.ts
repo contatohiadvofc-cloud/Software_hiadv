@@ -15,8 +15,8 @@ export const nomeRecurso = (r: string) => NOMES_RECURSO[r] ?? r
 
 /** Plano mínimo que inclui o recurso (para a frase "Disponível no plano …"). */
 const MINIMO: Record<string, PlanoId> = {
-  financeiro: 'premium', relatorios: 'premium', horas: 'premium', atencao: 'premium', drive: 'supremo',
-  ia: 'supremo', sara: 'supremo', zapsign: 'supremo', whatsapp: 'supremo', api: 'supremo',
+  financeiro: 'premium', relatorios: 'premium', horas: 'premium', atencao: 'premium', drive: 'senior',
+  ia: 'supremo', sara: 'supremo', zapsign: 'premium', whatsapp: 'senior', api: 'senior',
 }
 export function planoMinimo(recurso: string): string {
   const id = MINIMO[recurso] ?? 'pro'

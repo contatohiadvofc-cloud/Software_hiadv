@@ -20,7 +20,8 @@ import type { AssinaturaForm, DetalheCentral, EscritorioCentral, MeusRecursos, N
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
-export type Perfil = { email: string; nome: string; papel: Papel | null; escritorioId: string | null; escritorioNome: string }
+/** code = acesso à área do Coder (papel code, ou acesso_code ligado para um Master, como o Felipe). */
+export type Perfil = { email: string; nome: string; papel: Papel | null; code: boolean; escritorioId: string | null; escritorioNome: string }
 export type Area = { area: string; nome: string; ordem: number }
 export type Escritorio = { id: string; nome: string; atual: boolean }
 export type Achado = { tipo: string; titulo: string; trecho: string; clienteId: string | null; processoId: string | null }

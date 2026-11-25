@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const rota = recursoDaRota(loc.pathname)
   const bloqueado = rota && recursos.carregado && !recursos.pode(rota) ? rota : null
-  const gestor = sessao.perfil?.papel === 'master' || sessao.perfil?.papel === 'code'
+  const gestor = sessao.perfil?.papel === 'master' || !!sessao.perfil?.code
   const aviso = gestor ? avisoAssinatura(recursos.meus) : null
 
   return (

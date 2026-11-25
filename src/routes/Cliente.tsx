@@ -25,7 +25,7 @@ export function Cliente() {
   const { id } = useParams({ strict: false }) as { id: string }
   const api = useApi()
   const { perfil } = useSessao()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const recursos = useRecursos()
   const areas = useAreas()
   const q = useQuery({ queryKey: ['cliente', perfil?.escritorioId, id], queryFn: () => api.cliente(id), enabled: !!perfil })

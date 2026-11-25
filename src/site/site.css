@@ -148,10 +148,12 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 @media (max-width: 820px) { .sv-prev { grid-template-columns: 1fr; } }
 
 /* Planos */
-.sv-planos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: stretch; }
-.sv-plano { background: #fff; border: 1px solid var(--linha); border-radius: 16px; padding: 28px; display: flex; flex-direction: column; }
+.sv-planos { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; align-items: stretch; }
+.sv-plano-sara { border: 2px solid var(--vinho-claro); }
+@media (max-width: 1200px) { .sv-planos { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.sv-plano { background: #fff; border: 1px solid var(--linha); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; }
 .sv-plano h3 { display: flex; align-items: center; gap: 10px; font-size: 26px; }
-.sv-selo { font: 600 13px/1 var(--texto); background: var(--rose-claro); color: var(--vinho); padding: 6px 9px; border-radius: 999px; letter-spacing: 0; }
+.sv-selo { white-space: nowrap; font: 600 13px/1 var(--texto); background: var(--rose-claro); color: var(--vinho); padding: 6px 9px; border-radius: 999px; letter-spacing: 0; }
 .sv-preco { margin: 14px 0 0; color: var(--tinta-2); font-size: 15px; }
 .sv-preco strong { font-size: 32px; color: var(--tinta); font-weight: 600; margin-right: 4px; }
 .sv-fundador-preco { margin: 6px 0 0; font-size: 14.5px; font-weight: 600; color: var(--vinho); }

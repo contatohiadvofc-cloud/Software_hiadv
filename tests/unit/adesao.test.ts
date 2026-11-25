@@ -17,7 +17,7 @@ describe('adesão', () => {
     expect(recomendar({ atuacao: 'equipe', prioridades: ['ia'] })).toMatchObject({ plano: 'supremo', comecarCom: 'premium' })
   })
   it('preços e fundador conferem com o documento de planos', () => {
-    expect(PLANOS.map((p) => [p.id, p.preco, p.fundador])).toEqual([['pro', 119.9, 119.9], ['premium', 197.9, 197.9], ['supremo', 397.5, 397.5]])
+    expect(PLANOS.map((p) => [p.id, p.preco, p.fundador])).toEqual([['pro', 119.9, 119.9], ['premium', 197.9, 197.9], ['senior', 397.5, 397.5], ['supremo', 524.5, 524.5]])
     expect(PLANOS.find((p) => p.id === 'supremo')?.emBreve).toBe(true)
   })
   it('valida o formulário', () => {
@@ -48,4 +48,10 @@ describe('indicações', () => {
   it('resumo', () => {
     expect(resumoIndicacoes([{ status: 'ativada', cortesia: 'aplicada' }, { status: 'nova', cortesia: 'nenhuma' }, { status: 'ativada', cortesia: 'pendente' }])).toEqual({ total: 3, ativadas: 2, meses: 2 })
   })
+})
+
+import { REGRA_CORTESIA as REGRA20 } from '../../src/data/adesao'
+it('indicação vale 20% em uma mensalidade por indicação, e soma', () => {
+  expect(REGRA20).toContain('20% de desconto em uma mensalidade')
+  expect(REGRA20).toContain('quem indica 3 tem 3 mensalidades com 20% de desconto')
 })

@@ -11,7 +11,7 @@ export function OfficeSwitcher() {
   const [trocando, setTrocando] = useState(false)
   const nome = sessao.perfil?.escritorioNome || 'Escritório'
 
-  if (sessao.perfil?.papel !== 'code' || !lista.data || lista.data.length < 2) {
+  if (!sessao.perfil?.code || !lista.data || lista.data.length < 2) {
     return <div className="escritorio"><span className="escritorio-rotulo">Escritório</span><span className="escritorio-nome">{nome}</span></div>
   }
   return (

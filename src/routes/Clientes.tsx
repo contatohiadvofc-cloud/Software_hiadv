@@ -52,7 +52,7 @@ export function Clientes() {
   const [dialogo, setDialogo] = useState<'novo' | 'importar' | null>(null)
   const nav = useNavigate()
   useEffect(() => { const t = setTimeout(() => setTermo(texto.trim()), 250); return () => clearTimeout(t) }, [texto])
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const q = useQuery({ queryKey: ['clientes', perfil?.escritorioId, termo.length >= 2 ? termo : ''], queryFn: () => api.clientes(termo), enabled: !!perfil })
 
   return (

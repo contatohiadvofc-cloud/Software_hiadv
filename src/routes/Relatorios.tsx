@@ -27,7 +27,7 @@ function Barra({ rotulo, valor, max, texto, tom }: { rotulo: string; valor: numb
 export function Relatorios() {
   const api = useApi()
   const { perfil } = useSessao()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const [dias, setDias] = useState(90)
   const q = useQuery({ queryKey: ['relatorio', perfil?.escritorioId, dias], queryFn: () => api.relatorio(dias), enabled: !!perfil && gestor })
   if (perfil && !gestor) return <div className="pagina"><Panel><Empty title="Os relatórios ficam com o Gestor Master." /></Panel></div>

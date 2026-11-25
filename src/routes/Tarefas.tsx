@@ -34,7 +34,7 @@ export function Tarefas() {
   const { perfil } = useSessao()
   const qc = useQueryClient()
   const toast = useToast()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const [quem, setQuem] = useState<string>('minhas')
   const [novaAberta, setNovaAberta] = useState(false)
   const [prazoAberto, setPrazoAberto] = useState(false)

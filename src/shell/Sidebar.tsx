@@ -12,7 +12,7 @@ function Icone({ d }: { d: string }) {
 
 export function Sidebar() {
   const { perfil } = useSessao()
-  const gestor = perfil?.papel === 'master' || perfil?.papel === 'code'
+  const gestor = perfil?.papel === 'master' || !!perfil?.code
   const areas = useAreas()
   const { pode } = useRecursos()
 
@@ -69,12 +69,12 @@ export function Sidebar() {
             <Icone d="M4 20V10M10 20V4M16 20v-7M22 20H2" />Relatórios
           </Link>
         )}
-        {perfil?.papel === 'code' && (
+        {!!perfil?.code && (
           <Link to="/central" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
             <Icone d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />Central HiAdv
           </Link>
         )}
-        {perfil?.papel === 'code' && (
+        {!!perfil?.code && (
           <Link to="/adesoes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
             <Icone d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM19 8v6M22 11h-6" />Adesões
           </Link>
