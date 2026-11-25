@@ -23,7 +23,7 @@ export function situacaoPacote(p: Pick<PacoteBiblioteca, 'itens' | 'adicionados'
 
 export type NovoItemBiblioteca = { tipo: TipoBiblioteca; titulo: string; area: string; peca: string; conteudo: string; link: string }
 
-export type Servico = 'claude' | 'zapsign' | 'google_drive'
+export type Servico = 'claude' | 'zapsign' | 'google_drive' | 'escavador' | 'judit' | 'clicksign' | 'd4sign' | 'asaas'
 export type Integracao = {
   servico: Servico; ativo: boolean; modo: string | null; limiteMensal: number | null
   temChave: boolean; chaveFinal: string | null; configuradoEm: string | null; configuradoPor: string | null
@@ -32,6 +32,11 @@ export const SERVICOS: Record<Servico, { nome: string; descricao: string; usaCha
   claude: { nome: 'Claude (IA dos agentes)', descricao: 'Motor dos agentes: leitura de documentos, minutas, quesitos e mensagens. O consumo é cobrado na conta do escritório.', usaChave: true, dicaChave: 'Chave da API Anthropic do escritório (começa com sk-ant-).' },
   zapsign: { nome: 'ZapSign (assinatura)', descricao: 'Envia o kit do cliente (contrato, procuração, declaração) preenchido para assinatura pelo WhatsApp. Cada envio é cobrado na conta ZapSign do escritório.', usaChave: true, dicaChave: 'Token da API da ZapSign do escritório.' },
   google_drive: { nome: 'Google Drive', descricao: 'Lê a pasta de clientes compartilhada com o HiAdv para relacionar pastas aos clientes. Nada é lido sem aprovação.', usaChave: false },
+  escavador: { nome: 'Escavador', descricao: 'Monitoramento de processos e publicações pela API do Escavador. As consultas são cobradas na conta do escritório.', usaChave: true, dicaChave: 'Token da API do Escavador (painel do Escavador → API).' },
+  judit: { nome: 'JUDIT', descricao: 'Consulta e monitoramento processual por número, OAB e CPF. As consultas são cobradas na conta do escritório.', usaChave: true, dicaChave: 'Chave da API da JUDIT (api-key).' },
+  clicksign: { nome: 'Clicksign', descricao: 'Assinatura eletrônica do kit do cliente pela Clicksign.', usaChave: true, dicaChave: 'Access token da API da Clicksign.' },
+  d4sign: { nome: 'D4Sign', descricao: 'Assinatura eletrônica do kit do cliente pela D4Sign.', usaChave: true, dicaChave: 'Token da API e cryptKey da D4Sign, separados por dois-pontos (token:cryptKey).' },
+  asaas: { nome: 'Asaas', descricao: 'Boleto e Pix das parcelas de honorários, com baixa automática.', usaChave: true, dicaChave: 'Chave da API do Asaas (Minha conta → Integrações).' },
 }
 
 export type Agente = {

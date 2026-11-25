@@ -94,3 +94,13 @@ Quadro, lista e ficha do caso por área; área trabalhista completa; clientes; t
 - [x] Nova seção com 17 telas reais do sistema (dados de demonstração) em 5 grupos, cada uma com título e subtítulo; clique abre a tela grande (dialog acessível, foco volta ao botão).
 - [x] Link "Telas" no menu do site. Imagens em public/site/tela-*.webp (miniatura 640x400 e grande 1280x800).
 - [x] Teste e2e em tests/e2e/site.spec.ts (computador e celular) + axe sem violações.
+
+## 24/11/2026 — Integrações (catálogo de conectores)
+- [x] Tela própria `/integracoes` no menu (todos veem; só gestores conectam): grade de cartões por categoria, busca, painel com "o que passa a funcionar", "como conectar" e "quem responde pelo dado". Aviso fixo: intimações e andamentos vêm da ferramenta conectada, que responde pela captura; o controle oficial é o painel do tribunal.
+- [x] Disponíveis: Claude, ZapSign, Google Drive, Google Agenda; incluso: DJEN/DataJud. Em breve: Advise, AASP Intimações, intimações do eproc/PJe por parceira, WhatsApp oficial, Gmail, Asaas, Meta Ads. Catálogo em `src/data/conectores.ts`.
+- [x] Configurações aponta para a nova tela (chaves seguem no mesmo cofre e RPCs).
+- [ ] Ligar cada "Em breve" quando houver contrato/API: Advise e AASP primeiro.
+- [ ] Bug conhecido: DataJud "fora do ar" em 229/229 processos (24/11) — investigar.
+- [x] 24/11: conectores com cadastro próprio (sem burocracia) prontos para chave: Escavador, JUDIT, Clicksign, D4Sign, Asaas (SQL `docs/sql/hiadv2-conectores.sql`, aplicado só no TESTE). Advise, AASP e eproc/PJe ficam "Sob contrato". Catálogo sem DataJud.
+- [ ] Ler e agir por cada ferramenta (um conector por vez, com a documentação oficial da API e conta de teste): 1º Escavador, 2º JUDIT, 3º Asaas, 4º Clicksign/D4Sign.
+- [ ] Desligar o DataJud na função Consutar_processos (produção) — aguarda OK do Felipe.

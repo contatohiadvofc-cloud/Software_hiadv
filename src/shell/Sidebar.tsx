@@ -82,6 +82,9 @@ export function Sidebar() {
         <Link to="/indicar" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H8a2.5 2.5 0 0 1 0-5c3 0 4 5 4 5zM12 7h4a2.5 2.5 0 0 0 0-5c-3 0-4 5-4 5z" />Indique o HiAdv
         </Link>
+        <Link to="/integracoes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+          <Icone d="M9 2v6M15 2v6M6 8h12v4a6 6 0 0 1-12 0zM12 18v4" />Integrações
+        </Link>
         <Link to="/biblioteca" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20M4 19.5A2.5 2.5 0 0 0 6.5 22H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z" />Biblioteca
         </Link>

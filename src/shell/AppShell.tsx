@@ -1,3 +1,4 @@
+import { BarraPrevia } from '../previa/BarraPrevia'
 import { OfertaDesbloqueio, Travado } from './Desbloqueio'
 import { precisaDesbloquear } from '../lib/desbloqueio'
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
@@ -66,6 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="app">
       <Sidebar />
       <div className="app-col">
+        <BarraPrevia />
         <header className="topo">
           {loc.pathname !== '/seu-dia' && (
             <button type="button" className="topo-voltar" aria-label="Voltar para a tela anterior" title="Voltar" onClick={() => voltar(nav)}>

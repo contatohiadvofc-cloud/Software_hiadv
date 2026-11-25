@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router'
 import { useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
@@ -21,7 +22,7 @@ import { OabsAcompanhadas } from './OabsAcompanhadas'
 
 const dataFmt = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeZone: 'America/Sao_Paulo' })
 
-function CartaoIntegracao({ i, aoMudar }: { i: Integracao; aoMudar: () => void }) {
+export function CartaoIntegracao({ i, aoMudar }: { i: Integracao; aoMudar: () => void }) {
   const api = useApi()
   const toast = useToast()
   const meta = SERVICOS[i.servico]
@@ -359,11 +360,7 @@ export function Configuracoes() {
       </Panel>
 
       <section id="integracoes"><Panel title="Integrações" labelId="cfg-integ">
-        <p className="hv-panel-body muted">Já dá para guardar as chaves com segurança. O envio pela ZapSign e a leitura por IA com a chave do escritório são liberados na próxima atualização.</p>
-        {integ.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
-        {integ.isError && <ErrorState onRetry={() => integ.refetch()} />}
-        {integ.isSuccess && integ.data.length === 0 && <Empty title="As integrações ainda não foram ativadas no servidor." />}
-        {integ.isSuccess && integ.data.length > 0 && <ul className="integracoes">{integ.data.map((i) => <CartaoIntegracao key={i.servico} i={i} aoMudar={atualizar} />)}</ul>}
+        <p className="hv-panel-body muted">As chaves da Claude e da ZapSign, o Google Drive e as próximas conexões (Advise, AASP, WhatsApp, Asaas) ficam na tela <Link to="/integracoes">Integrações</Link>.</p>
       </Panel></section>
 
       <Panel title="Agentes" labelId="cfg-agentes">

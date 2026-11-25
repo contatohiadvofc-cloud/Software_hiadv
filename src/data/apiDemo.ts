@@ -1,3 +1,4 @@
+import { RECURSOS_POR_PLANO } from './planos'
 import type { Api, Area, Escritorio, Perfil } from './api'
 import { lerValor, previaParcelas, validarHonorario, validarLancamento, type Honorario, type Lancamento } from './financeiro'
 import { oabTela, validarPrazo, type Publicacao } from './publicacoes'
@@ -37,11 +38,7 @@ const CENTRAL: (EscritorioCentral & { detalhe: DetalheCentral })[] = [
     limites: { masters: 3, colaboradores: 8, oabs: 3, iaMensal: 0 }, uso: { masters: 2, colaboradores: 2, oabs: 1, iaMes: 0 }, ajustes: 0,
     detalhe: { ajustes: [], recursos: [], pessoas: [{ email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: 'master', bloqueios: [] }, { email: 'marcos@silvaprado.exemplo.br', nome: 'Marcos Lima', papel: 'colaborador', bloqueios: [] }], historico: [] } },
 ]
-const RECURSOS_PLANO: Record<string, string[]> = {
-  pro: ['casos','atendimentos','clientes','prazos','publicacoes','agenda','acompanhamento','documentos','celular'],
-}
-RECURSOS_PLANO.premium = [...RECURSOS_PLANO.pro, 'financeiro','relatorios','horas','atencao']
-RECURSOS_PLANO.supremo = [...RECURSOS_PLANO.premium, 'drive', 'ia','sara','zapsign','whatsapp','api']
+const RECURSOS_PLANO: Record<string, string[]> = RECURSOS_POR_PLANO
 function recalcular(e: (typeof CENTRAL)[number]) {
   e.detalhe.recursos = RECURSOS_PLANO.supremo.map((r) => {
     const aj = e.detalhe.ajustes.find((a) => a.recurso === r)
@@ -173,6 +170,7 @@ const INTEGRACOES: Integracao[] = [
   { servico: 'claude', ativo: false, modo: null, limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null },
   { servico: 'zapsign', ativo: false, modo: 'um_clique', limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null },
   { servico: 'google_drive', ativo: false, modo: null, limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null },
+  ...(['escavador', 'judit', 'clicksign', 'd4sign', 'asaas'] as const).map((servico) => ({ servico, ativo: false, modo: null, limiteMensal: null, temChave: false, chaveFinal: null, configuradoEm: null, configuradoPor: null })),
 ]
 const CATALOGO: Array<Omit<Agente, 'ativo' | 'etapas' | 'modeloId' | 'modeloTitulo' | 'parametros'>> = [
   { agente: 'conferente_dados', nome: 'Conferente de dados', descricao: 'Quando o caso entra na etapa escolhida, confere relato, dados do benefício ou da área e checklist. Se faltar algo, cria uma tarefa dizendo exatamente o quê.', areas: null, precisa: [], usaModelo: false, semCusto: true },

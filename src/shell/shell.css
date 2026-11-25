@@ -593,3 +593,41 @@ a.hv-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 .ia-erro { color: var(--danger) !important; }
 .ia-resultado { display: flex; flex-direction: column; gap: var(--s-2); border-top: 1px solid var(--line); padding-top: var(--s-3); }
 .ia-resultado h3 { margin: 0; font-size: var(--fs-lg); }
+
+/* Integrações (catálogo de conectores) */
+.conectores-aviso { margin: 0 0 var(--s-4); padding: var(--s-3) var(--s-4); border-left: 3px solid var(--line); background: var(--surface-2, transparent); font-size: var(--fs-sm); max-width: 72ch; }
+.conectores-filtros { display: flex; flex-direction: column; gap: var(--s-3); margin-bottom: var(--s-4); }
+.conectores-filtros .hv-input { max-width: 360px; }
+.conectores-chips { display: flex; gap: var(--s-2); overflow-x: auto; padding-bottom: 2px; }
+.conectores-chip { white-space: nowrap; border: 1px solid var(--line); background: none; color: inherit; border-radius: 999px; padding: 6px 12px; font: inherit; font-size: var(--fs-sm); cursor: pointer; }
+.conectores-chip[aria-pressed="true"] { background: var(--ink, currentColor); color: var(--bg, #fff); border-color: transparent; }
+.conectores-grade { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--s-3); }
+.conector { width: 100%; height: 100%; text-align: left; display: grid; grid-template-columns: 40px 1fr; grid-template-rows: auto auto; gap: var(--s-2) var(--s-3); padding: var(--s-4); border: 1px solid var(--line); border-radius: 12px; background: none; color: inherit; font: inherit; cursor: pointer; transition: border-color .15s; }
+.conector:hover { border-color: currentColor; }
+.conector:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.conector-icone { grid-row: span 2; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); display: grid; place-items: center; font-weight: 700; }
+.conector-texto { display: flex; flex-direction: column; gap: 2px; }
+.conector-texto .muted { font-size: var(--fs-sm); }
+.conector .hv-badge { justify-self: start; grid-column: 2; }
+.conector-detalhe h3 { font-size: var(--fs-md); margin: var(--s-4) 0 var(--s-2); }
+.conector-detalhe ul, .conector-detalhe ol { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+.conector-resp { margin-top: var(--s-4); font-size: var(--fs-sm); }
+
+/* Prévia "Experimente o HiAdv" */
+.previa-barra { position: sticky; top: 0; z-index: 30; display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; padding: .55rem 1rem; background: var(--vinho, #7a1f33); color: #fff; font-size: .9rem; }
+.previa-barra p { margin: 0; flex: 1 1 14rem; }
+.previa-barra button, .previa-barra a { font: inherit; }
+.previa-roteiro-btn, .previa-proxima { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.55); border-radius: .4rem; padding: .3rem .65rem; cursor: pointer; }
+.previa-cta { background: #fff; color: var(--vinho, #7a1f33); border-radius: .4rem; padding: .4rem .8rem; font-weight: 600; text-decoration: none; }
+.previa-roteiro { flex-basis: 100%; list-style: none; margin: .25rem 0 0; padding: 0; display: grid; gap: .35rem; }
+.previa-roteiro li { background: rgba(255,255,255,.1); border-radius: .4rem; padding: .45rem .6rem; }
+.previa-roteiro li[data-visto] span::before { content: '✓ '; }
+.previa-roteiro button { background: none; border: 0; color: #fff; padding: 0; cursor: pointer; font-weight: 600; }
+.previa-roteiro small { opacity: .8; font-weight: 400; margin-left: .35rem; }
+.previa-roteiro p { margin: .15rem 0 0; opacity: .9; }
+.previa-fim { position: fixed; inset: 0; z-index: 60; background: rgba(20,10,14,.55); display: grid; place-items: center; padding: 1rem; }
+.previa-fim-caixa { background: var(--superficie, #fff); color: var(--texto, #1d1a1b); max-width: 30rem; border-radius: .75rem; padding: 1.5rem; display: grid; gap: .75rem; }
+.previa-fim-caixa h2 { margin: 0; }
+.previa-fim-caixa .previa-cta { background: var(--vinho, #7a1f33); color: #fff; text-align: center; }
+.previa-link { text-align: center; color: inherit; }
+.conector-plano-selo { display: block; margin-top: .2rem; font-size: .78rem; color: var(--texto-suave, #6b6266); }

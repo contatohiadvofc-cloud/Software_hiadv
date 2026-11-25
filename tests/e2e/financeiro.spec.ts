@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { simularSupabase, entrar } from './mock'
 
-const hoje = new Date().toISOString().slice(0, 10)
+const hoje = new Date().toLocaleDateString('sv-SE')
 const mes = hoje.slice(0, 7)
 const passado = new Date(Date.now() - 40 * 864e5).toISOString().slice(0, 10)
 const lancamentos = [

@@ -1,3 +1,4 @@
+import { comecarPrevia } from './previa/previa'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './design/base.css'
@@ -5,6 +6,18 @@ import './shell/shell.css'
 import { App, definirSemSessao } from './app'
 import { lerEnv } from './env'
 import type { Api } from './data/api'
+
+// O app instalado abre em /app.html: mostra o endereço do sistema (o site de apresentação fica só em "/").
+if (location.pathname === '/app.html') {
+  const q = new URLSearchParams(location.search); q.delete('origem')
+  history.replaceState(null, '', '/seu-dia' + (q.toString() ? '?' + q : '') + location.hash)
+}
+
+// "Experimente o HiAdv": entra direto no escritório fictício, sem cadastro e sem salvar nada.
+if (location.pathname === '/experimentar') {
+  if (comecarPrevia()) { sessionStorage.setItem('hiadv-previa-entrar', '1'); history.replaceState(null, '', '/seu-dia') }
+  else history.replaceState(null, '', '/aderir?previa=usada')
+}
 
 try {
   const t = localStorage.getItem('hiadv-tema')

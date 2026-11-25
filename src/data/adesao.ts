@@ -41,12 +41,12 @@ export const PERGUNTAS: Pergunta[] = [
 export type Plano = { id: PlanoId; nome: string; preco: number; fundador: number; resumo: string; limites: string; destaques: string[]; emBreve?: boolean }
 
 export const PLANOS: Plano[] = [
-  { id: 'pro', nome: 'Júnior', preco: 109.9, fundador: 109.9, resumo: 'Para o advogado autônomo, com ou sem um assistente.', limites: '1 acesso Master, 1 colaborador e 1 OAB acompanhada',
-    destaques: ['Casos por área, em etapas', 'Prazos com feriados dos tribunais', 'Publicações e andamentos pela OAB', 'Atendimentos, do contato até virar cliente', 'Link de acompanhamento para o cliente'] },
-  { id: 'premium', nome: 'Pleno', preco: 189.9, fundador: 169.9, resumo: 'Para o escritório com equipe e financeiro.', limites: 'Até 3 acessos Master, 8 colaboradores e 3 OABs',
-    destaques: ['Tudo do Júnior', 'Financeiro e honorários', 'Relatórios e produtividade da equipe', 'Horas trabalhadas', 'Avisos e rodízio de responsáveis'] },
-  { id: 'supremo', nome: 'Sênior', preco: 297, fundador: 200, resumo: 'Tudo do HiAdv, com IA e leitura no seu Google Drive.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
-    destaques: ['Tudo do Pleno', 'IA para minutas, quesitos e leitura de intimações', 'Leitura e organização no seu Google Drive', 'Assinatura digital e WhatsApp oficial', 'Implantação assistida'] },
+  { id: 'pro', nome: 'Júnior', preco: 119.9, fundador: 119.9, resumo: 'Para o advogado autônomo, com ou sem um assistente.', limites: '1 acesso Master, 1 colaborador e 1 OAB acompanhada',
+    destaques: ['Casos por área, em etapas, com o que falta para avançar', 'Prazos com feriados dos tribunais', 'Publicações pela OAB e Escavador ou JUDIT conectados', 'Atendimentos, do contato até virar cliente', 'Link de acompanhamento para o cliente'] },
+  { id: 'premium', nome: 'Pleno', preco: 197.9, fundador: 197.9, resumo: 'Para o escritório com equipe e financeiro.', limites: 'Até 3 acessos Master, 8 colaboradores e 3 OABs',
+    destaques: ['Tudo do Júnior', 'Financeiro, honorários e cobrança pelo Asaas', 'Calculadoras de cada área, inclusive Bancário', 'Assinatura digital (ZapSign, Clicksign ou D4Sign)', 'Relatórios, horas e rodízio da equipe'] },
+  { id: 'supremo', nome: 'Sênior', preco: 397.5, fundador: 397.5, resumo: 'Tudo do HiAdv, com IA e leitura no seu Google Drive.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
+    destaques: ['Tudo do Pleno', 'IA para minutas, quesitos e leitura de intimações', 'Google Drive com identificador e leitor de documentos', 'Sara executando ações pedidas pela equipe', 'WhatsApp oficial e implantação assistida'] },
 ]
 export const plano = (id: PlanoId) => PLANOS.find((p) => p.id === id)!
 

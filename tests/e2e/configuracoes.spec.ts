@@ -16,7 +16,8 @@ async function abrir(page: import('@playwright/test').Page) {
 
 test('integrações: chave vai ao servidor e só o final aparece; ativar exige chave', async ({ page }) => {
   const est = await simularSupabase(page, { integracoes, agentes })
-  await abrir(page)
+  await entrar(page); await expect(page).toHaveURL(/\/seu-dia$/); await page.goto('/integracoes')
+  await page.getByRole('button', { name: /^Claude/ }).click()
   const claude = page.locator('.integracao', { hasText: 'Claude (IA dos agentes)' })
   await expect(claude.getByRole('button', { name: 'Ativar' })).toBeDisabled()
   await claude.getByRole('button', { name: 'Cadastrar chave' }).click()
@@ -65,4 +66,16 @@ test('agente sem custo: liga só com a etapa e manda os dias do acompanhamento',
   await d.getByRole('button', { name: 'Salvar e ligar' }).click()
   await expect(page.getByText('Acompanhamento: ligado.')).toBeVisible()
   expect(est.rpcs.find((x) => x.nome === 'agente_configurar')!.corpo).toEqual({ p_agente: 'acompanhamento', p_ativo: true, p_etapas: ['protocolado'], p_modelo: null, p_parametros: { dias: 7 } })
+})
+
+test('integrações: catálogo filtra e mostra quem responde pela captura', async ({ page }) => {
+  await simularSupabase(page, { integracoes, agentes })
+  await entrar(page); await expect(page).toHaveURL(/\/seu-dia$/); await page.goto('/integracoes')
+  await expect(page.getByRole('note')).toContainText('responde pela captura')
+  await page.getByRole('button', { name: 'Intimações, prazos e processos' }).click()
+  await expect(page.locator('.conector')).toHaveCount(3)
+  await page.getByRole('button', { name: /^Escavador/ }).click()
+  const d = page.getByRole('dialog', { name: 'Escavador' })
+  await expect(d.getByText(/Já dá para guardar a chave/)).toBeVisible()
+  await expect(d.getByText(/A captura é do Escavador/)).toBeVisible()
 })

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Button } from '../design/components/Button'
 import { Field } from '../design/components/Field'
@@ -50,6 +50,13 @@ export function Login() {
     const volta = busca.volta && busca.volta.startsWith('/') && !busca.volta.startsWith('//') ? busca.volta : '/seu-dia'
     nav({ to: volta })
   }
+
+  // Prévia "Experimente": entra sozinho no escritório fictício.
+  useEffect(() => {
+    let pediu = false
+    try { pediu = sessionStorage.getItem('hiadv-previa-entrar') === '1'; sessionStorage.removeItem('hiadv-previa-entrar') } catch { /* sem armazenamento */ }
+    if (pediu && modoDemo()) sessao.entrar('ana@silvaprado.exemplo.br', 'demo').then(irDepois, () => {})
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function enviar(e: FormEvent) {
     e.preventDefault()

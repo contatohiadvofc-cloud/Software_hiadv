@@ -24,6 +24,7 @@ const LIndicar = lazyRouteComponent(() => import('./routes/Indicar'), 'Indicar')
 const LAdesoes = lazyRouteComponent(() => import('./routes/Adesoes'), 'Adesoes')
 const LCentral = lazyRouteComponent(() => import('./routes/Central'), 'Central')
 const LAcompanhar = lazyRouteComponent(() => import('./routes/Acompanhar'), 'Acompanhar')
+const LIntegracoes = lazyRouteComponent(() => import('./routes/Integracoes'), 'Integracoes')
 const LConfiguracoes = lazyRouteComponent(() => import('./routes/Configuracoes'), 'Configuracoes')
 const LAppShell = lazyRouteComponent(() => import('./shell/AppShell'), 'AppShellRota')
 
@@ -56,19 +57,20 @@ const publicacoes = createRoute({ getParentRoute: () => dentro, path: '/publicac
 const financeiro = createRoute({ getParentRoute: () => dentro, path: '/financeiro', component: LFinanceiro, head: () => ({ meta: [{ title: 'Financeiro · HiAdv' }] }) })
 const relatorios = createRoute({ getParentRoute: () => dentro, path: '/relatorios', component: LRelatorios, head: () => ({ meta: [{ title: 'Relatórios · HiAdv' }] }) })
 const configuracoes = createRoute({ getParentRoute: () => dentro, path: '/configuracoes', component: LConfiguracoes, head: () => ({ meta: [{ title: 'Configurações · HiAdv' }] }) })
+const integracoes = createRoute({ getParentRoute: () => dentro, path: '/integracoes', component: LIntegracoes, head: () => ({ meta: [{ title: 'Integrações · HiAdv' }] }) })
 const atendimentos = createRoute({ getParentRoute: () => dentro, path: '/atendimentos', component: LAtendimentos, head: () => ({ meta: [{ title: 'Atendimentos · HiAdv' }] }) })
 // Página pública do cliente: fora da casca do app, sem login.
 const acompanhar = createRoute({ getParentRoute: () => raiz, path: '/acompanhar/$token', component: LAcompanhar, head: () => ({ meta: [{ title: 'Acompanhamento do seu caso' }, { name: 'robots', content: 'noindex' }, { name: 'referrer', content: 'no-referrer' }] }) })
 const aderir = createRoute({
   getParentRoute: () => raiz, path: '/aderir', component: LAderir, head: () => ({ meta: [{ title: 'Aderir ao HiAdv' }] }),
-  validateSearch: (s: Record<string, unknown>): { ref?: string } => (typeof s.ref === 'string' ? { ref: s.ref } : {}),
+  validateSearch: (s: Record<string, unknown>): { ref?: string; previa?: string } => ({ ...(typeof s.ref === 'string' ? { ref: s.ref } : {}), ...(typeof s.previa === 'string' ? { previa: s.previa } : {}) }),
 })
 const indicar = createRoute({ getParentRoute: () => dentro, path: '/indicar', component: LIndicar, head: () => ({ meta: [{ title: 'Indique o HiAdv · HiAdv' }] }) })
 const central = createRoute({ getParentRoute: () => dentro, path: '/central', component: LCentral, head: () => ({ meta: [{ title: 'Central HiAdv · HiAdv' }] }) })
 const adesoes = createRoute({ getParentRoute: () => dentro, path: '/adesoes', component: LAdesoes, head: () => ({ meta: [{ title: 'Adesões · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, configuracoes, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, integracoes, configuracoes, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

@@ -17,7 +17,7 @@ describe('adesão', () => {
     expect(recomendar({ atuacao: 'equipe', prioridades: ['ia'] })).toMatchObject({ plano: 'supremo', comecarCom: 'premium' })
   })
   it('preços e fundador conferem com o documento de planos', () => {
-    expect(PLANOS.map((p) => [p.id, p.preco, p.fundador])).toEqual([['pro', 109.9, 109.9], ['premium', 189.9, 169.9], ['supremo', 297, 200]])
+    expect(PLANOS.map((p) => [p.id, p.preco, p.fundador])).toEqual([['pro', 119.9, 119.9], ['premium', 197.9, 197.9], ['supremo', 397.5, 397.5]])
     expect(PLANOS.find((p) => p.id === 'supremo')?.emBreve).toBe(true)
   })
   it('valida o formulário', () => {

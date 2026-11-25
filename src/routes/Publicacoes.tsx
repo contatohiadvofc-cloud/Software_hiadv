@@ -113,7 +113,7 @@ export function Publicacoes() {
           </div>
         ))}
       </Panel>
-      {oabs.isSuccess && oabs.data.oabs.length > 0 && <p className="hv-hint pub-rodape">Acompanhando: {oabs.data.oabs.join(', ')}. Fonte: DJEN e DataJud (CNJ), consultados automaticamente.</p>}
+      {oabs.isSuccess && oabs.data.oabs.length > 0 && <p className="hv-hint pub-rodape">Acompanhando: {oabs.data.oabs.join(', ')}. Fonte: DJEN (CNJ) e as ferramentas conectadas em Integrações.</p>}
 
       <PrazoDialog aberto={!!prazo} aoFechar={() => setPrazo(null)} inicial={prazo ?? undefined} />
     </div>

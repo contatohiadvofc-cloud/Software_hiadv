@@ -25,7 +25,7 @@ function Sinal() {
 /** Página pública: 5 perguntas, o plano recomendado e o pedido de adesão. Nada é liberado sem a equipe do HiAdv. */
 export function Aderir() {
   const api = useApi()
-  const busca = useSearch({ strict: false }) as { ref?: string }
+  const busca = useSearch({ strict: false }) as { ref?: string; previa?: string }
   const ref = busca.ref && codigoValido(busca.ref) ? busca.ref.toUpperCase() : null
   const vagas = useQuery({ queryKey: ['adesao-vagas'], queryFn: () => api.adesaoVagas(), retry: false, refetchOnWindowFocus: false })
   const [etapa, setEtapa] = useState<Etapa>('inicio')
@@ -63,10 +63,11 @@ export function Aderir() {
 
         {etapa === 'inicio' && (
           <section className="ad-inicio" aria-labelledby="ad-titulo">
+            {busca.previa === 'usada' && <p className="ad-nota" role="status">Você já fez a prévia hoje neste aparelho. O próximo passo é o teste de 14 dias, com os dados do seu escritório e sem perder nada ao contratar.</p>}
             <h1 id="ad-titulo">Qual HiAdv combina com o seu escritório?</h1>
             <p>Cinco perguntas, menos de um minuto. No fim você vê o plano recomendado, o que ele inclui e pede a adesão. Quem libera o acesso é a equipe do HiAdv, pelo WhatsApp.</p>
             <button type="button" className="ad-botao ad-botao-claro" onClick={() => setEtapa(0)}>Começar</button>
-            {fundador && <p className="ad-nota">Lançamento: restam {vagas.data} de 20 vagas de fundador, com preço especial por 12 meses e 60 dias grátis.</p>}
+            {fundador && <p className="ad-nota">Lançamento: restam {vagas.data} de 20 vagas de fundador, com 60 dias grátis.</p>}
           </section>
         )}
 

@@ -5,7 +5,9 @@ test('manifesto do aplicativo responde com nome e início certos', async ({ requ
   expect(r.ok()).toBe(true)
   const m = await r.json()
   expect(m.short_name).toBe('HiAdv')
-  expect(m.start_url).toBe('/seu-dia')
+  expect(m.start_url).toBe('/app.html?origem=app')
+  expect(m.id).toBe('/seu-dia')
+  expect((await request.get('/404.html')).ok()).toBe(true)
 })
 
 test('o service worker registra', async ({ page }) => {
@@ -25,4 +27,10 @@ test('prévia do link: imagem de compartilhamento declarada e publicada', async 
   const r = await request.get('/og-hiadv.png')
   expect(r.ok()).toBe(true)
   expect(r.headers()['content-type']).toContain('image/png')
+})
+
+test('o app instalado abre no sistema, não no site de apresentação', async ({ page }) => {
+  await page.goto('/app.html?origem=app')
+  await expect(page).not.toHaveURL(/app\.html/)
+  await expect(page.locator('[data-entrar]')).toHaveCount(0)
 })

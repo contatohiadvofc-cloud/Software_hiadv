@@ -38,7 +38,7 @@ test('Central: quem não é code não abre', async ({ page }) => {
 })
 
 test('plano Júnior: Financeiro e Relatórios somem do menu e a tela explica', async ({ page }) => {
-  await simularSupabase(page, { meusRecursos: { plano: 'pro', situacao: 'teste', teste_ate: '2026-11-23', recursos: ['casos', 'clientes', 'prazos', 'publicacoes', 'atendimentos', 'agenda', 'acompanhamento', 'documentos', 'celular'] } })
+  await simularSupabase(page, { meusRecursos: { plano: 'pro', situacao: 'teste', teste_ate: new Date(Date.now() + 3 * 864e5).toISOString().slice(0, 10), recursos: ['casos', 'clientes', 'prazos', 'publicacoes', 'atendimentos', 'agenda', 'acompanhamento', 'documentos', 'celular'] } })
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)
   if (test.info().project.name === 'computador') {

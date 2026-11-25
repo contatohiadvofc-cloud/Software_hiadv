@@ -3,6 +3,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import type { Plugin } from 'vite'
+import { writeFileSync } from 'node:fs'
 
 /** Desempenho na primeira visita (PageSpeed):
  *  - o CSS vai dentro do index.html (sem pedido extra que trava a pintura);
@@ -44,6 +45,11 @@ function rotasDoApp(): Plugin {
   }
   return {
     name: 'hiadv-rotas-do-app',
+    // GitHub Pages: endereço sem arquivo (ex.: /seu-dia) recebe o 404.html, que é o próprio aplicativo
+    writeBundle(opts, bundle) {
+      const app = bundle['app.html']
+      if (app && app.type === 'asset' && opts.dir) writeFileSync(opts.dir + '/404.html', String(app.source))
+    },
     configureServer(s) { s.middlewares.use(reescrever) },
     configurePreviewServer(s) { s.middlewares.use(reescrever) },
   }
@@ -82,7 +88,9 @@ export default defineConfig({
         short_name: 'HiAdv',
         description: 'Gestão jurídica para escritórios de advocacia.',
         lang: 'pt-BR',
-        start_url: '/seu-dia',
+        // id fixo mantém o mesmo app instalado; o início é um arquivo real (abre mesmo sem o service worker)
+        id: '/seu-dia',
+        start_url: '/app.html?origem=app',
         scope: '/',
         display: 'standalone',
         background_color: '#f8f5f2',
