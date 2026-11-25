@@ -104,3 +104,12 @@ Quadro, lista e ficha do caso por área; área trabalhista completa; clientes; t
 - [x] 24/11: conectores com cadastro próprio (sem burocracia) prontos para chave: Escavador, JUDIT, Clicksign, D4Sign, Asaas (SQL `docs/sql/hiadv2-conectores.sql`, aplicado só no TESTE). Advise, AASP e eproc/PJe ficam "Sob contrato". Catálogo sem DataJud.
 - [ ] Ler e agir por cada ferramenta (um conector por vez, com a documentação oficial da API e conta de teste): 1º Escavador, 2º JUDIT, 3º Asaas, 4º Clicksign/D4Sign.
 - [ ] Desligar o DataJud na função Consutar_processos (produção) — aguarda OK do Felipe.
+
+## 24/11/2026 (noite) — publicado
+- [x] App instalado abre no sistema (start_url /app.html, id /seu-dia, 404.html gerado na publicação).
+- [x] Planos: Júnior 119,90 · Pleno 197,90 · Sênior 397,50 (src/data/planos.ts = docs/sql/hiadv3-planos.sql, aplicado em TESTE e produção).
+- [x] Prévia "Experimentar": 20 min, 1 por dia por aparelho, roteiro de 6 paradas, nada salvo, fim leva ao teste de 14 dias.
+- [x] Conectores (hiadv2-conectores.sql) aplicados em produção.
+- [ ] Consutar_processos v13 (DataJud desligado) ainda não publicada.
+- [ ] Motor de tipos de caso + correções da auditoria (começar pelo Bancário).
+- [ ] Revisão da Central (papel code) para ~100 escritórios.
