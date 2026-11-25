@@ -884,3 +884,40 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .rg-salvar span { margin-right:auto; color:var(--ink-3); font-size:var(--fs-sm) }
 .rg-salvar[data-alterado] span { color:var(--ink); font-weight:600 }
 @media (max-width: 600px) { .rg-linha { flex-direction:column; align-items:flex-start; gap:8px } .rg-salvar { bottom:64px } }
+
+/* Central: ficha lateral do escritório */
+.hv-dialog[data-variant='painel']:has(.ct-ficha) { width:min(620px, 100vw); overflow-y:auto; overscroll-behavior:contain }
+.ct-ficha { gap:0 !important }
+.ct-f-cabeca { position:sticky; top:0; z-index:2; display:flex; align-items:flex-start; gap:14px; padding:20px 20px 18px; background:linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 70%, #000) 100%); color:#fff; box-shadow:inset 0 -3px 0 var(--gold) }
+.ct-f-pasta { flex:none; display:flex; flex-direction:column; margin-top:4px }
+.ct-f-pasta i { display:block; width:22px; height:7px; background:var(--gold); border-radius:4px 4px 0 0 }
+.ct-f-pasta b { display:grid; place-items:center; width:48px; height:38px; background:#fff; color:var(--accent); border-radius:0 8px 8px 8px; font-weight:800; font-size:15px; letter-spacing:-.02em }
+.ct-f-titulos { flex:1; min-width:0 }
+.ct-f-titulos h2 { margin:0; font-size:22px; line-height:1.15; font-weight:800; letter-spacing:-.03em; color:#fff }
+.ct-f-titulos p { margin:4px 0 0; color:rgb(255 255 255 / .82); font-size:var(--fs-sm) }
+.ct-f-selos { display:flex; flex-wrap:wrap; gap:6px; margin-top:10px }
+.ct-f-selo { font-size:12px; font-weight:700; padding:3px 9px; border-radius:999px; background:rgb(255 255 255 / .16); color:#fff; border:1px solid rgb(255 255 255 / .28) }
+.ct-f-selo[data-s="ativo"] { background:#e7f5ec; color:#1f6a43; border-color:transparent }
+.ct-f-selo[data-s="teste"] { background:var(--gold); color:#161616; border-color:transparent }
+.ct-f-selo[data-s="suspenso"], .ct-f-selo[data-s="atraso"] { background:#fff; color:#b43a0a; border-color:transparent }
+.ct-f-fechar { flex:none; width:36px; height:36px; border-radius:10px; border:1px solid rgb(255 255 255 / .35); background:rgb(0 0 0 / .15); color:#fff; font-size:20px; line-height:1; cursor:pointer }
+.ct-f-fechar:hover { background:rgb(0 0 0 / .3) }
+.ct-f-fechar:focus-visible { outline:2px solid var(--gold); outline-offset:2px }
+.ct-ficha > .ct-abas { display:flex; flex-wrap:wrap; gap:4px !important; padding:12px 20px 0; background:var(--surface); border-bottom:1px solid var(--line) !important; overflow:visible }
+.ct-ficha > .ct-abas button { padding:9px 12px !important; font-size:var(--fs-sm) }
+.ct-ficha > .ct-abas button[aria-selected="true"] { background:var(--accent-soft) !important; color:var(--accent-soft-ink) !important; box-shadow:inset 0 3px 0 var(--accent) !important }
+#ct-aba-corpo { padding:20px }
+.ct-r-rot { display:block; font-size:var(--fs-xs); color:var(--ink-3); font-weight:600; margin-bottom:4px }
+.ct-r-plano { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; padding:16px; border-radius:0 12px 12px 12px; background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 40%, transparent); box-shadow:inset 0 3px 0 var(--accent) }
+.ct-r-plano strong { font-size:20px; font-weight:800; letter-spacing:-.02em; color:var(--accent-soft-ink) }
+.ct-r-selo { margin-left:8px; font-size:11px; font-weight:700; padding:2px 8px; border-radius:999px; background:var(--gold); color:#161616; vertical-align:middle }
+.ct-r-preco { text-align:right } .ct-r-preco span { color:var(--ink-3); font-size:var(--fs-sm); margin-left:2px }
+.ct-r-saude { padding:14px 16px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2) }
+.ct-r-saude .ct-saude-trilho { max-width:none }
+.ct-r-uso { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px }
+.ct-r-uso > div { padding:12px; border:1px solid var(--line); border-radius:12px; background:var(--surface-2) }
+.ct-r-uso strong { font-size:var(--fs-lg); font-weight:800 }
+.ct-r-obs { margin:0; padding:12px 16px; border-left:3px solid var(--gold); background:var(--surface-2); border-radius:0 10px 10px 0 }
+#ct-aba-corpo .ct-resumo { grid-template-columns:repeat(2, minmax(0,1fr)); gap:14px 20px; padding:4px 2px }
+#ct-aba-corpo .ct-resumo dd { overflow-wrap:anywhere }
+@media (max-width: 560px) { .ct-r-uso { grid-template-columns:repeat(2, minmax(0,1fr)) } #ct-aba-corpo .ct-resumo { grid-template-columns:1fr } }

@@ -233,22 +233,30 @@ function AbaHistorico({ e }: { e: EscritorioCentral }) {
 
 function AbaResumo({ e }: { e: EscritorioCentral }) {
   const acima = acimaDoLimite(e)
+  const lim = (u: number, l: number | null) => (l ? `${u} de ${l}` : String(u))
   const itens: [string, string][] = [
-    ['Plano', `${nomePlano(e.plano)}${e.preco ? ` · ${reais(e.preco)}/mês` : ''}${e.fundador ? ' · fundador' : ''}`],
-    ['Situação', `${e.situacao ? NOMES_SITUACAO[e.situacao] : '—'}${e.situacao === 'teste' && e.testeAte ? ` até ${isoParaTela(e.testeAte)}` : ''}`],
-    ['Pago até', isoParaTela(e.pagoAte) || '—'],
     ['Gestor Master', [e.masterNome, ...e.oabsMaster].filter(Boolean).join(' · ') || '—'],
-    ['Equipe', `${e.uso.masters} Master · ${e.uso.colaboradores} colaboradores · ${e.uso.oabs} OAB`],
-    ['Casos', String(e.casos ?? '—')],
-    ['IA no mês', `${e.uso.iaMes}${e.limites.iaMensal ? ` de ${e.limites.iaMensal}` : ''}`],
+    ['Pago até', isoParaTela(e.pagoAte) || '—'],
     ['Último acesso', isoParaTela(e.ultimoAcesso) || '—'],
+    ['Casos', String(e.casos ?? '—')],
+  ]
+  const uso: [string, string][] = [
+    ['Master', lim(e.uso.masters, e.limites.masters)],
+    ['Colaboradores', lim(e.uso.colaboradores, e.limites.colaboradores)],
+    ['OABs', lim(e.uso.oabs, e.limites.oabs)],
+    ['IA no mês', lim(e.uso.iaMes, e.limites.iaMensal)],
   ]
   return (
     <div className="ct-aba">
-      <BarraSaude n={e.saude} />
+      <div className="ct-r-plano">
+        <div><span className="ct-r-rot">Plano</span><strong>{nomePlano(e.plano)}</strong>{e.fundador && <span className="ct-r-selo">Fundador</span>}</div>
+        <div className="ct-r-preco">{e.preco ? <><strong>{reais(e.preco)}</strong><span>/mês</span></> : <span>—</span>}</div>
+      </div>
+      <div className="ct-r-saude"><span className="ct-r-rot">Saúde de uso</span><BarraSaude n={e.saude} /></div>
       {acima.length > 0 && <p className="ct-acima">Acima do plano: {acima.join(', ')}</p>}
+      <div className="ct-r-uso">{uso.map(([k, v]) => <div key={k}><span className="ct-r-rot">{k}</span><strong>{v}</strong></div>)}</div>
       <dl className="ct-resumo">{itens.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}</dl>
-      {e.obs && <p className="muted">Anotação: {e.obs}</p>}
+      {e.obs && <p className="ct-r-obs"><span className="ct-r-rot">Anotação</span>{e.obs}</p>}
     </div>
   )
 }
@@ -259,8 +267,20 @@ type Aba = (typeof ABAS)[number]
 function Ficha({ e, aoFechar }: { e: EscritorioCentral; aoFechar: () => void }) {
   const [aba, setAba] = useState<Aba>('Resumo')
   return (
-    <Dialog open onOpenChange={(v) => { if (!v) aoFechar() }} title={e.nome} variant="painel">
+    <Dialog open onOpenChange={(v) => { if (!v) aoFechar() }} title={e.nome} variant="painel" hideTitle>
       <div className="ct-ficha">
+        <header className="ct-f-cabeca">
+          <span className="ct-f-pasta" aria-hidden="true"><i /><b>{e.nome.replace(/\(.*?\)/g, '').split(/\s+/).filter((x) => x.length > 2).slice(0, 2).map((x) => x[0]!.toUpperCase()).join('') || 'E'}</b></span>
+          <div className="ct-f-titulos">
+            <h2>{e.nome}</h2>
+            <p>{[e.cidade, nomePlano(e.plano)].filter(Boolean).join(' · ')}</p>
+            <div className="ct-f-selos">
+              {e.situacao && <span className="ct-f-selo" data-s={e.situacao}>{NOMES_SITUACAO[e.situacao]}{e.situacao === 'teste' && e.testeAte ? ` até ${isoParaTela(e.testeAte)}` : ''}</span>}
+              {!e.ativo && <span className="ct-f-selo" data-s="suspenso">Acesso suspenso</span>}
+            </div>
+          </div>
+          <button type="button" className="ct-f-fechar" aria-label="Fechar" onClick={aoFechar}>×</button>
+        </header>
         <div className="ct-abas" role="tablist" aria-label="Partes da ficha">
           {ABAS.map((a) => <button key={a} type="button" role="tab" id={`ct-tab-${a}`} aria-selected={aba === a} aria-controls="ct-aba-corpo" onClick={() => setAba(a)}>{a}</button>)}
         </div>
