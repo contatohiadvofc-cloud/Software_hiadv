@@ -1,4 +1,5 @@
 import type { Api } from './api'
+import type { CanalChamada } from './chamada'
 
 /** Api que só baixa o cliente do servidor quando precisa.
  *  Quem abre o HiAdv sem estar logado vê o login na hora; o módulo do Supabase
@@ -21,6 +22,23 @@ export function criarApiPreguicosa(carregar: () => Promise<Api>, temToken: () =>
       ouvintes.add(o)
       if (pronta) pronta.then((a) => { if (ouvintes.has(o) && !o.parar) o.parar = a.aoMudarSessao(fn) }, () => {})
       return () => { ouvintes.delete(o); o.parar?.() }
+    },
+    // Funções que respondem na hora (não devolvem promessa): a ligação com o servidor fica por baixo.
+    chatAssinar: (conversa: string, aoChegar: () => void) => {
+      let parar: (() => void) | null = null
+      let cancelado = false
+      void obter().then((a) => { if (!cancelado) parar = a.chatAssinar(conversa, aoChegar) }, () => {})
+      return () => { cancelado = true; parar?.() }
+    },
+    reuniaoCanal: (id: string): CanalChamada => {
+      const real = obter().then((a) => a.reuniaoCanal(id))
+      return {
+        aoSinal(fn) { void real.then((c) => c?.aoSinal(fn)) },
+        aoPresenca(fn) { void real.then((c) => c?.aoPresenca(fn)) },
+        async entrar(eu) { const c = await real; if (!c) throw new Error('Chamada indisponível.'); await c.entrar(eu) },
+        enviar(s) { void real.then((c) => c?.enviar(s)) },
+        sair() { void real.then((c) => c?.sair(), () => {}) },
+      }
     },
   }
   return new Proxy({} as Api & { aquecer(): void }, {
