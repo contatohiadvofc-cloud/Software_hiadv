@@ -1,8 +1,8 @@
 // Motor da chamada em grupo (malha: cada aparelho conversa direto com cada outro). Até ~6 pessoas fica leve.
-import { ICE, devoLigar, qualidadeVideo, type CanalChamada, type Presenca, type Sinal } from '../data/chamada'
+import { ICE, devoLigar, qualidadeVideo, type CanalChamada, type Estado, type Presenca, type Sinal } from '../data/chamada'
 
-export type Participante = { id: string; email: string; nome: string; stream: MediaStream | null; instavel: boolean }
-type Par = { pc: RTCPeerConnection; email: string; nome: string; fazendoOferta: boolean; ignorar: boolean; educado: boolean; stream: MediaStream | null; visto: boolean; queda?: ReturnType<typeof setTimeout> }
+export type Participante = { id: string; email: string; nome: string; stream: MediaStream | null; instavel: boolean; mic: boolean; cam: boolean }
+type Par = { pc: RTCPeerConnection; email: string; nome: string; fazendoOferta: boolean; ignorar: boolean; educado: boolean; stream: MediaStream | null; visto: boolean; estado: Estado; queda?: ReturnType<typeof setTimeout> }
 
 export class ChamadaMotor {
   readonly meuId = Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -30,14 +30,34 @@ export class ChamadaMotor {
 
   participantes(): Participante[] {
     return [...this.pares.entries()].map(([id, p]) => ({ id, email: p.email, nome: p.nome, stream: p.stream,
-      instavel: p.pc.connectionState === 'disconnected' || p.pc.connectionState === 'failed' }))
+      instavel: p.pc.connectionState === 'disconnected' || p.pc.connectionState === 'failed', mic: p.estado.mic, cam: p.estado.cam }))
   }
 
   micLigado() { return !!this.local?.getAudioTracks().some((t) => t.enabled) }
   camLigada() { return !!this.local?.getVideoTracks().some((t) => t.enabled && t.readyState === 'live') }
   temCamera() { return !!this.local?.getVideoTracks().length }
-  alternarMic() { this.local?.getAudioTracks().forEach((t) => { t.enabled = !t.enabled }); this.aoMudar() }
-  alternarCam() { this.local?.getVideoTracks().forEach((t) => { t.enabled = !t.enabled }); this.aoMudar() }
+  alternarMic() { this.local?.getAudioTracks().forEach((t) => { t.enabled = !t.enabled }); this.avisarEstado(); this.aoMudar() }
+  alternarCam() { this.local?.getVideoTracks().forEach((t) => { t.enabled = !t.enabled }); this.avisarEstado(); this.aoMudar() }
+  private meuEstado(): Estado { return { mic: this.micLigado(), cam: this.camLigada() } }
+  /** Conta para os outros se o microfone e a câmera estão ligados (aparece "mudo" na tela deles). */
+  avisarEstado(para?: string) {
+    const estado = this.meuEstado()
+    if (para) return this.enviar(para, { estado })
+    this.pares.forEach((_p, id) => this.enviar(id, { estado }))
+  }
+  /** No celular: troca entre câmera frontal e traseira sem derrubar a chamada. */
+  async virarCamera() {
+    const atual = this.local?.getVideoTracks()[0]; if (!atual) return
+    const frente = (atual.getSettings().facingMode ?? 'user') === 'user'
+    let nova: MediaStreamTrack
+    try {
+      nova = (await navigator.mediaDevices.getUserMedia({ video: { facingMode: frente ? 'environment' : 'user', width: { ideal: 640 }, height: { ideal: 360 } } })).getVideoTracks()[0]!
+    } catch { return }
+    nova.enabled = atual.enabled
+    this.pares.forEach((p) => p.pc.getSenders().filter((x) => x.track === atual).forEach((x) => void x.replaceTrack(nova)))
+    this.local!.removeTrack(atual); atual.stop(); this.local!.addTrack(nova)
+    this.aoMudar()
+  }
 
   async compartilharTela() {
     if (this.tela) return this.pararTela()
@@ -69,7 +89,7 @@ export class ChamadaMotor {
 
   private criar(id: string, email: string, nome: string): Par {
     const pc = new RTCPeerConnection({ iceServers: this.iceServers, bundlePolicy: 'max-bundle' })
-    const p: Par = { pc, email, nome, fazendoOferta: false, ignorar: false, educado: this.meuId < id, stream: null, visto: false }
+    const p: Par = { pc, email, nome, fazendoOferta: false, ignorar: false, educado: this.meuId < id, stream: null, visto: false, estado: { mic: true, cam: true } }
     this.local?.getTracks().forEach((t) => pc.addTrack(t, this.local!))
     if (this.tela) pc.addTrack(this.tela.getVideoTracks()[0]!, this.tela)
     pc.onnegotiationneeded = async () => {
@@ -81,6 +101,7 @@ export class ChamadaMotor {
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed') { try { pc.restartIce() } catch { /* sem suporte */ } }
       clearTimeout(p.queda)
+      if (pc.connectionState === 'connected') this.avisarEstado(id)
       if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') p.queda = setTimeout(() => { if (this.pares.get(id) === p && pc.connectionState !== 'connected') this.fechar(id) }, 20000)
       this.aoMudar()
     }
@@ -93,6 +114,7 @@ export class ChamadaMotor {
   private async aoSinal(s: Sinal) {
     const p = this.pares.get(s.de) ?? this.criar(s.de, s.email, s.email)
     const pc = p.pc
+    if (s.estado) { p.estado = s.estado; this.aoMudar(); return }
     if (s.descricao) {
       const colisao = s.descricao.type === 'offer' && (p.fazendoOferta || pc.signalingState !== 'stable')
       p.ignorar = !p.educado && colisao

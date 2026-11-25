@@ -1,4 +1,4 @@
-import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, PedidoEntrada, PessoaComunidade, PessoaEquipe } from './conversas'
+import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, Contato, ContatoForm, PedidoEntrada, PessoaComunidade, PessoaEquipe } from './conversas'
 import type { CanalChamada } from './chamada'
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
@@ -229,6 +229,9 @@ export interface Api {
   comSalvar(f: ComunidadeForm): Promise<string>
   comPessoas(id: string): Promise<PessoaComunidade[]>
   comPedirEntrada(id: string): Promise<void>
+  contatoLista(): Promise<Contato[]>
+  contatoSalvar(f: ContatoForm): Promise<string>
+  contatoApagar(id: string): Promise<void>
   comPedidos(id: string): Promise<PedidoEntrada[]>
   comDecidirEntrada(id: string, escritorio: string, aprovar: boolean): Promise<void>
   /** horas: null = até liberar; 0 = liberar. */

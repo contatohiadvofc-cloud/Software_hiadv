@@ -20,7 +20,7 @@ import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
-import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada } from './conversas'
+import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato } from './conversas'
 import { ICE, type Presenca, type Sinal } from './chamada'
 
 function lerAnexo(a: unknown): Anexo | null {
@@ -766,6 +766,14 @@ export function criarApiSupabase(url: string, chave: string): Api {
       const r = (verificar(await sb.rpc('comunidade_pessoas', { p_id: id })) ?? []) as Record<string, unknown>[]
       return r.map((p) => ({ email: String(p.email), nome: String(p.nome), escritorio: (p.escritorio as string) ?? null, silenciadoAte: (p.silenciado_ate as string) ?? null }))
     },
+    async contatoLista() {
+      const r = await sb.rpc('contato_lista')
+      if (r.error && /function|does not exist/i.test(r.error.message)) return []
+      return ((verificar(r) ?? []) as Record<string, unknown>[]).map((c) => ({ id: String(c.id), tipo: c.tipo === 'equipe' ? 'equipe' : 'externo', email: (c.email as string) ?? null,
+        telefone: (c.telefone as string) ?? null, nome: String(c.nome), obs: (c.obs as string) ?? null, editadoPor: (c.editado_por as string) ?? null, editadoEm: String(c.editado_em) }) satisfies Contato)
+    },
+    async contatoSalvar(f) { return String(okOuErro(verificar(await sb.rpc('contato_salvar', { p: { id: f.id ?? null, tipo: f.tipo, email: f.email ?? null, telefone: f.telefone ?? null, nome: f.nome, obs: f.obs ?? null } }))).id) },
+    async contatoApagar(id) { okOuErro(verificar(await sb.rpc('contato_apagar', { p_id: id }))) },
     async comPedirEntrada(id) { okOuErro(verificar(await sb.rpc('comunidade_pedir_entrada', { p_id: id }))) },
     async comPedidos(id) {
       const r = (verificar(await sb.rpc('comunidade_pedidos', { p_id: id })) ?? []) as Record<string, unknown>[]

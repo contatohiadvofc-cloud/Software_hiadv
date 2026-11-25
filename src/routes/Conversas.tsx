@@ -5,14 +5,15 @@ import { useToast } from '../design/components/Toast'
 import { Dialog } from '../design/components/Dialog'
 import { Button } from '../design/components/Button'
 import {
-  INTERVALOS, LIMITE_AUDIO_SEG, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
+  INTERVALOS, LIMITE_AUDIO_SEG, linkWhatsApp, nomesComApelidos, normalizarTelefone, telefoneTela, type Contato, type PessoaEquipe, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
   primeiroNome, publicoComunidade, quandoCurto, resumo, tamanhoTela, tipoAnexo, tituloConversa, validarArquivo, validarComunidade,
   type Anexo, type Comunidade, type ComunidadeForm, type Conversa, type Mensagem,
 } from '../data/conversas'
 import { Chamada } from './Chamada'
+import { abrirMicLimpo, type MicLimpo } from '../lib/audioLimpo'
 
-type Sel = { tipo: 'conv'; id: string } | { tipo: 'com'; id: string } | null
-type Aba = 'equipe' | 'comunidades'
+type Sel = { tipo: 'conv'; id: string } | { tipo: 'com'; id: string } | { tipo: 'pessoa'; id: string } | { tipo: 'contato'; id: string } | { tipo: 'novo-contato'; id: '' } | null
+type Aba = 'equipe' | 'comunidades' | 'contatos'
 
 const I = {
   busca: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16zM21 21l-4.3-4.3',
@@ -32,6 +33,10 @@ const I = {
   arquivo: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6',
   grupo: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
   predio: 'M3 21h18M5 21V7l7-4 7 4v14M9 9h1M14 9h1M9 13h1M14 13h1M10 21v-4h4v4',
+  balao: 'M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z',
+  agenda: 'M4 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zM12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM7 17a5 5 0 0 1 10 0',
+  telefone: 'M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z',
+  lapis: 'M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z',
   megafone: 'M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1zM15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13',
 }
 export function Ic({ d, t = 20 }: { d: string; t?: number }) {
@@ -60,7 +65,8 @@ export function Conversas() {
   const convs = useQuery({ queryKey: ['chat-lista', perfil?.escritorioId], queryFn: () => api.chatLista(), refetchInterval: 20000 })
   const coms = useQuery({ queryKey: ['com-lista'], queryFn: () => api.comLista(), refetchInterval: 30000 })
   const pessoas = useQuery({ queryKey: ['chat-pessoas', perfil?.escritorioId], queryFn: () => api.chatPessoas(), staleTime: 300000 })
-  const nomes = useMemo(() => new Map((pessoas.data ?? []).map((p) => [p.email, p.nome])), [pessoas.data])
+  const contatos = useQuery({ queryKey: ['contatos', perfil?.escritorioId], queryFn: () => api.contatoLista(), staleTime: 60000 })
+  const nomes = useMemo(() => nomesComApelidos(pessoas.data ?? [], contatos.data ?? []), [pessoas.data, contatos.data])
   const naoEquipe = (convs.data ?? []).reduce((s, c) => s + c.naoLidas, 0)
   const naoCom = (coms.data ?? []).reduce((s, c) => s + c.naoLidas, 0)
   const souModerador = !!perfil?.code
@@ -85,13 +91,16 @@ export function Conversas() {
           <h1>Conversas</h1>
           {aba === 'equipe'
             ? <button type="button" className="cv-icone-bt" aria-label="Nova conversa" title="Nova conversa" onClick={() => setNova(true)}><Ic d={I.novo} /></button>
+            : aba === 'contatos'
+            ? <button type="button" className="cv-icone-bt" aria-label="Novo contato externo" title="Novo contato" onClick={() => setSel({ tipo: 'novo-contato', id: '' })}><Ic d={I.novo} /></button>
             : souModerador && <button type="button" className="cv-icone-bt" aria-label="Nova comunidade" title="Nova comunidade" onClick={() => setModerar('nova')}><Ic d={I.novo} /></button>}
         </div>
         <div className="cv-abas" role="tablist" aria-label="Tipo de conversa">
           <button type="button" role="tab" aria-selected={aba === 'equipe'} onClick={() => { setAba('equipe'); setSel(null) }}>Equipe{naoEquipe > 0 && <b className="cv-badge">{naoEquipe}</b>}</button>
           <button type="button" role="tab" aria-selected={aba === 'comunidades'} onClick={() => { setAba('comunidades'); setSel(null) }}>Comunidades{naoCom > 0 && <b className="cv-badge">{naoCom}</b>}</button>
+          <button type="button" role="tab" aria-selected={aba === 'contatos'} onClick={() => { setAba('contatos'); setSel(null) }}>Contatos</button>
         </div>
-        <label className="cv-busca"><Ic d={I.busca} t={17} /><input placeholder={aba === 'equipe' ? 'Buscar conversa' : 'Buscar comunidade'} aria-label="Buscar" value={busca} onChange={(e) => setBusca(e.target.value)} /></label>
+        <label className="cv-busca"><Ic d={I.busca} t={17} /><input placeholder={aba === 'equipe' ? 'Buscar conversa' : aba === 'contatos' ? 'Buscar nome ou número' : 'Buscar comunidade'} aria-label="Buscar" value={busca} onChange={(e) => setBusca(e.target.value)} /></label>
         <ul className="cv-lista" role="list">
           {aba === 'equipe' && convs.isLoading && <li className="cv-vazio">Carregando…</li>}
           {aba === 'equipe' && convs.isError && <li className="cv-vazio">Não deu para carregar as conversas. <button type="button" className="cv-link" onClick={() => convs.refetch()}>Tentar de novo</button></li>}
@@ -130,18 +139,31 @@ export function Conversas() {
           {aba === 'comunidades' && coms.isSuccess && listaCom.length === 0 && (
             <li className="cv-vazio">{termo ? 'Nenhuma comunidade com esse nome.' : 'As comunidades do HiAdv reúnem os Gestores Master de todos os escritórios, por área. Elas aparecem aqui assim que forem abertas para o seu perfil.'}</li>
           )}
+          {aba === 'contatos' && <ListaContatos termo={termo} eu={eu} pessoas={pessoas.data ?? []} contatos={contatos.data ?? []} nomes={nomes} sel={sel} escolher={setSel} />}
         </ul>
       </aside>
 
       <section className="cv-conversa" aria-label="Conversa aberta">
         {conv && <ConversaEquipe key={conv.id} c={conv} eu={eu} nomes={nomes} voltar={() => setSel(null)} />}
         {comu && <ConversaComunidade key={comu.id} c={comu} eu={eu} voltar={() => setSel(null)} moderar={() => setModerar(comu)} />}
-        {!conv && !comu && (
+        {(sel?.tipo === 'pessoa' || sel?.tipo === 'contato' || sel?.tipo === 'novo-contato') && (
+          <PainelContato key={sel.tipo + sel.id} sel={sel} eu={eu} pessoas={pessoas.data ?? []} contatos={contatos.data ?? []} nomes={nomes}
+            voltar={() => setSel(null)} abrirConversa={(id) => { setAba('equipe'); setSel({ tipo: 'conv', id }) }} aoSalvar={(id) => setSel({ tipo: 'contato', id })} />
+        )}
+        {!conv && !comu && !(sel?.tipo === 'pessoa' || sel?.tipo === 'contato' || sel?.tipo === 'novo-contato') && aba !== 'contatos' && (
           <div className="cv-nada">
             <span className="cv-nada-pasta" aria-hidden="true"><i /><b><Ic d={aba === 'equipe' ? I.grupo : I.megafone} t={30} /></b></span>
             <h2>{aba === 'equipe' ? 'Converse com a sua equipe' : 'Comunidades HiAdv'}</h2>
             <p>{aba === 'equipe' ? 'Texto, áudio, arquivos e chamada de voz ou vídeo, só com quem é do seu escritório.' : 'Troque experiência com Gestores Master de outros escritórios, por área de atuação.'}</p>
             {aba === 'equipe' && <Button onClick={() => setNova(true)}>Nova conversa</Button>}
+          </div>
+        )}
+        {aba === 'contatos' && !sel && (
+          <div className="cv-nada">
+            <span className="cv-nada-pasta" aria-hidden="true"><i /><b><Ic d={I.agenda} t={30} /></b></span>
+            <h2>Contatos do escritório</h2>
+            <p>Dê a cada pessoa da equipe o nome que todos reconhecem e guarde números de fora (peritos, agências do INSS, parceiros) para ligar ou chamar no WhatsApp direto daqui.</p>
+            <Button onClick={() => setSel({ tipo: 'novo-contato', id: '' })}>Novo contato</Button>
           </div>
         )}
       </section>
@@ -442,12 +464,13 @@ function Compositor(p: {
   const [subindo, setSubindo] = useState(false)
   const [gravando, setGravando] = useState<{ inicio: number } | null>(null)
   const [agora, setAgora] = useState(Date.now())
-  const rec = useRef<{ mr: MediaRecorder; partes: Blob[]; cancelado: boolean; stream: MediaStream } | null>(null)
+  const rec = useRef<{ mr: MediaRecorder; partes: Blob[]; cancelado: boolean; mic: MicLimpo } | null>(null)
+  const [nivel, setNivel] = useState(0)
   const area = useRef<HTMLTextAreaElement>(null)
   const arq = useRef<HTMLInputElement>(null)
 
   useEffect(() => { if (p.resposta) area.current?.focus() }, [p.resposta])
-  useEffect(() => { if (!gravando) return; const t = setInterval(() => { setAgora(Date.now()); if (Date.now() - gravando.inicio > LIMITE_AUDIO_SEG * 1000) pararGravacao(true) }, 250); return () => clearInterval(t) }, [gravando]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (!gravando) return; const t = setInterval(() => { setAgora(Date.now()); setNivel(rec.current?.mic.nivel() ?? 0); if (Date.now() - gravando.inicio > LIMITE_AUDIO_SEG * 1000) pararGravacao(true) }, 120); return () => clearInterval(t) }, [gravando]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { const el = area.current; if (!el) return; el.style.height = 'auto'; el.style.height = `${Math.min(el.scrollHeight, 140)}px` }, [texto])
 
   async function enviarTexto(e?: FormEvent) {
@@ -483,13 +506,13 @@ function Compositor(p: {
     if (!p.permite.audios) return toast('Esta conversa não aceita áudios.', 'danger')
     if (typeof MediaRecorder === 'undefined') return toast('Este navegador não grava áudio. Use o Chrome, o Edge ou o Safari atualizados.', 'danger')
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } })
+      const mic = await abrirMicLimpo()
       const tipo = formatoAudio((t) => MediaRecorder.isTypeSupported(t))
-      const mr = new MediaRecorder(stream, { ...(tipo ? { mimeType: tipo } : {}), audioBitsPerSecond: 32000 })
-      const r = { mr, partes: [] as Blob[], cancelado: false, stream }
+      const mr = new MediaRecorder(mic.stream, { ...(tipo ? { mimeType: tipo } : {}), audioBitsPerSecond: 48000 })
+      const r = { mr, partes: [] as Blob[], cancelado: false, mic }
       mr.ondataavailable = (e) => { if (e.data.size) r.partes.push(e.data) }
       mr.onstop = async () => {
-        stream.getTracks().forEach((t) => t.stop())
+        mic.parar()
         const seg = (Date.now() - inicio) / 1000
         if (r.cancelado || seg < 0.8) return
         const blob = new Blob(r.partes, { type: (mr.mimeType || 'audio/webm').split(';')[0] })
@@ -509,7 +532,7 @@ function Compositor(p: {
   function pararGravacao(enviar: boolean) {
     const r = rec.current; if (!r) return
     r.cancelado = !enviar
-    try { r.mr.stop() } catch { r.stream.getTracks().forEach((t) => t.stop()) }
+    try { r.mr.stop() } catch { r.mic.parar() }
     rec.current = null; setGravando(null)
   }
 
@@ -526,6 +549,7 @@ function Compositor(p: {
         <div className="cv-gravando" role="status">
           <button type="button" className="cv-icone-bt" aria-label="Descartar áudio" onClick={() => pararGravacao(false)}><Ic d={I.lixo} /></button>
           <span className="cv-rec"><i aria-hidden="true" />Gravando {duracaoTela((agora - gravando.inicio) / 1000)}</span>
+          <span className="cv-medidor" aria-hidden="true">{[0.15, 0.3, 0.5, 0.7, 0.9].map((x) => <i key={x} data-on={nivel >= x * 0.35 || undefined} />)}</span>
           <button type="button" className="cv-enviar" aria-label="Enviar áudio" onClick={() => pararGravacao(true)}><Ic d={I.enviar} t={18} /></button>
         </div>
       ) : (
@@ -586,6 +610,113 @@ function NovaConversa({ eu, aoAbrir, aoFechar }: { eu: string; aoAbrir: (id: str
         {modo === 'grupo' && <div className="cv-nova-fim"><span>{escolhidos.length} {escolhidos.length === 1 ? 'pessoa' : 'pessoas'}</span><Button disabled={nome.trim().length < 2 || !escolhidos.length} loading={grupo.isPending} onClick={() => grupo.mutate()}>Criar grupo</Button></div>}
       </div>
     </Dialog>
+  )
+}
+
+// ---------- contatos ----------
+function ListaContatos({ termo, eu, pessoas, contatos, nomes, sel, escolher }: { termo: string; eu: string; pessoas: PessoaEquipe[]; contatos: Contato[]; nomes: Map<string, string>; sel: Sel; escolher: (s: Sel) => void }) {
+  const digitos = termo.replace(/\D/g, '')
+  const equipe = pessoas.filter((p) => p.email !== eu && (!termo || (nomes.get(p.email) ?? p.nome).toLowerCase().includes(termo)))
+  const externos = contatos.filter((c) => c.tipo === 'externo' && (!termo || c.nome.toLowerCase().includes(termo) || (!!digitos && (c.telefone ?? '').includes(digitos))))
+  return (
+    <>
+      <li className="cv-sep">Equipe do escritório</li>
+      {equipe.map((p) => (
+        <li key={p.email}>
+          <button type="button" className="cv-item" aria-current={(sel?.tipo === 'pessoa' && sel.id === p.email) || undefined} onClick={() => escolher({ tipo: 'pessoa', id: p.email })}>
+            <Avatar nome={nomes.get(p.email) ?? p.nome} />
+            <span className="cv-item-meio"><span className="cv-item-nome">{nomes.get(p.email) ?? p.nome}</span><span className="cv-item-prev">{p.papel === 'master' ? 'Gestor Master' : p.papel === 'code' ? 'Coder' : 'Colaborador'}</span></span>
+          </button>
+        </li>
+      ))}
+      {!equipe.length && <li className="cv-vazio">{termo ? 'Ninguém da equipe com esse nome.' : 'Só você na equipe por enquanto.'}</li>}
+      <li className="cv-sep">Números externos</li>
+      {externos.map((c) => (
+        <li key={c.id}>
+          <button type="button" className="cv-item" aria-current={(sel?.tipo === 'contato' && sel.id === c.id) || undefined} onClick={() => escolher({ tipo: 'contato', id: c.id })}>
+            <span className="cv-av" data-tipo="externo" style={{ width: 44, height: 44 }} aria-hidden="true"><Ic d={I.telefone} t={19} /></span>
+            <span className="cv-item-meio"><span className="cv-item-nome">{c.nome}</span><span className="cv-item-prev">{telefoneTela(c.telefone ?? '')}</span></span>
+          </button>
+        </li>
+      ))}
+      {!externos.length && <li className="cv-vazio">{termo ? 'Nenhum número com esse nome.' : 'Nenhum número externo ainda. Toque em + para cadastrar.'}</li>}
+    </>
+  )
+}
+
+function PainelContato({ sel, eu, pessoas, contatos, nomes, voltar, abrirConversa, aoSalvar }: {
+  sel: Exclude<Sel, null>; eu: string; pessoas: PessoaEquipe[]; contatos: Contato[]; nomes: Map<string, string>
+  voltar: () => void; abrirConversa: (id: string) => void; aoSalvar: (id: string) => void
+}) {
+  const api = useApi()
+  const qc = useQueryClient()
+  const toast = useToast()
+  const pessoa = sel.tipo === 'pessoa' ? pessoas.find((p) => p.email === sel.id) : undefined
+  const contato = sel.tipo === 'contato' ? contatos.find((c) => c.id === sel.id) : undefined
+  const apelido = pessoa ? contatos.find((c) => c.tipo === 'equipe' && c.email === pessoa.email) : undefined
+  const novo = sel.tipo === 'novo-contato'
+  const [editando, setEditando] = useState(novo)
+  const [nome, setNome] = useState(pessoa ? (nomes.get(pessoa.email) ?? pessoa.nome) : contato?.nome ?? '')
+  const [tel, setTel] = useState(contato?.telefone ? telefoneTela(contato.telefone) : '')
+  const [obs, setObs] = useState((pessoa ? apelido?.obs : contato?.obs) ?? '')
+  const [erro, setErro] = useState<string | null>(null)
+  const [confirmar, setConfirmar] = useState(false)
+  const salvar = useMutation({
+    mutationFn: () => api.contatoSalvar(pessoa ? { tipo: 'equipe', email: pessoa.email, nome: nome.trim(), obs } : { id: contato?.id, tipo: 'externo', telefone: tel, nome: nome.trim(), obs }),
+    onSuccess: (id) => { toast('Contato salvo.'); qc.invalidateQueries({ queryKey: ['contatos'] }); setEditando(false); if (!pessoa) aoSalvar(id) },
+    onError: (e) => setErro((e as Error).message),
+  })
+  const apagar = useMutation({
+    mutationFn: () => api.contatoApagar(contato!.id),
+    onSuccess: () => { toast('Contato removido.'); qc.invalidateQueries({ queryKey: ['contatos'] }); voltar() },
+    onError: (e) => toast((e as Error).message, 'danger'),
+  })
+  const direta = useMutation({ mutationFn: () => api.chatDireta(pessoa!.email), onSuccess: (id) => { qc.invalidateQueries({ queryKey: ['chat-lista'] }); abrirConversa(id) }, onError: (e) => toast((e as Error).message, 'danger') })
+  if (!pessoa && !contato && !novo) return null
+  const titulo = novo ? 'Novo contato' : pessoa ? (nomes.get(pessoa.email) ?? pessoa.nome) : contato!.nome
+  function enviar(e: FormEvent) {
+    e.preventDefault()
+    if (!nome.trim()) return setErro('Dê um nome ao contato.')
+    if (!pessoa && !normalizarTelefone(tel)) return setErro('Confira o número: DDD e telefone, como (49) 99999-0000.')
+    setErro(null); salvar.mutate()
+  }
+  return (
+    <div className="cv-contato">
+      <header className="cv-fio-cabeca">
+        <button type="button" className="cv-icone-bt cv-so-cel" aria-label="Voltar para a lista" onClick={voltar}><Ic d={I.voltar} /></button>
+        <div className="cv-fio-tit"><h2>{titulo}</h2><p>{pessoa ? `Equipe · ${pessoa.email}` : novo ? 'Número de fora do escritório' : telefoneTela(contato!.telefone ?? '')}</p></div>
+        {!editando && <div className="cv-fio-acoes"><button type="button" className="cv-icone-bt" aria-label="Editar contato" title="Editar" onClick={() => setEditando(true)}><Ic d={I.lapis} /></button></div>}
+      </header>
+      <div className="cv-contato-corpo">
+        {pessoa ? <Avatar nome={titulo} tam={88} /> : <span className="cv-av" data-tipo="externo" style={{ width: 88, height: 88 }} aria-hidden="true"><Ic d={I.telefone} t={36} /></span>}
+        {editando ? (
+          <form className="cv-contato-form" onSubmit={enviar}>
+            <label className="hv-field"><span>{pessoa ? 'Nome que a equipe vê' : 'Nome'}</span><input className="hv-input" autoFocus maxLength={60} value={nome} onChange={(e) => setNome(e.target.value)} placeholder={pessoa ? pessoa.nome : 'Ex.: Perito Dr. Fulano'} /></label>
+            {!pessoa && <label className="hv-field"><span>Número</span><input className="hv-input" inputMode="tel" autoComplete="off" value={tel} onChange={(e) => setTel(e.target.value)} placeholder="(49) 99999-0000" /></label>}
+            <label className="hv-field"><span>Observação (opcional)</span><input className="hv-input" maxLength={200} value={obs} onChange={(e) => setObs(e.target.value)} placeholder="Ex.: atende só à tarde" /></label>
+            {pessoa && <p className="cv-mod-dica">O nome vale para toda a equipe do escritório. O cadastro original ({pessoa.nome}) continua igual.</p>}
+            {erro && <p className="hv-error" role="alert">{erro}</p>}
+            <div className="cv-contato-bts">
+              {!novo && <Button type="button" variant="secondary" onClick={() => setEditando(false)}>Cancelar</Button>}
+              <Button type="submit" loading={salvar.isPending}>Salvar</Button>
+            </div>
+          </form>
+        ) : (
+          <>
+            {(pessoa ? apelido?.obs : contato?.obs) && <p className="cv-contato-obs">{pessoa ? apelido?.obs : contato?.obs}</p>}
+            <div className="cv-contato-acoes">
+              {pessoa && pessoa.email !== eu && <button type="button" onClick={() => direta.mutate()} disabled={direta.isPending}><Ic d={I.balao} /><span>Mensagem</span></button>}
+              {contato?.telefone && <a href={`tel:${contato.telefone}`}><Ic d={I.telefone} /><span>Ligar</span></a>}
+              {contato?.telefone && <a href={linkWhatsApp(contato.telefone)} target="_blank" rel="noopener noreferrer"><Ic d={I.balao} /><span>WhatsApp</span></a>}
+            </div>
+            {contato && (confirmar
+              ? <span className="cv-contato-conf" role="group" aria-label="Confirmar remoção"><span>Remover {contato.nome}?</span><Button size="sm" variant="secondary" onClick={() => setConfirmar(false)}>Não</Button><Button size="sm" loading={apagar.isPending} onClick={() => apagar.mutate()}>Remover</Button></span>
+              : <button type="button" className="cv-link cv-perigo" onClick={() => setConfirmar(true)}>Remover contato</button>)}
+            {(pessoa ? apelido : contato) && <small className="cv-contato-quem">Editado por {primeiroNome(nomes.get((pessoa ? apelido : contato)!.editadoPor ?? '') ?? (pessoa ? apelido : contato)!.editadoPor ?? '')} em {new Date((pessoa ? apelido : contato)!.editadoEm).toLocaleDateString('pt-BR')}</small>}
+          </>
+        )}
+      </div>
+    </div>
   )
 }
 

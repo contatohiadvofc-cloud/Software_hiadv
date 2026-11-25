@@ -1,6 +1,6 @@
 // Conversas e comunidades da prévia (dados fictícios, só na memória deste aparelho).
 import type { Api } from './api'
-import type { Anexo, Comunidade, Conversa, Mensagem } from './conversas'
+import { normalizarTelefone, type Anexo, type Comunidade, type Contato, type Conversa, type Mensagem } from './conversas'
 
 const EU = 'ana@silvaprado.exemplo.br'
 const PESSOAS = [
@@ -32,6 +32,11 @@ const CONVERSAS: Conv[] = [
     msg('marcos@silvaprado.exemplo.br', 'Saiu a exigência do INSS no caso da Carla: CTPS completa.', 600),
     msg(EU, 'Pedi a CTPS pelo app do cliente. Prazo de 30 dias.', 590),
   ] },
+]
+
+const CONTATOS: Contato[] = [
+  { id: 'ct-1', tipo: 'externo', email: null, telefone: '+5549999990001', nome: 'Perito Dr. Exemplo (fictício)', obs: 'Agenda perícias às terças', editadoPor: EU, editadoEm: new Date().toISOString() },
+  { id: 'ct-2', tipo: 'externo', email: null, telefone: '+5549999990002', nome: 'APS Exemplo (fictícia)', obs: null, editadoPor: EU, editadoEm: new Date().toISOString() },
 ]
 
 type Com = Comunidade & { msgs: Mensagem[] }
@@ -80,7 +85,7 @@ function responder(c: Conv) {
 }
 
 type ConversasApi = Pick<Api, 'chatLista' | 'chatPessoas' | 'chatMensagens' | 'chatEnviar' | 'chatDireta' | 'chatGrupo' | 'chatLido' | 'chatReagir' | 'chatApagar' | 'chatSubir' | 'chatUrl' | 'chatAssinar'
-  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
+  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'contatoLista' | 'contatoSalvar' | 'contatoApagar' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
 
 export function conversasDemo(): ConversasApi {
   const reagir = (lista: Mensagem[], id: string, e: string) => {
@@ -137,6 +142,17 @@ export function conversasDemo(): ConversasApi {
     async comSalvar() { throw new Error('Na prévia, as comunidades não podem ser alteradas.') },
     async comPessoas() { return [] },
     async comSilenciar() { throw new Error('Na prévia, a moderação não está disponível.') },
+    async contatoLista() { return CONTATOS.map((c) => ({ ...c })) },
+    async contatoSalvar(f) {
+      const tel = f.tipo === 'externo' ? normalizarTelefone(f.telefone ?? '') : null
+      if (f.tipo === 'externo' && !tel) throw new Error('Confira o número: DDD e telefone, como (49) 99999-0000.')
+      const atual = CONTATOS.find((c) => (f.id && c.id === f.id) || (f.tipo === 'equipe' && c.email === f.email))
+      if (atual) { Object.assign(atual, { nome: f.nome, obs: f.obs ?? null, telefone: tel ?? atual.telefone, editadoPor: EU, editadoEm: new Date().toISOString() }); return atual.id }
+      const id = 'ct-' + Math.random().toString(36).slice(2)
+      CONTATOS.push({ id, tipo: f.tipo, email: f.email ?? null, telefone: tel, nome: f.nome, obs: f.obs ?? null, editadoPor: EU, editadoEm: new Date().toISOString() })
+      return id
+    },
+    async contatoApagar(id) { const i = CONTATOS.findIndex((c) => c.id === id); if (i >= 0) CONTATOS.splice(i, 1) },
     async comPedirEntrada() { throw new Error('Na prévia, os pedidos de entrada não estão disponíveis.') },
     async comPedidos() { return [] },
     async comDecidirEntrada() { throw new Error('Na prévia, a moderação não está disponível.') },

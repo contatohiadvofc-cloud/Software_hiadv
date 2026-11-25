@@ -1133,3 +1133,34 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .cv-entrada-corpo small { color:var(--muted); font-size:.8rem }
 .cv-entrada-status { padding:10px 14px; border-radius:10px; background:var(--gold-soft); color:var(--text) !important }
 .cv-chave small { display:block; font-size:.78rem; color:var(--muted); font-weight:400; margin-top:2px }
+
+/* Chamada: rótulos nos botões, indicador de fala e "mudo" */
+.ch-controles button { width:auto; min-width:56px; height:auto; padding:10px 8px 6px; border-radius:18px; gap:4px; font:inherit }
+.ch-controles button small { font-size:11px; font-weight:600; opacity:.9 }
+.ch-controles button svg { width:24px; height:24px }
+.ch-controles .ch-sair { width:auto; min-width:68px }
+.ch-tile { transition:box-shadow .15s }
+.ch-tile[data-falando] { box-shadow:inset 0 0 0 3px #c9a872 }
+.ch-tile[data-eu] video { transform:scaleX(-1) }
+.ch-nome { display:inline-flex; align-items:center; gap:6px }
+.ch-nome svg { color:#ff8a8f }
+@media (prefers-reduced-motion: reduce) { .ch-tile { transition:none } }
+
+.cv-medidor { display:inline-flex; align-items:flex-end; gap:3px; height:18px; margin-left:auto; margin-right:8px }
+.cv-medidor i { width:4px; border-radius:2px; background:var(--line); transition:background .08s }
+.cv-medidor i:nth-child(1){height:6px}.cv-medidor i:nth-child(2){height:9px}.cv-medidor i:nth-child(3){height:12px}.cv-medidor i:nth-child(4){height:15px}.cv-medidor i:nth-child(5){height:18px}
+.cv-medidor i[data-on] { background:var(--gold) }
+
+/* Contatos */
+.cv-sep { padding:14px 16px 6px; font-size:12px; font-weight:700; color:var(--muted); list-style:none }
+.cv-av[data-tipo="externo"] { background:var(--gold-soft); color:var(--gold); display:grid; place-items:center; border-radius:50% }
+.cv-contato { display:flex; flex-direction:column; min-height:0; height:100% }
+.cv-contato-corpo { flex:1; overflow:auto; display:flex; flex-direction:column; align-items:center; gap:16px; padding:28px 20px }
+.cv-contato-form { width:100%; max-width:380px; display:flex; flex-direction:column; gap:12px }
+.cv-contato-bts { display:flex; gap:8px; justify-content:flex-end }
+.cv-contato-obs { margin:0; max-width:380px; text-align:center; color:var(--muted) }
+.cv-contato-acoes { display:flex; gap:12px; flex-wrap:wrap; justify-content:center }
+.cv-contato-acoes a, .cv-contato-acoes button { display:flex; flex-direction:column; align-items:center; gap:6px; min-width:88px; padding:14px 12px; border-radius:16px; border:1px solid var(--line); background:var(--surface-2, transparent); color:var(--accent-text); font:inherit; font-size:.85rem; font-weight:600; text-decoration:none; cursor:pointer }
+.cv-contato-acoes a:hover, .cv-contato-acoes button:hover { border-color:var(--gold) }
+.cv-contato-quem { color:var(--muted); font-size:.78rem }
+.cv-contato-conf { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:center }

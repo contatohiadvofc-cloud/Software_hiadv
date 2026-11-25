@@ -11,3 +11,14 @@ test('prévia: conversas da equipe e comunidades abrem sem estourar a tela', asy
   await page.getByRole('button', { name: 'Enviar', exact: true }).click()
   await expect(page.getByText('Meta do mês: 12 protocolos', { exact: true }).last()).toBeVisible()
 })
+
+test('prévia: contatos — cadastra número externo e mostra WhatsApp', async ({ page }) => {
+  await page.goto('/experimentar')
+  await page.getByRole('link', { name: /^Conversas/ }).first().click()
+  await page.getByRole('tab', { name: 'Contatos' }).click()
+  await page.getByRole('button', { name: 'Novo contato externo' }).click()
+  await page.getByLabel('Nome', { exact: true }).fill('Agência INSS Teste')
+  await page.getByLabel('Número').fill('(49) 98888-7777')
+  await page.getByRole('button', { name: 'Salvar' }).click()
+  await expect(page.getByRole('link', { name: 'WhatsApp' })).toHaveAttribute('href', 'https://wa.me/5549988887777')
+})

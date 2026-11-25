@@ -2,7 +2,8 @@
 // O servidor só "apresenta" os aparelhos por um canal privado. Nada é gravado.
 
 export type Presenca = { id: string; email: string; nome: string; video: boolean }
-export type Sinal = { de: string; para: string; email: string; descricao?: RTCSessionDescriptionInit; candidato?: RTCIceCandidateInit }
+export type Estado = { mic: boolean; cam: boolean }
+export type Sinal = { de: string; para: string; email: string; descricao?: RTCSessionDescriptionInit; candidato?: RTCIceCandidateInit; estado?: Estado }
 
 export interface CanalChamada {
   aoSinal(fn: (s: Sinal) => void): void
@@ -33,3 +34,11 @@ export function cronometro(ms: number): string {
   const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60
   return h ? `${h}:${String(m).padStart(2, '0')}:${String(ss).padStart(2, '0')}` : `${m}:${String(ss).padStart(2, '0')}`
 }
+
+/** Nível de voz (0 a 1) a partir das amostras do analisador: acima de 0,06 a pessoa está falando. */
+export function nivelVoz(amostras: Uint8Array): number {
+  let soma = 0
+  for (const a of amostras) { const v = (a - 128) / 128; soma += v * v }
+  return Math.min(1, Math.sqrt(soma / Math.max(1, amostras.length)) * 4)
+}
+export const FALANDO = 0.06

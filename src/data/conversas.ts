@@ -221,3 +221,27 @@ export function publicoComunidade(c: Pick<Comunidade, 'soMasters' | 'areas'>): s
   if (!c.areas?.length) return c.soMasters ? 'Gestores Master de todos os escritórios' : 'Todas as equipes de todos os escritórios'
   return `${quem} que atuam em ${c.areas.map((a) => NOMES_AREAS[a] ?? a).join(', ').replace(/, ([^,]*)$/, ' ou $1')}`
 }
+
+// ---------- contatos do escritório ----------
+export type Contato = { id: string; tipo: 'equipe' | 'externo'; email: string | null; telefone: string | null; nome: string; obs: string | null; editadoPor: string | null; editadoEm: string }
+export type ContatoForm = { id?: string; tipo: 'equipe' | 'externo'; email?: string; telefone?: string; nome: string; obs?: string }
+
+/** Mesmo critério do servidor: só dígitos; sem "+" vira Brasil (+55). */
+export function normalizarTelefone(t: string): string | null {
+  let v = t.replace(/[^0-9+]/g, '')
+  if (!v) return null
+  if (!v.startsWith('+')) v = '+55' + v.replace(/^0+/, '')
+  return /^\+[1-9][0-9]{9,14}$/.test(v) ? v : null
+}
+/** +5549999990000 → (49) 99999-0000; outros países ficam como vieram. */
+export function telefoneTela(t: string): string {
+  const m = /^\+55(\d{2})(\d{4,5})(\d{4})$/.exec(t)
+  return m ? `(${m[1]}) ${m[2]}-${m[3]}` : t
+}
+export const linkWhatsApp = (t: string) => `https://wa.me/${t.replace(/\D/g, '')}`
+/** Nome que a equipe deu ao contato vale sobre o nome do cadastro. */
+export function nomesComApelidos(pessoas: { email: string; nome: string }[], contatos: Contato[]): Map<string, string> {
+  const m = new Map(pessoas.map((p) => [p.email, p.nome]))
+  for (const c of contatos) if (c.tipo === 'equipe' && c.email) m.set(c.email, c.nome)
+  return m
+}
