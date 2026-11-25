@@ -106,12 +106,15 @@ h3.hv-group-title { margin: 0; font-weight: 600; letter-spacing: 0; }
 /* ---------- login ---------- */
 .login { min-height: 100dvh; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); background: var(--bg); }
 .login > .login-caixa { align-self: center; justify-self: center; margin: var(--s-6) var(--s-4); }
-.login-apresenta { background: var(--brand-mark); color: var(--brand-mark-ink); padding: clamp(32px, 7vw, 96px); display: flex; flex-direction: column; justify-content: center; gap: var(--s-4); }
-.login-chamada { margin: 0; font-family: var(--font-marca); font-weight: 600; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.12; letter-spacing: -0.01em; max-width: 16ch; text-wrap: balance; }
+.login-apresenta { background: radial-gradient(120% 90% at 0% 100%, rgb(212 103 123 / 0.22), transparent 60%), radial-gradient(80% 60% at 100% 0%, rgb(212 103 123 / 0.10), transparent 70%), var(--surface); color: var(--ink); border-right: 1px solid var(--line); padding: clamp(32px, 7vw, 96px); display: flex; flex-direction: column; justify-content: center; gap: var(--s-4); }
+.login-chamada { color: #fff; margin: 0; font-family: var(--font-marca); font-weight: 600; font-size: clamp(30px, 3.6vw, 48px); line-height: 1.12; letter-spacing: -0.01em; max-width: 16ch; text-wrap: balance; }
 .login-sub { margin: 0; font-size: var(--fs-lg); line-height: 1.45; max-width: 40ch; opacity: 0.92; }
 .login-pontos { margin: var(--s-3) 0 0; padding: 0; list-style: none; display: grid; gap: var(--s-3); max-width: 46ch; }
 .login-pontos li { padding-left: 22px; position: relative; line-height: 1.45; }
-.login-pontos li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 8px; height: 8px; border-radius: 50%; background: var(--brand-dot); }
+.login-pontos li::before { content: ''; position: absolute; left: 0; top: 0.6em; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); }
+.login { color: var(--ink); }
+.login-sub { color: var(--ink-2); }
+.login-pontos { color: var(--ink-2); }
 @media (max-width: 860px) {
   .login { grid-template-columns: 1fr; align-content: start; }
   .login-apresenta { padding: var(--s-6) var(--s-5) var(--s-5); gap: var(--s-2); }
@@ -631,3 +634,4 @@ a.hv-btn { text-decoration: none; display: inline-flex; align-items: center; jus
 .previa-fim-caixa .previa-cta { background: var(--vinho, #7a1f33); color: #fff; text-align: center; }
 .previa-link { text-align: center; color: inherit; }
 .conector-plano-selo { display: block; margin-top: .2rem; font-size: .78rem; color: var(--texto-suave, #6b6266); }
+@media (display-mode: standalone) { .login .voltar-site { display: none; } }

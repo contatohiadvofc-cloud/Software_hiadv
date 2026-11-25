@@ -98,7 +98,7 @@ export function Login() {
   const voltar = () => { setErro(null); setInfo(null); setNova(''); setNova2(''); setModo('entrar') }
 
   return (
-    <div className="login">
+    <div className="login" data-theme="dark">
       <Apresentacao />
       <div className="login-caixa">
         {!modoDemo() && <a className="voltar-site" href="/"><span aria-hidden="true">‹</span> Voltar ao site</a>}
