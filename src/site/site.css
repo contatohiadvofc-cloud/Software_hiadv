@@ -65,7 +65,7 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 /* Herói: fundo vinho profundo e o produto de verdade em destaque */
 .sv-topo { background: rgb(14 14 14 / .92); }
 .sv-heroi { position: relative; color: #fff; padding: clamp(48px, 7vw, 96px) 0 0; background:
-  radial-gradient(1100px 600px at 78% 18%, rgb(201 168 114 / .14), transparent 60%),
+  radial-gradient(1100px 600px at 78% 18%, rgb(158 43 72 / .30), transparent 60%),
   radial-gradient(900px 500px at 8% 0%, rgb(201 168 114 / .06), transparent 65%),
   linear-gradient(180deg, #0e0e0e 0%, #141413 60%, #161616 100%); overflow: hidden; }
 .sv-heroi::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .06;
@@ -337,15 +337,15 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 .sv-topo { background: rgb(14 14 14 / .92); backdrop-filter: blur(8px); border-bottom-color: #333331; }
 .sv-pasta { position: relative; display: inline-block; background: #c9a872; color: #161616; border-radius: 0 6px 6px 6px; padding: 3px 6px 2px; margin-top: 4px; line-height: 1; }
 .sv-pasta::before { content: ''; position: absolute; left: 0; top: -4px; width: 13px; height: 4px; background: #c9a872; border-radius: 3px 3px 0 0; }
-.sv-btn-vinho, .sv-plano-destaque .sv-btn-claro { background: #c9a872 !important; color: #161616 !important; font-weight: 700; }
-.sv-btn-vinho:hover, .sv-plano-destaque .sv-btn-claro:hover { background: #d8bc86 !important; }
+.sv-btn-vinho, .sv-plano-destaque .sv-btn-claro { background: #9e2b48 !important; color: #ffffff !important; font-weight: 700; }
+.sv-btn-vinho:hover, .sv-plano-destaque .sv-btn-claro:hover { background: #b3354f !important; }
 .sv-plano-destaque { background: #232322; color: #f2f2f0; border-color: #c9a872; box-shadow: inset 0 3px 0 #c9a872; }
 .sv-areas-abas button { border-radius: 10px 10px 0 0; }
 .sv-areas-abas button[aria-selected='true'] { background: #232322; color: #f2f2f0; border-color: #232322; box-shadow: inset 0 3px 0 #c9a872; }
 .sv-selo { background: #2e281d; color: #efd7a8; }
 .sv-fundador-preco { color: #c9a872; }
-.sv-heroi .sv-btn-claro, .sv-topo .sv-btn-claro { background: #c9a872; color: #161616 !important; font-weight: 700; }
-.sv-heroi .sv-btn-claro:hover, .sv-topo .sv-btn-claro:hover { background: #d8bc86; }
+.sv-heroi .sv-btn-claro, .sv-topo .sv-btn-claro { background: #9e2b48; color: #ffffff !important; font-weight: 700; }
+.sv-heroi .sv-btn-claro:hover, .sv-topo .sv-btn-claro:hover { background: #b3354f; }
 
 /* Páginas de busca (/software-juridico/ etc.) */
 .sv-seo { padding-bottom: 72px; }
@@ -360,8 +360,8 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 .sv-seo-mais ul { list-style: none; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; }
 .sv-seo-mais a { display: inline-block; padding: 10px 14px; border: 1px solid #4a4a47; border-radius: 10px; text-decoration: none; }
 .sv-seo-mais a:hover { border-color: #c9a872; }
-.sv-seo .sv-btn-claro { background: #c9a872; color: #161616 !important; font-weight: 700; }
-.sv-seo .sv-btn-claro:hover { background: #d8bc86; }
+.sv-seo .sv-btn-claro { background: #9e2b48; color: #ffffff !important; font-weight: 700; }
+.sv-seo .sv-btn-claro:hover { background: #b3354f; }
 .sv-seo-mais { margin-top: 48px; }
 .sv-seo + .sv-rodape { padding-top: 0; }
 
@@ -369,7 +369,7 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 .marca { --marca-h: 26px; display:inline-flex; align-items:flex-end; gap:calc(var(--marca-h) * .117); color:#f2f2f0; line-height:1 }
 .marca-pasta { display:flex; flex-direction:column }
 .marca-pasta i { display:block; width:calc(var(--marca-h) * .617); height:calc(var(--marca-h) * .183); background:#c9a872; border-radius:calc(var(--marca-h) * .083) calc(var(--marca-h) * .083) 0 0 }
-.marca-pasta b { display:grid; place-items:center; width:calc(var(--marca-h) * 1.333); height:var(--marca-h); background:#c9a872; color:#161616; border-radius:0 calc(var(--marca-h) * .1) calc(var(--marca-h) * .1) calc(var(--marca-h) * .1); font-weight:800; font-size:calc(var(--marca-h) * .717); letter-spacing:-0.05em }
+.marca-pasta b { display:grid; place-items:center; width:calc(var(--marca-h) * 1.333); height:var(--marca-h); background:#9e2b48; color:#ffffff; border-radius:0 calc(var(--marca-h) * .1) calc(var(--marca-h) * .1) calc(var(--marca-h) * .1); font-weight:800; font-size:calc(var(--marca-h) * .717); letter-spacing:-0.05em }
 .marca-nome { font-weight:800; font-size:calc(var(--marca-h) * 1.033); letter-spacing:-0.05em; line-height:.9 }
 .sv-marca.marca { gap:calc(var(--marca-h) * .117); font-size:inherit }
 .sv-rodape-marca .marca { --marca-h: 30px }
@@ -413,3 +413,6 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 .sv-legal section { padding: 22px 0; border-top: 1px solid #333331; }
 .sv-legal h2 { font-size: 22px; max-width: none; letter-spacing: -0.02em; margin-bottom: 10px; }
 .sv-legal p { color: #cfcfca; margin: 10px 0 0; line-height: 1.65; }
+/* bordô primária: todo botão principal do site */
+.sv-btn-claro { background: #9e2b48; color: #ffffff !important; font-weight: 700; }
+.sv-btn-claro:hover { background: #b3354f; }

@@ -1,4 +1,4 @@
-/* HiAdv · tokens do design system (Identidade D · Pasta (ouro sobre grafite), 2026-11).
+/* HiAdv · tokens do design system (Identidade D · Pasta: bordô primária, ouro secundária, sobre grafite, 2026-11).
    Trocar a identidade visual = mudar só este arquivo. */
 :root,
 [data-theme='light'] {
@@ -18,15 +18,19 @@
   --ink-3: #5f5f5a;
 
   /* marca e ação: vinho. Vinho é só marca, botão e item escolhido; nunca alerta. */
-  --accent: #8f6f33;
-  --accent-hover: #765b29;
+  --accent: #7a1f33;
+  --accent-hover: #631828;
   --accent-ink: #ffffff;
-  --accent-soft: #f4ecdc;
-  --accent-soft-ink: #6b5226;
-  --brand-mark: #c9a872;
-  --brand-mark-ink: #161616;
+  --accent-soft: #f5e6e9;
+  --accent-soft-ink: #6b1a2c;
+  --accent-text: #7a1f33;  /* bordô para texto e links */
+  --gold: #8f6f33;         /* secundária: aba aberta, selos, detalhes */
+  --gold-soft: #f4ecdc;
+  --brand-tab: #b8955a;
+  --brand-mark: #7a1f33;
+  --brand-mark-ink: #ffffff;
   /* ponto rosé do "i" */
-  --brand-deep: #8f6f33;   /* toques: faixa do topo, item ativo */
+  --brand-deep: #7a1f33;   /* toques: faixa do topo, item ativo */
 
   /* estados: alerta em vermelho-alaranjado e aviso em âmbar, longe do vinho */
   --info: #1f5fbf;    --info-soft: #e8f0fc;
@@ -46,7 +50,7 @@
   --r-lg: 14px;
   --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px; --s-5: 24px; --s-6: 32px; --s-7: 48px;
   --shadow-pop: 0 12px 32px -12px rgb(34 27 30 / 0.28);
-  --focus: 0 0 0 3px rgb(143 111 51 / 0.35);
+  --focus: 0 0 0 3px rgb(143 111 51 / 0.45);
   --sidebar-w: 248px;
   --touch: 44px;
 
@@ -67,15 +71,19 @@
   --ink: #f2f2f0;
   --ink-2: #cfcfca;
   --ink-3: #a9a9a4;
-  --accent: #c9a872;
-  --accent-hover: #d8bc86;
-  --accent-ink: #161616;
-  --accent-soft: #2e281d;
-  --accent-soft-ink: #efd7a8;
-  --brand-mark: #c9a872;
-  --brand-mark-ink: #161616;
+  --accent: #9e2b48;
+  --accent-hover: #b3354f;
+  --accent-ink: #ffffff;
+  --accent-soft: #2b1419;
+  --accent-soft-ink: #f2b8c5;
+  --accent-text: #e48ca0;
+  --gold: #c9a872;
+  --gold-soft: #2e281d;
+  --brand-tab: #c9a872;
+  --brand-mark: #9e2b48;
+  --brand-mark-ink: #ffffff;
   
-  --brand-deep: #c9a872;
+  --brand-deep: #9e2b48;
   --info: #9cc3e4;    --info-soft: #1f2a33;
   --success: #a9d19f; --success-soft: #22301f;
   --warning: #e8c38a; --warning-soft: #332a1a;
@@ -85,7 +93,7 @@
   --t-pericia: #ad8df0;
   --t-tarefa: #a8989b;
   --shadow-pop: 0 12px 32px -12px rgb(0 0 0 / 0.6);
-  --focus: 0 0 0 3px rgb(201 168 114 / 0.45);
+  --focus: 0 0 0 3px rgb(201 168 114 / 0.5);
   color-scheme: dark;
 }
 

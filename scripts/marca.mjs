@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 const raiz = fileURLToPath(new URL('..', import.meta.url))
 const fonte = (p) => `data:font/woff2;base64,${readFileSync(`${raiz}node_modules/@fontsource/public-sans/files/public-sans-latin-${p}-normal.woff2`).toString('base64')}`
-export const COR = { fundo: '#0e0e0e', grafite: '#161616', pasta: '#232322', ouro: '#c9a872', texto: '#f2f2f0', apoio: '#a9a9a4' }
+export const COR = { fundo: '#0e0e0e', grafite: '#161616', pasta: '#232322', ouro: '#c9a872', bordo: '#9e2b48', texto: '#f2f2f0', apoio: '#a9a9a4' }
 const css = `@font-face{font-family:P;font-weight:800;src:url(${fonte(800)}) format('woff2')}@font-face{font-family:P;font-weight:400;src:url(${fonte(400)}) format('woff2')}
 html,body{margin:0;background:transparent}body{font-family:P,sans-serif}`
 
@@ -14,7 +14,7 @@ html,body{margin:0;background:transparent}body{font-family:P,sans-serif}`
 // proporções da arte: corpo 160×120, aba 74×22, cantos 10/12
 const pasta = (l) => { const h = l * .48, w = h * 1.333
   return `<div style="display:flex;flex-direction:column;margin-top:${h * .183}px"><div style="width:${h * .617}px;height:${h * .183}px;background:${COR.ouro};border-radius:${h * .083}px ${h * .083}px 0 0"></div>
-  <div style="width:${w}px;height:${h}px;background:${COR.ouro};border-radius:0 ${h * .1}px ${h * .1}px ${h * .1}px;display:grid;place-items:center;color:${COR.grafite};font-weight:800;font-size:${h * .717}px;letter-spacing:-.05em;line-height:1">Hi</div></div>` }
+  <div style="width:${w}px;height:${h}px;background:${COR.bordo};border-radius:0 ${h * .1}px ${h * .1}px ${h * .1}px;display:grid;place-items:center;color:#ffffff;font-weight:800;font-size:${h * .717}px;letter-spacing:-.05em;line-height:1">Hi</div></div>` }
 const icone = (l, { cheio = false } = {}) => `<!doctype html><html><head><style>${css}</style></head><body>
   <div style="width:${l}px;height:${l}px;border-radius:${cheio ? 0 : l * .22}px;background:${COR.fundo};display:grid;place-items:center"><div style="margin-top:-${l * .08}px">${pasta(cheio ? l * .78 : l * 1.05)}</div></div></body></html>`
 
