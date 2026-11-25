@@ -160,7 +160,7 @@ function NovoEscritorioForm({ aoCriar }: { aoCriar: (id: string) => void }) {
       <label className="adm-campo"><span>E-mail do Gestor Master</span><input className="hv-input" type="email" maxLength={160} value={n.masterEmail} onChange={campo('masterEmail')} /></label>
       <label className="adm-campo"><span>Plano</span>
         <select className="hv-input" value={n.plano} onChange={campo('plano')}>{PLANOS.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}</select></label>
-      <label className="alternar"><input type="checkbox" checked={n.fundador} onChange={(ev) => setN({ ...n, fundador: ev.target.checked })} /> Fundador (60 dias de teste)</label>
+      <label className="alternar"><input type="checkbox" checked={n.fundador} onChange={(ev) => setN({ ...n, fundador: ev.target.checked })} /> Fundador (implantação assistida sem custo)</label>
       {erro && <p className="hv-error" role="alert">{erro}</p>}
       <Button type="submit" loading={criar.isPending}>Criar escritório</Button>
     </form>

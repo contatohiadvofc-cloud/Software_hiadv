@@ -67,7 +67,7 @@ export function Aderir() {
             <h1 id="ad-titulo">Qual HiAdv combina com o seu escritório?</h1>
             <p>Cinco perguntas, menos de um minuto. No fim você vê o plano recomendado, o que ele inclui e pede a adesão. Quem libera o acesso é a equipe do HiAdv, pelo WhatsApp.</p>
             <button type="button" className="ad-botao ad-botao-claro" onClick={() => setEtapa(0)}>Começar</button>
-            {fundador && <p className="ad-nota">Lançamento: restam {vagas.data} de 20 vagas de fundador, com 60 dias grátis.</p>}
+            {fundador && <p className="ad-nota">Lançamento: restam {vagas.data} de 20 vagas de fundador, com implantação assistida sem custo.</p>}
           </section>
         )}
 
@@ -125,7 +125,7 @@ export function Aderir() {
               </div>
               <h3 className="ad-sub">O que o {p.nome} inclui</h3>
               <ul className="ad-inclui">{p.destaques.map((d) => <li key={d}>{d}</li>)}</ul>
-              <p className="ad-dica">{p.limites}. {fundador ? '60 dias grátis para fundadores.' : '14 dias grátis.'} Sem cartão para começar.</p>
+              <p className="ad-dica">{p.limites}. 14 dias grátis.{fundador ? ' Fundadores ganham a implantação assistida.' : ''} Sem cartão para começar.</p>
             </section>
 
             <section className="ad-cartao" aria-labelledby="ad-dados">
