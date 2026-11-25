@@ -284,7 +284,7 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 }
 
 /* Diferenciais */
-.sv-secao-escura { background: #2a0912; }
+.sv-secao-escura { background: #161616; }
 .sv-difs { margin: 36px 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--linha); }
 .sv-difs > div { padding: 26px 28px 28px 0; border-bottom: 1px solid var(--linha); }
 .sv-difs > div:not(:nth-child(3n + 1)) { padding-left: 28px; border-left: 1px solid var(--linha); }
@@ -322,14 +322,14 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 .man-quadro { position: relative; border-radius: 14px; overflow: hidden; border: 1px solid var(--linha); box-shadow: 0 20px 50px rgb(0 0 0 / .18); }
 .man-quadro img { display: block; width: 100%; height: auto; }
 .man-setas { position: absolute; inset: 0; width: 100%; height: 100%; }
-.man-caixa { fill: rgb(155 28 60 / .06); stroke: #9b1c3c; stroke-width: 3; }
-.man-linha { stroke: #9b1c3c; stroke-width: 3; }
-.man-ponta { fill: #9b1c3c; }
-.man-bola { fill: #9b1c3c; stroke: #fff; stroke-width: 3; }
-.man-num { fill: #fff; font: 700 18px/1 var(--texto); }
+.man-caixa { fill: rgb(201 168 114 / .06); stroke: #c9a872; stroke-width: 3; }
+.man-linha { stroke: #c9a872; stroke-width: 3; }
+.man-ponta { fill: #c9a872; }
+.man-bola { fill: #c9a872; stroke: #161616; stroke-width: 3; }
+.man-num { fill: #161616; font: 700 18px/1 var(--texto); }
 .man-legenda { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 20px; }
 .man-legenda li { display: flex; gap: 8px; align-items: baseline; }
-.man-legenda-n { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #9b1c3c; color: #fff; font-weight: 700; font-size: 13px; }
+.man-legenda-n { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #c9a872; color: #fff; font-weight: 700; font-size: 13px; }
 
 /* Identidade D · Pasta */
 .sv h1, .sv h2 { font-weight: 800; letter-spacing: -0.035em; }
@@ -400,3 +400,16 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
   .sv-exp-lista button { flex:none; padding:10px 12px }
   .sv-exp-lista button span span, .sv-exp-lista small { display:none !important }
 }
+
+/* aviso de cookies (só armazenamento essencial) */
+.sv-cookies { position: fixed; left: 16px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40; max-width: 420px; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; background: #232322; color: #f2f2f0; border: 1px solid #4a4a47; border-radius: 0 12px 12px 12px; box-shadow: inset 0 3px 0 #c9a872, 0 24px 48px -20px rgb(0 0 0 / .8); padding: 16px; font-size: 15px; line-height: 1.45; }
+.sv-cookies p { margin: 0; flex: 1 1 240px; color: #cfcfca; }
+.sv-cookies a { color: #d8bc86; }
+.sv-cookies .sv-btn { min-height: 40px; padding: 0 18px; }
+@media (max-width: 600px) { .sv-cookies { left: 12px; right: 84px; max-width: none; bottom: calc(12px + env(safe-area-inset-bottom)); padding: 12px; gap: 10px; font-size: 13.5px; flex-wrap: nowrap; } .sv-cookies p { flex: 1 1 auto; } .sv-cookies .sv-btn { min-height: 36px; padding: 0 12px; flex: none; } }
+.sv-legal .sv-largura { max-width: 820px; }
+.sv-legal h1 { font-size: clamp(34px, 5vw, 52px); line-height: 1.05; letter-spacing: -0.04em; font-weight: 800; margin: 14px 0 6px; }
+.sv-legal-versao { color: #a9a9a4; margin: 0 0 32px; }
+.sv-legal section { padding: 22px 0; border-top: 1px solid #333331; }
+.sv-legal h2 { font-size: 22px; max-width: none; letter-spacing: -0.02em; margin-bottom: 10px; }
+.sv-legal p { color: #cfcfca; margin: 10px 0 0; line-height: 1.65; }

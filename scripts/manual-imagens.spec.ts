@@ -5,6 +5,7 @@ import { writeFileSync } from 'node:fs'
 import { MANUAL } from '../src/data/manual'
 
 test('imagens do manual', async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('hiadv-demo-coder', '1'))
   await page.goto('/experimentar')
   await page.waitForTimeout(1500)
   await page.addStyleTag({ content: '.previa-barra, .previa-cartao, .previa-fim { display: none !important; } *, *::before, *::after { transition: none !important; animation: none !important; }' })

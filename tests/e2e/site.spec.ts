@@ -89,3 +89,17 @@ test('experimente: cada parada do roteiro troca a tela e abre a mesma tela na pr
   await expect(page).toHaveURL(/\/financeiro/)
   await expect(page.getByRole('region', { name: 'Prévia do HiAdv' })).toContainText('Financeiro')
 })
+
+test('aviso de cookies aparece uma vez, leva à política e some ao confirmar', async ({ page }) => {
+  await page.goto('/')
+  const aviso = page.getByRole('region', { name: 'Aviso de cookies' })
+  await expect(aviso).toBeVisible()
+  await expect(aviso.getByRole('link', { name: 'Saiba mais' })).toHaveAttribute('href', '/privacidade/#pp-10')
+  await aviso.getByRole('button', { name: 'Entendi' }).click()
+  await expect(aviso).toHaveCount(0)
+  await page.reload()
+  await expect(page.getByRole('region', { name: 'Aviso de cookies' })).toHaveCount(0)
+  await page.goto('/privacidade/')
+  await expect(page.getByRole('heading', { level: 1, name: 'Política de Privacidade e Cookies' })).toBeVisible()
+  await expect(page.getByText(/Felipe Schena Lanhi e Deividy Ryan de Jesus Batista/).first()).toBeVisible()
+})

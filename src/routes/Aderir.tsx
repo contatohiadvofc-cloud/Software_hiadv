@@ -137,7 +137,7 @@ export function Aderir() {
                 </div>
                 <label className="ad-consent">
                   <input type="checkbox" checked={f.consentimento} onChange={(e) => setF({ ...f, consentimento: e.target.checked })} />
-                  <span>Concordo que o HiAdv use estes dados só para falar comigo sobre a adesão.</span>
+                  <span>Concordo que o HiAdv use estes dados só para falar comigo sobre a adesão, como explica a <a href="/privacidade/" target="_blank" rel="noopener">Política de Privacidade</a>.</span>
                 </label>
                 {erro && <p className="ad-erro" role="alert">{erro}</p>}
                 <div className="ad-navega">

@@ -29,6 +29,7 @@ export function montarSite(doc: Document, win: Window) {
     })
   }
 
+  avisoCookies(doc, win)
   montarTour(doc)
   montarTour(doc, '.sv-exp-lista', 'exp-img', 'painel-exp')
   montarAreas(doc)
@@ -160,4 +161,18 @@ function montarInstalar(doc: Document, win: Window) {
     if (r.outcome === 'accepted') doc.querySelector<HTMLElement>('[data-instalado]')?.removeAttribute('hidden')
   }))
   win.addEventListener('appinstalled', () => { botoes.forEach((x) => x.setAttribute('hidden', '')); doc.querySelector<HTMLElement>('[data-instalado]')?.removeAttribute('hidden') })
+}
+
+/** Aviso de cookies: o HiAdv só usa armazenamento essencial (sem rastreamento), então é um aviso, não um pedido de consentimento. */
+export function avisoCookies(doc: Document, win: Window) {
+  let visto = false
+  try { visto = win.localStorage.getItem('hiadv-aviso-cookies') === '1' } catch { return }
+  if (visto) return
+  const caixa = doc.createElement('div')
+  caixa.className = 'sv-cookies'
+  caixa.setAttribute('role', 'region')
+  caixa.setAttribute('aria-label', 'Aviso de cookies')
+  caixa.innerHTML = '<p>Usamos só o armazenamento essencial para o site e o sistema funcionarem. Nada de rastreamento ou publicidade. <a href="/privacidade/#pp-10">Saiba mais</a></p><button type="button" class="sv-btn sv-btn-vinho">Entendi</button>'
+  caixa.querySelector('button')!.addEventListener('click', () => { try { win.localStorage.setItem('hiadv-aviso-cookies', '1') } catch { /* sem armazenamento */ } caixa.remove() })
+  doc.body.appendChild(caixa)
 }

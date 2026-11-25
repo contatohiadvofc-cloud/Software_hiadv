@@ -97,8 +97,9 @@ export const PAGINAS: Pagina[] = [
     titulo: 'Sobre o HiAdv: software jurídico feito por advogados | HiAdv',
     descricao: 'Conheça o HiAdv, software jurídico brasileiro criado por advogados para organizar prazos, casos e atendimentos de escritórios de advocacia, com sigilo, LGPD e ética da OAB desde o começo.',
     h1: 'Sobre o HiAdv',
-    abertura: 'O HiAdv é um software jurídico brasileiro, criado por advogados a partir da rotina real de um escritório. Ele organiza o que o escritório faz todo dia (prazos, publicações, casos, atendimentos e honorários) e deixa com o advogado o que é dele: parecer, decisão e assinatura.',
+    abertura: 'O HiAdv é um software jurídico brasileiro, criado e desenvolvido pelos fundadores Felipe Schena Lanhi e Deividy Ryan de Jesus Batista a partir da rotina real de um escritório de advocacia. Ele organiza o que o escritório faz todo dia (prazos, publicações, casos, atendimentos e honorários) e deixa com o advogado o que é dele: parecer, decisão e assinatura.',
     blocos: [
+      ['Quem faz o HiAdv', 'Felipe Schena Lanhi é advogado (OAB/SC 30.297) e conduz o produto a partir da prática do escritório. Deividy Ryan de Jesus Batista é o responsável pelo desenvolvimento da plataforma. Os dois fundaram o HiAdv e respondem por ele.'],
       ['Feito dentro de um escritório', 'Cada tela nasceu de um problema do dia a dia: prazo que escapava na planilha, cliente perguntando pelo WhatsApp em que fase está o caso, documento que ninguém sabia se tinha chegado.'],
       ['Sigilo e LGPD', 'Cada escritório só enxerga os próprios dados. A conexão é criptografada, o acesso é por pessoa com papéis definidos pelo Gestor Master, as ações importantes ficam registradas e laudos e exames são tratados como dados sensíveis.'],
       ['Ética da advocacia', 'O sistema organiza, avisa e agenda. Nenhuma mensagem sai para o cliente sem alguém da equipe conferir, e a IA só prepara rascunhos marcados para revisão do advogado.'],
@@ -171,7 +172,7 @@ function html(p: Pagina): string {
         <ul>${outras}<li><a href="/#planos">Planos e preços</a></li><li><a href="/#como-funciona">Como o HiAdv funciona por dentro</a></li></ul>
       </section>
     </main>
-    <footer class="sv-rodape"><p class="sv-largura sv-rodape-fim">© 2026 HiAdv · <a href="/">hiadv.com.br</a></p></footer>
+    <footer class="sv-rodape"><p class="sv-largura sv-rodape-fim">© 2026 HiAdv · <a href="/">hiadv.com.br</a> · <a href="/sobre/">Sobre</a> · <a href="/privacidade/">Privacidade e cookies</a></p></footer>
     <script type="module" src="/src/site/pagina.ts"></script>
   </body>
 </html>
@@ -183,7 +184,8 @@ writeFileSync('public/sitemap.xml', `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>${URL}/</loc><lastmod>${HOJE}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
 ${PAGINAS.map((p) => `  <url><loc>${URL}/${p.slug}/</loc><lastmod>${HOJE}</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>`).join('\n')}
+  <url><loc>${URL}/privacidade/</loc><lastmod>${HOJE}</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>
 `)
-writeFileSync('scripts/paginas-seo.json', JSON.stringify(PAGINAS.map((p) => p.slug)))
+writeFileSync('scripts/paginas-seo.json', JSON.stringify([...PAGINAS.map((p) => p.slug), 'privacidade']))
 console.log('páginas de busca geradas:', PAGINAS.length)

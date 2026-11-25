@@ -248,7 +248,10 @@ export function criarApiDemo(): Api {
     },
     aoMudarSessao(fn) { ouvintes.add(fn); return () => ouvintes.delete(fn) },
     async perfil(): Promise<Perfil> {
-      return { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: 'code', code: true, escritorioId: atual, escritorioNome: ESCRITORIOS.find((e) => e.id === atual)!.nome }
+      // a prévia pública mostra a Ana como Gestora Master; o acesso de Coder (Central, Adesões) só nas capturas do manual
+      let coder = false
+      try { coder = sessionStorage.getItem('hiadv-demo-coder') === '1' } catch { /* sem armazenamento */ }
+      return { email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado', papel: coder ? 'code' : 'master', code: coder, escritorioId: atual, escritorioNome: ESCRITORIOS.find((e) => e.id === atual)!.nome }
     },
     async escritorios() { return ESCRITORIOS.map((e) => ({ ...e, atual: e.id === atual })) },
     async trocarEscritorio(id) { atual = id },
