@@ -103,6 +103,7 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
         if (c.areas === 'sem-funcao') return json(r, { code: 'PGRST202', message: 'Could not find the function public.minhas_areas' }, 404)
         return json(r, c.areasPorEscritorio?.[estado.atual] ?? c.areas ?? [{ area: 'trabalhista', nome: 'Trabalhista', ordem: 10 }])
       }
+      if (nome === 'hiadv_sou_code') return json(r, (c.papel ?? 'master') === 'code')
       if (nome === 'hiadv_escritorios_disponiveis') return json(r, (c.escritorios ?? []).map((e) => ({ ...e, atual: e.id === estado.atual })))
       if (nome === 'hiadv_trocar_escritorio') { estado.atual = (req.postDataJSON() as { p_escritorio: string }).p_escritorio; return json(r, { ok: true }) }
       if (nome === 'busca_geral') { estado.chamadasBusca++; return json(r, c.busca ?? []) }
@@ -235,6 +236,9 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       return json(r, [{ email: 'ana@silvaprado.exemplo.br', nome: 'Ana Prado' }, { email: 'rafael@silvaprado.exemplo.br', nome: 'Rafael Souza' }])
     }
     if (p.endsWith('/rest/v1/equipe')) {
+      // como no banco real: a equipe só lê as colunas liberadas (acesso_code não está entre elas)
+      const pedidas = (url.searchParams.get('select') ?? '').split(',').map((x) => x.trim())
+      if (pedidas.some((x) => !['nome', 'papel', 'escritorio_id', 'email', 'areas', 'admin', 'criado_em'].includes(x))) return json(r, { code: '42501', message: 'permission denied for table equipe' }, 401)
       const linha = { nome: 'Ana Prado', papel: c.papel ?? 'master', escritorio_id: estado.atual }
       return json(r, (req.headers()['accept'] ?? '').includes('vnd.pgrst.object') ? linha : [linha])
     }
