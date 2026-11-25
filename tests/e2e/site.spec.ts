@@ -4,7 +4,7 @@ test('o site de apresentação abre em hiadv.com.br e leva ao questionário e ao
   await page.goto('/?ref=ABC2345')
   await expect(page.getByRole('heading', { level: 1, name: 'Seu escritório inteiro, num só lugar.' })).toBeVisible()
   await expect(page.getByRole('link', { name: 'Aderir ao HiAdv' }).first()).toHaveAttribute('href', '/aderir?ref=ABC2345')
-  await expect(page.getByRole('link', { name: 'Já tenho acesso' })).toHaveAttribute('href', '/login')
+  await expect(page.getByRole('link', { name: 'Ver o sistema por dentro' })).toHaveAttribute('href', '/experimentar')
   await expect(page.getByRole('link', { name: 'Falar com o HiAdv no WhatsApp' })).toHaveAttribute('href', /wa\.me\/5549999730572/)
   await page.getByRole('button', { name: /Assistir à apresentação/ }).click()
   await expect(page.locator('#video-apresentacao')).toHaveAttribute('src', /\/video\/hiadv-apresentacao/)
