@@ -14,7 +14,8 @@ test('plano mínimo de cada recurso', () => {
   expect(planoMinimo('assinatura')).toBe('premium')
   expect(planoMinimo('identificador')).toBe('senior')
   expect(planoMinimo('sara')).toBe('supremo')
-  expect(RECURSOS_POR_PLANO.senior).not.toContain('ia')
+  expect(RECURSOS_POR_PLANO.senior).toContain('ia')
+  expect(RECURSOS_POR_PLANO.senior).not.toContain('sara')
   expect(RECURSOS_POR_PLANO.senior).not.toContain('sara')
 })
 

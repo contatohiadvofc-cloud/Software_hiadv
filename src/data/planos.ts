@@ -12,10 +12,10 @@ export const RECURSOS_POR_PLANO: Record<PlanoId, string[]> = {
 // Pleno: equipe, dinheiro e as calculadoras de cada área (inclui o Bancário).
 RECURSOS_POR_PLANO.premium = [...RECURSOS_POR_PLANO.pro, 'financeiro', 'relatorios', 'horas', 'atencao',
   'calculadoras', 'assinatura', 'cobranca']
-// Sênior: Drive com identificador e leitor, WhatsApp oficial e API (sem IA).
-RECURSOS_POR_PLANO.senior = [...RECURSOS_POR_PLANO.premium, 'drive', 'identificador', 'whatsapp', 'api']
-// Sênior + Sara: o Sênior com IA e a Sara.
-RECURSOS_POR_PLANO.supremo = [...RECURSOS_POR_PLANO.senior, 'ia', 'sara']
+// Sênior: Drive com identificador e leitor, WhatsApp oficial, API e a IA própria (chave da Claude do escritório, em Integrações).
+RECURSOS_POR_PLANO.senior = [...RECURSOS_POR_PLANO.premium, 'drive', 'identificador', 'whatsapp', 'api', 'ia']
+// Sênior + Sara: o Sênior com a Sara Integrada (IA do sistema, uso incluído, sem chave própria).
+RECURSOS_POR_PLANO.supremo = [...RECURSOS_POR_PLANO.senior, 'sara']
 
 /** Plano mínimo que inclui o recurso (para o selo "no plano Pleno"). */
 export function planoMinimo(recurso: string): PlanoId | null {

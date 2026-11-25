@@ -7,7 +7,8 @@ describe('Central HiAdv', () => {
   })
   it('plano mínimo pelo nome de tela', () => {
     expect(planoMinimo('financeiro')).toBe('Pleno')
-    expect(planoMinimo('ia')).toBe('Sênior + Sara')
+    expect(planoMinimo('ia')).toBe('Sênior')
+    expect(planoMinimo('sara')).toBe('Sênior + Sara')
     expect(planoMinimo('drive')).toBe('Sênior')
     expect(planoMinimo('casos')).toBe('Júnior')
   })

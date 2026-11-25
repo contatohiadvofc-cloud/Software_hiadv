@@ -9,14 +9,14 @@ export const NOMES_RECURSO: Record<string, string> = {
   casos: 'Casos por área', atendimentos: 'Atendimentos', clientes: 'Clientes', prazos: 'Tarefas e prazos', publicacoes: 'Publicações',
   agenda: 'Agenda e Google Agenda', acompanhamento: 'Acompanhamento pelo cliente', documentos: 'Documentos a partir de modelos', celular: 'App no celular',
   financeiro: 'Financeiro e honorários', relatorios: 'Relatórios', horas: 'Horas trabalhadas', atencao: 'Avisos e rodízio', drive: 'Google Drive',
-  ia: 'IA (minutas, quesitos, intimações)', sara: 'Sara, assistente de ações', zapsign: 'Assinatura digital', whatsapp: 'WhatsApp oficial', api: 'API e webhooks',
+  ia: 'IA própria do escritório (chave em Integrações)', sara: 'Sara Integrada (IA do HiAdv)', zapsign: 'Assinatura digital', whatsapp: 'WhatsApp oficial', api: 'API e webhooks',
 }
 export const nomeRecurso = (r: string) => NOMES_RECURSO[r] ?? r
 
 /** Plano mínimo que inclui o recurso (para a frase "Disponível no plano …"). */
 const MINIMO: Record<string, PlanoId> = {
   financeiro: 'premium', relatorios: 'premium', horas: 'premium', atencao: 'premium', drive: 'senior',
-  ia: 'supremo', sara: 'supremo', zapsign: 'premium', whatsapp: 'senior', api: 'senior',
+  ia: 'senior', sara: 'supremo', zapsign: 'premium', whatsapp: 'senior', api: 'senior',
 }
 export function planoMinimo(recurso: string): string {
   const id = MINIMO[recurso] ?? 'pro'

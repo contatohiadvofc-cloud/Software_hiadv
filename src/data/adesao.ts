@@ -45,10 +45,10 @@ export const PLANOS: Plano[] = [
     destaques: ['Casos por área, em etapas, com o que falta para avançar', 'Prazos com feriados dos tribunais', 'Publicações pela OAB e Escavador ou JUDIT conectados', 'Atendimentos, do contato até virar cliente', 'Link de acompanhamento para o cliente'] },
   { id: 'premium', nome: 'Pleno', preco: 197.9, fundador: 197.9, resumo: 'Para o escritório com equipe e financeiro.', limites: 'Até 3 acessos Master, 8 colaboradores e 3 OABs',
     destaques: ['Tudo do Júnior', 'Financeiro, honorários e cobrança pelo Asaas', 'Calculadoras de cada área, inclusive Bancário', 'Assinatura digital (ZapSign, Clicksign ou D4Sign)', 'Relatórios, horas e rodízio da equipe'] },
-  { id: 'senior', nome: 'Sênior', preco: 397.5, fundador: 397.5, resumo: 'Tudo do HiAdv para escritórios maiores, sem a IA.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
-    destaques: ['Tudo do Pleno', 'Google Drive com identificador e leitor de documentos', 'WhatsApp oficial e acesso à API', 'Mais acessos e OABs acompanhadas', 'Implantação assistida'] },
-  { id: 'supremo', nome: 'Sênior + Sara', preco: 524.5, fundador: 524.5, resumo: 'O Sênior com a Sara, a assistente de IA que trabalha com o advogado.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs, com uso de IA incluído', emBreve: true,
-    destaques: ['Tudo do Sênior', 'Sara executando as ações pedidas pela equipe, com registro', 'Minutas para revisão a partir dos modelos do escritório', 'Teses com fonte oficial verificada, marcadas para conferência', 'Leitura de intimações e laudos com resumo do que fazer'] },
+  { id: 'senior', nome: 'Sênior', preco: 397.5, fundador: 397.5, resumo: 'Tudo do HiAdv para escritórios maiores, com a IA do próprio escritório conectada.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
+    destaques: ['Tudo do Pleno', 'IA própria: o escritório conecta a sua chave de IA e usa os agentes dentro do HiAdv', 'Google Drive com identificador e leitor de documentos', 'WhatsApp oficial e acesso à API', 'Mais acessos e OABs acompanhadas, com implantação assistida'] },
+  { id: 'supremo', nome: 'Sênior + Sara', preco: 524.5, fundador: 524.5, resumo: 'O Sênior com a Sara Integrada, a IA do HiAdv, já ligada e com uso incluído.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs; 300 usos de IA por mês incluídos, sem precisar de chave própria', emBreve: true,
+    destaques: ['Tudo do Sênior', 'Sara Integrada: a IA do sistema, sem contratar nem configurar chave', 'Sara executando as ações pedidas pela equipe, com registro', 'Minutas para revisão a partir dos modelos do escritório', 'Teses com fonte oficial verificada, marcadas para conferência', 'Leitura de intimações e laudos com resumo do que fazer'] },
 ]
 export const plano = (id: PlanoId) => PLANOS.find((p) => p.id === id)!
 

@@ -48,7 +48,7 @@ test('configurações: liga o bancário e desliga com confirmação, sem apagar 
 })
 
 test('celular: a página de áreas tem "Novo caso" e o atalho para ligar outra área', async ({ page }, info) => {
-  test.skip(info.project.name !== 'celular', 'só no celular')
+  test.skip(info.project.name === 'computador', 'só no celular')
   await simularSupabase(page, { clientes })
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)

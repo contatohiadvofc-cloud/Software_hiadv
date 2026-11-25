@@ -25,7 +25,7 @@ async function abrirArea(page: import('@playwright/test').Page) {
 }
 
 test('quadro mostra as etapas sem as de encerramento e os cartões', async ({ page }, info) => {
-  test.skip(info.project.name === 'celular', 'no celular as etapas viram abas (teste próprio abaixo)')
+  test.skip(info.project.name !== 'computador', 'no celular as etapas viram abas (teste próprio abaixo)')
   await simularSupabase(page, { etapas, casos })
   await abrirArea(page)
   const quadro = page.getByRole('region', { name: 'Quadro de casos' })
@@ -67,7 +67,7 @@ test('servidor recusa: o cartão volta para a etapa e aparece o motivo', async (
 })
 
 test('celular: abas de etapa com contagem, uma etapa por vez', async ({ page }, info) => {
-  test.skip(info.project.name !== 'celular', 'só no celular')
+  test.skip(info.project.name === 'computador', 'só no celular')
   const vazia = [{ status: 'triagem', ordem: 0, final: false, pede_motivo: false }, ...etapas]
   await simularSupabase(page, { etapas: vazia, casos })
   await abrirArea(page)

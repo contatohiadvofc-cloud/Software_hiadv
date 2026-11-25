@@ -1,3 +1,4 @@
+import { Marca } from '../shell/Marca'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useSearch } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -10,16 +11,7 @@ type Etapa = 'inicio' | number | 'relatorio' | 'enviado'
 const VAZIO: FormAdesao = { nome: '', email: '', whatsapp: '', oab: '', escritorio: '', cidade: '', uf: '', consentimento: false }
 
 function Sinal() {
-  return (
-    <span className="ad-marca">
-      <svg width="34" height="34" viewBox="0 0 32 32" aria-hidden="true">
-        <rect width="32" height="32" rx="8" fill="#ffffff" />
-        <path d="M10 7.5v17M22 13.5v11M10 16h12" stroke="#7a1f33" strokeWidth="3" strokeLinecap="round" fill="none" />
-        <circle cx="22" cy="8" r="2.1" fill="#f0b7c2" />
-      </svg>
-      <span>HiAdv</span>
-    </span>
-  )
+  return <span className="ad-marca"><Marca tamanho={28} /></span>
 }
 
 /** Página pública: 5 perguntas, o plano recomendado e o pedido de adesão. Nada é liberado sem a equipe do HiAdv. */

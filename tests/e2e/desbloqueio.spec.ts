@@ -28,7 +28,7 @@ test('a senha pode ser vista enquanto digita', async ({ page }) => {
 })
 
 test('no celular: oferece a senha do celular e depois abre com ela', async ({ page }, info) => {
-  test.skip(info.project.name !== 'celular', 'só no celular')
+  test.skip(info.project.name === 'computador', 'só no celular')
   const { cdp, authenticatorId } = await autenticadorVirtual(page)
   await simularSupabase(page)
   await entrar(page)
@@ -54,7 +54,7 @@ test('no celular: oferece a senha do celular e depois abre com ela', async ({ pa
 })
 
 test('no celular: "Agora não" some com a oferta', async ({ page }, info) => {
-  test.skip(info.project.name !== 'celular', 'só no celular')
+  test.skip(info.project.name === 'computador', 'só no celular')
   await autenticadorVirtual(page)
   await simularSupabase(page)
   await entrar(page)

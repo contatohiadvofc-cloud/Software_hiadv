@@ -121,8 +121,10 @@ test('página do cliente: abre sem login pelo link e mostra fase e compromissos'
 test('configurações: agenda no Google gera o link pessoal e o gestor salva o WhatsApp do escritório', async ({ page }) => {
   const estado = await simularSupabase(page)
   await ir(page, '/configuracoes')
+  await page.getByRole('navigation', { name: 'Grupos de configuração' }).getByRole('button', { name: /Seu acesso/ }).click()
   await page.getByRole('button', { name: 'Ligar agenda no Google' }).click()
   await expect(page.getByLabel('Seu link de agenda (pessoal)')).toHaveValue(new RegExp(`/functions/v1/agenda\\?t=${'e'.repeat(64)}$`))
+  await page.getByRole('navigation', { name: 'Grupos de configuração' }).getByRole('button', { name: /Escritório/ }).click()
   const contato = page.getByRole('region', { name: 'Contato do escritório' })
   await expect(contato.getByLabel('WhatsApp do escritório')).toHaveValue('(47) 3333-0000')
   await contato.getByLabel('WhatsApp do escritório').fill('(49) 99999-1111')

@@ -29,7 +29,7 @@ export type Integracao = {
   temChave: boolean; chaveFinal: string | null; configuradoEm: string | null; configuradoPor: string | null
 }
 export const SERVICOS: Record<Servico, { nome: string; descricao: string; usaChave: boolean; dicaChave?: string }> = {
-  claude: { nome: 'Claude (IA dos agentes)', descricao: 'Motor dos agentes: leitura de documentos, minutas, quesitos e mensagens. O consumo é cobrado na conta do escritório.', usaChave: true, dicaChave: 'Chave da API Anthropic do escritório (começa com sk-ant-).' },
+  claude: { nome: 'IA própria do escritório (Claude)', descricao: 'Motor dos agentes: leitura de documentos, minutas, quesitos e mensagens. O consumo é cobrado na conta do escritório.', usaChave: true, dicaChave: 'Chave da API Anthropic do escritório (começa com sk-ant-).' },
   zapsign: { nome: 'ZapSign (assinatura)', descricao: 'Envia o kit do cliente (contrato, procuração, declaração) preenchido para assinatura pelo WhatsApp. Cada envio é cobrado na conta ZapSign do escritório.', usaChave: true, dicaChave: 'Token da API da ZapSign do escritório.' },
   google_drive: { nome: 'Google Drive', descricao: 'Lê a pasta de clientes compartilhada com o HiAdv para relacionar pastas aos clientes. Nada é lido sem aprovação.', usaChave: false },
   escavador: { nome: 'Escavador', descricao: 'Monitoramento de processos e publicações pela API do Escavador. As consultas são cobradas na conta do escritório.', usaChave: true, dicaChave: 'Token da API do Escavador (painel do Escavador → API).' },

@@ -5,7 +5,7 @@ test('manual: aberto pelas configurações, com tela explicada, legenda e busca'
   await simularSupabase(page, { papel: 'colaborador' })
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)
-  await page.goto('/configuracoes')
+  await page.goto('/configuracoes#manual')
   await page.getByRole('link', { name: 'Abrir o manual' }).click()
   await expect(page.getByRole('heading', { name: 'Manual do HiAdv' })).toBeVisible()
   const casos = page.getByRole('region', { name: 'Casos por área' })

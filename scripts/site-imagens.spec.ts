@@ -10,8 +10,8 @@ async function ir(page: Page, r: string) {
 }
 async function salvar(page: Page, nome: string, miniatura = true) {
   const buf = await page.screenshot()
-  await sharp(buf).webp({ quality: 82 }).toFile(`public/site/${nome}.webp`)
-  if (miniatura) await sharp(buf).resize(640, 400).webp({ quality: 80 }).toFile(`public/site/${nome}-p.webp`)
+  await sharp(buf).webp({ quality: 80, effort: 6 }).toFile(`public/site/${nome}.webp`)
+  if (miniatura) await sharp(buf).resize(1280, 800, { kernel: 'lanczos3' }).webp({ quality: 78, effort: 6 }).toFile(`public/site/${nome}-p.webp`)
 }
 
 test('telas do site', async ({ page, browser }) => {
@@ -19,7 +19,7 @@ test('telas do site', async ({ page, browser }) => {
   await page.goto('/experimentar'); await page.waitForTimeout(1500)
   const rotas: [string, string][] = [['seu-dia', '/seu-dia'], ['atendimentos', '/atendimentos'], ['tarefas', '/tarefas'], ['agenda', '/agenda'],
     ['clientes', '/clientes'], ['publicacoes', '/publicacoes'], ['financeiro', '/financeiro'], ['relatorios', '/relatorios'],
-    ['biblioteca', '/biblioteca'], ['configuracoes', '/configuracoes'], ['quadro', '/area/administrativo']]
+    ['biblioteca', '/biblioteca'], ['configuracoes', '/configuracoes'], ['quadro', '/area/administrativo'], ['integracoes', '/integracoes']]
   for (const [n, r] of rotas) { await ir(page, r); await salvar(page, `tela-${n}`) }
   await ir(page, '/seu-dia'); await sharp(await page.screenshot({ scale: 'device' })).webp({ quality: 82 }).toFile('public/site/produto-seu-dia.webp')
   await page.keyboard.press('Control+k'); await page.waitForTimeout(500); await page.keyboard.type('Rita'); await page.waitForTimeout(700); await salvar(page, 'tela-busca')
@@ -38,12 +38,12 @@ test('telas do site', async ({ page, browser }) => {
   await ir(page, '/seu-dia'); await salvar(page, 'tela-escuro')
   await page.evaluate(() => { localStorage.setItem('hiadv-tema', 'dark'); document.documentElement.dataset.theme = 'dark' })
   // retratos do celular
-  const cel = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 1 })
+  const cel = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3 })
   await cel.goto('/experimentar'); await cel.waitForTimeout(1500)
   for (const [n, r] of [['seu-dia', '/seu-dia'], ['atendimentos', '/atendimentos'], ['publicacoes', '/publicacoes'], ['relatorios', '/relatorios'], ['quadro', '/area/administrativo']]) {
-    await ir(cel, r); await sharp(await cel.screenshot()).resize(540, 848, { fit: 'cover', position: 'top' }).webp({ quality: 82 }).toFile(`public/site/${n}.webp`)
+    await ir(cel, r); await sharp(await cel.screenshot()).resize(1080, 1696, { fit: 'cover', position: 'top' }).webp({ quality: 82 }).toFile(`public/site/${n}.webp`)
   }
-  await ir(cel, '/atendimentos'); await sharp(await cel.screenshot()).resize(400, 814, { fit: 'cover', position: 'top' }).webp({ quality: 82 }).toFile('public/site/produto-celular.webp')
+  await ir(cel, '/atendimentos'); await sharp(await cel.screenshot()).resize(800, 1628, { fit: 'cover', position: 'top' }).webp({ quality: 82 }).toFile('public/site/produto-celular.webp')
   await ir(cel, '/clientes'); await cel.locator('a[href^="/clientes/"]').first().click(); await cel.waitForTimeout(1200); await cel.addStyleTag({ content: esconder })
-  await sharp(await cel.screenshot()).resize(540, 848, { fit: 'cover', position: 'top' }).webp({ quality: 82 }).toFile('public/site/cliente.webp')
+  await sharp(await cel.screenshot()).resize(1080, 1696, { fit: 'cover', position: 'top' }).webp({ quality: 82 }).toFile('public/site/cliente.webp')
 })

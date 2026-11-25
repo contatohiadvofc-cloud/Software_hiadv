@@ -7,5 +7,7 @@ export default defineConfig({
   projects: [
     { name: 'computador', use: { viewport: { width: 1440, height: 900 } } },
     { name: 'celular', use: { ...devices['Pixel 7'] } },
+    // tela, toque e proporção do iPhone (o motor WebKit não está disponível neste ambiente; o Safari de verdade é conferido no aparelho)
+    { name: 'iphone', use: { ...devices['iPhone 13'], browserName: 'chromium', defaultBrowserType: undefined } },
   ],
 })

@@ -30,6 +30,7 @@ export function montarSite(doc: Document, win: Window) {
   }
 
   montarTour(doc)
+  montarTour(doc, '.sv-exp-lista', 'exp-img', 'painel-exp')
   montarAreas(doc)
   montarVideo(doc, win)
   montarGaleria(doc)
@@ -41,15 +42,20 @@ export function montarSite(doc: Document, win: Window) {
   }
 }
 
-function montarTour(doc: Document) {
-  const abas = Array.from(doc.querySelectorAll<HTMLButtonElement>('.sv-tour-lista [role="tab"]'))
-  const img = doc.getElementById('tour-img') as HTMLImageElement | null
-  const painel = doc.getElementById('painel-tour')
+function montarTour(doc: Document, lista = '.sv-tour-lista', imgId = 'tour-img', painelId = 'painel-tour') {
+  const abas = Array.from(doc.querySelectorAll<HTMLButtonElement>(`${lista} [role="tab"]`))
+  const img = doc.getElementById(imgId) as HTMLImageElement | null
+  const painel = doc.getElementById(painelId)
   if (!abas.length || !img || !painel) return
   const escolher = (aba: HTMLButtonElement, focar: boolean) => {
     for (const a of abas) { const sel = a === aba; a.setAttribute('aria-selected', String(sel)); a.tabIndex = sel ? 0 : -1 }
     img.src = aba.dataset.tela ?? img.src
     img.alt = aba.dataset.alt ?? ''
+    // prévia: o botão abre a mesma tela no escritório fictício e o texto diz o que testar
+    const abrir = painel.querySelector<HTMLAnchorElement>('[data-exp-abrir]')
+    if (abrir && aba.dataset.rota) abrir.href = `/experimentar?ir=${encodeURIComponent(aba.dataset.rota)}`
+    const tente = painel.querySelector('[data-exp-tente]')
+    if (tente && aba.dataset.tente) tente.textContent = aba.dataset.tente
     painel.setAttribute('aria-labelledby', aba.id)
     if (focar) aba.focus()
     // no celular a tela fica acima da lista: mostra a troca

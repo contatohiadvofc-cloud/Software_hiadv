@@ -11,19 +11,20 @@ const css = `@font-face{font-family:P;font-weight:800;src:url(${fonte(800)}) for
 html,body{margin:0;background:transparent}body{font-family:P,sans-serif}`
 
 // Pasta ouro com "Hi" dentro: aba no alto à esquerda e corpo com o canto superior esquerdo reto.
-const pasta = (l) => `<div style="position:relative;width:${l * .64}px;height:${l * .5}px;margin-top:${l * .07}px">
-  <div style="position:absolute;left:0;top:-${l * .07}px;width:${l * .26}px;height:${l * .08}px;background:${COR.ouro};border-radius:${l * .04}px ${l * .04}px 0 0"></div>
-  <div style="position:absolute;inset:0;background:${COR.ouro};border-radius:0 ${l * .07}px ${l * .07}px ${l * .07}px;display:grid;place-items:center;color:${COR.grafite};font-weight:800;font-size:${l * .34}px;letter-spacing:-.05em;line-height:1">Hi</div></div>`
+// proporções da arte: corpo 160×120, aba 74×22, cantos 10/12
+const pasta = (l) => { const h = l * .48, w = h * 1.333
+  return `<div style="display:flex;flex-direction:column;margin-top:${h * .183}px"><div style="width:${h * .617}px;height:${h * .183}px;background:${COR.ouro};border-radius:${h * .083}px ${h * .083}px 0 0"></div>
+  <div style="width:${w}px;height:${h}px;background:${COR.ouro};border-radius:0 ${h * .1}px ${h * .1}px ${h * .1}px;display:grid;place-items:center;color:${COR.grafite};font-weight:800;font-size:${h * .717}px;letter-spacing:-.05em;line-height:1">Hi</div></div>` }
 const icone = (l, { cheio = false } = {}) => `<!doctype html><html><head><style>${css}</style></head><body>
-  <div style="width:${l}px;height:${l}px;border-radius:${cheio ? 0 : l * .22}px;background:${COR.fundo};display:grid;place-items:center">${pasta(cheio ? l * .82 : l)}</div></body></html>`
+  <div style="width:${l}px;height:${l}px;border-radius:${cheio ? 0 : l * .22}px;background:${COR.fundo};display:grid;place-items:center"><div style="margin-top:-${l * .08}px">${pasta(cheio ? l * .78 : l * 1.05)}</div></div></body></html>`
 
 const og = `<!doctype html><html><head><style>${css}
   body{width:1200px;height:630px;background:${COR.fundo};color:${COR.texto};position:relative;overflow:hidden}
-  .c{position:absolute;left:96px;top:92px;right:110px}.m{display:flex;align-items:center;gap:6px;font-weight:800;font-size:96px;letter-spacing:-.05em}
+  .c{position:absolute;left:96px;top:92px;right:110px}.m{display:flex;align-items:flex-end;gap:10px;font-weight:800;font-size:118px;line-height:.9;letter-spacing:-.05em}
   h1{margin:70px 0 0;font-size:56px;font-weight:800;line-height:1.08;letter-spacing:-.035em;max-width:980px}
   p{margin:22px 0 0;font-size:28px;color:${COR.apoio}}.u{position:absolute;left:96px;bottom:58px;font-size:26px;font-weight:800;color:${COR.ouro}}
   .f{position:absolute;right:0;top:0;bottom:0;width:16px;background:${COR.ouro}}
-</style></head><body><div class="f"></div><div class="c"><div class="m">${pasta(170)}<span>Adv</span></div>
+</style></head><body><div class="f"></div><div class="c"><div class="m">${pasta(240)}<span>Adv</span></div>
   <h1>Software jurídico para escritórios de advocacia</h1><p>Prazos, publicações, casos, atendimentos e financeiro num só lugar.</p></div><div class="u">hiadv.com.br</div></body></html>`
 
 const b = await chromium.launch()

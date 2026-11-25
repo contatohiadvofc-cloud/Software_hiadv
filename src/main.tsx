@@ -1,4 +1,4 @@
-import { comecarPrevia } from './previa/previa'
+import { ROTEIRO, comecarPrevia } from './previa/previa'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './design/base.css'
@@ -15,7 +15,10 @@ if (location.pathname === '/app.html') {
 
 // "Experimente o HiAdv": entra direto no escritório fictício, sem cadastro e sem salvar nada.
 if (location.pathname === '/experimentar') {
-  if (comecarPrevia()) { sessionStorage.setItem('hiadv-previa-entrar', '1'); history.replaceState(null, '', '/seu-dia') }
+    // ?ir=/rota abre direto numa parada do roteiro (só rotas do roteiro)
+  const ir = new URLSearchParams(location.search).get('ir')
+  const destino = ir && ROTEIRO.some((p) => p.rota === ir) ? ir : '/seu-dia'
+  if (comecarPrevia()) { sessionStorage.setItem('hiadv-previa-entrar', '1'); history.replaceState(null, '', destino) }
   else history.replaceState(null, '', '/aderir?previa=usada')
 }
 

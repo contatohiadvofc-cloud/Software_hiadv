@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router'
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
 import { AGENTES_EM_BREVE, SERVICOS, faltasDoAgente, type Agente, type Integracao } from '../data/escritorio'
@@ -315,6 +315,61 @@ function Falhas() {
   )
 }
 
+type Secao = { id: string; titulo: string; dica: string; corpo: React.ReactNode }
+type Grupo = { id: string; titulo: string; resumo: string; secoes: Secao[] }
+
+/** Seção de configuração: título, uma linha do que ela faz e o conteúdo. */
+function Bloco({ s }: { s: Secao }) {
+  return (
+    <section id={s.id} className="cfg-bloco">
+      <Panel title={s.titulo} labelId={`cfg-${s.id}`}>
+        {s.corpo}
+      </Panel>
+    </section>
+  )
+}
+
+/** Configurações em grupos: menu à esquerda (abas no celular) e um grupo por vez, para não virar um amontoado. */
+function Paginado({ grupos, cabeca }: { grupos: Grupo[]; cabeca: React.ReactNode }) {
+  const doHash = () => {
+    const h = typeof location !== 'undefined' ? location.hash.slice(1) : ''
+    return grupos.find((g) => g.id === h || g.secoes.some((s) => s.id === h))?.id ?? grupos[0]!.id
+  }
+  const [ativo, setAtivo] = useState(doHash)
+  useEffect(() => {
+    const mudou = () => setAtivo(doHash())
+    window.addEventListener('hashchange', mudou)
+    const h = location.hash.slice(1)
+    if (h && !grupos.some((g) => g.id === h)) requestAnimationFrame(() => document.getElementById(h)?.scrollIntoView({ block: 'start' }))
+    return () => window.removeEventListener('hashchange', mudou)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  const g = grupos.find((x) => x.id === ativo) ?? grupos[0]!
+  function ir(id: string) { setAtivo(id); history.replaceState(null, '', `#${id}`) }
+  return (
+    <div className="pagina cfg">
+      {cabeca}
+      <div className="cfg-grade">
+        <nav className="cfg-menu" aria-label="Grupos de configuração">
+          {grupos.map((x) => (
+            <button key={x.id} type="button" aria-current={x.id === g.id ? 'page' : undefined} onClick={() => ir(x.id)}>
+              <strong>{x.titulo}</strong><span>{x.resumo}</span>
+            </button>
+          ))}
+        </nav>
+        <div className="cfg-conteudo">
+          <div className="cfg-grupo-cabeca"><h2>{g.titulo}</h2>
+            {g.secoes.length > 1 && <p className="cfg-atalhos">{g.secoes.map((s) => <a key={s.id} href={`#${s.id}`} onClick={(e) => { e.preventDefault(); document.getElementById(s.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.replaceState(null, '', `#${s.id}`) }}>{s.titulo}</a>)}</p>}
+          </div>
+          {g.secoes.map((s) => <Bloco key={s.id} s={s} />)}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const manualCorpo = <div className="hv-panel-body cfg-manual"><Link to="/manual" className="hv-btn" data-variant="primary">Abrir o manual</Link></div>
+
 export function Configuracoes() {
   const api = useApi()
   const { perfil } = useSessao()
@@ -324,54 +379,47 @@ export function Configuracoes() {
   const ag = useQuery({ queryKey: ['agentes', perfil?.escritorioId], queryFn: () => api.agentes(), enabled: !!perfil && gestor })
   const atualizar = () => { qc.invalidateQueries({ queryKey: ['integracoes'] }); qc.invalidateQueries({ queryKey: ['agentes'] }) }
 
-  const aparelho = <>
-    <section id="aparelho"><Panel title="Este aparelho" labelId="cfg-aparelho"><DesbloqueioNesteAparelho /></Panel></section>
-    <section id="agenda-google"><Panel title="Agenda no Google" labelId="cfg-agenda"><AgendaNoGoogle /></Panel></section>
-  </>
+  const seuAcesso: Grupo = { id: 'seu-acesso', titulo: 'Seu acesso', resumo: 'Este aparelho e a sua agenda', secoes: [
+    { id: 'aparelho', titulo: 'Este aparelho', dica: 'Desbloqueio rápido neste celular ou computador.', corpo: <DesbloqueioNesteAparelho /> },
+    { id: 'agenda-google', titulo: 'Agenda no Google', dica: 'Seus prazos, perícias e audiências no calendário do celular.', corpo: <AgendaNoGoogle /> },
+  ] }
+  const ajuda: Grupo = { id: 'ajuda', titulo: 'Ajuda', resumo: 'Manual e o que o seu plano inclui', secoes: [
+    { id: 'manual', titulo: 'Manual do HiAdv', dica: 'Cada área, etapa e função explicada com as telas e setas.', corpo: manualCorpo },
+    { id: 'recursos', titulo: 'Recursos do HiAdv', dica: 'O que já está no seu plano e o que vem nos próximos.', corpo: <RecursosDoHiAdv /> },
+  ] }
+  const titulo = <h1>Configurações</h1>
+
   if (perfil && !gestor) return (
-    <div className="pagina">
-      <div className="pagina-cabeca"><div><h1>Configurações</h1></div></div>
-      <section id="manual"><Panel title="Manual do HiAdv" labelId="cfg-manual"><div className="hv-panel-body cfg-manual"><p>O que cada área, etapa e função faz, com as telas explicadas por setas e o passo a passo. Bom para quem está começando e para tirar dúvidas.</p><Link to="/manual" className="hv-btn" data-variant="primary">Abrir o manual</Link></div></Panel></section>
-      <section id="recursos"><Panel title="Recursos do HiAdv" labelId="cfg-recursos"><RecursosDoHiAdv /></Panel></section>
-      {aparelho}
-      <Panel><Empty title="As configurações do escritório ficam com o Gestor Master." /></Panel>
-    </div>
+    <Paginado grupos={[{ ...seuAcesso, secoes: [...seuAcesso.secoes, { id: 'escritorio-aviso', titulo: 'Configurações do escritório', dica: 'Contato, OABs, áreas, regras e integrações.', corpo: <Empty title="As configurações do escritório ficam com o Gestor Master." /> }] }, ajuda]}
+      cabeca={<div className="pagina-cabeca"><div>{titulo}</div></div>} />
   )
 
-  return (
-    <div className="pagina">
-      <div className="pagina-cabeca"><div><h1>Configurações</h1><p className="muted">{perfil?.escritorioNome}. Cada escritório tem as suas chaves, os seus custos e os seus agentes.</p></div></div>
-
-      <section id="manual"><Panel title="Manual do HiAdv" labelId="cfg-manual"><div className="hv-panel-body cfg-manual"><p>O que cada área, etapa e função faz, com as telas explicadas por setas e o passo a passo. Bom para quem está começando e para tirar dúvidas.</p><Link to="/manual" className="hv-btn" data-variant="primary">Abrir o manual</Link></div></Panel></section>
-      <section id="recursos"><Panel title="Recursos do HiAdv" labelId="cfg-recursos"><RecursosDoHiAdv /></Panel></section>
-
-      {aparelho}
-
-      <section id="contato"><Panel title="Contato do escritório" labelId="cfg-contato"><ContatoEscritorio /></Panel></section>
-
-      <section id="oabs"><Panel title="OABs acompanhadas" labelId="cfg-oabs"><OabsAcompanhadas /></Panel></section>
-
-      <section id="areas-de-atuacao"><Panel title="Áreas de atuação" labelId="cfg-areas"><AreasDeAtuacao /></Panel></section>
-
-      <section id="regras"><Panel title="Regras de atenção" labelId="cfg-regras">
-        <RegrasDeAtencao />
-      </Panel></section>
-
-      <Panel title="Falhas das automações" labelId="cfg-falhas">
-        <Falhas />
-      </Panel>
-
-      <section id="integracoes"><Panel title="Integrações" labelId="cfg-integ">
-        <p className="hv-panel-body muted">As chaves da Claude e da ZapSign, o Google Drive e as próximas conexões (Advise, AASP, WhatsApp, Asaas) ficam na tela <Link to="/integracoes">Integrações</Link>.</p>
-      </Panel></section>
-
-      <Panel title="Agentes" labelId="cfg-agentes">
-        <p className="hv-panel-body muted">Os agentes preparam; quem decide e assina é o advogado. Tudo o que fazem fica no histórico do caso. Os marcados “Sem custo” funcionam por regras, sem IA, e podem ser ligados já.</p>
-        {ag.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
-        {ag.isError && <ErrorState onRetry={() => ag.refetch()} />}
-        {ag.isSuccess && ag.data.length === 0 && <Empty title="Os agentes ainda não foram ativados no servidor." />}
-        {ag.isSuccess && ag.data.length > 0 && <ul className="agentes">{ag.data.map((a) => <LinhaAgente key={a.agente} a={a} integracoes={integ.data ?? []} aoMudar={atualizar} />)}</ul>}
-      </Panel>
-    </div>
-  )
+  const agentes = <>
+    {ag.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+    {ag.isError && <ErrorState onRetry={() => ag.refetch()} />}
+    {ag.isSuccess && ag.data.length === 0 && <Empty title="Os agentes ainda não foram ativados no servidor." />}
+    {ag.isSuccess && ag.data.length > 0 && <ul className="agentes">{ag.data.map((a) => <LinhaAgente key={a.agente} a={a} integracoes={integ.data ?? []} aoMudar={atualizar} />)}</ul>}
+  </>
+  const claude = integ.data?.find((i) => i.servico === 'claude')
+  const grupos: Grupo[] = [
+    { id: 'escritorio', titulo: 'Escritório', resumo: 'Contato, OABs e áreas atendidas', secoes: [
+      { id: 'contato', titulo: 'Contato do escritório', dica: 'Aparece para o cliente no link de acompanhamento.', corpo: <ContatoEscritorio /> },
+      { id: 'oabs', titulo: 'OABs acompanhadas', dica: 'As publicações destas OABs chegam na caixa de Publicações.', corpo: <OabsAcompanhadas /> },
+      { id: 'areas-de-atuacao', titulo: 'Áreas de atuação', dica: 'Só as áreas ligadas aparecem no menu e no “Novo caso”.', corpo: <AreasDeAtuacao /> },
+    ] },
+    { id: 'rotina', titulo: 'Rotina da equipe', resumo: 'O que pede atenção e o que falhou', secoes: [
+      { id: 'regras', titulo: 'Regras de atenção', dica: 'Quando um caso parado ou um prazo entra em “Precisa de atenção”.', corpo: <RegrasDeAtencao /> },
+      { id: 'falhas', titulo: 'Falhas das automações', dica: 'O que um agente ou o rodízio não conseguiu concluir.', corpo: <Falhas /> },
+    ] },
+    { id: 'ia', titulo: 'IA e conexões', resumo: claude?.ativo ? 'IA ligada' : 'IA, agentes e integrações', secoes: [
+      { id: 'integracoes', titulo: 'Integrações', dica: 'Chaves e contas ligadas ao escritório. Nenhuma chave é pedida por mensagem.', corpo: (
+        <div className="hv-panel-body cfg-linha">
+          <span className="cfg-estado" data-ok={claude?.ativo ? 'sim' : 'nao'}>{claude?.ativo ? `IA própria ligada${claude.chaveFinal ? ` (chave …${claude.chaveFinal})` : ''}` : 'IA própria desligada'}</span>
+          <Link to="/integracoes" className="hv-btn" data-variant="secondary">Abrir Integrações</Link>
+        </div>) },
+      { id: 'agentes', titulo: 'Agentes', dica: 'Preparam o trabalho; quem decide e assina é o advogado. “Sem custo” funciona sem IA.', corpo: agentes },
+    ] },
+    seuAcesso, ajuda,
+  ]
+  return <Paginado grupos={grupos} cabeca={<div className="pagina-cabeca"><div>{titulo}<p className="muted">{perfil?.escritorioNome}</p></div></div>} />
 }

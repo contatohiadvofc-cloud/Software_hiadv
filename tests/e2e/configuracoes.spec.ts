@@ -11,17 +11,17 @@ const agentes = [{ agente: 'redatora', nome: 'Redatora', descricao: 'Escreve a m
 async function abrir(page: import('@playwright/test').Page) {
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)
-  await page.goto('/configuracoes')
+  await page.goto('/configuracoes#agentes')
 }
 
 test('integrações: chave vai ao servidor e só o final aparece; ativar exige chave', async ({ page }) => {
   const est = await simularSupabase(page, { integracoes, agentes })
   await entrar(page); await expect(page).toHaveURL(/\/seu-dia$/); await page.goto('/integracoes')
   await page.getByRole('button', { name: /^Claude/ }).click()
-  const claude = page.locator('.integracao', { hasText: 'Claude (IA dos agentes)' })
+  const claude = page.locator('.integracao', { hasText: 'IA própria do escritório (Claude)' })
   await expect(claude.getByRole('button', { name: 'Ativar' })).toBeDisabled()
   await claude.getByRole('button', { name: 'Cadastrar chave' }).click()
-  const d = page.getByRole('dialog', { name: /Chave: Claude/ })
+  const d = page.getByRole('dialog', { name: /Chave: IA própria/ })
   await expect(d.getByLabel(/Chave da API Anthropic/)).toHaveAttribute('type', 'password')
   await d.getByLabel(/Chave da API Anthropic/).fill('sk-ant-FICTICIA-0000000000WXYZ')
   await d.getByRole('button', { name: 'Salvar chave' }).click()

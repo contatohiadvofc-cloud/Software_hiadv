@@ -4,7 +4,7 @@ import { simularSupabase, entrar } from './mock'
 async function ir(page: Page) {
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)
-  await page.goto('/configuracoes')
+  await page.goto('/configuracoes#recursos')
 }
 
 test('recursos: gestor vê o que está ligado, o passo a passo do que está em preparação e a pendência da OAB', async ({ page }) => {

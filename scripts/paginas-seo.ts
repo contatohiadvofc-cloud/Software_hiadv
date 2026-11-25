@@ -92,6 +92,23 @@ export const PAGINAS: Pagina[] = [
       ['Quantas OABs posso acompanhar?', 'Uma no Júnior, três no Pleno e dez nos planos Sênior.'],
     ],
   },
+  {
+    slug: 'sobre',
+    titulo: 'Sobre o HiAdv: software jurídico feito por advogados | HiAdv',
+    descricao: 'Conheça o HiAdv, software jurídico brasileiro criado por advogados para organizar prazos, casos e atendimentos de escritórios de advocacia, com sigilo, LGPD e ética da OAB desde o começo.',
+    h1: 'Sobre o HiAdv',
+    abertura: 'O HiAdv é um software jurídico brasileiro, criado por advogados a partir da rotina real de um escritório. Ele organiza o que o escritório faz todo dia (prazos, publicações, casos, atendimentos e honorários) e deixa com o advogado o que é dele: parecer, decisão e assinatura.',
+    blocos: [
+      ['Feito dentro de um escritório', 'Cada tela nasceu de um problema do dia a dia: prazo que escapava na planilha, cliente perguntando pelo WhatsApp em que fase está o caso, documento que ninguém sabia se tinha chegado.'],
+      ['Sigilo e LGPD', 'Cada escritório só enxerga os próprios dados. A conexão é criptografada, o acesso é por pessoa com papéis definidos pelo Gestor Master, as ações importantes ficam registradas e laudos e exames são tratados como dados sensíveis.'],
+      ['Ética da advocacia', 'O sistema organiza, avisa e agenda. Nenhuma mensagem sai para o cliente sem alguém da equipe conferir, e a IA só prepara rascunhos marcados para revisão do advogado.'],
+      ['Implantação e suporte', 'Os 20 primeiros escritórios têm implantação assistida sem custo: a equipe do HiAdv ajuda a importar os clientes e a configurar as áreas. O atendimento é pelo WhatsApp (49) 99973-0572 e pelo e-mail hiadvofc@gmail.com.'],
+    ],
+    perguntas: [
+      ['O HiAdv atende escritórios de outros estados?', 'Sim. O HiAdv é 100% online e atende escritórios de todo o Brasil.'],
+      ['Como falo com a equipe do HiAdv?', 'Pelo WhatsApp (49) 99973-0572 ou pelo e-mail hiadvofc@gmail.com.'],
+    ],
+  },
 ]
 
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;')
@@ -124,13 +141,15 @@ function html(p: Pagina): string {
     <meta property="og:description" content="${esc(p.descricao)}" />
     <meta property="og:image" content="${URL}/og-hiadv.png" />
     <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" href="/icons/favicon-96.png" sizes="96x96" />
     <link rel="icon" href="/icons/favicon-48.png" sizes="48x48" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <script type="application/ld+json">${JSON.stringify(ld)}</script>
   </head>
   <body class="sv">
     <header class="sv-topo"><div class="sv-largura sv-topo-linha">
-      <a class="sv-marca" href="/" aria-label="HiAdv, início"><span class="sv-pasta" aria-hidden="true">Hi</span><span aria-hidden="true">Adv</span></a>
+      <a class="sv-marca marca" href="/" aria-label="HiAdv, início"><span class="marca-pasta" aria-hidden="true"><i></i><b>Hi</b></span><span class="marca-nome" aria-hidden="true">Adv</span></a>
       <div class="sv-topo-acoes"><a class="sv-experimentar" href="/experimentar">Experimentar</a><a class="sv-btn sv-btn-claro" href="/aderir">Aderir</a></div>
     </div></header>
     <main id="conteudo" class="sv-seo">
