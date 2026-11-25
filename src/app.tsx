@@ -14,6 +14,7 @@ const LTarefas = lazyRouteComponent(() => import('./routes/Tarefas'), 'Tarefas')
 const LClientes = lazyRouteComponent(() => import('./routes/Clientes'), 'Clientes')
 const LCliente = lazyRouteComponent(() => import('./routes/Cliente'), 'Cliente')
 const LAgenda = lazyRouteComponent(() => import('./routes/Agenda'), 'Agenda')
+const LConversas = lazyRouteComponent(() => import('./routes/Conversas'), 'Conversas')
 const LBiblioteca = lazyRouteComponent(() => import('./routes/Biblioteca'), 'Biblioteca')
 const LPublicacoes = lazyRouteComponent(() => import('./routes/Publicacoes'), 'Publicacoes')
 const LFinanceiro = lazyRouteComponent(() => import('./routes/Financeiro'), 'Financeiro')
@@ -52,6 +53,7 @@ const listaAreas = createRoute({ getParentRoute: () => dentro, path: '/areas', c
 const tarefas = createRoute({ getParentRoute: () => dentro, path: '/tarefas', component: LTarefas, head: () => ({ meta: [{ title: 'Tarefas · HiAdv' }] }) })
 const clientes = createRoute({ getParentRoute: () => dentro, path: '/clientes', component: LClientes, head: () => ({ meta: [{ title: 'Clientes · HiAdv' }] }) })
 const cliente = createRoute({ getParentRoute: () => dentro, path: '/clientes/$id', component: LCliente, head: () => ({ meta: [{ title: 'Cliente · HiAdv' }] }) })
+const conversas = createRoute({ getParentRoute: () => dentro, path: '/conversas', component: LConversas, head: () => ({ meta: [{ title: 'Conversas · HiAdv' }] }) })
 const agenda = createRoute({ getParentRoute: () => dentro, path: '/agenda', component: LAgenda, head: () => ({ meta: [{ title: 'Agenda · HiAdv' }] }) })
 const biblioteca = createRoute({ getParentRoute: () => dentro, path: '/biblioteca', component: LBiblioteca, head: () => ({ meta: [{ title: 'Biblioteca · HiAdv' }] }) })
 const publicacoes = createRoute({ getParentRoute: () => dentro, path: '/publicacoes', component: LPublicacoes, head: () => ({ meta: [{ title: 'Publicações · HiAdv' }] }) })
@@ -72,7 +74,7 @@ const manual = createRoute({ getParentRoute: () => dentro, path: '/manual', comp
 const adesoes = createRoute({ getParentRoute: () => dentro, path: '/adesoes', component: LAdesoes, head: () => ({ meta: [{ title: 'Adesões · HiAdv' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, integracoes, configuracoes, manual, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, dentro.addChildren([seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, conversas, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, integracoes, configuracoes, manual, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

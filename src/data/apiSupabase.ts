@@ -20,6 +20,35 @@ import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
+import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem } from './conversas'
+import type { Presenca, Sinal } from './chamada'
+
+function lerAnexo(a: unknown): Anexo | null {
+  if (!a || typeof a !== 'object') return null
+  const x = a as Record<string, unknown>
+  if (!x.path) return null
+  return { path: String(x.path), nome: String(x.nome ?? 'arquivo'), tipo: String(x.tipo ?? 'application/octet-stream'), tamanho: Number(x.tamanho ?? 0),
+    duracao: x.duracao != null ? Number(x.duracao) : undefined, largura: x.largura != null ? Number(x.largura) : undefined, altura: x.altura != null ? Number(x.altura) : undefined }
+}
+function lerMensagem(m: Record<string, unknown>): Mensagem {
+  return { id: String(m.id), autor: String(m.autor), autorNome: (m.autor_nome as string) ?? null, autorEscritorio: (m.autor_esc as string) ?? null,
+    texto: (m.texto as string) ?? null, anexo: lerAnexo(m.anexo), respostaA: (m.resposta_a as string) ?? null,
+    reacoes: (m.reacoes as Record<string, string>) ?? {}, criadoEm: String(m.criado_em), editadoEm: (m.editado_em as string) ?? null }
+}
+function lerConversa(c: Record<string, unknown>): Conversa {
+  const u = c.ultima as Record<string, unknown> | null
+  return { id: String(c.id), tipo: c.tipo as Conversa['tipo'], titulo: (c.titulo as string) ?? null, membros: (c.membros as string[]) ?? [],
+    ultima: u ? { autor: String(u.autor), texto: (u.texto as string) ?? null, anexo: lerAnexo(u.anexo), criadoEm: String(u.criado_em) } : null,
+    naoLidas: Number(c.nao_lidas ?? 0), ultimaEm: String(c.ultima_em) }
+}
+function lerComunidade(c: Record<string, unknown>): Comunidade {
+  const u = c.ultima as Record<string, unknown> | null
+  return { id: String(c.id), nome: String(c.nome), descricao: (c.descricao as string) ?? null, areas: (c.areas as string[]) ?? null,
+    soMasters: !!c.so_masters, quemPosta: c.quem_posta === 'moderadores' ? 'moderadores' : 'todos', anexos: c.anexos !== false, audios: c.audios !== false,
+    ativa: c.ativa !== false, ordem: Number(c.ordem ?? 0),
+    ultima: u ? { autorNome: (u.autor_nome as string) ?? null, texto: (u.texto as string) ?? null, anexo: lerAnexo(u.anexo), criadoEm: String(u.criado_em) } : null,
+    naoLidas: Number(c.nao_lidas ?? 0), ultimaEm: String(c.ultima_em), podePostar: !!c.pode_postar, moderador: !!c.moderador }
+}
 
 function verificar<T>(r: { data: T; error: PostgrestError | null; status?: number }): T {
   if (r.error) {
@@ -668,6 +697,107 @@ export function criarApiSupabase(url: string, chave: string): Api {
       if (!areas.length) return []
       const r = verificar(await sb.from('fluxo_status').select('area, status, ordem, final').in('area', areas.map((a) => a.area)).order('ordem')) ?? []
       return r.filter((e) => !e.final).map((e) => ({ area: e.area as string, areaNome: areas.find((a) => a.area === e.area)?.nome ?? String(e.area), status: e.status as string }))
+    },
+    // ===== Conversas e Comunidades =====
+    async chatLista() {
+      const r = (verificar(await sb.rpc('chat_lista')) ?? []) as Record<string, unknown>[]
+      return r.map(lerConversa)
+    },
+    async chatPessoas() {
+      const r = (verificar(await sb.rpc('chat_pessoas')) ?? []) as Record<string, unknown>[]
+      return r.map((p) => ({ email: String(p.email), nome: String(p.nome || p.email), papel: (p.papel as string) ?? null }))
+    },
+    async chatMensagens(conversa, antes) {
+      const r = (verificar(await sb.rpc('chat_mensagens_de', { p_conversa: conversa, p_antes: antes ?? null })) ?? []) as Record<string, unknown>[]
+      return r.map(lerMensagem)
+    },
+    async chatEnviar(conversa, texto, anexo, respostaA) {
+      const r = respostaA
+        ? verificar(await sb.rpc('chat_responder', { p_conversa: conversa, p_texto: texto ?? '', p_resposta: respostaA }))
+        : verificar(await sb.rpc('chat_enviar', { p_conversa: conversa, p_texto: texto, p_anexo: anexo ?? null }))
+      return lerMensagem(r as Record<string, unknown>)
+    },
+    async chatDireta(email) { return String(verificar(await sb.rpc('chat_direta', { p_email: email }))) },
+    async chatGrupo(titulo, emails, id) {
+      const r = okOuErro(verificar(await sb.rpc('chat_grupo_salvar', { p_conversa: id ?? null, p_titulo: titulo, p_emails: emails })))
+      return String(r.id)
+    },
+    async chatLido(conversa) { verificar(await sb.rpc('chat_lido', { p_conversa: conversa })) },
+    async chatReagir(msg, emoji) { verificar(await sb.rpc('chat_reagir', { p_id: msg, p_emoji: emoji })) },
+    async chatApagar(msg) { verificar(await sb.rpc('chat_cancelar_envio', { p_id: msg })) },
+    async chatSubir(onde, pasta, arquivo, nome, extra) {
+      const path = caminhoAnexo(pasta, nome)
+      const tipo = arquivo.type || 'application/octet-stream'
+      const up = await sb.storage.from(onde).upload(path, arquivo, { contentType: tipo, upsert: false, cacheControl: '31536000' })
+      if (up.error) throw new Error(/row-level|not allowed|Unauthorized/i.test(up.error.message) ? 'Sem permissão para enviar arquivos aqui.' : 'Não deu para enviar o arquivo. Confira a internet e tente de novo.')
+      return { path, nome, tipo, tamanho: arquivo.size, ...extra }
+    },
+    async chatUrl(onde, path) {
+      const r = await sb.storage.from(onde).createSignedUrl(path, 3600)
+      if (r.error || !r.data) throw new Error('Arquivo indisponível.')
+      return r.data.signedUrl
+    },
+    chatAssinar(conversa, aoChegar) {
+      const canal = sb.channel(`chat:${conversa}:${Math.random().toString(36).slice(2)}`)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'chat_mensagens', filter: `conversa_id=eq.${conversa}` }, () => aoChegar())
+        .subscribe()
+      return () => { void sb.removeChannel(canal) }
+    },
+    async comLista() {
+      const r = await sb.rpc('comunidade_lista')
+      if (r.error && /Could not find|does not exist/i.test(r.error.message)) return []
+      return ((verificar(r) ?? []) as Record<string, unknown>[]).map(lerComunidade)
+    },
+    async comMensagens(id, antes) {
+      const r = (verificar(await sb.rpc('comunidade_mensagens_de', { p_id: id, p_antes: antes ?? null })) ?? []) as Record<string, unknown>[]
+      return r.map(lerMensagem)
+    },
+    async comEnviar(id, texto, anexo, respostaA) { okOuErro(verificar(await sb.rpc('comunidade_enviar', { p_id: id, p_texto: texto, p_anexo: anexo ?? null, p_resposta: respostaA ?? null }))) },
+    async comLido(id) { verificar(await sb.rpc('comunidade_lido', { p_id: id })) },
+    async comReagir(msg, emoji) { okOuErro(verificar(await sb.rpc('comunidade_reagir', { p_msg: msg, p_emoji: emoji }))) },
+    async comApagar(msg) { okOuErro(verificar(await sb.rpc('comunidade_apagar', { p_msg: msg }))) },
+    async comSalvar(f) {
+      const r = okOuErro(verificar(await sb.rpc('comunidade_salvar', { p: { id: f.id ?? null, nome: f.nome, descricao: f.descricao, areas: f.areas, so_masters: f.soMasters, quem_posta: f.quemPosta, anexos: f.anexos, audios: f.audios, ativa: f.ativa } })))
+      return String(r.id)
+    },
+    async comPessoas(id) {
+      const r = (verificar(await sb.rpc('comunidade_pessoas', { p_id: id })) ?? []) as Record<string, unknown>[]
+      return r.map((p) => ({ email: String(p.email), nome: String(p.nome), escritorio: (p.escritorio as string) ?? null, silenciadoAte: (p.silenciado_ate as string) ?? null }))
+    },
+    async comSilenciar(id, email, horas) { okOuErro(verificar(await sb.rpc('comunidade_silenciar', { p_id: id, p_email: email, p_horas: horas }))) },
+    async reuniaoAtiva(conversa) {
+      const r = verificar(await sb.rpc('reuniao_ativa', { p_conversa: conversa })) as Record<string, unknown> | null
+      return r ? { id: String(r.id), video: !!r.video, iniciadaPor: String(r.iniciada_por), participantes: (r.participantes as string[]) ?? [] } : null
+    },
+    async reuniaoIniciar(conversa, video) { return String(okOuErro(verificar(await sb.rpc('reuniao_iniciar', { p_conversa: conversa, p_video: video }))).id) },
+    async reuniaoEncerrar(id) { okOuErro(verificar(await sb.rpc('reuniao_encerrar', { p_reuniao: id }))) },
+    reuniaoCanal(id) {
+      let ch: ReturnType<typeof sb.channel> | null = null
+      let aoSinal: (s: Sinal) => void = () => {}
+      let aoPres: (v: Presenca[]) => void = () => {}
+      let meuId = ''
+      return {
+        aoSinal(fn) { aoSinal = fn },
+        aoPresenca(fn) { aoPres = fn },
+        async entrar(eu) {
+          meuId = eu.id
+          try { await sb.realtime.setAuth() } catch { /* usa o token atual */ }
+          ch = sb.channel(`reuniao:${id}`, { config: { private: true, broadcast: { self: false }, presence: { key: eu.id } } })
+          ch.on('broadcast', { event: 'sinal' }, (m) => { const s = m.payload as Sinal; if (s.para === meuId) aoSinal(s) })
+          ch.on('presence', { event: 'sync' }, () => {
+            const st = ch!.presenceState() as Record<string, Presenca[]>
+            aoPres(Object.values(st).flat().filter((p) => p.id && p.id !== meuId))
+          })
+          await new Promise<void>((ok, falha) => {
+            ch!.subscribe(async (estado) => {
+              if (estado === 'SUBSCRIBED') { await ch!.track(eu); ok() }
+              else if (estado === 'CHANNEL_ERROR' || estado === 'TIMED_OUT') falha(new Error('A conexão da chamada falhou. Confira a internet e tente de novo.'))
+            })
+          })
+        },
+        enviar(s) { void ch?.send({ type: 'broadcast', event: 'sinal', payload: s }) },
+        sair() { if (ch) { void ch.untrack(); void sb.removeChannel(ch); ch = null } },
+      }
     },
   }
 }

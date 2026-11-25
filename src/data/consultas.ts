@@ -32,3 +32,12 @@ export function useRecursos() {
   const q = useQuery({ queryKey: ['meus-recursos', perfil?.escritorioId, perfil?.email], queryFn: () => api.meusRecursos(), enabled: !!perfil, staleTime: 5 * 60_000 })
   return { meus: q.data ?? null, carregado: q.isSuccess || q.isError, pode: (r: string) => pode(q.data ?? null, r) }
 }
+
+/** Mensagens não lidas (equipe + comunidades) para o selo do menu. Atualiza a cada 30 s; falha conta como zero. */
+export function useNaoLidas(): number {
+  const api = useApi()
+  const { perfil } = useSessao()
+  const c = useQuery({ queryKey: ['chat-lista', perfil?.escritorioId], queryFn: () => api.chatLista(), enabled: !!perfil, refetchInterval: 30_000, retry: false })
+  const m = useQuery({ queryKey: ['com-lista'], queryFn: () => api.comLista(), enabled: !!perfil, refetchInterval: 60_000, retry: false })
+  return (c.data ?? []).reduce((s, x) => s + x.naoLidas, 0) + (m.data ?? []).reduce((s, x) => s + x.naoLidas, 0)
+}

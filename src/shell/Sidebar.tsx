@@ -1,6 +1,6 @@
 import { Link } from '@tanstack/react-router'
 import { useSessao } from '../lib/contexto'
-import { useAreas, useRecursos } from '../data/consultas'
+import { useAreas, useNaoLidas, useRecursos } from '../data/consultas'
 import { Marca } from './Marca'
 import { OfficeSwitcher } from './OfficeSwitcher'
 
@@ -15,6 +15,7 @@ export function Sidebar() {
   const gestor = perfil?.papel === 'master' || !!perfil?.code
   const areas = useAreas()
   const { pode } = useRecursos()
+  const nao = useNaoLidas()
 
   return (
     <nav className="lateral" aria-label="Navegação principal">
@@ -37,6 +38,10 @@ export function Sidebar() {
         </Link>
         <Link to="/clientes" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
           <Icone d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8" />Clientes
+        </Link>
+        <Link to="/conversas" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+          <Icone d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z" />Conversas
+          {nao > 0 && <b className="lateral-badge" aria-label={`${nao} mensagens não lidas`}>{nao > 99 ? '99+' : nao}</b>}
         </Link>
       </div>
       <div className="lateral-grupo">

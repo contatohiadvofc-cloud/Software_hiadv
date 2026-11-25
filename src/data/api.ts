@@ -1,3 +1,5 @@
+import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, PessoaComunidade, PessoaEquipe } from './conversas'
+import type { CanalChamada } from './chamada'
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
 import type { Ficha, NovaExigencia } from './ficha'
@@ -203,4 +205,34 @@ export interface Api {
   configGoogle(): Promise<{ cfg: ConfigGoogle | null; driveLigado: boolean }>
   /** Só o papel code. */
   configGoogleSalvar(cfg: ConfigGoogle): Promise<void>
+  // ===== Conversas da equipe (escritório) e Comunidades HiAdv =====
+  chatLista(): Promise<Conversa[]>
+  chatPessoas(): Promise<PessoaEquipe[]>
+  chatMensagens(conversa: string, antes?: string): Promise<Mensagem[]>
+  chatEnviar(conversa: string, texto: string | null, anexo?: Anexo | null, respostaA?: string | null): Promise<Mensagem>
+  chatDireta(email: string): Promise<string>
+  chatGrupo(titulo: string, emails: string[], id?: string | null): Promise<string>
+  chatLido(conversa: string): Promise<void>
+  chatReagir(msg: string, emoji: string): Promise<void>
+  chatApagar(msg: string): Promise<void>
+  /** Sobe o arquivo na pasta da conversa ou da comunidade e devolve o anexo pronto para enviar. */
+  chatSubir(onde: 'chat' | 'comunidade', pasta: string, arquivo: Blob, nome: string, extra?: Partial<Anexo>): Promise<Anexo>
+  chatUrl(onde: 'chat' | 'comunidade', path: string): Promise<string>
+  /** Avisa quando chega mensagem nova numa conversa do escritório (tempo real). Devolve a função que para de ouvir. */
+  chatAssinar(conversa: string, aoChegar: () => void): () => void
+  comLista(): Promise<Comunidade[]>
+  comMensagens(id: string, antes?: string): Promise<Mensagem[]>
+  comEnviar(id: string, texto: string | null, anexo?: Anexo | null, respostaA?: string | null): Promise<void>
+  comLido(id: string): Promise<void>
+  comReagir(msg: string, emoji: string): Promise<void>
+  comApagar(msg: string): Promise<void>
+  comSalvar(f: ComunidadeForm): Promise<string>
+  comPessoas(id: string): Promise<PessoaComunidade[]>
+  /** horas: null = até liberar; 0 = liberar. */
+  comSilenciar(id: string, email: string, horas: number | null): Promise<void>
+  reuniaoAtiva(conversa: string): Promise<{ id: string; video: boolean; iniciadaPor: string; participantes: string[] } | null>
+  reuniaoIniciar(conversa: string, video: boolean): Promise<string>
+  reuniaoEncerrar(id: string): Promise<void>
+  /** Canal de sinalização da chamada (voz e vídeo vão direto entre os aparelhos). null na prévia. */
+  reuniaoCanal(id: string): CanalChamada | null
 }

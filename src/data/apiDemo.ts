@@ -1,3 +1,4 @@
+import { conversasDemo } from './conversasDemo'
 import { RECURSOS_POR_PLANO } from './planos'
 import type { Api, Area, Escritorio, Perfil } from './api'
 import { lerValor, previaParcelas, validarHonorario, validarLancamento, type Honorario, type Lancamento } from './financeiro'
@@ -235,6 +236,7 @@ export function criarApiDemo(): Api {
   const avisar = () => ouvintes.forEach((f) => f(logado))
 
   return {
+    ...conversasDemo(),
     async temSessao() { return logado },
     async entrar(_email, senha) {
       if (senha !== 'demo') throw new CredencialInvalida()
