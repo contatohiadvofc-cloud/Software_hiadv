@@ -68,7 +68,7 @@ test('indique o HiAdv: link pessoal, WhatsApp e indicações com cortesia', asyn
   await expect(page.getByLabel('Link pessoal de indicação')).toHaveValue(/\/aderir\?ref=ANA7K2Q$/)
   await expect(page.getByRole('link', { name: 'Enviar pelo WhatsApp' })).toHaveAttribute('href', /^https:\/\/wa\.me\/\?text=/)
   await expect(page.getByText('Carla · Pleno')).toBeVisible()
-  await expect(page.getByText('1 mês grátis a aplicar')).toBeVisible()
+  await expect(page.getByText('50% de desconto a aplicar')).toBeVisible()
   await expect(page.getByText('indicado por rafael')).toBeVisible()
 })
 

@@ -51,7 +51,7 @@ export function Indicar() {
           <dl className="fin-cartoes ind-resumo">
             <div className="fin-cartao"><dt>Indicados</dt><dd>{res.total}</dd></div>
             <div className="fin-cartao"><dt>Ativados</dt><dd>{res.ativadas}</dd></div>
-            <div className="fin-cartao"><dt>Meses grátis</dt><dd>{res.meses}</dd></div>
+            <div className="fin-cartao"><dt>Descontos de 50%</dt><dd>{res.meses}</dd></div>
           </dl>
           <ul className="fin-lista">
             {lista.data.map((x) => (

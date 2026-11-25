@@ -103,7 +103,7 @@ export function alternar(lista: string[] | undefined, valor: string, max?: numbe
 }
 
 // ---------- Indicações ----------
-export const REGRA_CORTESIA = 'A cada escritório que aderir pelo seu link e pagar a primeira mensalidade, o seu escritório ganha 1 mês grátis, até 12 meses por ano.'
+export const REGRA_CORTESIA = 'A cada escritório que aderir pelo seu link e pagar a primeira mensalidade, o seu escritório ganha 50% de desconto em uma mensalidade, até 12 descontos por ano.'
 export const WHATSAPP_HIADV = '49999730572'
 
 export function codigoValido(c: string): boolean {
@@ -122,7 +122,7 @@ export type Indicacao = { id: string; primeiroNome: string; plano: PlanoId; stat
 export type StatusAdesao = 'nova' | 'em_contato' | 'ativada' | 'recusada'
 export type Cortesia = 'nenhuma' | 'pendente' | 'aplicada'
 export const NOMES_STATUS: Record<StatusAdesao, string> = { nova: 'Pedido recebido', em_contato: 'Em contato', ativada: 'Ativado', recusada: 'Não seguiu' }
-export const NOMES_CORTESIA: Record<Cortesia, string> = { nenhuma: '', pendente: '1 mês grátis a aplicar', aplicada: '1 mês grátis aplicado' }
+export const NOMES_CORTESIA: Record<Cortesia, string> = { nenhuma: '', pendente: '50% de desconto a aplicar', aplicada: '50% de desconto aplicado' }
 
 export function resumoIndicacoes(l: Pick<Indicacao, 'status' | 'cortesia'>[]): { total: number; ativadas: number; meses: number } {
   return { total: l.length, ativadas: l.filter((x) => x.status === 'ativada').length, meses: l.filter((x) => x.cortesia !== 'nenhuma').length }

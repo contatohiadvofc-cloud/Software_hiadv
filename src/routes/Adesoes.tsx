@@ -56,7 +56,7 @@ function Pedido({ a }: { a: Adesao }) {
         {a.indicadorEmail && (
           <label className="adm-campo"><span>Cortesia de quem indicou</span>
             <select className="hv-input" value={a.cortesia} onChange={(e) => status.mutate({ s: a.status, cortesia: e.target.value as Cortesia })}>
-              <option value="nenhuma">Nenhuma</option><option value="pendente">1 mês a aplicar</option><option value="aplicada">1 mês aplicado</option>
+              <option value="nenhuma">Nenhuma</option><option value="pendente">50% a aplicar</option><option value="aplicada">50% aplicado</option>
             </select>
           </label>
         )}
