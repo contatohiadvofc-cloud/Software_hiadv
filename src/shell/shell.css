@@ -1196,3 +1196,13 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .av-recusar { background:#e0303a; color:#fff }
 .av-atender { background:#2fbf71; color:#0b0b0b }
 .cv-lado-cabeca .cv-sino { margin-left:auto }
+
+/* Chamadas anteriores e transcrição */
+.cv-hist-lista { list-style:none; margin:0; padding:0 }
+.cv-hist-topo { display:flex; justify-content:space-between; gap:8px; margin-bottom:12px }
+.cv-falas { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:12px }
+.cv-falas li { padding:10px 12px; border-radius:12px; background:var(--surface-2, rgb(127 127 127 / .08)); border-left:3px solid var(--line) }
+.cv-falas li[data-meu] { border-left-color:var(--gold) }
+.cv-falas-quem { display:flex; justify-content:space-between; font-size:.8rem; font-weight:700; color:var(--accent-text) }
+.cv-falas-quem time { font-weight:400; color:var(--muted) }
+.cv-falas p { margin:4px 0 0; line-height:1.5 }

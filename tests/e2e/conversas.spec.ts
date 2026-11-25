@@ -33,3 +33,12 @@ test('prévia: busca no que foi dito e ajustes de som', async ({ page }) => {
   await page.getByRole('button', { name: 'Sino' }).click()
   await expect(page.getByRole('button', { name: 'Sino' })).toHaveAttribute('aria-pressed', 'true')
 })
+
+test('prévia: chamadas anteriores mostram o que foi dito', async ({ page }) => {
+  await page.goto('/experimentar')
+  await page.getByRole('link', { name: /^Conversas/ }).first().click()
+  await page.getByText(/Equipe Silva/).first().click()
+  await page.getByRole('button', { name: 'Chamadas anteriores e transcrições' }).click()
+  await page.locator('.cv-hist-lista .cv-item').first().click()
+  await expect(page.getByText(/12 requerimentos/)).toBeVisible()
+})

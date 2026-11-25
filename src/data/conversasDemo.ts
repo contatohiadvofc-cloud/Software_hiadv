@@ -85,7 +85,7 @@ function responder(c: Conv) {
 }
 
 type ConversasApi = Pick<Api, 'chatLista' | 'chatPessoas' | 'chatMensagens' | 'chatEnviar' | 'chatDireta' | 'chatGrupo' | 'chatLido' | 'chatReagir' | 'chatApagar' | 'chatSubir' | 'chatUrl' | 'chatAssinar'
-  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'contatoLista' | 'chatTranscrever' | 'chatBuscar' | 'reuniaoMinhasAtivas' | 'contatoSalvar' | 'contatoApagar' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
+  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'contatoLista' | 'chatTranscrever' | 'chatBuscar' | 'reuniaoMinhasAtivas' | 'reuniaoFalaEnviar' | 'reuniaoHistorico' | 'reuniaoFalas' | 'contatoSalvar' | 'contatoApagar' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
 
 export function conversasDemo(): ConversasApi {
   const reagir = (lista: Mensagem[], id: string, e: string) => {
@@ -150,6 +150,16 @@ export function conversasDemo(): ConversasApi {
         .sort((a, b) => b.criadoEm.localeCompare(a.criadoEm))
     },
     async reuniaoMinhasAtivas() { return [] },
+    async reuniaoFalaEnviar() {},
+    async reuniaoHistorico(conversa) { return conversa === 'cv-equipe' ? [{ id: 'rn-1', video: true, iniciadaPor: 'julia@silvaprado.exemplo.br', inicio: new Date(Date.now() - 864e5).toISOString(), fim: new Date(Date.now() - 864e5 + 18 * 6e4).toISOString(), participantes: [EU, 'julia@silvaprado.exemplo.br'], falas: 3 }] : [] },
+    async reuniaoFalas() {
+      const t0 = Date.now() - 864e5
+      return [
+        { autor: 'julia@silvaprado.exemplo.br', texto: 'Bom dia! Meta da semana: protocolar os 12 requerimentos de auxílio-acidente que estão com documentação completa.', faladoEm: new Date(t0 + 6e4).toISOString() },
+        { autor: EU, texto: 'Combinado. Eu reviso as iniciais até quinta e o Marcos agenda as perícias.', faladoEm: new Date(t0 + 2 * 6e4).toISOString() },
+        { autor: 'julia@silvaprado.exemplo.br', texto: 'Perfeito, sexta a gente confere o placar.', faladoEm: new Date(t0 + 3 * 6e4).toISOString() },
+      ]
+    },
     async contatoLista() { return CONTATOS.map((c) => ({ ...c })) },
     async contatoSalvar(f) {
       const tel = f.tipo === 'externo' ? normalizarTelefone(f.telefone ?? '') : null

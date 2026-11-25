@@ -20,7 +20,7 @@ import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
-import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato, type ResultadoBusca, type ChamadaAtiva } from './conversas'
+import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato, type ResultadoBusca, type ChamadaAtiva, type ReuniaoPassada, type Fala } from './conversas'
 import { ICE, type Presenca, type Sinal } from './chamada'
 
 function lerAnexo(a: unknown): Anexo | null {
@@ -777,8 +777,24 @@ export function criarApiSupabase(url: string, chave: string): Api {
     async chatBuscar(termo) {
       const r = await sb.rpc('chat_buscar', { p_termo: termo })
       if (r.error && /function|does not exist/i.test(r.error.message)) return []
-      return ((verificar(r) ?? []) as Record<string, unknown>[]).map((x) => ({ id: String(x.id), conversaId: String(x.conversa_id), autor: String(x.autor), texto: (x.texto as string) ?? null,
+      return ((verificar(r) ?? []) as Record<string, unknown>[]).map((x) => ({ id: String(x.id), reuniaoId: (x.reuniao_id as string) ?? null, conversaId: String(x.conversa_id), autor: String(x.autor), texto: (x.texto as string) ?? null,
         transcricao: (x.transcricao as string) ?? null, anexo: lerAnexo(x.anexo), criadoEm: String(x.criado_em), tipo: x.tipo as ResultadoBusca['tipo'], titulo: (x.titulo as string) ?? null }))
+    },
+    async reuniaoFalaEnviar(reuniao, audio) {
+      const f = new FormData()
+      f.append('reuniao', reuniao)
+      f.append('arquivo', new File([audio], `trecho.${audio.type.includes('mp4') ? 'm4a' : audio.type.includes('ogg') ? 'ogg' : 'webm'}`, { type: audio.type }))
+      await sb.functions.invoke('transcrever', { body: f })
+    },
+    async reuniaoHistorico(conversa) {
+      const r = await sb.rpc('reuniao_historico', { p_conversa: conversa })
+      if (r.error) return []
+      return ((r.data ?? []) as Record<string, unknown>[]).map((x) => ({ id: String(x.id), video: !!x.video, iniciadaPor: String(x.iniciada_por), inicio: String(x.inicio), fim: (x.fim as string) ?? null, participantes: (x.participantes as string[]) ?? [], falas: Number(x.falas ?? 0) }) satisfies ReuniaoPassada)
+    },
+    async reuniaoFalas(reuniao) {
+      const r = await sb.rpc('reuniao_falas_de', { p_reuniao: reuniao })
+      if (r.error) return []
+      return ((r.data ?? []) as Record<string, unknown>[]).map((x) => ({ autor: String(x.autor), texto: String(x.texto), faladoEm: String(x.falado_em) }) satisfies Fala)
     },
     async reuniaoMinhasAtivas() {
       const r = await sb.rpc('reuniao_minhas_ativas')

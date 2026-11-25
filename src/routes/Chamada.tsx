@@ -2,6 +2,7 @@ import { useEffect, useReducer, useRef, useState } from 'react'
 import { useApi } from '../lib/contexto'
 import { useToast } from '../design/components/Toast'
 import { ChamadaMotor, type Participante } from '../lib/chamadaMotor'
+import { iniciarTranscritor } from '../lib/transcritorReuniao'
 import { FALANDO, cronometro, nivelVoz } from '../data/chamada'
 import { iniciais } from '../data/conversas'
 import { Ic } from './Conversas'
@@ -71,8 +72,11 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
     const m = new ChamadaMotor(canal, eu, atualizar)
     motor.current = m
     let trava: { release: () => Promise<void> } | null = null
+    let pararTranscricao: (() => void) | null = null
     api.reuniaoIce().then((ice) => { if (ice.length) m.iceServers = ice }).catch(() => {}).then(() => m.iniciar(video)).then(async () => {
       setPronta(true)
+      const voz = m.local?.getAudioTracks()[0]
+      if (voz) pararTranscricao = iniciarTranscritor(voz, (b) => api.reuniaoFalaEnviar(id, b))
       try { trava = await (navigator as Navigator & { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } }).wakeLock?.request('screen') ?? null } catch { /* sem suporte */ }
     }).catch((e: Error) => {
       toast(/Permission|NotAllowed|denied/i.test(e.name + e.message) ? `Sem acesso ao ${video ? 'microfone ou à câmera' : 'microfone'}. Libere a permissão do navegador e tente de novo.` : e.message, 'danger')
@@ -81,7 +85,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
     const t = setInterval(() => setAgora(Date.now()), 1000)
     const fechar = () => m.sair()
     addEventListener('pagehide', fechar)
-    return () => { clearInterval(t); removeEventListener('pagehide', fechar); m.sair(); void trava?.release().catch(() => {}) }
+    return () => { clearInterval(t); removeEventListener('pagehide', fechar); pararTranscricao?.(); m.sair(); void trava?.release().catch(() => {}) }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const m = motor.current
@@ -97,7 +101,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
     <div className="ch" role="dialog" aria-modal="true" aria-label={`Chamada: ${titulo}`}>
       <header className="ch-topo">
         <div><b>{titulo}</b><span>{pronta ? `${pessoas.length + 1} na chamada · ${cronometro(agora - inicio)}` : 'Conectando…'}</span></div>
-        <span className="ch-seguro">Criptografada · não é gravada</span>
+        <span className="ch-seguro" title="Áudio e vídeo vão direto entre os aparelhos e não são gravados. O que cada um fala vira texto e fica no histórico da conversa.">Transcrição ligada · só o texto é guardado</span>
       </header>
       <div className="ch-grade" data-n={Math.min(pessoas.length + 1 + (m?.tela ? 1 : 0), 9)}>
         <Tile nome={eu.nome} stream={m?.local ?? null} eu mudo={!m?.micLigado()} semCamera={!m?.camLigada()} />

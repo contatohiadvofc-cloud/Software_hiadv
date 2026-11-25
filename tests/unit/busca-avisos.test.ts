@@ -26,3 +26,12 @@ describe('preferências de aviso', () => {
     for (const n of Object.values(NOTAS)) for (const [hz, , dur] of n) { expect(hz).toBeGreaterThan(300); expect(dur).toBeLessThanOrEqual(0.5) }
   })
 })
+
+import { teveFala, PEDACO_MS } from '../../src/lib/transcritorReuniao'
+describe('transcrição da chamada', () => {
+  it('só manda pedaço com fala de verdade', () => {
+    expect(teveFala(2, 150)).toBe(false)
+    expect(teveFala(7, 150)).toBe(true)
+    expect(PEDACO_MS).toBeLessThanOrEqual(30_000)
+  })
+})

@@ -5,7 +5,7 @@ import { useToast } from '../design/components/Toast'
 import { Dialog } from '../design/components/Dialog'
 import { Button } from '../design/components/Button'
 import {
-  INTERVALOS, LIMITE_AUDIO_SEG, linkWhatsApp, nomesComApelidos, dataHoraCompleta, trecho, normalizarTelefone, telefoneTela, type Contato, type PessoaEquipe, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
+  INTERVALOS, LIMITE_AUDIO_SEG, linkWhatsApp, nomesComApelidos, dataHoraCompleta, trecho, normalizarTelefone, telefoneTela, type Contato, type PessoaEquipe, type ReuniaoPassada, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
   primeiroNome, publicoComunidade, quandoCurto, resumo, tamanhoTela, tipoAnexo, tituloConversa, validarArquivo, validarComunidade,
   type Anexo, type Comunidade, type ComunidadeForm, type Conversa, type Mensagem,
 } from '../data/conversas'
@@ -34,6 +34,7 @@ const I = {
   arquivo: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6',
   grupo: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
   predio: 'M3 21h18M5 21V7l7-4 7 4v14M9 9h1M14 9h1M9 13h1M14 13h1M10 21v-4h4v4',
+  relogio: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2',
   sino: 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
   texto: 'M4 6h16M4 12h16M4 18h10',
   balao: 'M21 11.5a8.4 8.4 0 0 1-9 8.4 8.5 8.5 0 0 1-3.8-.9L3 21l1.9-5.2A8.4 8.4 0 1 1 21 11.5z',
@@ -142,7 +143,7 @@ export function Conversas() {
                     <button type="button" className="cv-item cv-achado" onClick={() => setSel({ tipo: 'conv', id: r.conversaId })}>
                       <span className="cv-item-meio">
                         <span className="cv-item-nome">{onde}<small>{dataHoraCompleta(r.criadoEm)}</small></span>
-                        <span className="cv-achado-txt">{r.autor === eu ? 'Você' : primeiroNome(nomes.get(r.autor) ?? r.autor)}{falado ? ' (áudio)' : ''}: {trecho(falado ? r.transcricao! : (r.texto ?? ''), busca.trim())}</span>
+                        <span className="cv-achado-txt">{r.autor === eu ? 'Você' : primeiroNome(nomes.get(r.autor) ?? r.autor)}{r.reuniaoId ? ' (na chamada)' : falado ? ' (áudio)' : ''}: {trecho(falado ? r.transcricao! : (r.texto ?? ''), busca.trim())}</span>
                       </span>
                     </button>
                   </li>
@@ -214,6 +215,7 @@ function ConversaEquipe({ c, eu, nomes, voltar, atender }: { c: Conversa; eu: st
   const papel = useSessao().perfil?.papel
   const gestor = papel === 'master' || papel === 'code'
   const [chamada, setChamada] = useState<{ id: string; video: boolean } | null>(null)
+  const [historico, setHistorico] = useState(false)
   const ativa = useQuery({ queryKey: ['reuniao', c.id], queryFn: () => api.reuniaoAtiva(c.id), refetchInterval: 15000 })
   const titulo = tituloConversa(c, eu, nomes)
   // veio do aviso "Atender": entra direto na chamada
@@ -237,6 +239,7 @@ function ConversaEquipe({ c, eu, nomes, voltar, atender }: { c: Conversa; eu: st
         lido={() => api.chatLido(c.id).then(() => qc.invalidateQueries({ queryKey: ['chat-lista'] }))}
         assinar={(fn) => api.chatAssinar(c.id, fn)} onde="chat" pasta={c.id} permite={{ anexos: true, audios: true, postar: true }}
         acoes={<>
+          <button type="button" className="cv-icone-bt" aria-label="Chamadas anteriores e transcrições" title="Chamadas anteriores" onClick={() => setHistorico(true)}><Ic d={I.relogio} /></button>
           <button type="button" className="cv-icone-bt" aria-label="Chamada de voz" title="Chamada de voz" onClick={() => ligar(false)}><Ic d={I.fone} /></button>
           <button type="button" className="cv-icone-bt" aria-label="Chamada de vídeo" title="Chamada de vídeo" onClick={() => ligar(true)}><Ic d={I.video} /></button>
         </>}
@@ -249,6 +252,7 @@ function ConversaEquipe({ c, eu, nomes, voltar, atender }: { c: Conversa; eu: st
           </div>
         ) : null}
       />
+      {historico && <HistoricoChamadas conversa={c.id} nomes={nomes} eu={eu} aoFechar={() => setHistorico(false)} />}
       {chamada && <Chamada id={chamada.id} video={chamada.video} titulo={titulo} eu={{ email: eu, nome: nomes.get(eu) ?? eu }} aoSair={() => { setChamada(null); qc.invalidateQueries({ queryKey: ['reuniao', c.id] }) }} />}
     </>
   )
@@ -684,6 +688,64 @@ function NovaConversa({ eu, aoAbrir, aoFechar }: { eu: string; aoAbrir: (id: str
           {pessoas.isSuccess && outros.length === 0 && <li className="cv-vazio">Ninguém com esse nome na equipe.</li>}
         </ul>
         {modo === 'grupo' && <div className="cv-nova-fim"><span>{escolhidos.length} {escolhidos.length === 1 ? 'pessoa' : 'pessoas'}</span><Button disabled={nome.trim().length < 2 || !escolhidos.length} loading={grupo.isPending} onClick={() => grupo.mutate()}>Criar grupo</Button></div>}
+      </div>
+    </Dialog>
+  )
+}
+
+// ---------- chamadas anteriores ----------
+function HistoricoChamadas({ conversa, nomes, eu, aoFechar }: { conversa: string; nomes: Map<string, string>; eu: string; aoFechar: () => void }) {
+  const api = useApi()
+  const toast = useToast()
+  const [aberta, setAberta] = useState<ReuniaoPassada | null>(null)
+  const lista = useQuery({ queryKey: ['reunioes', conversa], queryFn: () => api.reuniaoHistorico(conversa) })
+  const falas = useQuery({ queryKey: ['reuniao-falas', aberta?.id], queryFn: () => api.reuniaoFalas(aberta!.id), enabled: !!aberta })
+  const nome = (e: string) => (e === eu ? 'Você' : nomes.get(e) ?? e)
+  const duracao = (r: ReuniaoPassada) => r.fim ? `${Math.max(1, Math.round((new Date(r.fim).getTime() - new Date(r.inicio).getTime()) / 60000))} min` : 'em andamento'
+  function copiar() {
+    const txt = (falas.data ?? []).map((f) => `[${horaMensagem(f.faladoEm)}] ${nome(f.autor)}: ${f.texto}`).join('\n')
+    void navigator.clipboard?.writeText(txt).then(() => toast('Transcrição copiada.'), () => toast('Não deu para copiar.', 'danger'))
+  }
+  return (
+    <Dialog open onOpenChange={(v) => { if (!v) aoFechar() }} title={aberta ? `Chamada de ${dataHoraCompleta(aberta.inicio)}` : 'Chamadas anteriores'} variant="painel">
+      <div className="hv-dialog-body cv-hist">
+        {!aberta && (
+          <>
+            {lista.isLoading && <p className="cv-vazio">Carregando…</p>}
+            {lista.isSuccess && !lista.data.length && <p className="cv-vazio">Nenhuma chamada nesta conversa ainda. O que for dito nas próximas chamadas vira texto e aparece aqui.</p>}
+            <ul className="cv-hist-lista" role="list">
+              {lista.data?.map((r) => (
+                <li key={r.id}>
+                  <button type="button" className="cv-item" onClick={() => setAberta(r)}>
+                    <span className="cv-av" data-tipo="externo" style={{ width: 40, height: 40 }} aria-hidden="true"><Ic d={r.video ? I.video : I.fone} t={18} /></span>
+                    <span className="cv-item-meio">
+                      <span className="cv-item-nome">{dataHoraCompleta(r.inicio)}</span>
+                      <span className="cv-item-prev">{duracao(r)} · {r.participantes.map((p) => primeiroNome(nome(p))).join(', ') || primeiroNome(nome(r.iniciadaPor))} · {r.falas ? `${r.falas} ${r.falas === 1 ? 'trecho' : 'trechos'} transcritos` : 'sem transcrição'}</span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+        {aberta && (
+          <>
+            <div className="cv-hist-topo">
+              <Button size="sm" variant="secondary" onClick={() => setAberta(null)}>Voltar</Button>
+              {!!falas.data?.length && <Button size="sm" variant="secondary" onClick={copiar}>Copiar texto</Button>}
+            </div>
+            {falas.isLoading && <p className="cv-vazio">Carregando a transcrição…</p>}
+            {falas.isSuccess && !falas.data.length && <p className="cv-vazio">Nada foi transcrito nesta chamada.</p>}
+            <ol className="cv-falas">
+              {falas.data?.map((f, i) => (
+                <li key={i} data-meu={f.autor === eu || undefined}>
+                  <span className="cv-falas-quem">{nome(f.autor)} <time title={dataHoraCompleta(f.faladoEm)}>{horaMensagem(f.faladoEm)}</time></span>
+                  <p>{f.texto}</p>
+                </li>
+              ))}
+            </ol>
+          </>
+        )}
       </div>
     </Dialog>
   )

@@ -248,7 +248,7 @@ export function nomesComApelidos(pessoas: { email: string; nome: string }[], con
   return m
 }
 
-export type ResultadoBusca = { id: string; conversaId: string; autor: string; texto: string | null; transcricao: string | null; anexo: Anexo | null; criadoEm: string; tipo: TipoConversa; titulo: string | null }
+export type ResultadoBusca = { id: string; reuniaoId?: string | null; conversaId: string; autor: string; texto: string | null; transcricao: string | null; anexo: Anexo | null; criadoEm: string; tipo: TipoConversa; titulo: string | null }
 export type ChamadaAtiva = { id: string; conversaId: string; video: boolean; iniciadaPor: string; inicio: string; participantes: string[] }
 /** Data e hora completas (para o registro de cada mensagem). */
 export const dataHoraCompleta = (iso: string) => new Date(iso).toLocaleString('pt-BR', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
@@ -259,3 +259,6 @@ export function trecho(texto: string, termo: string, raio = 50): string {
   const ini = Math.max(0, i - raio), fim = Math.min(texto.length, i + termo.length + raio)
   return (ini > 0 ? '…' : '') + texto.slice(ini, fim) + (fim < texto.length ? '…' : '')
 }
+
+export type ReuniaoPassada = { id: string; video: boolean; iniciadaPor: string; inicio: string; fim: string | null; participantes: string[]; falas: number }
+export type Fala = { autor: string; texto: string; faladoEm: string }

@@ -1,4 +1,4 @@
-import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, ChamadaAtiva, Contato, ContatoForm, PedidoEntrada, ResultadoBusca, PessoaComunidade, PessoaEquipe } from './conversas'
+import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, ChamadaAtiva, Contato, Fala, ReuniaoPassada, ContatoForm, PedidoEntrada, ResultadoBusca, PessoaComunidade, PessoaEquipe } from './conversas'
 import type { CanalChamada } from './chamada'
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
@@ -236,6 +236,10 @@ export interface Api {
   chatBuscar(termo: string): Promise<ResultadoBusca[]>
   /** Chamadas acontecendo agora nas minhas conversas. */
   reuniaoMinhasAtivas(): Promise<ChamadaAtiva[]>
+  /** Manda um pedaço da própria voz na chamada para virar texto (o áudio não é guardado). */
+  reuniaoFalaEnviar(reuniao: string, audio: Blob): Promise<void>
+  reuniaoHistorico(conversa: string): Promise<ReuniaoPassada[]>
+  reuniaoFalas(reuniao: string): Promise<Fala[]>
   contatoSalvar(f: ContatoForm): Promise<string>
   contatoApagar(id: string): Promise<void>
   comPedidos(id: string): Promise<PedidoEntrada[]>
