@@ -1118,3 +1118,9 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .ch-controles button:focus-visible { outline:2px solid #c9a872; outline-offset:3px }
 @media (max-width: 700px) { .ch-grade[data-n="2"] { grid-template-columns:1fr; } .ch-grade[data-n="3"], .ch-grade[data-n="4"] { grid-template-columns:1fr 1fr } }
 @media (prefers-reduced-motion: reduce) { .cv-pulso, .cv-rec i, .cv-img-carregando { animation:none } }
+
+/* Alternar claro/escuro: ícone sempre à mão, inclusive no celular */
+.conta-tema { display:inline-flex; align-items:center; gap:6px; min-height:40px; min-width:40px; justify-content:center; padding:0 10px; border:1px solid var(--line); border-radius:999px; background:transparent; color:var(--text); font:inherit; font-size:.85rem; cursor:pointer }
+.conta-tema:hover { border-color:var(--gold); color:var(--accent-text) }
+.conta-tema:focus-visible { outline:2px solid var(--accent-text); outline-offset:2px }
+@media (max-width: 760px) { .conta-tema span { display:none } .conta-tema { padding:0 } }
