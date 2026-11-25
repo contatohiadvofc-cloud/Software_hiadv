@@ -37,7 +37,7 @@ export function recursoDaRota(caminho: string): string | null {
   return null
 }
 
-export type MeusRecursos = { plano: PlanoId | null; situacao: Situacao | null; testeAte: string | null; recursos: string[] }
+export type MeusRecursos = { plano: PlanoId | null; situacao: Situacao | null; testeAte: string | null; pagoAte?: string | null; recursos: string[] }
 
 /** null = escritório antigo, sem assinatura na Central: tudo aberto. */
 export function pode(meus: MeusRecursos | null | undefined, recurso: string): boolean {
@@ -50,6 +50,13 @@ export function avisoAssinatura(meus: MeusRecursos | null | undefined, hoje = ne
   if (!meus?.situacao) return null
   if (meus.situacao === 'suspenso') return 'O acesso do escritório está suspenso. Casos e prazos continuam abertos; fale com o HiAdv para reativar o restante.'
   if (meus.situacao === 'atraso') return 'Há uma mensalidade em atraso. Fale com o HiAdv para manter todos os recursos.'
+  // Mensalidade: "pago até" é o vencimento. Com 3 dias corridos de atraso, o gestor vê o aviso.
+  if (meus.situacao === 'ativo' && meus.pagoAte) {
+    const dia0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
+    const venc = new Date(meus.pagoAte + 'T00:00:00')
+    const atraso = Math.round((dia0.getTime() - venc.getTime()) / 86_400_000)
+    if (atraso >= 3) return `A mensalidade venceu em ${venc.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })}. Para manter todos os recursos, regularize o pagamento com o HiAdv.`
+  }
   if (meus.situacao === 'teste' && meus.testeAte) {
     const dia0 = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate())
     const dias = Math.round((new Date(meus.testeAte + 'T00:00:00').getTime() - dia0.getTime()) / 86_400_000)

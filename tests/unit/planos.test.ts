@@ -14,3 +14,10 @@ test('plano mínimo de cada recurso', () => {
   expect(planoMinimo('assinatura')).toBe('premium')
   expect(planoMinimo('identificador')).toBe('supremo')
 })
+
+import { avisoAssinatura } from '../../src/data/central'
+test('aviso de mensalidade só a partir de 3 dias corridos de atraso', () => {
+  const base = { plano: 'pro' as const, situacao: 'ativo' as const, testeAte: null, pagoAte: '2026-12-10', recursos: [] }
+  expect(avisoAssinatura(base, new Date(2026, 11, 12))).toBeNull()
+  expect(avisoAssinatura(base, new Date(2026, 11, 13))).toMatch(/venceu em 10\/12/)
+})

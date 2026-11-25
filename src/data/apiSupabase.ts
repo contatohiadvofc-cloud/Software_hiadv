@@ -560,7 +560,7 @@ export function criarApiSupabase(url: string, chave: string): Api {
       if (r.error && /hiadv_meus_recursos|PGRST202/i.test(`${r.error.code} ${r.error.message}`)) return null
       const d = verificar(r) as Record<string, unknown> | null
       if (!d || typeof d !== 'object' || Array.isArray(d) || !d.plano) return null
-      return { plano: d.plano as PlanoId, situacao: (d.situacao as Situacao) ?? null, testeAte: (d.teste_ate as string) ?? null, recursos: (d.recursos as string[]) ?? [] }
+      return { plano: d.plano as PlanoId, situacao: (d.situacao as Situacao) ?? null, testeAte: (d.teste_ate as string) ?? null, pagoAte: (d.pago_ate as string) ?? null, recursos: (d.recursos as string[]) ?? [] }
     },
     async centralEscritorios() {
       const d = (verificar(await sb.rpc('hiadv_central_escritorios')) ?? []) as Record<string, any>[]
