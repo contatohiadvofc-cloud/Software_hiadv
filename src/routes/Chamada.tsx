@@ -64,6 +64,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
   const toast = useToast()
   const [, atualizar] = useReducer((x: number) => x + 1, 0)
   const motor = useRef<ChamadaMotor | null>(null)
+  const sairRef = useRef<() => Promise<void>>(async () => {})
   const [pronta, setPronta] = useState(false)
   const [inicio] = useState(Date.now())
   const [agora, setAgora] = useState(Date.now())
@@ -77,10 +78,32 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
     motor.current = m
     let trava: { release: () => Promise<void> } | null = null
     let pararTranscricao: (() => void) | null = null
+    let voltar: (() => Promise<void>) | null = null
     api.reuniaoIce().then((ice) => { if (ice.length) m.iceServers = ice }).catch(() => {}).then(() => m.iniciar(video)).then(async () => {
       setPronta(true)
-      const voz = m.local?.getAudioTracks()[0]
-      if (voz) pararTranscricao = iniciarTranscritor(voz, (b) => api.reuniaoFalaEnviar(id, b))
+      const transcrever = () => {
+        pararTranscricao?.()
+        const voz = m.local?.getAudioTracks()[0]
+        pararTranscricao = voz ? iniciarTranscritor(voz, (b) => api.reuniaoFalaEnviar(id, b)) : null
+      }
+      transcrever()
+      // controles da chamada na tela de bloqueio / central de notificações (onde o celular oferece)
+      try {
+        const ms = navigator.mediaSession as MediaSession & { setMicrophoneActive?: (a: boolean) => void; setCameraActive?: (a: boolean) => void }
+        ms.metadata = new MediaMetadata({ title: `Chamada · ${titulo}`, artist: 'HiAdv', artwork: [{ src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' }] })
+        const acao = (a: string, fn: () => void) => { try { ms.setActionHandler(a as MediaSessionAction, fn) } catch { /* ação não suportada */ } }
+        acao('hangup', () => void sairRef.current())
+        acao('togglemicrophone', () => { m.alternarMic(); ms.setMicrophoneActive?.(m.micLigado()) })
+        acao('togglecamera', () => { m.alternarCam(); ms.setCameraActive?.(m.camLigada()) })
+      } catch { /* sem Media Session */ }
+      // voltou da tela bloqueada ou de outro app: religa o microfone e reconecta
+      voltar = async () => {
+        if (document.visibilityState !== 'visible') return
+        try { trava ??= await (navigator as Navigator & { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } }).wakeLock?.request('screen') ?? null } catch { /* sem suporte */ }
+        if (await m.retomar()) { transcrever(); toast('Microfone religado. A chamada continua.') }
+      }
+      document.addEventListener('visibilitychange', voltar)
+      m.local?.getTracks().forEach((t) => t.addEventListener('ended', () => void voltar?.()))
       try { trava = await (navigator as Navigator & { wakeLock?: { request: (t: 'screen') => Promise<{ release: () => Promise<void> }> } }).wakeLock?.request('screen') ?? null } catch { /* sem suporte */ }
     }).catch((e: Error) => {
       toast(/Permission|NotAllowed|denied/i.test(e.name + e.message) ? `Sem acesso ao ${video ? 'microfone ou à câmera' : 'microfone'}. Libere a permissão do navegador e tente de novo.` : e.message, 'danger')
@@ -89,7 +112,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
     const t = setInterval(() => setAgora(Date.now()), 1000)
     const fechar = () => m.sair()
     addEventListener('pagehide', fechar)
-    return () => { clearInterval(t); removeEventListener('pagehide', fechar); pararTranscricao?.(); m.sair(); void trava?.release().catch(() => {}) }
+    return () => { clearInterval(t); removeEventListener('pagehide', fechar); if (voltar) document.removeEventListener('visibilitychange', voltar); try { navigator.mediaSession.metadata = null } catch { /* nada */ } pararTranscricao?.(); m.sair(); void trava?.release().catch(() => {}) }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const m = motor.current
@@ -116,6 +139,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
     if (pessoas.length === 0) { try { await api.reuniaoEncerrar(id) } catch { /* encerra sozinha depois */ } }
     aoSair()
   }
+  sairRef.current = sair
 
   return (
     <div className="ch" role="dialog" aria-modal="true" aria-label={`Chamada: ${titulo}`}>

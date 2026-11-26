@@ -53,6 +53,14 @@ test('chamada de vídeo entre duas pessoas: conecta, mostra vídeo, mudo e alto-
   await julia.waitForTimeout(1200)
   await julia.screenshot({ path: 'test-results/chamada-video-celular.png' })
 
+  // tela bloqueada: o microfone do celular é desligado; ao voltar, o HiAdv religa e o outro lado segue ouvindo
+  await ana.evaluate(() => (window as unknown as { __mic?: MediaStreamTrack }).__mic = undefined)
+  await ana.locator('.ch-tile[data-eu] video').evaluate((v: HTMLVideoElement) => (v.srcObject as MediaStream).getAudioTracks()[0]!.stop())
+  await ana.evaluate(() => document.dispatchEvent(new Event('visibilitychange')))
+  await expect(ana.getByText('Microfone religado. A chamada continua.')).toBeVisible({ timeout: 10_000 })
+  await expect.poll(() => ana.locator('.ch-tile[data-eu] video').evaluate((v: HTMLVideoElement) => (v.srcObject as MediaStream).getAudioTracks().filter((t) => t.readyState === 'live').length)).toBe(1)
+  await expect.poll(() => julia.locator('.ch-tile:not([data-eu]) video').evaluate((v: HTMLVideoElement) => (v.srcObject as MediaStream).getAudioTracks().some((t) => t.readyState === 'live' && !t.muted)), { timeout: 10_000 }).toBe(true)
+
   // sair: o outro lado fica sozinho
   await ana.getByRole('button', { name: 'Sair da chamada' }).click()
   await expect(julia.locator('.ch-tile:not([data-eu])')).toHaveCount(0, { timeout: 15_000 })
@@ -70,7 +78,7 @@ test('áudio: grava, ouve e lê a transcrição antes de enviar, ou exclui', asy
   await page.waitForTimeout(2000)
   await page.getByRole('button', { name: 'Parar e ouvir antes de enviar' }).click()
   await expect(page.getByRole('group', { name: 'Revisar áudio antes de enviar' })).toBeVisible()
-  await expect(page.getByText(/aparece a transcrição do seu áudio/)).toBeVisible()
+  await expect(page.getByText(/O texto do áudio aparece logo depois do envio/)).toBeVisible()
   await page.screenshot({ path: 'test-results/audio-revisao.png' })
   await page.getByRole('button', { name: 'Excluir' }).click()
   await expect(page.getByRole('group', { name: 'Revisar áudio antes de enviar' })).toHaveCount(0)

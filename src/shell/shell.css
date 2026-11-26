@@ -1251,3 +1251,5 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .ch-grade[data-dupla] .ch-tile[data-eu] { position:absolute; z-index:2; right:14px; bottom:14px; width:clamp(110px, 24%, 240px); height:auto; aspect-ratio:3 / 4; box-shadow:0 8px 24px rgb(0 0 0 / .45); border:2px solid rgb(255 255 255 / .15) }
 .ch-grade[data-dupla] .ch-tile[data-eu] .ch-av { width:48px; height:48px; font-size:18px }
 @media (min-width: 900px) { .ch-grade[data-dupla] .ch-tile[data-eu] { aspect-ratio:16 / 10 } }
+
+.cv-revisao-dica { margin:0; font-size:.78rem; color:var(--muted) }

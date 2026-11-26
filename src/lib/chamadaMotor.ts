@@ -80,6 +80,46 @@ export class ChamadaMotor {
     this.aoMudar()
   }
 
+  /**
+   * Volta da tela bloqueada ou do segundo plano: o celular costuma desligar o microfone do navegador.
+   * Pega um microfone novo (e a câmera, se tinha) e troca na conexão sem derrubar a chamada; reconecta quem caiu.
+   * Devolve true se precisou trocar o microfone.
+   */
+  async retomar(): Promise<boolean> {
+    if (!this.local) return false
+    let trocou = false
+    const audio = this.local.getAudioTracks()[0]
+    if (!audio || audio.readyState === 'ended' || audio.muted) {
+      try {
+        const nova = (await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: 48000, voiceIsolation: true } as MediaTrackConstraints })).getAudioTracks()[0]!
+        nova.enabled = audio ? audio.enabled : true
+        this.trocarFaixa(audio, nova)
+        trocou = true
+      } catch { /* sem permissão agora: tenta de novo na próxima volta */ }
+    }
+    const video = this.local.getVideoTracks()[0]
+    if (video && (video.readyState === 'ended' || video.muted)) {
+      try {
+        const nova = (await navigator.mediaDevices.getUserMedia({ video: { facingMode: video.getSettings().facingMode ?? 'user', width: { ideal: 640 }, height: { ideal: 360 } } })).getVideoTracks()[0]!
+        nova.enabled = video.enabled
+        this.trocarFaixa(video, nova)
+      } catch { /* segue só com áudio */ }
+    }
+    this.pares.forEach((p) => { if (p.pc.connectionState !== 'connected') { try { p.pc.restartIce() } catch { /* sem suporte */ } } })
+    this.avisarEstado()
+    this.aoMudar()
+    return trocou
+  }
+  private trocarFaixa(antiga: MediaStreamTrack | undefined, nova: MediaStreamTrack) {
+    this.pares.forEach((p) => {
+      const envio = p.pc.getSenders().find((x) => (antiga && x.track === antiga) || (!x.track && nova.kind === 'audio') || x.track?.kind === nova.kind)
+      if (envio) void envio.replaceTrack(nova)
+      else p.pc.addTrack(nova, this.local!)
+    })
+    if (antiga) { this.local!.removeTrack(antiga); antiga.stop() }
+    this.local!.addTrack(nova)
+  }
+
   sair() {
     this.pares.forEach((_p, id) => this.fechar(id))
     this.local?.getTracks().forEach((t) => t.stop())

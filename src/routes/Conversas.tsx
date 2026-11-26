@@ -572,7 +572,6 @@ function Compositor(p: {
   subir: (b: Blob, nome: string, extra?: Partial<Anexo>) => Promise<Anexo>
 }) {
   const toast = useToast()
-  const api = useApi()
   const [texto, setTexto] = useState('')
   const [subindo, setSubindo] = useState(false)
   const [gravando, setGravando] = useState<{ inicio: number } | null>(null)
@@ -649,9 +648,8 @@ function Compositor(p: {
   }
   function abrirRevisao(blob: Blob, seg: number) {
     const url = URL.createObjectURL(blob)
-    const transcreve = p.onde === 'chat'
-    setRevisao({ blob, url, seg, texto: null, estado: transcreve ? 'transcrevendo' : 'sem' })
-    if (transcreve) void api.chatTranscreverPrevia(blob).then((r) => setRevisao((v) => (v && v.url === url ? { ...v, texto: r.ok ? (r.texto || null) : null, estado: r.ok && r.texto ? 'pronto' : 'sem' } : v)))
+    // a transcrição é feita logo depois do envio (aparece embaixo do áudio na conversa)
+    setRevisao({ blob, url, seg, texto: null, estado: 'sem' })
   }
   function fecharRevisao() { if (revisao) URL.revokeObjectURL(revisao.url); setRevisao(null) }
   function pararGravacao(enviar: boolean, direto = false) {
@@ -684,6 +682,7 @@ function Compositor(p: {
           <Audio url={revisao.url} duracao={revisao.seg} meu />
           {revisao.estado === 'transcrevendo' && <p className="cv-revisao-txt" aria-live="polite"><i className="cv-pontos" aria-hidden="true"><b /><b /><b /></i>Transcrevendo o áudio…</p>}
           {revisao.estado === 'pronto' && <p className="cv-revisao-txt">{revisao.texto}</p>}
+          {revisao.estado === 'sem' && p.onde === 'chat' && <p className="cv-revisao-dica">Ouça antes de enviar. O texto do áudio aparece logo depois do envio.</p>}
           <div className="cv-revisao-bts">
             <button type="button" className="cv-revisao-excluir" onClick={fecharRevisao}><Ic d={I.lixo} t={16} />Excluir</button>
             <button type="button" className="cv-revisao-enviar" disabled={subindo} onClick={() => { const r = revisao; void enviarAudio(r.blob, r.seg, r.texto).then(() => { URL.revokeObjectURL(r.url); setRevisao(null) }) }}><Ic d={I.enviar} t={16} />{subindo ? 'Enviando…' : 'Enviar áudio'}</button>
