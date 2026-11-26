@@ -56,6 +56,7 @@ export type Cenario = {
   rhCandidatos?: Record<string, unknown>[]
   rhPublica?: Record<string, unknown> | null
   rhErroEnvio?: string
+  rhResposta?: Record<string, unknown> | null
 }
 
 function b64url(o: object) {
@@ -111,6 +112,8 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'rh_vaga_salvar') { estado.rpcs.push({ nome, corpo: (req.postDataJSON() ?? {}) as Record<string, unknown> }); return json(r, { ok: true, id: 'vg-nova' }) }
       if (nome === 'rh_vaga_status' || nome === 'rh_candidatura_atualizar' || nome === 'rh_candidatura_apagar') { estado.rpcs.push({ nome, corpo: (req.postDataJSON() ?? {}) as Record<string, unknown> }); return json(r, { ok: true }) }
       if (nome === 'rh_candidaturas_da_vaga') return json(r, c.rhCandidatos ?? [])
+      if (nome === 'rh_entrevista_salvar' || nome === 'rh_proposta_salvar' || nome === 'rh_resposta_enviar') { estado.rpcs.push({ nome, corpo: (req.postDataJSON() ?? {}) as Record<string, unknown> }); return json(r, { ok: true }) }
+      if (nome === 'rh_resposta_ver') return json(r, c.rhResposta ?? null)
       if (nome === 'rh_vaga_publica') return json(r, c.rhPublica ?? null)
       if (nome === 'rh_candidatura_enviar') { estado.rpcs.push({ nome, corpo: (req.postDataJSON() ?? {}) as Record<string, unknown> }); return json(r, c.rhErroEnvio ? { ok: false, erro: c.rhErroEnvio } : { ok: true }) }
       if (nome === 'hiadv_sou_code') return json(r, (c.papel ?? 'master') === 'code')

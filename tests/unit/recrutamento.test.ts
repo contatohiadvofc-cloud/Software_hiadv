@@ -63,3 +63,32 @@ describe('funil e divulgação', () => {
   })
   it('lista de texto ignora linhas vazias', () => { expect(listaDeTexto(' a \n\n b\n ')).toEqual(['a', 'b']); expect(salarioTela(null)).toBeNull() })
 })
+
+import { entrevistaVazia, linkResposta, propostaDaVaga, textoConvite, textoProposta, validarEntrevista, validarProposta } from '../../src/data/recrutamento'
+describe('entrevista e proposta', () => {
+  const e = { ...entrevistaVazia(), data: '2026-11-27', hora: '14:00' }
+  it.each([
+    [{ data: '2026-11-25' }, 'Escolha uma data a partir de hoje.'], [{ data: '27/11/2026' }, 'Escolha uma data a partir de hoje.'],
+    [{ hora: '25:00' }, 'Horário inválido.'], [{ hora: '9:00' }, 'Horário inválido.'],
+    [{ duracao: 5 }, 'A duração vai de 10 a 240 minutos.'], [{ duracao: 300 }, 'A duração vai de 10 a 240 minutos.'],
+    [{ modo: 'presencial' as const, local: ' ' }, 'Informe o endereço da entrevista.'],
+    [{ link: 'http://meet' }, 'O link da chamada precisa começar com https://'],
+  ])('entrevista recusa %o', (m, msg) => { expect(validarEntrevista({ ...e, ...m }, '2026-11-26')).toBe(msg) })
+  it('entrevista aceita vídeo sem link e presencial com endereço', () => {
+    expect(validarEntrevista(e, '2026-11-26')).toBeNull()
+    expect(validarEntrevista({ ...e, modo: 'presencial', local: 'Rua XV, 308' }, '2026-11-26')).toBeNull()
+  })
+  const p = { ...propostaDaVaga({ ...vagaVazia(), salario: 2300, salarioObs: '+ bônus', beneficios: ['VA'] }), inicio: '2026-12-01', responderAte: '2026-11-28' }
+  it('proposta já vem da vaga', () => { expect(p.salario).toBe(2300); expect(p.bonus).toBe('+ bônus'); expect(p.beneficios).toEqual(['VA']); expect(p.local).toBe('Remoto') })
+  it.each([
+    [{ cargo: 'ab' }, 'Informe o cargo.'], [{ salario: null }, 'Informe o salário.'], [{ salario: 0 }, 'Informe o salário.'],
+    [{ inicio: '2026-11-01' }, 'A data de início precisa ser a partir de hoje.'],
+    [{ responderAte: '2026-12-05' }, 'O prazo de resposta vai de hoje até a data de início.'], [{ responderAte: '2026-11-20' }, 'O prazo de resposta vai de hoje até a data de início.'],
+  ])('proposta recusa %o', (m, msg) => { expect(validarProposta({ ...p, ...m }, '2026-11-26')).toBe(msg) })
+  it('mensagens prontas trazem o link e não falam em gravação no presencial', () => {
+    const l = linkResposta('https://hiadv.com.br/', 'a'.repeat(36)); expect(l).toBe(`https://hiadv.com.br/resposta/${'a'.repeat(36)}`)
+    const t = textoConvite('Ana Ferreira', 'Lanhi', 'Triagem', e, l); expect(t).toContain('Olá, Ana!'); expect(t).toContain('27/11/2026 às 14:00'); expect(t).toContain(l); expect(t).toContain('gravada')
+    expect(textoConvite('Ana F', 'L', 'T', { ...e, modo: 'presencial', local: 'Rua XV', gravacao: true }, l)).not.toContain('gravada')
+    const tp = textoProposta('Ana F', 'Lanhi', p, l); expect(tp).toContain('responda até 28/11/2026'); expect(tp).toContain('Benefícios: VA')
+  })
+})

@@ -1379,3 +1379,22 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .vg-rodape { padding: 24px 20px; color: #888; font-size: 13px; text-align: center; }
 .vg .ad-erro { color: #a3122a; } .vg .ad-consent { color: #333; }
 @media (max-width: 380px) { .vg-beneficios { grid-template-columns: 1fr; } .vg-fixo small { display: none; } }
+.rh-convites { display: flex; flex-direction: column; gap: var(--s-3); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: var(--s-3) 0; }
+.rh-sub { background: var(--surface-2); border-radius: var(--r); padding: var(--s-3); }
+.rh-bloco h3 { margin: 0 0 4px; font-size: var(--fs-md); }
+.rh-bloco p { margin: 0 0 var(--s-2); overflow-wrap: anywhere; }
+.rh-msg-texto { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: var(--fs-sm); background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: var(--s-3); margin: 0 0 var(--s-2); max-height: 260px; overflow: auto; }
+.rh-resposta { margin: 0; padding: var(--s-2) var(--s-3); border-radius: 10px; background: var(--accent-soft); color: var(--accent-soft-ink); overflow-wrap: anywhere; }
+.vg-topo-resp { padding-top: 28px; }
+.vg-ok { margin: 16px 20px 0; padding: 12px 14px; border-radius: 10px; background: #e8f4ea; color: #1d4d27; }
+.vg-tabela { margin: 0; border: 1px solid #eee; border-radius: 10px; }
+.vg-tabela div { display: grid; grid-template-columns: 120px 1fr; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #eee; font-size: 15px; }
+.vg-tabela div:last-child { border-bottom: 0; }
+.vg-tabela dt { color: #666; } .vg-tabela dd { margin: 0; color: #1c1c1c; overflow-wrap: anywhere; }
+.vg-tabela a { color: #6e1c2e; font-weight: 700; }
+.vg-recado { margin: 14px 0 0; color: #444; font-size: 15px; }
+.vg-botoes { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+.vg-botoes .vg-botao { flex: 1 1 160px; }
+.vg-botao-claro { background: #fff; color: #1c1c1c; border: 1px solid #cfc8bd; }
+.vg-confirma p { margin: 18px 0 0; font-weight: 700; color: #1c1c1c; }
+@media (max-width: 380px) { .vg-tabela div { grid-template-columns: 1fr; gap: 2px; } }

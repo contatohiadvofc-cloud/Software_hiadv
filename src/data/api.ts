@@ -15,7 +15,7 @@ import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
 import type { EtapaLead, Lead, NovoLead } from './atendimentos'
 import type { NovasHoras, RegistroHoras } from './horas'
 import type { Portal, SituacaoPortal } from './portal'
-import type { Candidatura, DadosVaga, Etapa, FormCandidatura, StatusVaga, Vaga, VagaPublica } from './recrutamento'
+import type { Candidatura, DadosVaga, Entrevista, Etapa, FormCandidatura, Proposta, RespostaPublica, StatusVaga, TipoResposta, Vaga, VagaPublica } from './recrutamento'
 import type { Adesao, Cortesia, FormAdesao, Indicacao, PlanoId, Respostas, StatusAdesao } from './adesao'
 import type { PedidoIA } from './iaPrompts'
 import type { ConfigGoogle } from '../lib/drive'
@@ -193,6 +193,10 @@ export interface Api {
   candidaturaAtualizar(id: string, m: { etapa?: Etapa; nota?: number; obs?: string }): Promise<void>
   candidaturaApagar(id: string): Promise<void>
   curriculoLink(path: string): Promise<string>
+  entrevistaSalvar(id: string, e: Entrevista): Promise<void>
+  propostaSalvar(id: string, p: Proposta): Promise<void>
+  respostaVer(token: string): Promise<RespostaPublica | null>
+  respostaEnviar(token: string, tipo: TipoResposta, msg: string): Promise<void>
   /** Público, sem login. */
   vagaPublica(escritorio: string, vaga: string): Promise<VagaPublica | null>
   candidaturaEnviar(vaga: string, f: FormCandidatura, curriculo: File | null): Promise<void>

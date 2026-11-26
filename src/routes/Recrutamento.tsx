@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
-import { ETAPAS, MODELOS, NOMES_FUNCAO, NOMES_STATUS_VAGA, agruparPorEtapa, linkVaga, listaDeTexto, nomeEtapa, salarioTela, textoDivulgacao, validarVaga, vagaVazia,
+import { ETAPAS, MODELOS, NOMES_RESPOSTA, NOMES_FUNCAO, NOMES_STATUS_VAGA, agruparPorEtapa, linkVaga, listaDeTexto, nomeEtapa, salarioTela, textoDivulgacao, validarVaga, vagaVazia,
   type Candidatura, type DadosVaga, type Etapa, type Funcao, type StatusVaga, type Vaga } from '../data/recrutamento'
 import { linkWhatsapp, telefoneTela } from '../data/clientes'
 import { Panel } from '../design/components/Panel'
@@ -12,6 +12,7 @@ import { Button } from '../design/components/Button'
 import { Dialog } from '../design/components/Dialog'
 import { Field } from '../design/components/Field'
 import { useToast } from '../design/components/Toast'
+import { ConvitesCandidato } from './RecrutamentoConvites'
 
 const tomStatus = (s: StatusVaga) => (s === 'aberta' ? 'success' : s === 'pausada' ? 'warning' : 'neutral') as 'success' | 'warning' | 'neutral'
 const origem = () => (typeof window !== 'undefined' ? window.location.origin : 'https://hiadv.com.br')
@@ -94,14 +95,15 @@ function CartaoCandidato({ c, gestor, aoAbrir, aoArrastar }: { c: Candidatura; g
       <button type="button" className="rh-card-abrir" onClick={aoAbrir}>
         <strong>{c.nome}</strong>
         <span className="muted sm">{[c.cidade, c.uf].filter(Boolean).join('/') || 'Cidade não informada'}</span>
-        <span className="rh-card-pe">{c.nota ? <span aria-label={`Nota ${c.nota} de 5`}>{'★'.repeat(c.nota)}{'☆'.repeat(5 - c.nota)}</span> : <span className="muted sm">Sem nota</span>}
+        <span className="rh-card-pe">{c.resposta && <Badge tone={c.resposta.tipo === 'recusar' ? 'neutral' : c.resposta.tipo === 'outro_horario' ? 'warning' : 'success'}>{NOMES_RESPOSTA[c.resposta.tipo]}</Badge>}{c.nota ? <span aria-label={`Nota ${c.nota} de 5`}>{'★'.repeat(c.nota)}{'☆'.repeat(5 - c.nota)}</span> : <span className="muted sm">Sem nota</span>}
           {c.curriculoPath && <Badge tone="info">CV</Badge>}</span>
       </button>
     </li>
   )
 }
 
-function FichaCandidato({ c, perguntas, gestor, aoFechar }: { c: Candidatura; perguntas: string[]; gestor: boolean; aoFechar: () => void }) {
+function FichaCandidato({ c, vaga, escritorio, gestor, aoFechar }: { c: Candidatura; vaga: Vaga; escritorio: string; gestor: boolean; aoFechar: () => void }) {
+  const perguntas = vaga.perguntas
   const api = useApi(); const qc = useQueryClient(); const toast = useToast()
   const [obs, setObs] = useState(c.obs ?? '')
   const [apagar, setApagar] = useState(false)
@@ -125,6 +127,7 @@ function FichaCandidato({ c, perguntas, gestor, aoFechar }: { c: Candidatura; pe
       )}
       {gestor ? (
         <>
+          <ConvitesCandidato c={c} vaga={vaga} escritorio={escritorio} />
           <div className="rh-duas">
             <label className="adm-campo"><span>Etapa</span>
               <select className="hv-input" value={c.etapa} onChange={(e) => mudar.mutate({ etapa: e.target.value as Etapa })}>
@@ -150,7 +153,7 @@ function FichaCandidato({ c, perguntas, gestor, aoFechar }: { c: Candidatura; pe
   )
 }
 
-function Funil({ vaga, gestor }: { vaga: Vaga; gestor: boolean }) {
+function Funil({ vaga, gestor, escritorio }: { vaga: Vaga; gestor: boolean; escritorio: string }) {
   const api = useApi(); const qc = useQueryClient(); const toast = useToast()
   const q = useQuery({ queryKey: ['candidaturas', vaga.id], queryFn: () => api.candidaturas(vaga.id) })
   const [aberto, setAberto] = useState<string | null>(null)
@@ -177,7 +180,7 @@ function Funil({ vaga, gestor }: { vaga: Vaga; gestor: boolean }) {
         ))}
       </div>
       <Dialog open={!!atual} onOpenChange={(v) => { if (!v) setAberto(null) }} title={atual?.nome ?? 'Candidato'} variant="painel">
-        {atual && <FichaCandidato c={atual} perguntas={vaga.perguntas} gestor={gestor} aoFechar={() => setAberto(null)} />}
+        {atual && <FichaCandidato c={atual} vaga={vaga} escritorio={escritorio} gestor={gestor} aoFechar={() => setAberto(null)} />}
       </Dialog>
     </>
   )
@@ -241,7 +244,7 @@ export function Recrutamento() {
             aoEditar={() => setEditando({ ...v })} />
         ))}</ul></Panel>
       )}
-      {vaga && <Panel title={`Candidatos · ${vaga.titulo}`}><Funil vaga={vaga} gestor={gestor} /></Panel>}
+      {vaga && <Panel title={`Candidatos · ${vaga.titulo}`}><Funil vaga={vaga} gestor={gestor} escritorio={escritorio} /></Panel>}
       <Dialog open={editando !== null} onOpenChange={(v) => { if (!v) setEditando(null) }} title={editando && editando !== 'nova' && editando.id ? 'Editar vaga' : 'Nova vaga'} variant="painel">
         {editando !== null && <EditorVaga inicial={editando === 'nova' ? null : editando} aoFechar={() => setEditando(null)} />}
       </Dialog>

@@ -18,7 +18,7 @@ import type { Agente, Integracao, ItemBiblioteca } from './escritorio'
 import { validarLead, type Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
 import { validarAdesao, type Adesao } from './adesao'
-import { validarCandidatura, validarVaga, type Candidatura, type Vaga } from './recrutamento'
+import { validarCandidatura, validarEntrevista, validarProposta, validarVaga, type Candidatura, type Vaga } from './recrutamento'
 import { montarPedidoIA } from './iaPrompts'
 import { validarNovo, type DetalheCentral, type EscritorioCentral } from './central'
 
@@ -760,6 +760,25 @@ export function criarApiDemo(): Api {
     },
     async candidaturaApagar(id) { const i = CANDIDATOS.findIndex((x) => x.id === id); if (i < 0) throw new Error('Candidatura não encontrada.'); const [c] = CANDIDATOS.splice(i, 1); contarVaga(c.vaga) },
     async curriculoLink() { throw new Error('Na demonstração não há currículos salvos.') },
+    async entrevistaSalvar(id, e) {
+      const c = CANDIDATOS.find((x) => x.id === id); if (!c) throw new Error('Candidatura não encontrada.')
+      const m = validarEntrevista(e); if (m) throw new Error(m)
+      c.entrevista = { ...e }; if (['recebido', 'triagem', 'teste'].includes(c.etapa)) c.etapa = 'entrevista'; c.token ??= `demo${id}`.padEnd(36, '0'); contarVaga(c.vaga)
+    },
+    async propostaSalvar(id, p) {
+      const c = CANDIDATOS.find((x) => x.id === id); if (!c) throw new Error('Candidatura não encontrada.')
+      const m = validarProposta(p); if (m) throw new Error(m)
+      c.proposta = { ...p }; if (c.etapa !== 'contratado') c.etapa = 'proposta'; c.token ??= `demo${id}`.padEnd(36, '0'); contarVaga(c.vaga)
+    },
+    async respostaVer(token) {
+      const c = CANDIDATOS.find((x) => x.token === token); if (!c) return null
+      return { nome: c.nome.split(' ')[0], escritorio: 'Silva & Prado Advocacia', vaga: VAGAS.find((v) => v.id === c.vaga)?.titulo ?? '', entrevista: c.entrevista ?? null, proposta: c.proposta ?? null, resposta: c.resposta ?? null, etapa: c.etapa }
+    },
+    async respostaEnviar(token, tipo, msg) {
+      const c = CANDIDATOS.find((x) => x.token === token); if (!c) throw new Error('Link inválido.')
+      if (tipo === 'outro_horario' && !msg.trim()) throw new Error('Diga quais dias e horários ficam melhores.')
+      c.resposta = { tipo, msg: msg.trim() || null, em: new Date().toISOString() }; if (tipo === 'aceitar') c.etapa = 'contratado'
+    },
     async vagaPublica(esc, slug) {
       const v = VAGAS.find((x) => x.escritorioSlug === esc && x.slug === slug && x.status !== 'rascunho'); if (!v) return null
       return { ...v, escritorio: 'Silva & Prado Advocacia', cidadeEscritorio: 'Joaçaba', aberta: v.status === 'aberta', salario: v.mostrarSalario ? v.salario : null }

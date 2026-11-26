@@ -19,7 +19,7 @@ import type { Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
-import type { Candidatura, Vaga } from './recrutamento'
+import type { Candidatura, RespostaPublica, Vaga } from './recrutamento'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato, type ResultadoBusca, type ChamadaAtiva, type ReuniaoPassada, type Fala } from './conversas'
 import { ICE, type Presenca, type Sinal } from './chamada'
@@ -33,6 +33,19 @@ function lerDadosVaga(x: Record<string, unknown>) {
     requisitos: arr('requisitos'), diferenciais: arr('diferenciais'), perguntas: arr('perguntas'), quantidade: Number(x.quantidade ?? 1), inscricoesAte: (x.inscricoes_ate as string) ?? null }
 }
 
+function lerEntrevista(x: unknown) {
+  if (!x || typeof x !== 'object') return null
+  const e = x as Record<string, unknown>
+  return { modo: e.modo === 'presencial' ? 'presencial' as const : 'video' as const, data: String(e.data ?? ''), hora: String(e.hora ?? ''), duracao: Number(e.duracao ?? 45),
+    local: (e.local as string) ?? '', link: (e.link as string) ?? '', com: (e.com as string) ?? '', levar: (e.levar as string) ?? '', gravacao: e.gravacao === true }
+}
+function lerProposta(x: unknown) {
+  if (!x || typeof x !== 'object') return null
+  const p = x as Record<string, unknown>
+  return { cargo: String(p.cargo ?? ''), regime: String(p.regime ?? ''), salario: p.salario === null || p.salario === undefined ? null : Number(p.salario), bonus: (p.bonus as string) ?? '',
+    jornada: (p.jornada as string) ?? '', local: (p.local as string) ?? '', beneficios: Array.isArray(p.beneficios) ? (p.beneficios as string[]) : [], inicio: String(p.inicio ?? ''),
+    responderAte: String(p.responder_ate ?? ''), mensagem: (p.mensagem as string) ?? '' }
+}
 function lerAnexo(a: unknown): Anexo | null {
   if (!a || typeof a !== 'object') return null
   const x = a as Record<string, unknown>
@@ -583,7 +596,8 @@ export function criarApiSupabase(url: string, chave: string): Api {
       return d.map((x): Candidatura => ({ id: String(x.id), nome: String(x.nome), email: String(x.email), whatsapp: String(x.whatsapp), cidade: (x.cidade as string) ?? null,
         uf: (x.uf as string) ?? null, linkedin: (x.linkedin as string) ?? null, curriculoPath: (x.curriculo_path as string) ?? null,
         respostas: (x.respostas as Record<string, string>) ?? {}, bancoTalentos: x.banco_talentos === true, etapa: x.etapa as Candidatura['etapa'],
-        nota: x.nota === null || x.nota === undefined ? null : Number(x.nota), obs: (x.obs as string) ?? null, criadoEm: String(x.criado_em) }))
+        nota: x.nota === null || x.nota === undefined ? null : Number(x.nota), obs: (x.obs as string) ?? null, criadoEm: String(x.criado_em),
+        entrevista: lerEntrevista(x.entrevista), proposta: lerProposta(x.proposta), resposta: (x.resposta as Candidatura['resposta']) ?? null, token: (x.token as string) ?? null }))
     },
     async candidaturaAtualizar(id, m) { okOuErro(verificar(await sb.rpc('rh_candidatura_atualizar', { p_id: id, p_etapa: m.etapa ?? null, p_nota: m.nota ?? null, p_obs: m.obs ?? null }))) },
     async candidaturaApagar(id) { okOuErro(verificar(await sb.rpc('rh_candidatura_apagar', { p_id: id }))) },
@@ -592,6 +606,18 @@ export function criarApiSupabase(url: string, chave: string): Api {
       if (r.error || !r.data) throw new Error('Não foi possível abrir o currículo.')
       return r.data.signedUrl
     },
+    async entrevistaSalvar(id, e) { okOuErro(verificar(await sb.rpc('rh_entrevista_salvar', { p_id: id, p: e }))) },
+    async propostaSalvar(id, p) {
+      okOuErro(verificar(await sb.rpc('rh_proposta_salvar', { p_id: id, p: { cargo: p.cargo, regime: p.regime, salario: p.salario, bonus: p.bonus, jornada: p.jornada, local: p.local,
+        beneficios: p.beneficios, inicio: p.inicio, responder_ate: p.responderAte, mensagem: p.mensagem } })))
+    },
+    async respostaVer(token) {
+      const x = verificar(await sb.rpc('rh_resposta_ver', { p_token: token })) as Record<string, unknown> | null
+      if (!x) return null
+      return { nome: String(x.nome), escritorio: String(x.escritorio), vaga: String(x.vaga), entrevista: lerEntrevista(x.entrevista), proposta: lerProposta(x.proposta),
+        resposta: (x.resposta as RespostaPublica['resposta']) ?? null, etapa: x.etapa as RespostaPublica['etapa'] }
+    },
+    async respostaEnviar(token, tipo, msg) { okOuErro(verificar(await sb.rpc('rh_resposta_enviar', { p_token: token, p_tipo: tipo, p_msg: msg }))) },
     async vagaPublica(escritorio, vaga) {
       const x = verificar(await sb.rpc('rh_vaga_publica', { p_escritorio: escritorio, p_vaga: vaga })) as Record<string, unknown> | null
       if (!x) return null

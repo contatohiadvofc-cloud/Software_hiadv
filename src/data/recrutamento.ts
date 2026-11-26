@@ -14,6 +14,7 @@ export type VagaPublica = DadosVaga & { id: string; escritorio: string; cidadeEs
 export type Candidatura = {
   id: string; nome: string; email: string; whatsapp: string; cidade: string | null; uf: string | null; linkedin: string | null
   curriculoPath: string | null; respostas: Record<string, string>; bancoTalentos: boolean; etapa: Etapa; nota: number | null; obs: string | null; criadoEm: string
+  entrevista?: Entrevista | null; proposta?: Proposta | null; resposta?: Resposta | null; token?: string | null
 }
 export type FormCandidatura = { nome: string; email: string; whatsapp: string; cidade: string; uf: string; linkedin: string; respostas: Record<string, string>; consentimento: boolean; bancoTalentos: boolean }
 
@@ -111,3 +112,59 @@ export function agruparPorEtapa(lista: Candidatura[]): Record<Etapa, Candidatura
 }
 
 export function listaDeTexto(t: string): string[] { return t.split('\n').map((x) => x.trim()).filter(Boolean) }
+
+// ===== Entrevista e proposta =====
+export type Entrevista = { modo: 'presencial' | 'video'; data: string; hora: string; duracao: number; local: string; link: string; com: string; levar: string; gravacao: boolean }
+export type Proposta = { cargo: string; regime: string; salario: number | null; bonus: string; jornada: string; local: string; beneficios: string[]; inicio: string; responderAte: string; mensagem: string }
+export type TipoResposta = 'confirmar' | 'outro_horario' | 'aceitar' | 'recusar'
+export type Resposta = { tipo: TipoResposta; msg: string | null; em: string }
+export type RespostaPublica = { nome: string; escritorio: string; vaga: string; entrevista: Entrevista | null; proposta: Proposta | null; resposta: Resposta | null; etapa: Etapa }
+
+export const NOMES_RESPOSTA: Record<TipoResposta, string> = { confirmar: 'Confirmou a entrevista', outro_horario: 'Pediu outro horário', aceitar: 'Aceitou a proposta', recusar: 'Recusou a proposta' }
+
+export function entrevistaVazia(): Entrevista { return { modo: 'video', data: '', hora: '', duracao: 45, local: '', link: '', com: '', levar: '', gravacao: true } }
+
+export function validarEntrevista(e: Entrevista, hoje = new Date().toLocaleDateString('sv-SE')): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(e.data) || e.data < hoje) return 'Escolha uma data a partir de hoje.'
+  if (!/^([01]\d|2[0-3]):[0-5]\d$/.test(e.hora)) return 'Horário inválido.'
+  if (!Number.isInteger(e.duracao) || e.duracao < 10 || e.duracao > 240) return 'A duração vai de 10 a 240 minutos.'
+  if (e.modo === 'presencial' && !e.local.trim()) return 'Informe o endereço da entrevista.'
+  if (e.link.trim() && !/^https:\/\//i.test(e.link.trim())) return 'O link da chamada precisa começar com https://'
+  return null
+}
+
+export function propostaDaVaga(v: Pick<DadosVaga, 'titulo' | 'regime' | 'salario' | 'salarioObs' | 'jornada' | 'modalidade' | 'cidade' | 'beneficios'>): Proposta {
+  return { cargo: v.titulo, regime: v.regime, salario: v.salario, bonus: v.salarioObs, jornada: v.jornada, local: [v.modalidade, v.cidade].filter(Boolean).join(' · '),
+    beneficios: [...v.beneficios], inicio: '', responderAte: '', mensagem: '' }
+}
+
+export function validarProposta(p: Proposta, hoje = new Date().toLocaleDateString('sv-SE')): string | null {
+  if (p.cargo.trim().length < 4) return 'Informe o cargo.'
+  if (p.salario === null || !Number.isFinite(p.salario) || p.salario <= 0 || p.salario > 1_000_000) return 'Informe o salário.'
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(p.inicio) || p.inicio < hoje) return 'A data de início precisa ser a partir de hoje.'
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(p.responderAte) || p.responderAte < hoje || p.responderAte > p.inicio) return 'O prazo de resposta vai de hoje até a data de início.'
+  if (p.beneficios.length > 20) return 'Até 20 benefícios.'
+  return null
+}
+
+const dataBr = (iso: string) => iso.split('-').reverse().join('/')
+const diaSemana = (iso: string) => new Date(`${iso}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'long' })
+
+/** Mensagem pronta do convite. O gestor revisa e envia; o HiAdv não envia sozinho. */
+export function textoConvite(nome: string, escritorio: string, vaga: string, e: Entrevista, link: string): string {
+  const onde = e.modo === 'presencial' ? `Local: ${e.local.trim()}` : `Por vídeo${e.link.trim() ? `: ${e.link.trim()}` : ' (o link chega antes do horário)'}`
+  return [`Olá, ${nome.split(' ')[0]}! Aqui é do ${escritorio}.`, `Queremos conversar com você sobre a vaga de ${vaga}.`,
+    `Quando: ${diaSemana(e.data)}, ${dataBr(e.data)} às ${e.hora} (${e.duracao} min)`, onde,
+    e.com.trim() ? `Com: ${e.com.trim()}` : '', e.modo === 'presencial' && e.levar.trim() ? `Levar: ${e.levar.trim()}` : '',
+    e.modo === 'video' && e.gravacao ? 'Se você concordar, a conversa é gravada e transcrita só para a avaliação desta vaga.' : '',
+    `Confirme ou peça outro horário por aqui: ${link}`].filter(Boolean).join('\n')
+}
+
+export function textoProposta(nome: string, escritorio: string, p: Proposta, link: string): string {
+  return [`Olá, ${nome.split(' ')[0]}! Temos uma proposta do ${escritorio} para você.`, `Cargo: ${p.cargo.trim()} (${p.regime})`,
+    `Salário: ${salarioTela(p.salario)}${p.bonus.trim() ? ` ${p.bonus.trim()}` : ''}`, p.jornada.trim() ? `Jornada: ${p.jornada.trim()}` : '',
+    p.beneficios.length ? `Benefícios: ${p.beneficios.join(', ')}` : '', `Início: ${dataBr(p.inicio)}${p.local.trim() ? ` · ${p.local.trim()}` : ''}`,
+    p.mensagem.trim(), `Veja os detalhes e responda até ${dataBr(p.responderAte)}: ${link}`].filter(Boolean).join('\n')
+}
+
+export const linkResposta = (origem: string, token: string) => `${origem.replace(/\/$/, '')}/resposta/${token}`
