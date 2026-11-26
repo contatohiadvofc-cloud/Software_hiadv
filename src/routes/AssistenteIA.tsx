@@ -7,6 +7,7 @@ import { escolherArquivos, escolherPasta, lerTexto, nomeArquivo, salvarNoDrive, 
 import { Dialog } from '../design/components/Dialog'
 import { Button } from '../design/components/Button'
 import { useToast } from '../design/components/Toast'
+import { AvaliarIA } from './AprendizadoIA'
 
 export type ContextoIA = {
   cliente?: { id: string; nome: string }
@@ -120,6 +121,7 @@ export function AssistenteIA({ open, onOpenChange, ctx }: { open: boolean; onOpe
               <Button variant="secondary" size="sm" onClick={() => navigator.clipboard?.writeText(resultado).then(() => toast('Copiado.'), () => toast('Não foi possível copiar.', 'danger'))}>Copiar</Button>
               {podeDrive && <Button variant="secondary" size="sm" loading={salvar.isPending} onClick={() => salvar.mutate()}>Salvar no Drive</Button>}
             </div>
+            <AvaliarIA key={resultado.slice(0, 40)} acao={acao} pedido={(instrucao || texto).slice(0, 600)} />
           </section>
         )}
       </div>

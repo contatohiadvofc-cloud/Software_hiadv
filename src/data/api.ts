@@ -1,3 +1,4 @@
+import type { AprendizadoIA } from './iaAprendizado'
 import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, ChamadaAtiva, Contato, Fala, ReuniaoPassada, ContatoForm, PedidoEntrada, ResultadoBusca, PessoaComunidade, PessoaEquipe, GrupoInfo } from './conversas'
 import type { CanalChamada } from './chamada'
 import type { ItemDia } from './seuDia'
@@ -18,7 +19,7 @@ import type { Portal, SituacaoPortal } from './portal'
 import type { ConversaCliente, GrupoAtualizacoes, MensagemCliente, StatusAtualizacao } from './suporte'
 import type { Candidatura, DadosVaga, Entrevista, Etapa, FormCandidatura, Proposta, RespostaPublica, StatusVaga, TipoResposta, Vaga, VagaPublica } from './recrutamento'
 import type { Adesao, Cortesia, FormAdesao, Indicacao, PlanoId, Respostas, StatusAdesao } from './adesao'
-import type { PedidoIA } from './iaPrompts'
+import type { AcaoIA, PedidoIA } from './iaPrompts'
 import type { ConfigGoogle } from '../lib/drive'
 import type { AssinaturaForm, DetalheCentral, EscritorioCentral, MeusRecursos, NovoEscritorio, PagamentoCentral, PainelCentral } from './central'
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
@@ -218,6 +219,11 @@ export interface Api {
   /** IA do plano Sênior (chave da Claude do escritório, no servidor). Devolve o rascunho. */
   iaGerar(p: PedidoIA): Promise<string>
   iaUsoMes(): Promise<{ usados: number; limite: number | null } | null>
+  iaAvaliar(acao: AcaoIA, pedido: string, util: boolean, comoQueria: string): Promise<void>
+  iaAprendizado(): Promise<AprendizadoIA>
+  iaOrientacaoSalvar(id: number | null, acao: AcaoIA | null, texto: string, feedbackId?: number | null): Promise<number>
+  iaOrientacaoAtiva(id: number, ativo: boolean): Promise<void>
+  iaFeedbackRecusar(id: number): Promise<void>
   /** Identificadores públicos do app do HiAdv no Google (seletor do Drive) e se o Drive está ligado no escritório. */
   configGoogle(): Promise<{ cfg: ConfigGoogle | null; driveLigado: boolean }>
   /** Só o papel code. */

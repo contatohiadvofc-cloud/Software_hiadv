@@ -1,3 +1,10 @@
+import { problemaOrientacao, MAX_ORIENTACOES, type AprendizadoIA } from './iaAprendizado'
+const demoIA: AprendizadoIA & { seq: number } = {
+  seq: 10,
+  pendentes: [{ id: 2, quem: 'ana@demo.hiadv', acao: 'quesitos', pedido: 'Quesitos para perícia de joelho (LCA)', comoQueria: 'Queria os quesitos numerados no formato 1 -, 2 -, 3 - e no máximo 15.', em: '2026-11-25T14:00:00Z' }],
+  orientacoes: [{ id: 1, acao: 'minuta', texto: 'Nos pedidos, coloque cada pedido em parágrafo próprio, identificado por a), b), c).', ativo: true, usos: 12, criadoPor: 'gestor@demo.hiadv', em: '2026-11-20T12:00:00Z' }],
+  resumo: { uteis: 18, naoUteis: 3 },
+}
 import { conversasDemo } from './conversasDemo'
 import { suporteDemo } from './suporteDemo'
 import { RECURSOS_POR_PLANO } from './planos'
@@ -839,6 +846,22 @@ export function criarApiDemo(): Api {
       return `Rascunho de demonstração (${p.acao}). Na versão real, este texto é escrito pela IA com a chave da Claude do escritório e chega aqui para você revisar.\n\nO pedido enviado teria ${mensagem.length} caracteres.`
     },
     async iaUsoMes() { return { usados: 3, limite: 300 } },
+    async iaAvaliar(acao, pedido, util, comoQueria) {
+      if (!util && comoQueria.trim()) demoIA.pendentes.unshift({ id: ++demoIA.seq, quem: 'voce@demo.hiadv', acao, pedido: pedido.slice(0, 600), comoQueria: comoQueria.trim(), em: new Date().toISOString() })
+      if (util) demoIA.resumo.uteis++; else demoIA.resumo.naoUteis++
+    },
+    async iaAprendizado() { return structuredClone({ pendentes: demoIA.pendentes, orientacoes: demoIA.orientacoes, resumo: demoIA.resumo }) },
+    async iaOrientacaoSalvar(id, acao, texto, feedbackId) {
+      const erro = problemaOrientacao(texto); if (erro) throw new Error(erro)
+      if (id) { const o = demoIA.orientacoes.find((x) => x.id === id); if (!o) throw new Error('Orientação não encontrada.'); o.texto = texto.trim(); o.acao = acao; return id }
+      if (demoIA.orientacoes.filter((o) => o.ativo).length >= MAX_ORIENTACOES) throw new Error('O escritório já tem 40 orientações ligadas. Desligue alguma antes de criar outra.')
+      const nid = ++demoIA.seq
+      demoIA.orientacoes.unshift({ id: nid, acao, texto: texto.trim(), ativo: true, usos: 0, criadoPor: 'voce@demo.hiadv', em: new Date().toISOString() })
+      if (feedbackId) demoIA.pendentes = demoIA.pendentes.filter((f) => f.id !== feedbackId)
+      return nid
+    },
+    async iaOrientacaoAtiva(id, ativo) { const o = demoIA.orientacoes.find((x) => x.id === id); if (o) o.ativo = ativo },
+    async iaFeedbackRecusar(id) { demoIA.pendentes = demoIA.pendentes.filter((f) => f.id !== id) },
     async configGoogle() { return { cfg: null, driveLigado: false } },
     async configGoogleSalvar() { throw new Error('Na demonstração a configuração do Google não é salva.') },
     async centralNovo(n) {

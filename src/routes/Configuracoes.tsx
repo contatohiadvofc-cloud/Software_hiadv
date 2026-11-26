@@ -1,3 +1,4 @@
+import { AprendizadoIA } from './AprendizadoIA'
 import { Carregando } from '../design/components/Carregando'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState, type FormEvent } from 'react'
@@ -436,6 +437,7 @@ export function Configuracoes() {
           <span className="cfg-estado" data-ok={claude?.ativo ? 'sim' : 'nao'}>{claude?.ativo ? `IA própria ligada${claude.chaveFinal ? ` (chave …${claude.chaveFinal})` : ''}` : 'IA própria desligada'}</span>
           <Link to="/integracoes" className="hv-btn" data-variant="secondary">Abrir Integrações</Link>
         </div>) },
+      ...(gestor ? [{ id: 'aprendizado-ia', titulo: 'Aprendizado da IA', dica: 'O que a equipe pediu e o que a IA do escritório já aprendeu. Vale só para este escritório.', corpo: <AprendizadoIA /> }] : []),
       { id: 'agentes', titulo: 'Agentes', dica: 'Preparam o trabalho; quem decide e assina é o advogado. “Sem custo” funciona sem IA.', corpo: agentes },
     ] },
     seuAcesso, ajuda,

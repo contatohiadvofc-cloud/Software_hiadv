@@ -1504,3 +1504,10 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
   .sp-msg { max-width: 88%; }
 }
 .sp-calendario { margin: 0 0 var(--s-3, 12px); padding: 10px 14px; border-radius: 10px; background: var(--fundo-suave, rgba(127,127,127,.08)); font-size: .92rem; }
+.ia-avaliar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.ia-avaliar textarea, .ia-avaliar label { flex-basis: 100%; }
+.iaa h3 { margin: 18px 0 8px; font-size: 1rem; }
+.iaa-lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.iaa-item { border: 1px solid var(--borda, rgba(127,127,127,.25)); border-radius: 10px; padding: 12px; display: grid; gap: 6px; }
+.iaa-item[data-ativo="nao"] { opacity: .65; }
+.iaa-resumo { font-weight: 600; }

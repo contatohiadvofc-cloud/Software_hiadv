@@ -1,3 +1,4 @@
+import type { AprendizadoIA } from './iaAprendizado'
 import { createClient, type SupabaseClient, type PostgrestError } from '@supabase/supabase-js'
 import type { Api, Achado, Area, Escritorio, Papel, Perfil } from './api'
 import { CredencialInvalida, PrimeiroAcesso, SessaoExpirada } from './api'
@@ -717,6 +718,19 @@ export function criarApiSupabase(url: string, chave: string): Api {
       if (!d?.ok) throw new Error(d?.erro ?? 'A IA não conseguiu responder agora.')
       return String(d.texto ?? '')
     },
+    async iaAvaliar(acao, pedido, util, comoQueria) {
+      okOuErro(verificar(await sb.rpc('ia_avaliar', { p_acao: acao, p_pedido: pedido, p_util: util, p_como: comoQueria })))
+    },
+    async iaAprendizado() {
+      const d = verificar(await sb.rpc('ia_aprendizado')) as AprendizadoIA | null
+      return d ?? { pendentes: [], orientacoes: [], resumo: { uteis: 0, naoUteis: 0 } }
+    },
+    async iaOrientacaoSalvar(id, acao, texto, feedbackId) {
+      const r = okOuErro(verificar(await sb.rpc('ia_orientacao_salvar', { p_id: id, p_acao: acao, p_texto: texto, p_feedback: feedbackId ?? null })))
+      return Number(r.id)
+    },
+    async iaOrientacaoAtiva(id, ativo) { okOuErro(verificar(await sb.rpc('ia_orientacao_ativa', { p_id: id, p_ativo: ativo }))) },
+    async iaFeedbackRecusar(id) { okOuErro(verificar(await sb.rpc('ia_feedback_recusar', { p_id: id }))) },
     async iaUsoMes() {
       const r = await sb.rpc('hiadv_ia_uso_mes')
       if (r.error) return null
