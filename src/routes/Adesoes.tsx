@@ -47,7 +47,7 @@ function Pedido({ a }: { a: Adesao }) {
         <Badge tone={a.status === 'ativada' ? 'success' : a.status === 'recusada' ? 'neutral' : 'info'}>{NOMES_STATUS[a.status]}</Badge>
       </div>
       {respostasTela(a) && <p className="adm-respostas">{respostasTela(a)}</p>}
-      {a.respostas.implantacao === 'assistida' && <p className="adm-respostas"><Badge tone="info">Quer implantação assistida (6 semanas)</Badge></p>}
+      {a.respostas.implantacao === 'assistida' && <p className="adm-respostas"><Badge tone="info">Quer implantação assistida (7 dias)</Badge></p>}
       <div className="adm-acoes">
         <label className="adm-campo"><span>Plano</span>
           <select className="hv-input" value={a.plano} onChange={(e) => mudarPlano.mutate(e.target.value as PlanoId)}>{PLANOS.map((p) => <option key={p.id} value={p.id}>{p.nome}</option>)}</select>

@@ -55,7 +55,7 @@ export const PLANOS: Plano[] = [
     destaques: ['Tudo do Pleno', 'IA própria: o escritório conecta a chave da IA que já usa e trabalha com os agentes dentro do HiAdv', 'Minutas e resumos para revisão do advogado, a partir dos dados do caso', 'Google Drive do escritório com identificador e leitor de documentos', 'WhatsApp oficial e API incluídos quando forem lançados'] },
   { id: 'supremo', nome: 'Master', preco: 524.5, fundador: 524.5, aPartirDe: true, resumo: 'O plano completo: a Sara Integrada, a IA do HiAdv, já ligada, e acessos sob medida para a equipe.', limites: 'A partir de 5 gestores e 8 colaboradores, com acessos extras sob medida; 300 usos de IA por mês incluídos', emBreve: true,
     acessos: { gestores: 5, colaboradores: 8, total: 13 },
-    destaques: ['Tudo do Sênior', 'Sara Integrada: a IA do HiAdv, sem contratar nem configurar chave', 'Sara executando as ações pedidas pela equipe, com registro', 'Acessos personalizados: mais gestores e colaboradores, com custo por acesso extra', 'Combo sob medida com a implantação assistida', 'Leitura de intimações e laudos com resumo do que fazer'] },
+    destaques: ['Tudo do Sênior', 'Sara Integrada: a IA do HiAdv, sem contratar nem configurar chave', 'Sara executando as ações pedidas pela equipe, com registro', 'Acessos personalizados: mais gestores e colaboradores, com custo por acesso extra', 'Implantação assistida opcional: 7 dias com o fundador Deividy, por R$ 800', 'Leitura de intimações e laudos com resumo do que fazer'] },
 ]
 
 /** Quantas pessoas cabem numa chamada de voz ou vídeo: o total de acessos do plano (no Master, o contratado). */
@@ -154,16 +154,21 @@ export type Adesao = {
   status: StatusAdesao; fundador: boolean; cortesia: Cortesia; obs: string | null; criadoEm: string
 }
 
-/** Implantação assistida: 6 semanas com o Deividy aplicando, integrando, ativando e treinando a equipe. Opcional; quem preferir implanta sozinho pelo Manual. */
+/** Implantação assistida: opcional, só no plano Master. 7 dias com o fundador Deividy configurando, integrando e treinando a equipe. */
 export const IMPLANTACAO = {
-  valor: 8000,
+  valor: 800,
+  dias: 7,
+  plano: 'supremo' as PlanoId,
+  /** O que a implantação inclui, além da configuração. */
+  inclui: 'Configuração do sistema e treinamento da equipe: como usar o HiAdv, estratégias comerciais, planejamento organizacional e tudo o que o sistema consegue fazer, com o fundador Deividy acompanhando o escritório pessoalmente durante 7 dias.',
   pagamento: 'Dinheiro, cartão de débito, Pix, até 10x no cartão de crédito ou 3x no boleto',
-  semanas: [
-    { titulo: 'Semana 1 · Diagnóstico e base', itens: ['Reunião de diagnóstico com os gestores: áreas, funções, fluxo atual e metas', 'Dados do escritório, logo, OABs e equipe cadastrados; papéis e acessos de cada pessoa', 'Treino 1: navegação, Seu dia, busca global, atalhos e aplicativo no celular (Android e iPhone)'] },
-    { titulo: 'Semana 2 · Fluxos e áreas', itens: ['Áreas, etapas e modelos de caso montados por tipo de benefício ou ação', 'Campos personalizados, checklists de entrada e saída e responsáveis por área', 'Treino 2: casos, tarefas, passagem de bastão e prazos com feriados'] },
-    { titulo: 'Semana 3 · Migração dos dados', itens: ['Importação de clientes, casos e prazos da planilha ou do sistema anterior, com conferência', 'Publicações pela OAB ligadas e conferidas com o escritório', 'Treino 3: clientes, documentos, agenda e link de acompanhamento do cliente'] },
-    { titulo: 'Semana 4 · Integrações', itens: ['Conexões ativadas conforme o plano: cobrança, assinatura digital, Google Drive, consulta processual', 'Financeiro e honorários configurados com as regras do escritório', 'Treino 4: financeiro, relatórios e conversas e chamadas da equipe'] },
-    { titulo: 'Semana 5 · Automações e Sara', itens: ['Automações do escritório montadas e simuladas antes de ligar', 'Sara configurada com os limites definidos pelos gestores', 'Treino 5: automações, Sara, recrutamento e atendimentos (do contato ao cliente)'] },
-    { titulo: 'Semana 6 · Rodagem assistida e entrega', itens: ['Uma semana usando no dia a dia com acompanhamento e ajustes finos', 'Revisão de acessos, segurança e cópias de segurança', 'Treino 6: dúvidas finais, gestor sênior e entrega do roteiro do escritório'] },
+  etapas: [
+    { titulo: 'Dia 1 · Diagnóstico e planejamento', itens: ['Reunião com os gestores e planejamento organizacional: áreas, funções, metas e capacidade da equipe', 'Dados do escritório, logo, OABs e equipe cadastrados; papéis e acessos de cada pessoa', 'Treino 1: navegação, Seu dia, busca global, atalhos e aplicativo no celular (Android e iPhone)'] },
+    { titulo: 'Dia 2 · Fluxos e áreas', itens: ['Áreas, etapas e modelos de caso montados por tipo de benefício ou ação', 'Campos personalizados, checklists de entrada e saída e responsáveis por área', 'Treino 2: casos, tarefas, passagem de bastão e prazos com feriados'] },
+    { titulo: 'Dia 3 · Migração dos dados', itens: ['Importação de clientes, casos e prazos da planilha ou do sistema anterior, com conferência', 'Publicações pela OAB ligadas e conferidas com o escritório', 'Treino 3: clientes, documentos, agenda e o app Meu Processo do cliente'] },
+    { titulo: 'Dia 4 · Integrações e financeiro', itens: ['Conexões ativadas: cobrança, assinatura digital, Google Drive, consulta processual', 'Financeiro e honorários configurados com as regras do escritório', 'Treino 4: financeiro, relatórios, conversas e chamadas da equipe'] },
+    { titulo: 'Dia 5 · Estratégia comercial', itens: ['Estratégias comerciais: do primeiro contato ao contrato, com o funil de atendimentos e a origem de cada lead', 'Mesa do Suporte e Meu Processo: como manter o cliente informado depois do contrato', 'Treino 5: atendimentos, suporte ao cliente e indicadores comerciais'] },
+    { titulo: 'Dia 6 · Automações e Sara', itens: ['Automações montadas e simuladas antes de ligar', 'Sara configurada com os limites definidos pelos gestores', 'Treino 6: automações, Sara e recrutamento'] },
+    { titulo: 'Dia 7 · Rodagem assistida e entrega', itens: ['Dia de uso real com acompanhamento e ajustes finos', 'Revisão de acessos, segurança e cópias de segurança', 'Treino 7: dúvidas finais, gestor responsável pelo sistema e entrega do roteiro do escritório'] },
   ],
 } as const

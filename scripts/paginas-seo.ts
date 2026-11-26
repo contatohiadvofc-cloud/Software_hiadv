@@ -155,7 +155,7 @@ export const PAGINAS: Pagina[] = [
       ['Feito dentro de um escritório', 'Cada tela nasceu de um problema do dia a dia: prazo que escapava na planilha, cliente perguntando pelo WhatsApp em que fase está o caso, documento que ninguém sabia se tinha chegado.'],
       ['Sigilo e LGPD', 'Cada escritório só enxerga os próprios dados. A conexão é criptografada, o acesso é por pessoa com papéis definidos pelo Gestor, as ações importantes ficam registradas e laudos e exames são tratados como dados sensíveis.'],
       ['Ética da advocacia', 'O sistema organiza, avisa e agenda. Nenhuma mensagem sai para o cliente sem alguém da equipe conferir, e a IA só prepara rascunhos marcados para revisão do advogado.'],
-      ['Implantação e suporte', 'O escritório pode implantar sozinho, pelo manual, ou contratar a implantação assistida de 6 semanas, em que a equipe do HiAdv configura, integra e treina a equipe. O atendimento é pelo WhatsApp (49) 99973-0572 e pelo e-mail hiadvofc@gmail.com.'],
+      ['Implantação e suporte', 'O escritório implanta pelo manual, no próprio ritmo. No plano Master, há a opção da implantação assistida por R$ 800: em 7 dias, o fundador Deividy acompanha o escritório, configura o sistema e treina a equipe no uso do HiAdv, em estratégias comerciais e no planejamento organizacional. A migração da planilha de clientes é gratuita em qualquer plano. O atendimento é pelo WhatsApp (49) 99973-0572 e pelo e-mail hiadvofc@gmail.com.'],
     ],
     perguntas: [
       ['O HiAdv atende escritórios de outros estados?', 'Sim. O HiAdv é 100% online e atende escritórios de todo o Brasil.'],

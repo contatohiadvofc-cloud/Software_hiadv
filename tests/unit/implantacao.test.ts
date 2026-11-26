@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vitest'
 import { IMPLANTACAO } from '../../src/data/adesao'
 describe('implantação assistida', () => {
-  it('tem 6 semanas, cada uma com treino', () => {
-    expect(IMPLANTACAO.semanas).toHaveLength(6)
-    IMPLANTACAO.semanas.forEach((s, i) => { expect(s.titulo.startsWith(`Semana ${i + 1}`)).toBe(true); expect(s.itens.some((x) => x.startsWith('Treino'))).toBe(true) })
+  it('tem 7 dias, cada um com treino, e é só do plano Master', () => {
+    expect(IMPLANTACAO.dias).toBe(7)
+    expect(IMPLANTACAO.etapas).toHaveLength(7)
+    IMPLANTACAO.etapas.forEach((s, i) => { expect(s.titulo.startsWith(`Dia ${i + 1}`)).toBe(true); expect(s.itens.some((x) => x.startsWith('Treino'))).toBe(true) })
+    expect(IMPLANTACAO.plano).toBe('supremo')
+    for (const t of ['estratégias comerciais', 'planejamento organizacional', 'Deividy', '7 dias']) expect(IMPLANTACAO.inclui).toContain(t)
   })
-  it('custa R$ 8.000 com as formas de pagamento combinadas', () => {
-    expect(IMPLANTACAO.valor).toBe(8000)
+  it('custa R$ 800 com as formas de pagamento combinadas', () => {
+    expect(IMPLANTACAO.valor).toBe(800)
     for (const f of ['Dinheiro', 'débito', 'Pix', '10x', '3x no boleto']) expect(IMPLANTACAO.pagamento).toContain(f)
   })
 })

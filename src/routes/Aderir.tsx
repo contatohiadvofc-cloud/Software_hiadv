@@ -33,7 +33,7 @@ export function Aderir() {
   useEffect(() => { window.scrollTo?.(0, 0) }, [etapa])
 
   const enviar = useMutation({
-    mutationFn: () => api.adesaoEnviar({ ...f, plano, recomendado: rec.plano, respostas: r, ref }),
+    mutationFn: () => api.adesaoEnviar({ ...f, plano, recomendado: rec.plano, respostas: plano === IMPLANTACAO.plano ? r : { ...r, implantacao: undefined }, ref }),
     onSuccess: () => setEtapa('enviado'),
     onError: (e) => setErro((e as Error).message),
   })
@@ -59,7 +59,7 @@ export function Aderir() {
             <h1 id="ad-titulo">Qual HiAdv combina com o seu escritório?</h1>
             <p>Cinco perguntas, menos de um minuto. No fim você vê o plano recomendado, o que ele inclui e pede a adesão. Quem libera o acesso é a equipe do HiAdv, pelo WhatsApp.</p>
             <button type="button" className="ad-botao ad-botao-claro" onClick={() => setEtapa(0)}>Começar</button>
-            {fundador && <p className="ad-nota">Lançamento: restam {vagas.data} de 20 vagas de fundador, com implantação assistida sem custo.</p>}
+            {fundador && <p className="ad-nota">Lançamento: restam {vagas.data} de 20 vagas de fundador.</p>}
           </section>
         )}
 
@@ -117,10 +117,11 @@ export function Aderir() {
               </div>
               <h3 className="ad-sub">O que o {p.nome} inclui</h3>
               <ul className="ad-inclui">{p.destaques.map((d) => <li key={d}>{d}</li>)}</ul>
-              <p className="ad-dica">{p.limites}. 14 dias grátis.{fundador ? ' Fundadores ganham a implantação assistida.' : ''} Sem cartão para começar.</p>
+              <p className="ad-dica">{p.limites}. 14 dias grátis. Sem cartão para começar.</p>
+              {p.id !== IMPLANTACAO.plano && <p className="ad-dica">A configuração é pelo Manual, no seu ritmo, e a migração da sua planilha de clientes é gratuita.</p>}
             </section>
 
-            {!p.emBreve && (
+            {p.id === IMPLANTACAO.plano && (
               <section className="ad-cartao" aria-labelledby="ad-implantacao">
                 <h2 id="ad-implantacao">Como você quer começar?</h2>
                 <div className="ad-planos" role="radiogroup" aria-labelledby="ad-implantacao">
@@ -129,14 +130,15 @@ export function Aderir() {
                     <span className="ad-resumo">Siga o Manual em Configurações, no seu ritmo. Sem custo extra.</span>
                   </button>
                   <button type="button" role="radio" aria-checked={r.implantacao === 'assistida'} className="ad-plano" onClick={() => setR({ ...r, implantacao: 'assistida' })}>
-                    <span className="ad-plano-topo"><strong>Implantação assistida</strong><span className="ad-selo">6 semanas</span></span>
+                    <span className="ad-plano-topo"><strong>Implantação assistida</strong><span className="ad-selo">7 dias</span></span>
                     <span className="ad-preco">{preco(IMPLANTACAO.valor)}<small> uma vez</small></span>
-                    <span className="ad-resumo">Nossa equipe aplica, integra, ativa e treina o seu time, uma etapa por semana.</span>
+                    <span className="ad-resumo">Opcional no Master. O fundador Deividy acompanha o escritório por 7 dias: configura, integra e treina a equipe, uma etapa por dia.</span>
                   </button>
                 </div>
                 {r.implantacao === 'assistida' && (
                   <>
-                    <ol className="ad-semanas">{IMPLANTACAO.semanas.map((s) => <li key={s.titulo}><strong>{s.titulo}</strong><ul>{s.itens.map((i) => <li key={i}>{i}</li>)}</ul></li>)}</ol>
+                    <p className="ad-dica">{IMPLANTACAO.inclui}</p>
+                    <ol className="ad-semanas">{IMPLANTACAO.etapas.map((s) => <li key={s.titulo}><strong>{s.titulo}</strong><ul>{s.itens.map((i) => <li key={i}>{i}</li>)}</ul></li>)}</ol>
                     <p className="ad-dica">Pagamento: {IMPLANTACAO.pagamento}. A mensalidade do plano é à parte.</p>
                   </>
                 )}

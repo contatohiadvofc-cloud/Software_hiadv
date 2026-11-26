@@ -104,17 +104,21 @@ test('colaborador não vê a tela de adesões', async ({ page }) => {
   await expect(page.getByText('Esta tela é da administração do HiAdv.')).toBeVisible()
 })
 
-test('aderir: implantação assistida de 6 semanas segue no pedido', async ({ page }) => {
+test('aderir: implantação assistida de 7 dias só aparece no Master e segue no pedido', async ({ page }) => {
   const estado = await simularSupabase(page, { vagas: 17 })
   await page.goto('/aderir')
   await page.getByRole('button', { name: 'Começar' }).click()
   await responder(page, [['Sozinho(a)'], ['Até 100'], ['Uma'], ['Previdenciário'], ['Não perder prazos e intimações']])
+  await expect(page.getByRole('heading', { name: 'Como você quer começar?' })).toHaveCount(0)
+  await expect(page.getByText(/migração da sua planilha de clientes é gratuita/)).toBeVisible()
+  await page.getByRole('radio', { name: /^Master/ }).click()
   const assistida = page.getByRole('radio', { name: /Implantação assistida/ })
-  await expect(assistida).toContainText('R$ 8.000,00')
-  await expect(page.getByText('Semana 1 · Diagnóstico e base')).toHaveCount(0)
+  await expect(assistida).toContainText('R$ 800,00')
+  await expect(assistida).toContainText('7 dias')
+  await expect(page.getByText('Dia 1 · Diagnóstico e planejamento')).toHaveCount(0)
   await assistida.click()
   await expect(assistida).toHaveAttribute('aria-checked', 'true')
-  for (let i = 1; i <= 6; i++) await expect(page.getByText(new RegExp(`^Semana ${i} ·`))).toBeVisible()
+  for (let i = 1; i <= 7; i++) await expect(page.getByText(new RegExp(`^Dia ${i} ·`))).toBeVisible()
   await expect(page.getByText(/até 10x no cartão de crédito ou 3x no boleto/)).toBeVisible()
   // nada transborda na largura do aparelho
   const largo = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
@@ -123,8 +127,9 @@ test('aderir: implantação assistida de 6 semanas segue no pedido', async ({ pa
   await page.getByLabel('E-mail').fill('carla@exemplo.com')
   await page.getByLabel('WhatsApp').fill('(49) 98888-1111')
   await page.getByLabel('Concordo que o HiAdv use estes dados', { exact: false }).check()
-  await page.getByRole('button', { name: 'Pedir adesão' }).click()
-  await expect(page.getByRole('heading', { name: 'Pedido recebido.' })).toBeVisible()
-  const corpo = estado.rpcs.find((x) => x.nome === 'hiadv_adesao_enviar')?.corpo.p as { respostas: Record<string, unknown> }
+  await page.getByRole('button', { name: 'Entrar na lista' }).click()
+  await expect(page.getByRole('heading', { name: 'Você está na lista.' })).toBeVisible()
+  const corpo = estado.rpcs.find((x) => x.nome === 'hiadv_adesao_enviar')?.corpo.p as { plano: string; respostas: Record<string, unknown> }
+  expect(corpo.plano).toBe('supremo')
   expect(corpo.respostas.implantacao).toBe('assistida')
 })

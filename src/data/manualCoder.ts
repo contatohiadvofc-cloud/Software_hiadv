@@ -52,51 +52,54 @@ export const MANUAL_CODER: SecaoManual[] = [
 ]
 
 export const MANUAL_IMPLANTACAO: SecaoManual[] = [
-  { id: 'antes', titulo: 'Antes da semana 1', itens: [
-    'Confirmar pagamento ou parcela 1 e o plano contratado na Central HiAdv.',
-    'Criar o escritório na Central (Novo escritório em 3 passos) e o primeiro acesso Master.',
-    'Marcar as 6 reuniões semanais com os gestores e combinar quem participa de cada treino.',
+  { id: 'antes', titulo: 'Antes do dia 1', itens: [
+    'A implantação assistida só existe no plano Master. Confirmar pagamento ou parcela 1 e o plano na Central HiAdv.',
+    'Criar o escritório na Central (Novo escritório em 3 passos) e o primeiro acesso de gestor.',
+    'Marcar os 7 dias seguidos com os gestores e combinar quem participa de cada treino.',
     'Pedir a planilha ou exportação do sistema anterior (clientes, casos, prazos) sem dados de saúde por e-mail.',
   ] },
-  { id: 's1', titulo: 'Semana 1 · Diagnóstico e base', itens: [
-    'Reunião de diagnóstico: áreas, quem faz o quê, fluxo atual, gargalos e metas dos próximos 3 meses.',
+  { id: 'd1', titulo: 'Dia 1 · Diagnóstico e planejamento', itens: [
+    'Reunião de diagnóstico e planejamento organizacional: áreas, quem faz o quê, fluxo atual, gargalos, metas dos próximos 3 meses e capacidade da equipe.',
     'Configurar dados do escritório, logo, OABs acompanhadas, cidade e WhatsApp.',
-    'Cadastrar a equipe com o papel certo (master, colaborador, parceiro) e conferir os acessos.',
+    'Cadastrar a equipe com o papel certo (gestor, colaborador, parceiro) e conferir os acessos.',
     'Treino 1 (60 min): Seu dia, Modo foco, busca global (Ctrl+K e voz), atalhos (tecla ?), instalar o app no Android e no iPhone.',
-    'Entrega da semana: todos entram pelo celular e pelo computador.',
   ] },
-  { id: 's2', titulo: 'Semana 2 · Fluxos e áreas', itens: [
+  { id: 'd2', titulo: 'Dia 2 · Fluxos e áreas', itens: [
     'Montar áreas e etapas (ex.: Comercial → Triagem → Jurídico → Suporte) e os responsáveis de cada uma.',
     'Modelos de caso por tipo de benefício ou ação; campos personalizados e checklists de entrada e saída.',
-    'Carga por pessoa só se houver mais de uma pessoa na mesma função.',
     'Treino 2: criar caso, tarefas, passagem de bastão com resumo, prazos com feriados.',
   ] },
-  { id: 's3', titulo: 'Semana 3 · Migração dos dados', itens: [
+  { id: 'd3', titulo: 'Dia 3 · Migração dos dados', itens: [
     'Importar clientes, casos e prazos; conferir por amostragem com a equipe (mínimo 20 casos).',
     'Ligar publicações pela OAB e conferir as intimações da semana com o que o escritório já tinha.',
-    'Treino 3: clientes, documentos, agenda e link de acompanhamento do cliente.',
+    'Treino 3: clientes, documentos, agenda e o link do Meu Processo para o cliente.',
   ] },
-  { id: 's4', titulo: 'Semana 4 · Integrações', itens: [
-    'Ativar as conexões do plano: cobrança (Asaas), assinatura digital, Google Drive, consulta processual (Escavador ou JUDIT).',
+  { id: 'd4', titulo: 'Dia 4 · Integrações e financeiro', itens: [
+    'Ativar as conexões: cobrança (Asaas), assinatura digital, Google Drive, consulta processual (Escavador ou JUDIT).',
     'Os próprios gestores colam as chaves em Integrações; o Coder só orienta.',
     'Configurar financeiro e honorários com as regras do escritório.',
     'Treino 4: financeiro, relatórios, conversas, áudios e chamadas da equipe.',
   ] },
-  { id: 's5', titulo: 'Semana 5 · Automações e Sara', itens: [
+  { id: 'd5', titulo: 'Dia 5 · Estratégia comercial', itens: [
+    'Estratégia comercial: funil de atendimentos, origem de cada lead, tempo de resposta e passos do contato ao contrato.',
+    'Mesa do Suporte: como revisar e publicar as novidades no Meu Processo de cada cliente.',
+    'Treino 5: atendimentos, suporte ao cliente e indicadores comerciais.',
+  ] },
+  { id: 'd6', titulo: 'Dia 6 · Automações e Sara', itens: [
     'Montar as automações do escritório, simular cada uma antes de ligar e registrar quem aprovou.',
     'Configurar a Sara com os limites definidos pelos gestores (padrão 5 ações por pedido).',
     'Abrir a primeira vaga no Recrutamento se o escritório estiver contratando.',
-    'Treino 5: automações, Sara, recrutamento e atendimentos do contato ao cliente.',
+    'Treino 6: automações, Sara e recrutamento.',
   ] },
-  { id: 's6', titulo: 'Semana 6 · Rodagem assistida e entrega', itens: [
-    'Uma semana de uso real com acompanhamento diário curto (15 min) e ajustes finos.',
-    'Revisar acessos, quem é master, cópias de segurança e o histórico de auditoria.',
-    'Treino 6: dúvidas finais e treino do gestor que vai cuidar do sistema no dia a dia.',
+  { id: 'd7', titulo: 'Dia 7 · Rodagem assistida e entrega', itens: [
+    'Dia de uso real com acompanhamento e ajustes finos.',
+    'Revisar acessos, quem é gestor, cópias de segurança e o histórico de auditoria.',
+    'Treino 7: dúvidas finais e treino do gestor que vai cuidar do sistema no dia a dia.',
     'Entregar o roteiro do escritório (como eles usam) e registrar a implantação como concluída na Central.',
   ] },
   { id: 'cobranca', titulo: 'Valor e pagamento', itens: [
-    'Implantação assistida: R$ 8.000,00, uma vez. A mensalidade do plano é à parte.',
+    'Implantação assistida: opcional e só no plano Master. R$ 800,00, uma vez, com o fundador Deividy acompanhando por 7 dias (configuração e treino de uso, estratégia comercial e planejamento organizacional). A mensalidade do plano é à parte.',
     'Formas: dinheiro, cartão de débito, Pix, até 10x no cartão de crédito ou 3x no boleto.',
-    'Quem preferir implanta sozinho pelo Manual em Configurações, sem custo extra.',
+    'Nos outros planos, o escritório implanta pelo Manual em Configurações, sem custo extra, e a migração da planilha de clientes é gratuita.',
   ] },
 ]

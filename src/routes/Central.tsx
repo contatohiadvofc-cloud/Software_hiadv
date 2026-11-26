@@ -356,7 +356,7 @@ function NovoEscritorioForm({ aoCriar }: { aoCriar: (id: string) => void }) {
           <fieldset className="ct-planos"><legend>Plano</legend>
             {PLANOS.map((p) => <label key={p.id} className="ct-plano" data-on={n.plano === p.id || undefined}><input type="radio" name="plano" checked={n.plano === p.id} onChange={() => setN({ ...n, plano: p.id })} /> {p.nome}</label>)}
           </fieldset>
-          <label className="alternar"><input type="checkbox" checked={n.fundador} onChange={(ev) => setN({ ...n, fundador: ev.target.checked })} /> Fundador (implantação assistida sem custo)</label>
+          <label className="alternar"><input type="checkbox" checked={n.fundador} onChange={(ev) => setN({ ...n, fundador: ev.target.checked })} /> Fundador</label>
           <p className="muted ct-obs">Confira: {n.nome} · {n.masterNome} ({n.masterEmail}) · começa em teste de 14 dias.</p>
         </>}
       </div>

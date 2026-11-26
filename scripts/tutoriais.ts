@@ -46,7 +46,7 @@ export const TUTORIAIS: Tutorial[] = [
     descricao: 'Troque entre claro e escuro pelo botão do topo, no celular ou no computador.',
     passos: [{ rota: '/seu-dia', legenda: 'Toque no sol ou na lua do topo', clique: 'tema' }, { legenda: 'Pronto: o tema fica salvo', espera: 2500 }] },
   { id: '14-configuracoes', titulo: 'Configurações: equipe, áreas e integrações', tags: ['hiadv', 'configuracao', 'implantacao'],
-    descricao: 'O gestor ajusta a equipe, as áreas do escritório e as integrações. Quem preferir pode contratar a implantação assistida de 6 semanas.',
+    descricao: 'O gestor ajusta a equipe, as áreas do escritório e as integrações. No plano Master, há a opção da implantação assistida de 7 dias.',
     passos: [{ rota: '/configuracoes', legenda: 'Abra Configurações' }, { legenda: 'Equipe, áreas e integrações', rolar: 400 }] },
 ]
 

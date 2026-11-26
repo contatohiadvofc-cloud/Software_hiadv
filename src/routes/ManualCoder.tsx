@@ -6,7 +6,7 @@ import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
 
 type Aba = 'coder' | 'implantacao'
-const ABAS: [Aba, string][] = [['coder', 'Manual do Coder'], ['implantacao', 'Implantação em 6 semanas']]
+const ABAS: [Aba, string][] = [['coder', 'Manual do Coder'], ['implantacao', 'Implantação em 7 dias']]
 const texto = (s: SecaoManual) => [s.titulo, ...s.itens.flatMap((i) => (typeof i === 'string' ? [i] : [i.t, ...i.sub]))].join(' ').toLowerCase()
 
 /** Manuais internos (só o papel code): para revisar o sistema e conduzir implantações. */
