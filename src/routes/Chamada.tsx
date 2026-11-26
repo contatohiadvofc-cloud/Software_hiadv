@@ -1,5 +1,7 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useLocation } from '@tanstack/react-router'
+import { gravarChamada, nomeGravacao, type Gravacao } from '../lib/gravador'
 import { limiteChamada, plano as dadosPlano } from '../data/adesao'
 import { useApi } from '../lib/contexto'
 import { useToast } from '../design/components/Toast'
@@ -11,11 +13,14 @@ import { iniciais } from '../data/conversas'
 import { Ic } from './Conversas'
 
 const D = {
+  minimizar: 'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7',
+  ampliar: 'M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7',
   mic: 'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v3',
   micOff: 'M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V5a3 3 0 0 0-5.9-.6M17 16.9A7 7 0 0 1 5 12v-2m14 0v2c0 .8-.1 1.5-.4 2.2M12 19v3',
   cam: 'M23 7l-7 5 7 5zM14 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z',
   camOff: 'M1 1l22 22M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.7 0H14a2 2 0 0 1 2 2v3.3l1 1L23 7v10',
   tela: 'M2 4h20v12H2zM8 20h8M12 16v4',
+  gravar: 'M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z',
   alto: 'M11 5 6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14',
   virar: 'M20 7h-3.2l-1.8-2H9L7.2 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM9 13.5a3 3 0 0 1 5.2-2M15 12.5a3 3 0 0 1-5.2 2M14 9.5v2h-2M10 16.5v-2h2',
   sair: 'M10.7 13.3a16 16 0 0 0 3.4 2.4l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8M23 1 1 23',
@@ -47,16 +52,21 @@ function Tile({ nome, stream, eu, instavel, mudo, semCamera, somPorFora }: { nom
   const v = useRef<HTMLVideoElement>(null)
   const temVideo = !semCamera && !!stream?.getVideoTracks().some((t) => t.enabled && t.readyState === 'live' && !t.muted)
   const falando = useFalando(stream, !mudo)
-  useEffect(() => { if (v.current && v.current.srcObject !== stream) v.current.srcObject = stream }, [stream])
+  useEffect(() => {
+    const el = v.current; if (!el) return
+    if (el.srcObject !== stream) el.srcObject = stream
+    // alguns navegadores (iPhone) só tocam o vídeo e o som de quem chega com play() explícito
+    if (stream) void el.play().catch(() => {})
+  }, [stream, temVideo])
   return (
-    <div className="ch-tile" data-instavel={instavel || undefined} data-video={temVideo || undefined} data-falando={falando || undefined} data-eu={eu || undefined}>
+    <div className="ch-cel"><div className="ch-tile" data-instavel={instavel || undefined} data-video={temVideo || undefined} data-falando={falando || undefined} data-eu={eu || undefined}>
       <video ref={v} autoPlay playsInline muted={eu || somPorFora} />
       {!temVideo && <span className="ch-av" aria-hidden="true">{iniciais(nome)}</span>}
       <span className="ch-nome">
         {mudo && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-label="microfone desligado" role="img"><path d={D.micOff} /></svg>}
         {eu ? 'Você' : nome}{instavel && ' · reconectando'}
       </span>
-    </div>
+    </div></div>
   )
 }
 
@@ -138,6 +148,35 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
   }, [pronta, meus.isSuccess, limite]) // eslint-disable-line react-hooks/exhaustive-deps
   const chaveSom = pessoas.map((p) => p.id + (p.stream ? p.stream.id : '')).join('|')
   const [alto, setAlto] = useState(false)
+  const [mini, setMini] = useState(false)
+  // mudou de tela no HiAdv: a chamada continua, reduzida no canto
+  const caminho = useLocation({ select: (l) => l.pathname })
+  const primeiroCaminho = useRef(caminho)
+  useEffect(() => { if (caminho !== primeiroCaminho.current) setMini(true) }, [caminho])
+  const gravacao = useRef<Gravacao | null>(null)
+  const [gravando, setGravando] = useState(false)
+  async function alternarGravacao() {
+    if (gravacao.current) { await terminarGravacao(); return }
+    if (!confirm('Gravar a chamada? Todos na chamada verão o aviso "gravando". O arquivo fica só no seu computador. Na próxima janela, escolha esta aba (ou a tela inteira) e marque "Compartilhar áudio".')) return
+    try {
+      const vozes = [m?.local, ...pessoas.map((p) => p.stream)].filter((x): x is MediaStream => !!x)
+      const g = await gravarChamada(vozes)
+      gravacao.current = g; setGravando(true); m?.marcarGravacao(true)
+      g.aoTerminar(() => { if (gravacao.current === g) void terminarGravacao() })
+      toast('Gravando. Clique em "Parar" para salvar o arquivo.')
+    } catch (e) { if (!/NotAllowed|Abort/i.test((e as Error).name)) toast('Não foi possível gravar neste navegador. Use o Chrome ou o Edge no computador.', 'danger') }
+  }
+  async function terminarGravacao() {
+    const g = gravacao.current; if (!g) return
+    gravacao.current = null; setGravando(false); motor.current?.marcarGravacao(false)
+    const blob = await g.parar()
+    if (!blob.size) return
+    const url = URL.createObjectURL(blob); const a = document.createElement('a')
+    a.href = url; a.download = nomeGravacao(new Date(), blob.type); document.body.append(a); a.click(); a.remove()
+    setTimeout(() => URL.revokeObjectURL(url), 60_000)
+    toast('Gravação salva na pasta de downloads.')
+  }
+  useEffect(() => () => { void gravacao.current?.parar() }, [])
   const [fone, setFone] = useState(false)
   const falante = useRef<AltoFalante | null>(null)
   useEffect(() => {
@@ -154,6 +193,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
   useEffect(() => () => falante.current?.desligar(), [])
   const celular = typeof matchMedia !== 'undefined' && matchMedia('(pointer: coarse)').matches
   async function sair() {
+    if (gravacao.current) await terminarGravacao()
     m?.sair()
     if (pessoas.length === 0) { try { await api.reuniaoEncerrar(id) } catch { /* encerra sozinha depois */ } }
     aoSair()
@@ -161,16 +201,20 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
   sairRef.current = sair
 
   return (
-    <div className="ch" role="dialog" aria-modal="true" aria-label={`Chamada: ${titulo}`}>
+    <div className="ch" data-mini={mini || undefined} role="dialog" aria-modal={!mini} aria-label={`Chamada: ${titulo}`}>
       <header className="ch-topo">
         <div><b>{titulo}</b><span>{pronta ? `${pessoas.length + 1} na chamada · ${cronometro(agora - inicio)}` : 'Conectando…'}</span></div>
+        <button type="button" className="ch-mini-botao" aria-label={mini ? 'Ampliar a chamada' : 'Reduzir a chamada'} title={mini ? 'Ampliar' : 'Reduzir e continuar usando o HiAdv'} onClick={() => setMini(!mini)}><Ic d={mini ? D.ampliar : D.minimizar} /></button>
         <span className="ch-fone" data-fone={fone || undefined} title={fone ? 'Fone conectado: só a sua voz é captada, sem eco.' : 'Sem fone: o eco e o ruído ao redor são reduzidos. Para captar só a sua voz, use fone com microfone.'}>{fone ? 'Fone conectado' : 'Sem fone · use fone para isolar sua voz'}</span>
-        <span className="ch-seguro" title="Áudio e vídeo vão direto entre os aparelhos e não são gravados. O que cada um fala vira texto e fica no histórico da conversa.">Transcrição ligada · só o texto é guardado</span>
+        {(gravando || pessoas.some((p) => p.gravando))
+          ? <span className="ch-gravando" role="status"><i aria-hidden="true" />{gravando ? 'Você está gravando' : `${pessoas.filter((p) => p.gravando).map((p) => p.nome.split(' ')[0]).join(', ')} está gravando`}</span>
+          : <span className="ch-seguro" title="Áudio e vídeo vão direto entre os aparelhos. Só grava quem clicar em Gravar, e todos veem o aviso. O que cada um fala vira texto no histórico da conversa.">Transcrição ligada · só o texto é guardado</span>}
       </header>
-      <div className="ch-grade" data-dupla={(pessoas.length === 1 && !m?.tela) || undefined} data-n={Math.min(pessoas.length + 1 + (m?.tela ? 1 : 0), 9)}>
+      <div className="ch-grade" data-dupla={(pessoas.length === 1 && !m?.tela && !pessoas[0]?.tela) || undefined} data-n={Math.min(pessoas.length + 1 + (m?.tela ? 1 : 0) + pessoas.filter((p) => p.tela).length, 9)}>
         <Tile nome={eu.nome} stream={m?.local ?? null} eu mudo={!m?.micLigado()} semCamera={!m?.camLigada()} />
         {m?.tela && <Tile nome="Sua tela" stream={m.tela} eu />}
         {pessoas.map((p) => <Tile key={p.id} nome={p.nome} stream={p.stream} instavel={p.instavel} mudo={!p.mic} semCamera={!p.cam} somPorFora={alto} />)}
+        {pessoas.filter((p) => p.tela).map((p) => <Tile key={`${p.id}-tela`} nome={`Tela de ${p.nome.split(' ')[0]}`} stream={p.tela} eu />)}
         {pronta && pessoas.length === 0 && <p className="ch-espera">Esperando alguém entrar. Quem está na conversa vê o aviso para entrar.</p>}
       </div>
       <footer className="ch-controles">
@@ -178,6 +222,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
         {m?.temCamera() && <button type="button" aria-pressed={!m.camLigada()} aria-label={m.camLigada() ? 'Desligar câmera' : 'Ligar câmera'} onClick={() => m.alternarCam()}><Ic d={m.camLigada() ? D.cam : D.camOff} /><small>Câmera</small></button>}
         {m?.temCamera() && celular && <button type="button" aria-label="Virar câmera" onClick={() => void m.virarCamera()}><Ic d={D.virar} /><small>Virar</small></button>}
         {'getDisplayMedia' in (navigator.mediaDevices ?? {}) && !celular && <button type="button" aria-pressed={!!m?.tela} aria-label="Compartilhar tela" onClick={() => void m?.compartilharTela()}><Ic d={D.tela} /><small>Tela</small></button>}
+        {'getDisplayMedia' in (navigator.mediaDevices ?? {}) && typeof MediaRecorder !== 'undefined' && !celular && <button type="button" className={gravando ? 'ch-rec' : undefined} aria-pressed={gravando} aria-label={gravando ? 'Parar a gravação e salvar' : 'Gravar a chamada'} onClick={() => void alternarGravacao()}><Ic d={D.gravar} /><small>{gravando ? 'Parar' : 'Gravar'}</small></button>}
         <button type="button" aria-pressed={alto} aria-label={alto ? 'Voltar ao som normal' : 'Alto-falante: som mais alto'} onClick={() => setAlto(!alto)}><Ic d={D.alto} /><small>{alto ? 'Alto ✓' : 'Alto-falante'}</small></button>
         <button type="button" className="ch-sair" aria-label="Sair da chamada" onClick={() => void sair()}><Ic d={D.sair} /><small>Sair</small></button>
       </footer>

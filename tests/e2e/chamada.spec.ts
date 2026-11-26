@@ -48,6 +48,21 @@ test('chamada de vídeo entre duas pessoas: conecta, mostra vídeo, mudo e alto-
   await expect(julia.getByRole('button', { name: 'Voltar ao som normal' })).toHaveAttribute('aria-pressed', 'true')
   expect(await julia.locator('.ch-tile:not([data-eu]) video').evaluate((v: HTMLVideoElement) => v.muted)).toBe(true)
 
+  // reduzir a chamada e continuar usando o HiAdv
+  await julia.getByRole('button', { name: 'Reduzir a chamada' }).click()
+  await expect(julia.locator('.ch[data-mini]')).toBeVisible()
+  const caixa = await julia.locator('.ch').boundingBox()
+  expect(caixa!.width).toBeLessThan(400)
+  await julia.screenshot({ path: 'test-results/chamada-reduzida.png' })
+  // ir para outra tela do HiAdv: a chamada continua no canto, com vídeo
+  await julia.getByRole('link', { name: /^Tarefas/ }).first().click()
+  await expect(julia).toHaveURL(/tarefas/)
+  await expect(julia.locator('.ch[data-mini] .ch-tile:not([data-eu]) video')).toHaveCount(1)
+  await julia.screenshot({ path: 'test-results/chamada-outra-tela.png' })
+  await julia.getByRole('button', { name: 'Ampliar a chamada' }).click()
+  await expect(julia.locator('.ch[data-mini]')).toHaveCount(0)
+  await expect(julia.getByRole('button', { name: 'Gravar a chamada' })).toBeVisible()
+
   // celular
   await julia.setViewportSize({ width: 390, height: 844 })
   await julia.waitForTimeout(1200)
