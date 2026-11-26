@@ -52,6 +52,10 @@ export type Cenario = {
   ia?: Record<string, unknown>
   indicacoes?: Array<Record<string, unknown>>
   vagas?: number
+  rhVagas?: Record<string, unknown>[]
+  rhCandidatos?: Record<string, unknown>[]
+  rhPublica?: Record<string, unknown> | null
+  rhErroEnvio?: string
 }
 
 function b64url(o: object) {
@@ -103,6 +107,12 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
         if (c.areas === 'sem-funcao') return json(r, { code: 'PGRST202', message: 'Could not find the function public.minhas_areas' }, 404)
         return json(r, c.areasPorEscritorio?.[estado.atual] ?? c.areas ?? [{ area: 'trabalhista', nome: 'Trabalhista', ordem: 10 }])
       }
+      if (nome === 'rh_vaga_lista') return json(r, c.rhVagas ?? [])
+      if (nome === 'rh_vaga_salvar') { estado.rpcs.push({ nome, corpo: (req.postDataJSON() ?? {}) as Record<string, unknown> }); return json(r, { ok: true, id: 'vg-nova' }) }
+      if (nome === 'rh_vaga_status' || nome === 'rh_candidatura_atualizar' || nome === 'rh_candidatura_apagar') { estado.rpcs.push({ nome, corpo: (req.postDataJSON() ?? {}) as Record<string, unknown> }); return json(r, { ok: true }) }
+      if (nome === 'rh_candidaturas_da_vaga') return json(r, c.rhCandidatos ?? [])
+      if (nome === 'rh_vaga_publica') return json(r, c.rhPublica ?? null)
+      if (nome === 'rh_candidatura_enviar') { estado.rpcs.push({ nome, corpo: (req.postDataJSON() ?? {}) as Record<string, unknown> }); return json(r, c.rhErroEnvio ? { ok: false, erro: c.rhErroEnvio } : { ok: true }) }
       if (nome === 'hiadv_sou_code') return json(r, (c.papel ?? 'master') === 'code')
       if (nome === 'hiadv_escritorios_disponiveis') return json(r, (c.escritorios ?? []).map((e) => ({ ...e, atual: e.id === estado.atual })))
       if (nome === 'hiadv_trocar_escritorio') { estado.atual = (req.postDataJSON() as { p_escritorio: string }).p_escritorio; return json(r, { ok: true }) }
@@ -261,6 +271,7 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       return json(r, (req.headers()['accept'] ?? '').includes('vnd.pgrst.object') ? fil[0] ?? null : fil)
     }
     if (p.endsWith('/rest/v1/biblioteca')) return json(r, c.biblioteca ?? [])
+    if (p.includes('/storage/v1/object/curriculos/')) { estado.uploads.push('curriculos/' + p.split('/storage/v1/object/curriculos/')[1]); return json(r, { Key: 'ok' }) }
     if (p.includes('/storage/v1/object/biblioteca/')) { estado.uploads.push(p.split('/storage/v1/object/biblioteca/')[1]); return json(r, { Key: 'ok' }) }
     if (p.endsWith('/rest/v1/area_campos')) return json(r, c.camposArea ?? [])
     if (p.endsWith('/rest/v1/fluxo_status')) return json(r, c.etapas ?? [])

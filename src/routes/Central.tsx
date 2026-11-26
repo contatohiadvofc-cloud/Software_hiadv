@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { useApi, useSessao } from '../lib/contexto'
 import { PLANOS, type PlanoId } from '../data/adesao'
 import { NOMES_SITUACAO, acimaDoLimite, dataIso, faixaSaude, isoParaTela, mascaraData, nomeRecurso, validarNovo, type AssinaturaForm, type EscritorioCentral, type NovoEscritorio, type Situacao } from '../data/central'
@@ -389,7 +390,8 @@ export function Central() {
     <div className="pagina">
       <div className="pagina-cabeca">
         <div><h1>Central HiAdv</h1><p className="muted">Receita, saúde e controle de cada escritório. Tudo o que muda aqui fica no histórico.</p></div>
-        <Button variant={novo ? 'secondary' : 'primary'} onClick={() => setNovo(!novo)} aria-expanded={novo}>{novo ? 'Fechar' : 'Novo escritório'}</Button>
+        <div className="ct-cabeca-acoes"><Link to="/central/manuais" className="hv-btn" data-variant="secondary">Manuais do Coder</Link>
+        <Button variant={novo ? 'secondary' : 'primary'} onClick={() => setNovo(!novo)} aria-expanded={novo}>{novo ? 'Fechar' : 'Novo escritório'}</Button></div>
       </div>
       {novo && <Panel title="Novo escritório" labelId="ct-novo"><div className="hv-panel-body"><NovoEscritorioForm aoCriar={(id) => { setNovo(false); setAberto(id) }} /></div></Panel>}
       <Panel><div className="hv-panel-body"><PainelReceita /></div></Panel>

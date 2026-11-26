@@ -19,9 +19,19 @@ import type { Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
+import type { Candidatura, Vaga } from './recrutamento'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
 import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato, type ResultadoBusca, type ChamadaAtiva, type ReuniaoPassada, type Fala } from './conversas'
 import { ICE, type Presenca, type Sinal } from './chamada'
+
+
+function lerDadosVaga(x: Record<string, unknown>) {
+  const arr = (k: string) => (Array.isArray(x[k]) ? (x[k] as string[]) : [])
+  return { funcao: x.funcao as Vaga['funcao'], titulo: String(x.titulo ?? ''), regime: String(x.regime ?? ''), modalidade: String(x.modalidade ?? ''),
+    jornada: (x.jornada as string) ?? '', cidade: (x.cidade as string) ?? '', salario: x.salario === null || x.salario === undefined ? null : Number(x.salario),
+    salarioObs: (x.salario_obs as string) ?? '', mostrarSalario: x.mostrar_salario !== false, beneficios: arr('beneficios'), atividades: arr('atividades'),
+    requisitos: arr('requisitos'), diferenciais: arr('diferenciais'), perguntas: arr('perguntas'), quantidade: Number(x.quantidade ?? 1), inscricoesAte: (x.inscricoes_ate as string) ?? null }
+}
 
 function lerAnexo(a: unknown): Anexo | null {
   if (!a || typeof a !== 'object') return null
@@ -555,6 +565,47 @@ export function criarApiSupabase(url: string, chave: string): Api {
     },
     async agendaLinkExiste() {
       return verificar(await sb.rpc('hiadv_agenda_link_existe')) === true
+    },
+    async vagas() {
+      const d = (verificar(await sb.rpc('rh_vaga_lista')) ?? []) as Record<string, unknown>[]
+      return d.map((x): Vaga => ({ ...lerDadosVaga(x), id: String(x.id), slug: String(x.slug), escritorioSlug: (x.escritorio_slug as string) ?? null,
+        status: x.status as Vaga['status'], total: Number(x.total ?? 0), novos: Number(x.novos ?? 0), criadoEm: String(x.criado_em) }))
+    },
+    async vagaSalvar(v) {
+      const r = okOuErro(verificar(await sb.rpc('rh_vaga_salvar', { p: { id: v.id ?? null, funcao: v.funcao, titulo: v.titulo, regime: v.regime, modalidade: v.modalidade,
+        jornada: v.jornada, cidade: v.cidade, salario: v.salario ?? '', salario_obs: v.salarioObs, mostrar_salario: v.mostrarSalario, beneficios: v.beneficios,
+        atividades: v.atividades, requisitos: v.requisitos, diferenciais: v.diferenciais, perguntas: v.perguntas, quantidade: v.quantidade, inscricoes_ate: v.inscricoesAte ?? '' } })))
+      return String((r as { id: string }).id)
+    },
+    async vagaStatus(id, status) { okOuErro(verificar(await sb.rpc('rh_vaga_status', { p_id: id, p_status: status }))) },
+    async candidaturas(vaga) {
+      const d = (verificar(await sb.rpc('rh_candidaturas_da_vaga', { p_vaga: vaga })) ?? []) as Record<string, unknown>[]
+      return d.map((x): Candidatura => ({ id: String(x.id), nome: String(x.nome), email: String(x.email), whatsapp: String(x.whatsapp), cidade: (x.cidade as string) ?? null,
+        uf: (x.uf as string) ?? null, linkedin: (x.linkedin as string) ?? null, curriculoPath: (x.curriculo_path as string) ?? null,
+        respostas: (x.respostas as Record<string, string>) ?? {}, bancoTalentos: x.banco_talentos === true, etapa: x.etapa as Candidatura['etapa'],
+        nota: x.nota === null || x.nota === undefined ? null : Number(x.nota), obs: (x.obs as string) ?? null, criadoEm: String(x.criado_em) }))
+    },
+    async candidaturaAtualizar(id, m) { okOuErro(verificar(await sb.rpc('rh_candidatura_atualizar', { p_id: id, p_etapa: m.etapa ?? null, p_nota: m.nota ?? null, p_obs: m.obs ?? null }))) },
+    async candidaturaApagar(id) { okOuErro(verificar(await sb.rpc('rh_candidatura_apagar', { p_id: id }))) },
+    async curriculoLink(path) {
+      const r = await sb.storage.from('curriculos').createSignedUrl(path, 300)
+      if (r.error || !r.data) throw new Error('Não foi possível abrir o currículo.')
+      return r.data.signedUrl
+    },
+    async vagaPublica(escritorio, vaga) {
+      const x = verificar(await sb.rpc('rh_vaga_publica', { p_escritorio: escritorio, p_vaga: vaga })) as Record<string, unknown> | null
+      if (!x) return null
+      return { ...lerDadosVaga(x), id: String(x.id), escritorio: String(x.escritorio), cidadeEscritorio: (x.cidade_escritorio as string) ?? null, aberta: x.aberta === true }
+    },
+    async candidaturaEnviar(vaga, f, curriculo) {
+      let path: string | null = null
+      if (curriculo) {
+        path = `${vaga}/${crypto.randomUUID()}.pdf`
+        const up = await sb.storage.from('curriculos').upload(path, curriculo, { contentType: 'application/pdf', upsert: false })
+        if (up.error) throw new Error('Não foi possível enviar o currículo. Tente de novo.')
+      }
+      okOuErro(verificar(await sb.rpc('rh_candidatura_enviar', { p: { vaga, nome: f.nome, email: f.email, whatsapp: f.whatsapp, cidade: f.cidade, uf: f.uf,
+        linkedin: f.linkedin, respostas: f.respostas, consentimento: f.consentimento, banco_talentos: f.bancoTalentos, curriculo_path: path } })))
     },
     async adesaoVagas() {
       return Number(verificar(await sb.rpc('hiadv_adesao_vagas')) ?? 0)

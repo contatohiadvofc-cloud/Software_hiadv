@@ -18,6 +18,7 @@ import type { Agente, Integracao, ItemBiblioteca } from './escritorio'
 import { validarLead, type Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
 import { validarAdesao, type Adesao } from './adesao'
+import { validarCandidatura, validarVaga, type Candidatura, type Vaga } from './recrutamento'
 import { montarPedidoIA } from './iaPrompts'
 import { validarNovo, type DetalheCentral, type EscritorioCentral } from './central'
 
@@ -34,6 +35,16 @@ const PORTAIS = new Map<string, { cliente: string; expira: string; acessos: numb
 let contatoDemo = { cidade: 'Capinzal' as string | null, whatsapp: '49999990000' as string | null }
 let agendaDemo = false
 const ADESOES: Adesao[] = []
+const VAGAS: Vaga[] = [{ id: 'vg1', slug: 'assistente-de-triagem-documental', escritorioSlug: 'silva-prado-advocacia', status: 'aberta', total: 3, novos: 1, criadoEm: '2026-11-20T10:00:00Z',
+  funcao: 'triagem', titulo: 'Assistente de triagem documental', regime: 'CLT', modalidade: 'Remoto', jornada: 'Seg. a sex., 8h às 17h', cidade: '', salario: 2300, salarioObs: '+ bonificação por meta',
+  mostrarSalario: true, beneficios: ['Vale-alimentação R$ 450', 'Auxílio internet R$ 100', 'Notebook fornecido'], atividades: ['Conferir laudos e exames', 'Analisar o CNIS e organizar a pasta'],
+  requisitos: ['Ensino médio completo', 'Atenção a detalhe'], diferenciais: ['Experiência com documentos médicos'], perguntas: ['Como você organiza uma tarefa com muitos documentos?'], quantidade: 1, inscricoesAte: null }]
+const CANDIDATOS: (Candidatura & { vaga: string })[] = [
+  { id: 'cd1', vaga: 'vg1', nome: 'Ana Ferreira', email: 'ana@exemplo.com', whatsapp: '49988887777', cidade: 'Joaçaba', uf: 'SC', linkedin: null, curriculoPath: null, respostas: { 0: 'Separo por tipo e confiro uma lista.' }, bancoTalentos: true, etapa: 'recebido', nota: null, obs: null, criadoEm: '2026-11-25T12:00:00Z' },
+  { id: 'cd2', vaga: 'vg1', nome: 'Bruno Lima', email: 'bruno@exemplo.com', whatsapp: '49977776666', cidade: 'Capinzal', uf: 'SC', linkedin: null, curriculoPath: null, respostas: { 0: 'Faço uma planilha.' }, bancoTalentos: false, etapa: 'triagem', nota: 4, obs: null, criadoEm: '2026-11-24T12:00:00Z' },
+  { id: 'cd3', vaga: 'vg1', nome: 'Carla Souza', email: 'carla@exemplo.com', whatsapp: '49966665555', cidade: 'Herval d\'Oeste', uf: 'SC', linkedin: null, curriculoPath: null, respostas: { 0: 'Por prazo.' }, bancoTalentos: false, etapa: 'entrevista', nota: 5, obs: 'Boa comunicação.', criadoEm: '2026-11-23T12:00:00Z' },
+]
+function contarVaga(id: string) { const v = VAGAS.find((x) => x.id === id); if (v) { const l = CANDIDATOS.filter((c) => c.vaga === id); v.total = l.length; v.novos = l.filter((c) => c.etapa === 'recebido').length } }
 const CENTRAL: (EscritorioCentral & { detalhe: DetalheCentral })[] = [
   { id: 'demo', nome: 'Silva & Prado Advocacia (demonstração)', cidade: 'Joinville/SC', ativo: true, oabsMaster: ['OAB/SC 00.101'], plano: 'premium', situacao: 'ativo', fundador: true, testeAte: null, pagoAte: null, obs: null,
     limites: { masters: 3, colaboradores: 8, oabs: 3, iaMensal: 0 }, uso: { masters: 2, colaboradores: 2, oabs: 1, iaMes: 0 }, ajustes: 0, preco: 397.5, saude: 82, ultimoAcesso: new Date().toISOString(), masterNome: 'Ana Prado', casos: 48,
@@ -728,6 +739,39 @@ export function criarApiDemo(): Api {
     },
     async agendaLinkGerar() { agendaDemo = true; return `https://exemplo.supabase.co/functions/v1/agenda?t=${'d'.repeat(64)}` },
     async agendaLinkExiste() { return agendaDemo },
+    async vagas() { return VAGAS.map((v) => ({ ...v })) },
+    async vagaSalvar(v) {
+      const m = validarVaga(v); if (m) throw new Error(m)
+      const atual = v.id ? VAGAS.find((x) => x.id === v.id) : undefined
+      if (atual) { Object.assign(atual, { ...v, titulo: v.titulo.trim() }); return atual.id }
+      const base = v.titulo.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'vaga'
+      let slug = base, n = 1; while (VAGAS.some((x) => x.slug === slug)) slug = `${base}-${++n}`
+      const nova: Vaga = { ...v, titulo: v.titulo.trim(), id: `vg${Date.now()}`, slug, escritorioSlug: 'silva-prado-advocacia', status: 'rascunho', total: 0, novos: 0, criadoEm: new Date().toISOString() }
+      VAGAS.unshift(nova); return nova.id
+    },
+    async vagaStatus(id, status) { const v = VAGAS.find((x) => x.id === id); if (!v) throw new Error('Vaga não encontrada.'); v.status = status },
+    async candidaturas(vaga) { return CANDIDATOS.filter((c) => c.vaga === vaga).map(({ vaga: _v, ...c }) => ({ ...c })) },
+    async candidaturaAtualizar(id, m) {
+      const c = CANDIDATOS.find((x) => x.id === id); if (!c) throw new Error('Candidatura não encontrada.')
+      if (m.etapa === 'banco' && !c.bancoTalentos) throw new Error('Este candidato não aceitou ficar no banco de talentos.')
+      if (m.nota !== undefined && (m.nota < 1 || m.nota > 5)) throw new Error('A nota vai de 1 a 5.')
+      if (m.etapa) c.etapa = m.etapa; if (m.nota !== undefined) c.nota = m.nota; if (m.obs !== undefined) c.obs = m.obs.trim() || null
+      contarVaga(c.vaga)
+    },
+    async candidaturaApagar(id) { const i = CANDIDATOS.findIndex((x) => x.id === id); if (i < 0) throw new Error('Candidatura não encontrada.'); const [c] = CANDIDATOS.splice(i, 1); contarVaga(c.vaga) },
+    async curriculoLink() { throw new Error('Na demonstração não há currículos salvos.') },
+    async vagaPublica(esc, slug) {
+      const v = VAGAS.find((x) => x.escritorioSlug === esc && x.slug === slug && x.status !== 'rascunho'); if (!v) return null
+      return { ...v, escritorio: 'Silva & Prado Advocacia', cidadeEscritorio: 'Joaçaba', aberta: v.status === 'aberta', salario: v.mostrarSalario ? v.salario : null }
+    },
+    async candidaturaEnviar(vaga, f) {
+      const v = VAGAS.find((x) => x.id === vaga); if (!v || v.status !== 'aberta') throw new Error('Esta vaga não está recebendo inscrições.')
+      const m = validarCandidatura(f, v.perguntas); if (m) throw new Error(m)
+      if (CANDIDATOS.some((c) => c.vaga === vaga && c.email === f.email.trim().toLowerCase())) throw new Error('Já recebemos uma inscrição com este e-mail para esta vaga.')
+      CANDIDATOS.unshift({ id: `cd${Date.now()}`, vaga, nome: f.nome.trim(), email: f.email.trim().toLowerCase(), whatsapp: f.whatsapp.replace(/\D/g, ''), cidade: f.cidade || null, uf: f.uf || null,
+        linkedin: f.linkedin || null, curriculoPath: null, respostas: f.respostas, bancoTalentos: f.bancoTalentos, etapa: 'recebido', nota: null, obs: null, criadoEm: new Date().toISOString() })
+      contarVaga(vaga)
+    },
     async adesaoVagas() { return 20 - ADESOES.filter((a) => a.fundador && a.status === 'ativada').length },
     async adesaoEnviar(p) {
       const m = validarAdesao(p); if (m) throw new Error(m)

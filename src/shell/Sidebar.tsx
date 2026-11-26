@@ -74,6 +74,11 @@ export function Sidebar() {
             <Icone d="M4 20V10M10 20V4M16 20v-7M22 20H2" />Relatórios
           </Link>
         )}
+        {!!perfil && (
+          <Link to="/recrutamento" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+            <Icone d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />Recrutamento
+          </Link>
+        )}
         {!!perfil?.code && (
           <Link to="/central" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
             <Icone d="M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" />Central HiAdv

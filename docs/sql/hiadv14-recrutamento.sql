@@ -157,14 +157,14 @@ end $$;
 
 create or replace function public.rh_candidatura_atualizar(p_id uuid, p_etapa text, p_nota int, p_obs text)
 returns json language plpgsql security definer set search_path = public as $$
-declare esc uuid := public.meu_escritorio(); nm text; atual text;
+declare esc uuid := public.meu_escritorio(); nm text; atual text; banco boolean;
 begin
   if not public.sou_admin() then return json_build_object('ok', false, 'erro', 'Só o gestor move candidatos.'); end if;
   if p_etapa is not null and p_etapa not in ('recebido','triagem','teste','entrevista','proposta','contratado','banco','nao_seguiu') then return json_build_object('ok', false, 'erro', 'Etapa inválida.'); end if;
   if p_nota is not null and (p_nota < 1 or p_nota > 5) then return json_build_object('ok', false, 'erro', 'A nota vai de 1 a 5.'); end if;
-  select nome, etapa into nm, atual from public.rh_candidaturas where id = p_id and escritorio_id = esc;
+  select nome, etapa, banco_talentos into nm, atual, banco from public.rh_candidaturas where id = p_id and escritorio_id = esc;
   if nm is null then return json_build_object('ok', false, 'erro', 'Candidatura não encontrada.'); end if;
-  if p_etapa = 'banco' and not (select banco_talentos from public.rh_candidaturas where id = p_id) then
+  if p_etapa = 'banco' and not banco then
     return json_build_object('ok', false, 'erro', 'Este candidato não aceitou ficar no banco de talentos.'); end if;
   update public.rh_candidaturas set etapa = coalesce(p_etapa, etapa), nota = coalesce(p_nota, nota),
     obs = case when p_obs is null then obs else left(nullif(btrim(p_obs),''), 1000) end, atualizado_em = now(),
@@ -204,7 +204,7 @@ declare v public.rh_vagas; nm text := btrim(coalesce(p->>'nome','')); em text :=
         wa text := regexp_replace(coalesce(p->>'whatsapp',''), '\D', '', 'g'); li text := nullif(btrim(coalesce(p->>'linkedin','')), '');
         cv text := nullif(p->>'curriculo_path',''); resp jsonb := coalesce(p->'respostas', '{}'::jsonb);
 begin
-  select * into v from public.rh_vagas where id = nullif(p->>'vaga','')::uuid;
+  begin select * into v from public.rh_vagas where id = nullif(p->>'vaga','')::uuid; exception when others then v := null; end;
   if v.id is null or v.status <> 'aberta' or (v.inscricoes_ate is not null and v.inscricoes_ate < current_date) then
     return json_build_object('ok', false, 'erro', 'Esta vaga não está recebendo inscrições.'); end if;
   if coalesce((p->>'consentimento')::boolean, false) is not true then return json_build_object('ok', false, 'erro', 'É preciso aceitar o uso dos dados para participar.'); end if;
@@ -240,11 +240,21 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values ('curriculos', 'curriculos', false, 5242880, array['application/pdf'])
 on conflict (id) do update set public = false, file_size_limit = 5242880, allowed_mime_types = array['application/pdf'];
 
+-- As políticas usam funções próprias porque quem envia (anon) não lê a tabela de vagas.
+create or replace function public.rh_vaga_aberta_txt(p text)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (select 1 from public.rh_vagas v where v.id::text = p and v.status = 'aberta');
+$$;
+create or replace function public.rh_vaga_minha_txt(p text)
+returns boolean language sql stable security definer set search_path = public as $$
+  select public.is_equipe() and exists (select 1 from public.rh_vagas v where v.id::text = p and v.escritorio_id = public.meu_escritorio());
+$$;
+grant execute on function public.rh_vaga_aberta_txt(text) to anon, authenticated;
+grant execute on function public.rh_vaga_minha_txt(text) to authenticated;
+
 drop policy if exists "curriculos envio" on storage.objects;
 create policy "curriculos envio" on storage.objects for insert to anon, authenticated
-  with check (bucket_id = 'curriculos' and name ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}\.pdf$'
-    and exists (select 1 from public.rh_vagas v where v.id::text = (storage.foldername(name))[1] and v.status = 'aberta'));
+  with check (bucket_id = 'curriculos' and name ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}\.pdf$' and public.rh_vaga_aberta_txt((storage.foldername(name))[1]));
 drop policy if exists "curriculos leitura" on storage.objects;
 create policy "curriculos leitura" on storage.objects for select to authenticated
-  using (bucket_id = 'curriculos' and public.is_equipe()
-    and exists (select 1 from public.rh_vagas v where v.id::text = (storage.foldername(name))[1] and v.escritorio_id = public.meu_escritorio()));
+  using (bucket_id = 'curriculos' and public.rh_vaga_minha_txt((storage.foldername(name))[1]));

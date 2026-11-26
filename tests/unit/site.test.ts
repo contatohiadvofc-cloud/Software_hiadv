@@ -46,8 +46,9 @@ describe('manual', () => {
       expect(readFileSync(`public/manual/${p.id}.jpg`).length).toBeGreaterThan(10000)
     }
   })
-  it('o site mostra as telas explicadas, geradas do mesmo manual', () => {
-    for (const id of ['hoje', 'casos', 'publicacoes']) expect(html).toContain(MANUAL.find((p) => p.id === id)!.titulo.replace(/&/g, '&amp;'))
-    expect(html).toContain('id="como-funciona"')
+  it('o manual fica oculto do público (só dentro do sistema)', () => {
+    expect(html).not.toContain('id="como-funciona"')
+    expect(html).not.toContain('href="#como-funciona"')
+    expect(MANUAL.length).toBeGreaterThan(0)
   })
 })

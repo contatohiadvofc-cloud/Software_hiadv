@@ -15,6 +15,7 @@ import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
 import type { EtapaLead, Lead, NovoLead } from './atendimentos'
 import type { NovasHoras, RegistroHoras } from './horas'
 import type { Portal, SituacaoPortal } from './portal'
+import type { Candidatura, DadosVaga, Etapa, FormCandidatura, StatusVaga, Vaga, VagaPublica } from './recrutamento'
 import type { Adesao, Cortesia, FormAdesao, Indicacao, PlanoId, Respostas, StatusAdesao } from './adesao'
 import type { PedidoIA } from './iaPrompts'
 import type { ConfigGoogle } from '../lib/drive'
@@ -184,6 +185,17 @@ export interface Api {
   adesoes(): Promise<Adesao[]>
   adesaoAtualizar(id: string, status: StatusAdesao, extra?: { fundador?: boolean; cortesia?: Cortesia; obs?: string }): Promise<void>
   adesaoPlano(id: string, plano: PlanoId): Promise<void>
+  /** Recrutamento (equipe vê; gestor edita). */
+  vagas(): Promise<Vaga[]>
+  vagaSalvar(v: DadosVaga & { id?: string }): Promise<string>
+  vagaStatus(id: string, status: StatusVaga): Promise<void>
+  candidaturas(vaga: string): Promise<Candidatura[]>
+  candidaturaAtualizar(id: string, m: { etapa?: Etapa; nota?: number; obs?: string }): Promise<void>
+  candidaturaApagar(id: string): Promise<void>
+  curriculoLink(path: string): Promise<string>
+  /** Público, sem login. */
+  vagaPublica(escritorio: string, vaga: string): Promise<VagaPublica | null>
+  candidaturaEnviar(vaga: string, f: FormCandidatura, curriculo: File | null): Promise<void>
   /** O que a pessoa logada pode usar (null = escritório sem assinatura na Central: tudo aberto). */
   meusRecursos(): Promise<MeusRecursos | null>
   /** Central HiAdv: só o papel code. */

@@ -219,7 +219,7 @@ function html(p: Pagina): string {
       </section>
       <section class="sv-largura sv-seo-mais">
         <h2>Veja também</h2>
-        <ul>${outras}<li><a href="/#planos">Planos e preços</a></li><li><a href="/#como-funciona">Como o HiAdv funciona por dentro</a></li></ul>
+        <ul>${outras}<li><a href="/#planos">Planos e preços</a></li></ul>
       </section>
     </main>
     <footer class="sv-rodape"><p class="sv-largura sv-rodape-fim">© 2026 HiAdv · <a href="/">hiadv.com.br</a> · <a href="/sobre/">Sobre</a> · <a href="/privacidade/">Privacidade e cookies</a></p></footer>
