@@ -49,3 +49,23 @@ export function resumoPublicacao(n: number, clientes: number): string {
 }
 
 export const quandoCurto = (iso: string) => new Date(iso).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+
+/** Andamentos e mudanças de etapa vão ao cliente nos dias 1 e 15 de cada mês. Perícia, audiência e documento pedido não esperam. */
+export const DIAS_PUBLICACAO = [1, 15] as const
+export const ORIGENS_URGENTES: OrigemAtualizacao[] = ['pericia', 'audiencia', 'pendencia']
+
+/** Data (AAAA-MM-DD, horário de Brasília) da próxima rodada de publicação, contando o próprio dia se ele for 1 ou 15. */
+export function proximaPublicacao(agora: Date = new Date()): string {
+  const hoje = agora.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+  let [a, m, d] = hoje.split('-').map(Number)
+  if (d === 1 || d === 15) return hoje
+  if (d < 15) d = 15
+  else { d = 1; m += 1; if (m > 12) { m = 1; a += 1 } }
+  return `${a}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+}
+export const ehDiaDePublicacao = (agora: Date = new Date()) => proximaPublicacao(agora) === agora.toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' })
+export function avisoPublicacao(agora: Date = new Date()): string {
+  if (ehDiaDePublicacao(agora)) return 'Hoje é dia de publicar os andamentos no Meu Processo.'
+  const [a, m, d] = proximaPublicacao(agora).split('-')
+  return `Próxima publicação de andamentos: ${d}/${m}/${a}. Perícia, audiência e pedido de documento podem ser publicados na hora.`
+}

@@ -92,3 +92,19 @@ describe('Mesa do Suporte', () => {
     expect(resumoPublicacao(0, 0)).toBe('Nada para publicar.')
   })
 })
+
+import { proximaPublicacao, ehDiaDePublicacao, avisoPublicacao } from '../../src/data/suporte'
+describe('publicação nos dias 1 e 15', () => {
+  const em = (iso: string) => new Date(`${iso}T15:00:00Z`)
+  it('acha a próxima rodada', () => {
+    expect(proximaPublicacao(em('2026-11-26'))).toBe('2026-12-01')
+    expect(proximaPublicacao(em('2026-12-02'))).toBe('2026-12-15')
+    expect(proximaPublicacao(em('2026-12-15'))).toBe('2026-12-15')
+    expect(proximaPublicacao(em('2026-12-20'))).toBe('2027-01-01')
+  })
+  it('avisa no dia certo e fora dele', () => {
+    expect(ehDiaDePublicacao(em('2026-12-01'))).toBe(true)
+    expect(avisoPublicacao(em('2026-12-01'))).toMatch(/Hoje é dia/)
+    expect(avisoPublicacao(em('2026-11-26'))).toContain('01/12/2026')
+  })
+})

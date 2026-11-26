@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useApi, useSessao } from '../lib/contexto'
-import { NOMES_ORIGEM, LIMITE_TEXTO, LIMITE_TITULO, alertasTexto, idsDosGrupos, quandoCurto, resumoPublicacao, validarAtualizacao,
+import { NOMES_ORIGEM, LIMITE_TEXTO, LIMITE_TITULO, alertasTexto, idsDosGrupos, quandoCurto, resumoPublicacao, validarAtualizacao, avisoPublicacao,
   type Atualizacao, type GrupoAtualizacoes, type StatusAtualizacao } from '../data/suporte'
 import { Panel } from '../design/components/Panel'
 import { Empty } from '../design/components/Empty'
@@ -296,6 +296,7 @@ export function Suporte() {
         <div><h1>Suporte ao cliente</h1><p className="muted">O HiAdv prepara as novidades de cada processo. Você confere, ajusta e publica no Meu Processo de cada cliente.</p></div>
         <Button onClick={() => setNova(true)}>Nova atualização</Button>
       </div>
+      <p className="sp-calendario" role="note">Os andamentos vão ao cliente nos dias 1 e 15 de cada mês. {avisoPublicacao()}</p>
       <div className="ct-abas" role="tablist" aria-label="Mesa do Suporte">
         {abas.map(([id, rotulo, n]) => (
           <button key={id} type="button" role="tab" aria-selected={aba === id} onClick={() => setAba(id)}>
