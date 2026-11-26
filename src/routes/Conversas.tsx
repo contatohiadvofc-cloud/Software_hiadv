@@ -12,7 +12,7 @@ import {
   type Anexo, type Comunidade, type ComunidadeForm, type Conversa, type Mensagem, ehAviso, podeNoGrupo,
 } from '../data/conversas'
 import { GrupoPainel } from './GrupoPainel'
-import { Chamada } from './Chamada'
+import { abrirChamada, useChamadaAtiva } from '../lib/chamadaAtiva'
 import { abrirMicLimpo, type MicLimpo } from '../lib/audioLimpo'
 import { SONS, lerPrefs, marcarAberta, salvarPrefs, tocar, type PrefsAvisos } from '../lib/avisos'
 
@@ -221,13 +221,15 @@ function ConversaEquipe({ c, eu, nomes, pessoas, voltar, atender, conversarCom }
   const toast = useToast()
   const papel = useSessao().perfil?.papel
   const gestor = papel === 'master' || papel === 'code'
-  const [chamada, setChamada] = useState<{ id: string; video: boolean } | null>(null)
+  const ativaGlobal = useChamadaAtiva()
+  const chamada = ativaGlobal?.conversa === c.id ? ativaGlobal : null
   const [historico, setHistorico] = useState(false)
   const [dadosGrupo, setDadosGrupo] = useState(false)
   const grupo = useQuery({ queryKey: ['grupo', c.id], queryFn: () => api.grupoInfo(c.id), enabled: c.tipo === 'grupo' })
   const podeGrupo = grupo.data ? podeNoGrupo(grupo.data) : null
   const ativa = useQuery({ queryKey: ['reuniao', c.id], queryFn: () => api.reuniaoAtiva(c.id), refetchInterval: 15000 })
   const titulo = tituloConversa(c, eu, nomes)
+  const setChamada = (x: { id: string; video: boolean }) => abrirChamada({ ...x, titulo, conversa: c.id, eu: { email: eu, nome: nomes.get(eu) ?? eu } })
   // veio do aviso "Atender": entra direto na chamada
   const atendida = useRef(false)
   useEffect(() => {
@@ -276,7 +278,6 @@ function ConversaEquipe({ c, eu, nomes, pessoas, voltar, atender, conversarCom }
       {c.tipo === 'grupo' && <GrupoPainel conversa={c.id} eu={eu} nomes={nomes} pessoas={pessoas} aberto={dadosGrupo} aoFechar={() => setDadosGrupo(false)}
         conversarCom={conversarCom} aoSair={() => { setDadosGrupo(false); voltar(); qc.invalidateQueries({ queryKey: ['chat-lista'] }) }} />}
       {historico && <HistoricoChamadas conversa={c.id} nomes={nomes} eu={eu} aoFechar={() => setHistorico(false)} />}
-      {chamada && <Chamada id={chamada.id} video={chamada.video} titulo={titulo} eu={{ email: eu, nome: nomes.get(eu) ?? eu }} aoSair={() => { setChamada(null); qc.invalidateQueries({ queryKey: ['reuniao', c.id] }) }} />}
     </>
   )
 }

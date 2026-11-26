@@ -2,7 +2,7 @@
 // O servidor só "apresenta" os aparelhos por um canal privado. Nada é gravado.
 
 export type Presenca = { id: string; email: string; nome: string; video: boolean }
-export type Estado = { mic: boolean; cam: boolean }
+export type Estado = { mic: boolean; cam: boolean; gravando?: boolean }
 export type Sinal = { de: string; para: string; email: string; descricao?: RTCSessionDescriptionInit; candidato?: RTCIceCandidateInit; estado?: Estado }
 
 export interface CanalChamada {

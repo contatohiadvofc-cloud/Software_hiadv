@@ -1542,3 +1542,8 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .ch[data-mini] .ch-controles button small { display:none }
 .ch[data-mini] .ch-controles button svg { width:20px; height:20px }
 @media (max-width: 700px) { .ch[data-mini] { width:min(220px, calc(100vw - 24px)) } .ch[data-mini] .ch-grade { height:150px } }
+.ch-gravando { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #fff; background: #b42318; padding: 5px 10px; border-radius: 999px; }
+.ch-gravando i { width: 8px; height: 8px; border-radius: 50%; background: #fff; animation: ch-pisca 1.2s infinite; }
+@keyframes ch-pisca { 50% { opacity: .25 } }
+@media (prefers-reduced-motion: reduce) { .ch-gravando i { animation: none; } }
+.ch-controles button.ch-rec { background: #b42318; color: #fff; }

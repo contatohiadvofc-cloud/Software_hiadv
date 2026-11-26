@@ -1,8 +1,8 @@
 // Motor da chamada em grupo (malha: cada aparelho conversa direto com cada outro). Até ~6 pessoas fica leve.
 import { ICE, devoLigar, qualidadeVideo, type CanalChamada, type Estado, type Presenca, type Sinal } from '../data/chamada'
 
-export type Participante = { id: string; email: string; nome: string; stream: MediaStream | null; instavel: boolean; mic: boolean; cam: boolean }
-type Par = { fila: Promise<void>; pendentes: RTCIceCandidateInit[]; pc: RTCPeerConnection; email: string; nome: string; fazendoOferta: boolean; ignorar: boolean; educado: boolean; stream: MediaStream | null; visto: boolean; estado: Estado; queda?: ReturnType<typeof setTimeout> }
+export type Participante = { id: string; email: string; nome: string; stream: MediaStream | null; tela: MediaStream | null; instavel: boolean; mic: boolean; cam: boolean; gravando: boolean }
+type Par = { fila: Promise<void>; pendentes: RTCIceCandidateInit[]; pc: RTCPeerConnection; email: string; nome: string; fazendoOferta: boolean; ignorar: boolean; educado: boolean; stream: MediaStream | null; tela: MediaStream | null; visto: boolean; estado: Estado; queda?: ReturnType<typeof setTimeout> }
 
 export class ChamadaMotor {
   readonly meuId = Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -38,8 +38,8 @@ export class ChamadaMotor {
   }
 
   participantes(): Participante[] {
-    return [...this.pares.entries()].map(([id, p]) => ({ id, email: p.email, nome: p.nome, stream: p.stream,
-      instavel: p.pc.connectionState === 'disconnected' || p.pc.connectionState === 'failed', mic: p.estado.mic, cam: p.estado.cam }))
+    return [...this.pares.entries()].map(([id, p]) => ({ id, email: p.email, nome: p.nome, stream: p.stream, tela: p.tela,
+      instavel: p.pc.connectionState === 'disconnected' || p.pc.connectionState === 'failed', mic: p.estado.mic, cam: p.estado.cam, gravando: !!p.estado.gravando }))
   }
 
   micLigado() { return !!this.local?.getAudioTracks().some((t) => t.enabled) }
@@ -47,7 +47,9 @@ export class ChamadaMotor {
   temCamera() { return !!this.local?.getVideoTracks().length }
   alternarMic() { this.local?.getAudioTracks().forEach((t) => { t.enabled = !t.enabled }); this.avisarEstado(); this.aoMudar() }
   alternarCam() { this.local?.getVideoTracks().forEach((t) => { t.enabled = !t.enabled }); this.avisarEstado(); this.aoMudar() }
-  private meuEstado(): Estado { return { mic: this.micLigado(), cam: this.camLigada() } }
+  gravando = false
+  marcarGravacao(sim: boolean) { this.gravando = sim; this.avisarEstado(); this.aoMudar() }
+  private meuEstado(): Estado { return { mic: this.micLigado(), cam: this.camLigada(), gravando: this.gravando } }
   /** Conta para os outros se o microfone e a câmera estão ligados (aparece "mudo" na tela deles). */
   avisarEstado(para?: string) {
     const estado = this.meuEstado()
@@ -138,7 +140,7 @@ export class ChamadaMotor {
 
   private criar(id: string, email: string, nome: string): Par {
     const pc = new RTCPeerConnection({ iceServers: this.iceServers, bundlePolicy: 'max-bundle' })
-    const p: Par = { fila: Promise.resolve(), pendentes: [], pc, email, nome, fazendoOferta: false, ignorar: false, educado: this.meuId < id, stream: null, visto: false, estado: { mic: true, cam: true } }
+    const p: Par = { fila: Promise.resolve(), pendentes: [], pc, email, nome, fazendoOferta: false, ignorar: false, educado: this.meuId < id, stream: null, tela: null, visto: false, estado: { mic: true, cam: true } }
     this.local?.getTracks().forEach((t) => pc.addTrack(t, this.local!))
     if (this.tela) pc.addTrack(this.tela.getVideoTracks()[0]!, this.tela)
     pc.onnegotiationneeded = async () => {
@@ -146,7 +148,17 @@ export class ChamadaMotor {
       catch { /* tenta de novo na próxima negociação */ } finally { p.fazendoOferta = false }
     }
     pc.onicecandidate = (e) => { if (e.candidate) this.enviar(id, { candidato: e.candidate.toJSON() }) }
-    pc.ontrack = (e) => { p.stream = e.streams[0] ?? new MediaStream([e.track]); e.track.onunmute = () => this.aoMudar(); this.aoMudar() }
+    // a câmera e o microfone chegam primeiro; um segundo fluxo de vídeo é a tela compartilhada (não pode substituir a câmera)
+    pc.ontrack = (e) => {
+      const fluxo = e.streams[0] ?? new MediaStream([e.track])
+      if (!p.stream || p.stream.id === fluxo.id) p.stream = fluxo
+      else {
+        p.tela = fluxo
+        const limpar = () => { if (p.tela === fluxo && !fluxo.getTracks().some((t) => t.readyState === 'live' && !t.muted)) { p.tela = null; this.aoMudar() } }
+        fluxo.onremovetrack = limpar; e.track.addEventListener('ended', limpar); e.track.addEventListener('mute', () => setTimeout(limpar, 1500))
+      }
+      e.track.onunmute = () => this.aoMudar(); this.aoMudar()
+    }
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed') { try { pc.restartIce() } catch { /* sem suporte */ } }
       clearTimeout(p.queda)

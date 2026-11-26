@@ -2,6 +2,7 @@ import { BarraPrevia } from '../previa/BarraPrevia'
 import { OfertaDesbloqueio, Travado } from './Desbloqueio'
 import { precisaDesbloquear } from '../lib/desbloqueio'
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react'
+import { ChamadaGlobal } from '../routes/ChamadaGlobal'
 import { Outlet, useLocation, useNavigate } from '@tanstack/react-router'
 import { useQueryClient } from '@tanstack/react-query'
 import { useSessao } from '../lib/contexto'
@@ -100,6 +101,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
       <BottomBar />
       <AvisosConversas />
+      <ChamadaGlobal />
       <AvisoSemInternet />
       {atalhos && <Atalhos aoFechar={() => setAtalhos(false)} />}
       <CommandSearch open={buscando} onOpenChange={setBuscando} />
