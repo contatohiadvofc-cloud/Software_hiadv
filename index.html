@@ -55,14 +55,16 @@
     </header>
 
     <main id="conteudo">
-      <section class="sv-heroi" aria-labelledby="t-heroi">
+      <section class="sv-heroi" aria-labelledby="t-heroi" data-heroi-fx>
+        <div class="mv-luz" aria-hidden="true"></div>
+        <div class="mv-fichas" aria-hidden="true"><span class="mv-ficha" data-ficha style="--fx:8%;--fy:18%;--fz:1.2"><b>Prazo hoje</b>Manifestar sobre o laudo</span><span class="mv-ficha" data-ficha style="--fx:46%;--fy:8%;--fz:.7"><b>Perícia</b>12/12 às 14h</span><span class="mv-ficha" data-ficha style="--fx:88%;--fy:62%;--fz:1"><b>Publicação</b>TRF4 · nova</span><span class="mv-ficha" data-ficha style="--fx:70%;--fy:88%;--fz:.8"><b>Meu Processo</b>Cliente leu a novidade</span></div>
         <div class="sv-largura sv-heroi-grade">
         <div class="sv-heroi-texto">
           <h1 id="t-heroi">Seu escritório inteiro, num só lugar.</h1>
           <p class="sv-heroi-sub">Prazos, publicações, casos, atendimentos e o acompanhamento do cliente no mesmo sistema, no celular e no computador. Feito por advogados, para escritórios de todas as áreas.</p>
           <div class="sv-heroi-acoes">
-            <a class="sv-btn sv-btn-claro sv-btn-grande" href="/aderir" data-aderir>Aderir ao HiAdv</a>
-            <a class="sv-btn sv-btn-contorno sv-btn-grande" href="#experimentar">Ver o sistema por dentro</a>
+            <a class="sv-btn sv-btn-claro sv-btn-grande" href="/aderir" data-aderir data-magnetico><span data-letras>Aderir ao HiAdv</span></a>
+            <a class="sv-btn sv-btn-contorno sv-btn-grande" href="#experimentar" data-magnetico><span data-letras>Ver o sistema por dentro</span></a>
             <button type="button" class="sv-assistir" id="abrir-video"><span class="sv-play" aria-hidden="true"></span>Assistir à apresentação <span class="sv-dur">49 s</span></button>
           </div>
         </div>
@@ -107,6 +109,94 @@
           <track kind="captions" srclang="pt-BR" label="Português" src="/video/hiadv-apresentacao.vtt" />
         </video>
       </dialog>
+
+
+      <section class="mv-manifesto" aria-labelledby="t-manifesto">
+        <div class="sv-largura mv-manifesto-grade">
+          <h2 id="t-manifesto" class="mv-rotulo"><span aria-hidden="true">+</span> Por que o HiAdv</h2>
+          <p class="mv-grande" data-revelar>O HiAdv nasceu dentro de um escritório de advocacia, não numa sala de reunião. Cada prazo, perícia, publicação e cliente fica no lugar certo, com responsável e data, para a equipe parar de procurar e <strong>começar a resolver.</strong></p>
+        </div>
+      </section>
+
+      <section class="mv-caos" data-caos aria-labelledby="t-caos">
+        <div class="mv-caos-fixo">
+          <div class="sv-largura mv-caos-topo">
+            <h2 id="t-caos">Do WhatsApp espalhado ao quadro do escritório.</h2>
+            <div class="mv-caos-frases"><p class="mv-caos-antes">Hoje: recados soltos, planilhas e prints que ninguém acha.</p>
+            <p class="mv-caos-depois">Com o HiAdv: cada coisa na etapa certa, com dono e prazo.</p></div>
+          </div>
+          <div class="sv-largura mv-quadro" aria-hidden="true">
+            <div class="mv-coluna"><span class="mv-coluna-nome">Comercial</span>
+              <div class="mv-cartao" data-cartao data-x="-28" data-y="-30" data-r="-14"><i class="mv-ponto"></i>Novo contato pelo WhatsApp<small>origem: anúncio</small></div>
+              <div class="mv-cartao" data-cartao data-x="18" data-y="22" data-r="9"><i class="mv-ponto"></i>Qualificação feita<small>auxílio-acidente</small></div>
+            </div>
+            <div class="mv-coluna"><span class="mv-coluna-nome">Triagem</span>
+              <div class="mv-cartao" data-cartao data-x="30" data-y="-34" data-r="12"><i class="mv-ponto mv-alerta"></i>Falta o CNIS<small>pedido ao cliente</small></div>
+              <div class="mv-cartao" data-cartao data-x="-22" data-y="28" data-r="-8"><i class="mv-ponto"></i>Laudos conferidos<small>checklist completo</small></div>
+            </div>
+            <div class="mv-coluna"><span class="mv-coluna-nome">Jurídico</span>
+              <div class="mv-cartao" data-cartao data-x="-34" data-y="10" data-r="16"><i class="mv-ponto mv-alerta"></i>Prazo: manifestar sobre o laudo<small>vence 05/12</small></div>
+              <div class="mv-cartao" data-cartao data-x="26" data-y="-8" data-r="-11"><i class="mv-ponto"></i>Publicação nova<small>TRF4 · lida</small></div>
+            </div>
+            <div class="mv-coluna"><span class="mv-coluna-nome">Suporte</span>
+              <div class="mv-cartao" data-cartao data-x="-16" data-y="-26" data-r="7"><i class="mv-ponto"></i>Perícia marcada<small>12/12 às 14h</small></div>
+              <div class="mv-cartao" data-cartao data-x="12" data-y="34" data-r="-15"><i class="mv-ponto"></i>Novidade publicada<small>no Meu Processo</small></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mv-numeros" aria-labelledby="t-numeros">
+        <div class="sv-largura">
+          <h2 id="t-numeros" class="sr-only">O HiAdv em números</h2>
+          <ul class="mv-bento">
+            <li class="mv-bloco mv-surge" data-inclinar>
+              <strong data-contar="6">6</strong><span>áreas da advocacia com etapas prontas</span>
+              <svg class="mv-desenho" viewBox="0 0 160 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M80 20 140 50 80 80 20 50Z"/><path d="M20 62 80 92 140 62"/><path d="M20 74 80 104 140 74"/><path d="M20 86 80 116 140 86"/></g><path class="mv-destaque" d="M80 20 140 50 80 80 20 50Z"/></svg>
+            </li>
+            <li class="mv-bloco mv-surge" data-inclinar>
+              <strong data-contar="23">23</strong><span>planilhas na exportação completa, quando o gestor quiser</span>
+              <svg class="mv-desenho" viewBox="0 0 160 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M20 30h120M20 50h120M20 70h120M20 90h120M20 110h120M20 30v80M50 30v80M80 30v80M110 30v80M140 30v80"/></g><rect class="mv-destaque" x="80" y="50" width="30" height="20"/></svg>
+            </li>
+            <li class="mv-bloco mv-surge" data-inclinar>
+              <strong data-contar="6" data-sufixo=" h">6 h</strong><span>de prazo máximo para o retorno do suporte</span>
+              <svg class="mv-desenho" viewBox="0 0 160 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="80" cy="64" r="46"/><circle cx="80" cy="64" r="34"/><path d="M80 64V36M80 64l20 12"/></g><path class="mv-destaque" d="M80 18a46 46 0 0 1 40 23L80 64Z"/></svg>
+            </li>
+            <li class="mv-bloco mv-surge" data-inclinar>
+              <strong data-contar="0">0</strong><span>dados compartilhados entre escritórios</span>
+              <svg class="mv-desenho" viewBox="0 0 160 120" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M80 12 128 30v34c0 26-20 42-48 52-28-10-48-26-48-52V30Z"/><path d="M80 28 114 41v24c0 18-14 30-34 37-20-7-34-19-34-37V41Z"/></g><path class="mv-destaque" d="m66 62 10 10 20-22" fill="none" stroke-width="3"/></svg>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="mv-etapas" data-etapas aria-labelledby="t-etapas">
+        <div class="mv-etapas-fixo">
+          <div class="sv-largura mv-etapas-grade">
+            <div>
+              <p class="mv-rotulo">( Como o caso anda )</p>
+              <h2 id="t-etapas">Da primeira mensagem ao cliente bem informado.</h2>
+              <ol class="mv-etapas-lista">
+                <li data-etapa><span class="mv-num" aria-hidden="true">01</span><div><h3>Atendimento</h3><p>O contato chega pelo site ou WhatsApp com a origem registrada, e a equipe qualifica sem perder ninguém.</p></div></li>
+                <li data-etapa><span class="mv-num" aria-hidden="true">02</span><div><h3>Triagem de documentos</h3><p>Checklist de CNIS, laudos e procuração, com o pedido do que falta pronto para o cliente.</p></div></li>
+                <li data-etapa><span class="mv-num" aria-hidden="true">03</span><div><h3>Jurídico</h3><p>Prazos com feriados, publicações pela OAB e passagem de bastão com resumo automático.</p></div></li>
+                <li data-etapa><span class="mv-num" aria-hidden="true">04</span><div><h3>Suporte</h3><p>O HiAdv prepara as novidades de cada processo; a equipe revisa e publica com um clique.</p></div></li>
+                <li data-etapa><span class="mv-num" aria-hidden="true">05</span><div><h3>Meu Processo</h3><p>O cliente acompanha a etapa, a perícia e as novidades no celular, sem precisar ligar.</p></div></li>
+              </ol>
+            </div>
+            <div class="mv-aparelho" data-etapa-tela="0" aria-hidden="true">
+              <div class="mv-tela">
+                <div class="mv-tela-topo"><span></span>HiAdv</div>
+                <div class="mv-painel" data-p="0"><b>Novo atendimento</b><p>Rita M. · WhatsApp</p><em>Qualificar</em></div>
+                <div class="mv-painel" data-p="1"><b>Documentos</b><p>✓ Procuração<br/>✓ Laudos<br/>○ CNIS</p><em>Pedir ao cliente</em></div>
+                <div class="mv-painel" data-p="2"><b>Prazo</b><p>Manifestar sobre o laudo<br/>vence 05/12</p><em>Responsável: Ana</em></div>
+                <div class="mv-painel" data-p="3"><b>Para revisar</b><p>“O laudo da perícia chegou”</p><em>Publicar</em></div>
+                <div class="mv-painel" data-p="4"><b>Meu Processo</b><p>Etapa 4 de 6<br/>Perícia em 12/12</p><em>Novidade lida</em></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <section class="sv-secao sv-secao-rose" id="areas" aria-labelledby="t-areas">
         <div class="sv-largura">
@@ -357,6 +447,7 @@
 <!-- manual:inicio (oculto do público desde 26/11/2026; o manual fica só dentro do sistema) -->
 <!-- manual:fim -->
 
+      <div class="mv-fita" aria-hidden="true"><div class="mv-fita-trilho"><span>Prazos com feriados</span><span>Publicações pela OAB</span><span>Meu Processo</span><span>Conversas e chamadas</span><span>Financeiro</span><span>Recrutamento</span><span>IA do escritório</span><span>Exportação completa</span><span>Prazos com feriados</span><span>Publicações pela OAB</span><span>Meu Processo</span><span>Conversas e chamadas</span><span>Financeiro</span><span>Recrutamento</span><span>IA do escritório</span><span>Exportação completa</span></div></div>
       <section class="sv-secao" id="planos" aria-labelledby="t-planos">
         <div class="sv-largura">
           <h2 id="t-planos">Planos</h2>
