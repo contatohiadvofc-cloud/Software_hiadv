@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -51,7 +52,7 @@ function BarraSaude({ n }: { n: number | null | undefined }) {
 function PainelReceita() {
   const api = useApi()
   const q = useQuery({ queryKey: ['central', 'painel'], queryFn: () => api.centralPainel() })
-  if (q.isLoading) return <p className="muted" role="status">Carregando receita…</p>
+  if (q.isLoading) return <Carregando texto="Carregando receita…" />
   if (q.isError || !q.data) return <ErrorState onRetry={() => q.refetch()} />
   const p = q.data
   const max = Math.max(1, ...p.dias.map((d) => d.recebido + d.previsto))
@@ -154,7 +155,7 @@ function AbaControle({ e }: { e: EscritorioCentral }) {
     onSuccess: () => { toast('Recurso ajustado e registrado no histórico.'); setPedido(null); setMotivo(''); setValidade(''); qc.invalidateQueries({ queryKey: ['central'] }) },
     onError: (x) => toast((x as Error).message, 'danger'),
   })
-  if (q.isLoading) return <p className="muted" role="status">Carregando…</p>
+  if (q.isLoading) return <Carregando texto="Carregando…" />
   if (q.isError || !q.data) return <ErrorState onRetry={() => q.refetch()} />
   const d = q.data
   const valorDe = (r: string): Estado => d.ajustes.find((a) => a.recurso === r)?.valor ?? 'plano'
@@ -193,7 +194,7 @@ function AbaPessoas({ e }: { e: EscritorioCentral }) {
   const api = useApi(); const qc = useQueryClient(); const toast = useToast()
   const q = useQuery({ queryKey: ['central', e.id], queryFn: () => api.centralEscritorio(e.id) })
   const pessoa = useMutation({ mutationFn: (v: { email: string; r: string; bloquear: boolean }) => api.pessoaAjuste(e.id, v.email, v.r, v.bloquear, null), onSuccess: () => { toast('Acesso da pessoa ajustado.'); qc.invalidateQueries({ queryKey: ['central'] }) }, onError: (x) => toast((x as Error).message, 'danger') })
-  if (q.isLoading) return <p className="muted" role="status">Carregando…</p>
+  if (q.isLoading) return <Carregando texto="Carregando…" />
   if (q.isError || !q.data) return <ErrorState onRetry={() => q.refetch()} />
   const d = q.data; const liberados = d.recursos.filter((r) => r.liberado).map((r) => r.recurso)
   return (
@@ -225,7 +226,7 @@ function AbaPessoas({ e }: { e: EscritorioCentral }) {
 function AbaHistorico({ e }: { e: EscritorioCentral }) {
   const api = useApi()
   const q = useQuery({ queryKey: ['central', e.id], queryFn: () => api.centralEscritorio(e.id) })
-  if (q.isLoading) return <p className="muted" role="status">Carregando…</p>
+  if (q.isLoading) return <Carregando texto="Carregando…" />
   if (q.isError || !q.data) return <ErrorState onRetry={() => q.refetch()} />
   return q.data.historico.length === 0 ? <p className="muted ct-aba">Nenhuma mudança registrada.</p> : (
     <ul className="ct-historico ct-aba">{q.data.historico.map((h, i) => <li key={i}><span>{isoParaTela(h.quando)}</span> {h.acao} <small>· {h.quem}</small></li>)}</ul>
@@ -395,7 +396,7 @@ export function Central() {
       </div>
       {novo && <Panel title="Novo escritório" labelId="ct-novo"><div className="hv-panel-body"><NovoEscritorioForm aoCriar={(id) => { setNovo(false); setAberto(id) }} /></div></Panel>}
       <Panel><div className="hv-panel-body"><PainelReceita /></div></Panel>
-      {q.isLoading && <p className="muted" role="status">Carregando…</p>}
+      {q.isLoading && <Carregando texto="Carregando…" />}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
       {q.isSuccess && q.data.length === 0 && <Panel><Empty title="Nenhum escritório ainda.">Os escritórios aparecem aqui quando uma adesão é ativada.</Empty></Panel>}
       {q.data && q.data.length > 0 && (

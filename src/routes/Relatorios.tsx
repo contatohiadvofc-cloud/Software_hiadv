@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
@@ -44,7 +45,7 @@ export function Relatorios() {
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Relatórios</h1><p className="muted">Calculados na hora com os dados do escritório.</p></div></div>
       <div className="hv-barra-solta"><Filtros rotulo="Período" valor={String(dias)} aoMudar={(v) => setDias(Number(v))} opcoes={PERIODOS.map((p) => ({ id: String(p.dias), rotulo: p.nome }))} /></div>
-      {q.isLoading && <p className="muted" role="status">Carregando…</p>}
+      {q.isLoading && <Carregando texto="Carregando…" />}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
       {r && (
         <>

@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -194,7 +195,7 @@ export function Financeiro() {
           </Panel>
         </>
       )}
-      {q.isLoading && <p className="muted" role="status">Carregando…</p>}
+      {q.isLoading && <Carregando texto="Carregando…" />}
 
       <NovoHonorarioDialog aberto={dialogo === 'contrato'} aoFechar={() => setDialogo(null)} />
       <NovoLancamentoDialog aberto={dialogo === 'lancamento'} aoFechar={() => setDialogo(null)} />

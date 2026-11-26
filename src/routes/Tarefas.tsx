@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useMemo, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
@@ -126,7 +127,7 @@ export function Tarefas() {
           ]} />
           {grupo && <Button size="sm" variant="ghost" onClick={() => setGrupo(null)}>Mostrar todos os prazos</Button>}
         </div>
-        {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+        {q.isLoading && <Carregando painel texto="Carregando…" />}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && total === 0 && <Empty title="Nenhuma tarefa aberta aqui." action={<Button onClick={() => setNovaAberta(true)}>Nova tarefa</Button>}>Tudo em dia. Crie uma tarefa para lembrar alguém da equipe, com prazo e caso ligado.</Empty>}
         {q.isSuccess && total > 0 && grupos.filter(([titulo]) => !grupo || grupo === titulo).map(([titulo, itens, urgente]) => itens.length > 0 && (

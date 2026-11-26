@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useMemo, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
@@ -162,7 +163,7 @@ function Funil({ vaga, gestor, escritorio }: { vaga: Vaga; gestor: boolean; escr
   const mover = useMutation({ mutationFn: (m: { id: string; etapa: Etapa }) => api.candidaturaAtualizar(m.id, { etapa: m.etapa }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['candidaturas'] }); qc.invalidateQueries({ queryKey: ['vagas'] }) }, onError: (e) => toast((e as Error).message, 'danger') })
   const atual = (q.data ?? []).find((c) => c.id === aberto) ?? null
-  if (q.isLoading) return <p className="muted" role="status">Carregando candidatos…</p>
+  if (q.isLoading) return <Carregando texto="Carregando candidatos…" />
   if (q.isError) return <ErrorState onRetry={() => q.refetch()} />
   if (!q.data?.length) return <Empty title="Nenhuma inscrição ainda.">{vaga.status === 'aberta' ? 'Divulgue o link da vaga: as inscrições aparecem aqui em cards.' : 'Publique a vaga para começar a receber inscrições.'}</Empty>
   return (
@@ -233,7 +234,7 @@ export function Recrutamento() {
         <div><h1>Recrutamento</h1><p className="muted">Vagas, página pública com inscrição e os candidatos em cards por etapa.</p></div>
         {gestor && <Button onClick={() => setEditando('nova')}>Nova vaga</Button>}
       </div>
-      {q.isLoading && <p className="muted" role="status">Carregando…</p>}
+      {q.isLoading && <Carregando texto="Carregando…" />}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
       {q.isSuccess && vagas.length === 0 && (
         <Panel><Empty title="Nenhuma vaga criada.">{gestor ? 'Toque em Nova vaga: o HiAdv já sugere atividades, requisitos e perguntas da função.' : 'Quando o gestor abrir uma vaga, ela aparece aqui.'}</Empty></Panel>

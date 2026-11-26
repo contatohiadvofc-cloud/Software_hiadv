@@ -1,3 +1,5 @@
+import { Carregando } from '../design/components/Carregando'
+import { assumir, picos, proximaVelocidade, salvarVelocidade, soltar, tocarProximo, velocidadeSalva } from '../lib/audioPlayer'
 import { useDeferredValue, useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
@@ -114,7 +116,7 @@ export function Conversas() {
         </div>
         <label className="cv-busca"><Ic d={I.busca} t={17} /><input placeholder={aba === 'equipe' ? 'Buscar conversa ou o que foi dito' : aba === 'contatos' ? 'Buscar nome ou número' : 'Buscar comunidade'} aria-label="Buscar" value={busca} onChange={(e) => setBusca(e.target.value)} /></label>
         <ul className="cv-lista" role="list">
-          {aba === 'equipe' && convs.isLoading && <li className="cv-vazio">Carregando…</li>}
+          {aba === 'equipe' && convs.isLoading && <li><Carregando avatar linhas={4} /></li>}
           {aba === 'equipe' && convs.isError && <li className="cv-vazio">Não deu para carregar as conversas. <button type="button" className="cv-link" onClick={() => convs.refetch()}>Tentar de novo</button></li>}
           {aba === 'equipe' && listaConv.map((c) => (
             <li key={c.id}>
@@ -155,7 +157,7 @@ export function Conversas() {
               {achados.isSuccess && achados.data.length === 0 && <li className="cv-vazio">Nada encontrado no que foi escrito ou falado (áudios transcritos).</li>}
             </>
           )}
-          {aba === 'comunidades' && coms.isLoading && <li className="cv-vazio">Carregando…</li>}
+          {aba === 'comunidades' && coms.isLoading && <li><Carregando avatar linhas={4} /></li>}
           {aba === 'comunidades' && listaCom.map((c) => (
             <li key={c.id}>
               <button type="button" className="cv-item" aria-current={sel?.id === c.id || undefined} onClick={() => setSel({ tipo: 'com', id: c.id })}>
@@ -340,10 +342,18 @@ function Fio(p: FioProps) {
   useEffect(() => p.assinar?.(() => { void atualizar() }), []) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { void p.lido() }, [q.data?.length]) // eslint-disable-line react-hooks/exhaustive-deps
   const msgs = [...(q.data ?? []), ...pendentes]
+  const [longe, setLonge] = useState(false)
+  const [novas, setNovas] = useState(0)
+  const ultimoTotal = useRef(0)
   useEffect(() => {
     const el = lista.current; if (!el) return
-    if (el.scrollHeight - el.scrollTop - el.clientHeight < 240 || pendentes.length) fim.current?.scrollIntoView({ block: 'end' })
-  }, [msgs.length, pendentes.length])
+    const perto = el.scrollHeight - el.scrollTop - el.clientHeight < 240
+    if (perto || pendentes.length) { fim.current?.scrollIntoView({ block: 'end' }); setNovas(0) }
+    else if (ultimoTotal.current && msgs.length > ultimoTotal.current) setNovas((n) => n + msgs.length - ultimoTotal.current)
+    ultimoTotal.current = msgs.length
+  }, [msgs.length, pendentes.length]) // eslint-disable-line react-hooks/exhaustive-deps
+  const aoRolar = () => { const el = lista.current; if (!el) return; const l = el.scrollHeight - el.scrollTop - el.clientHeight > 400; setLonge(l); if (!l) setNovas(0) }
+  const descer = () => { fim.current?.scrollIntoView({ block: 'end', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); setNovas(0) }
   useEffect(() => { fim.current?.scrollIntoView({ block: 'end' }) }, [q.isSuccess])
 
   const blocos = montarBlocos(msgs, new Date(), p.chamadas ?? [])
@@ -368,8 +378,8 @@ function Fio(p: FioProps) {
         <div className="cv-fio-acoes">{p.acoes}</div>
       </header>
       {p.faixa}
-      <div className="cv-msgs" ref={lista} role="log" aria-live="polite" aria-label={`Mensagens de ${p.titulo}`}>
-        {q.isLoading && <p className="cv-vazio">Carregando mensagens…</p>}
+      <div className="cv-msgs" ref={lista} onScroll={aoRolar} role="log" aria-live="polite" aria-label={`Mensagens de ${p.titulo}`}>
+        {q.isLoading && <Carregando avatar texto="Carregando mensagens…" />}
         {q.isError && <p className="cv-vazio">Não deu para carregar. <button type="button" className="cv-link" onClick={() => q.refetch()}>Tentar de novo</button></p>}
         {q.isSuccess && msgs.length === 0 && <p className="cv-vazio cv-vazio-fio">Nenhuma mensagem ainda. Diga um oi 👋</p>}
         {blocos.map((b) => b.tipo === 'dia'
@@ -384,6 +394,11 @@ function Fio(p: FioProps) {
               apagar={p.podeApagar(b.m) ? async () => { setMenu(null); try { await p.apagar(b.m.id); await atualizar() } catch (x) { toast((x as Error).message, 'danger') } } : null} />)}
         <div ref={fim} />
       </div>
+      {(longe || novas > 0) && (
+        <button type="button" className="cv-descer" onClick={descer} aria-label={novas ? `${novas} ${novas === 1 ? 'mensagem nova' : 'mensagens novas'}. Ir para o fim` : 'Ir para a última mensagem'}>
+          {novas > 0 && <span className="cv-descer-n">{novas > 99 ? '99+' : novas}</span>}<Ic d="M6 9l6 6 6-6" t={20} />
+        </button>
+      )}
       {p.bloqueio
         ? <p className="cv-bloqueio">{p.bloqueio}</p>
         : <Compositor onde={p.onde} pasta={p.pasta} permite={p.permite} resposta={resp} nomeResposta={resp ? (resp.autor === p.eu ? 'você' : p.nomeDe(resp)) : ''} cancelarResposta={() => setResp(null)} aoEnviar={mandar} subir={(b, n, x) => api.chatSubir(p.onde, p.pasta, b, n, x)} />}
@@ -529,24 +544,37 @@ function AnexoView({ a, onde, meu }: { a: Anexo; onde: 'chat' | 'comunidade'; me
 /** Player de áudio leve: tocar/pausar, barra de progresso e velocidade 1x/1,5x/2x, como nos apps de mensagem. */
 function Audio({ url, duracao, meu }: { url: string | null; duracao?: number; meu: boolean }) {
   const el = useRef<HTMLAudioElement>(null)
+  const onda = useRef<HTMLDivElement>(null)
   const [tocando, setTocando] = useState(false)
   const [pos, setPos] = useState(0)
   const [dur, setDur] = useState(duracao ?? 0)
-  const [vel, setVel] = useState(1)
+  const [vel, setVel] = useState(velocidadeSalva)
   const [falhou, setFalhou] = useState(false)
-  const barras = useMemo(() => Array.from({ length: 28 }, (_, i) => 30 + Math.round(Math.abs(Math.sin(i * 1.7 + (duracao ?? 3))) * 70)), [duracao])
-  const pct = dur ? pos / dur : 0
+  const [ouvido, setOuvido] = useState(false)
+  const falsas = useMemo(() => Array.from({ length: 32 }, (_, i) => 0.3 + Math.abs(Math.sin(i * 1.7 + (duracao ?? 3))) * 0.7), [duracao])
+  const [barras, setBarras] = useState<number[]>(falsas)
+  useEffect(() => { if (!url) return; let vivo = true; picos(url, 32).then((p) => { if (vivo) setBarras(p) }, () => {}); return () => { vivo = false } }, [url])
+  const pct = dur ? Math.min(1, pos / dur) : 0
+  const irPara = (fr: number) => { const a = el.current; if (!a || !dur) return; a.currentTime = Math.max(0, Math.min(dur, fr * dur)); setPos(a.currentTime) }
+  const doPonteiro = (x: number) => { const r = onda.current!.getBoundingClientRect(); irPara((x - r.left) / r.width) }
+  const alternar = () => { const a = el.current; if (!a) return; if (a.paused) { assumir(a); a.playbackRate = vel; void a.play().then(() => setFalhou(false), () => setFalhou(true)) } else a.pause() }
   return (
-    <div className="cv-audio" data-meu={meu || undefined}>
-      <button type="button" aria-label={tocando ? 'Pausar áudio' : 'Ouvir áudio'} disabled={!url} onClick={() => { const a = el.current!; if (a.paused) void a.play().then(() => setFalhou(false), () => setFalhou(true)); else a.pause() }}>
+    <div className="cv-audio" data-meu={meu || undefined} data-ouvido={ouvido || undefined}>
+      <button type="button" className="cv-audio-play" aria-label={tocando ? 'Pausar áudio' : 'Ouvir áudio'} disabled={!url} onClick={alternar}>
         <Ic d={tocando ? I.pausa : I.play} t={16} />
       </button>
-      <div className="cv-onda" onClick={(e) => { const a = el.current; if (!a || !dur) return; const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect(); a.currentTime = ((e.clientX - r.left) / r.width) * dur }}>
-        {barras.map((h, i) => <i key={i} style={{ height: `${h}%` }} data-on={i / barras.length < pct || undefined} />)}
+      <div ref={onda} className="cv-onda" role="slider" tabIndex={url ? 0 : -1} aria-label="Posição do áudio" aria-valuemin={0} aria-valuemax={Math.round(dur)} aria-valuenow={Math.round(pos)} aria-valuetext={`${duracaoTela(pos)} de ${duracaoTela(dur)}`}
+        onPointerDown={(e) => { if (!dur) return; e.currentTarget.setPointerCapture(e.pointerId); doPonteiro(e.clientX) }}
+        onPointerMove={(e) => { if (e.currentTarget.hasPointerCapture(e.pointerId)) doPonteiro(e.clientX) }}
+        onKeyDown={(e) => { if (e.key === 'ArrowRight') { e.preventDefault(); irPara((pos + 5) / dur) } else if (e.key === 'ArrowLeft') { e.preventDefault(); irPara((pos - 5) / dur) } else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); alternar() } }}>
+        {barras.map((h, i) => <i key={i} style={{ height: `${Math.round(h * 100)}%` }} data-on={(i + 0.5) / barras.length <= pct || undefined} />)}
+        <b className="cv-onda-ponto" style={{ left: `${pct * 100}%` }} aria-hidden="true" />
       </div>
       <span className="cv-audio-t">{duracaoTela(tocando || pos ? pos : dur)}</span>
-      <button type="button" className="cv-vel" aria-label="Velocidade" onClick={() => { const v = vel === 1 ? 1.5 : vel === 1.5 ? 2 : 1; setVel(v); if (el.current) el.current.playbackRate = v }}>{String(vel).replace('.', ',')}x</button>
-      {url && <audio ref={el} src={url} preload="metadata" onPlay={() => setTocando(true)} onPause={() => setTocando(false)} onEnded={() => { setTocando(false); setPos(0) }}
+      <button type="button" className="cv-vel" aria-label={`Velocidade ${String(vel).replace('.', ',')} vezes. Tocar para mudar`} onClick={() => { const v = proximaVelocidade(vel); setVel(v); salvarVelocidade(v); if (el.current) el.current.playbackRate = v }}>{String(vel).replace('.', ',')}×</button>
+      {url && <audio ref={el} src={url} preload="metadata" onPlay={(e) => { assumir(e.currentTarget); e.currentTarget.playbackRate = velocidadeSalva(); setVel(velocidadeSalva()); setTocando(true); setOuvido(true) }}
+        onPause={(e) => { soltar(e.currentTarget); setTocando(false) }}
+        onEnded={(e) => { setTocando(false); setPos(0); const a = e.currentTarget; soltar(a); tocarProximo(a) }}
         onError={() => setFalhou(true)} onTimeUpdate={(e) => setPos(e.currentTarget.currentTime)} onLoadedMetadata={(e) => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d) }} />}
       {falhou && url && <a className="cv-audio-falha" href={url} target="_blank" rel="noopener noreferrer" download>Este aparelho não tocou o áudio aqui. Toque para abrir.</a>}
     </div>
@@ -733,7 +761,7 @@ function NovaConversa({ eu, aoAbrir, aoFechar }: { eu: string; aoAbrir: (id: str
         {modo === 'grupo' && <label className="hv-field"><span>Nome do grupo</span><input className="hv-input" maxLength={80} value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Ex.: Metas de novembro" /></label>}
         <label className="cv-busca"><Ic d={I.busca} t={17} /><input placeholder="Buscar pessoa da equipe" aria-label="Buscar pessoa" value={filtro} onChange={(e) => setFiltro(e.target.value)} /></label>
         <ul className="cv-pessoas" role="list">
-          {pessoas.isLoading && <li className="cv-vazio">Carregando…</li>}
+          {pessoas.isLoading && <li><Carregando avatar linhas={4} /></li>}
           {outros.map((x) => (
             <li key={x.email}>
               {modo === 'direta'
@@ -767,7 +795,7 @@ function HistoricoChamadas({ conversa, nomes, eu, aoFechar }: { conversa: string
       <div className="hv-dialog-body cv-hist">
         {!aberta && (
           <>
-            {lista.isLoading && <p className="cv-vazio">Carregando…</p>}
+            {lista.isLoading && <Carregando avatar />}
             {lista.isSuccess && !lista.data.length && <p className="cv-vazio">Nenhuma chamada nesta conversa ainda. O que for dito nas próximas chamadas vira texto e aparece aqui.</p>}
             <ul className="cv-hist-lista" role="list">
               {lista.data?.map((r) => (

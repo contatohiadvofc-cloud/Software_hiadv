@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useMemo, useState, type DragEvent } from 'react'
 import { useParams } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -129,7 +130,7 @@ export function Area() {
           { id: 'prontos', rotulo: 'Checklist completo', valor: prontos, dica: 'prontos para avançar' },
         ]} />
       })()}
-      {q.isLoading && <p className="muted" role="status">Carregando os casos…</p>}
+      {q.isLoading && <Carregando texto="Carregando os casos…" />}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
       {q.isSuccess && q.data.etapas.length === 0 && <Panel><Empty title="Esta área ainda não tem etapas configuradas.">O Gestor Master define as etapas em Configurações, no grupo Rotina da equipe.</Empty></Panel>}
 

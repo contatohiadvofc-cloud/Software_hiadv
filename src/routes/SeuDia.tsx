@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
@@ -172,7 +173,7 @@ export function SeuDia() {
             ]} />
           </div>
         )}
-        {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+        {q.isLoading && <Carregando painel texto="Carregando…" />}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && total === 0 && <Empty title="Nada pendente para hoje.">Quando chegarem prazos, perícias, audiências ou tarefas para você, eles aparecem aqui.</Empty>}
         {q.isSuccess && total > 0 && (

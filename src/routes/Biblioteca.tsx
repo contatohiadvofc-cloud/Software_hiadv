@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useMemo, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
@@ -129,7 +130,7 @@ export function Biblioteca() {
       </div>
 
       <Panel>
-        {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+        {q.isLoading && <Carregando painel texto="Carregando…" />}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && itens.length === 0 && <Empty title={filtro ? 'Nada encontrado.' : `Nenhum item em ${meta.plural.toLowerCase()} ainda.`}>Use “Incluir” para anexar o primeiro.</Empty>}
         {q.isSuccess && itens.length > 0 && (

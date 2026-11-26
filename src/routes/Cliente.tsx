@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useState } from 'react'
 import { Link, useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -37,7 +38,7 @@ export function Cliente() {
   const nomeArea = (a: string) => areas.data?.find((x) => x.area === a)?.nome ?? rotuloEtapa(a)
   const agora = new Date()
 
-  if (q.isLoading) return <div className="pagina"><p className="muted" role="status">Carregando…</p></div>
+  if (q.isLoading) return <div className="pagina"><Carregando texto="Carregando…" /></div>
   if (q.isError) return <div className="pagina"><Panel><ErrorState onRetry={() => q.refetch()} /></Panel></div>
   if (!q.data) return null
   const { cliente: c, casos, processos, tarefas } = q.data

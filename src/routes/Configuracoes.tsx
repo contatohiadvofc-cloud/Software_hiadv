@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -158,7 +159,7 @@ function LinhaAgente({ a, integracoes, aoMudar }: { a: Agente; integracoes: Inte
           <fieldset className="integracao-opcoes">
             <legend>Quando entra em ação</legend>
             <p className="muted">Escolha as etapas. Quando um caso for movido para uma delas, o agente trabalha e entrega o resultado para revisão.</p>
-            {etapasQ.isLoading && <p className="muted">Carregando etapas…</p>}
+            {etapasQ.isLoading && <Carregando linhas={2} texto="Carregando etapas…" />}
             {Object.entries(porArea).map(([area, g]) => (
               <div key={area} className="agente-etapas">
                 <b>{g.nome}</b>
@@ -215,7 +216,7 @@ function RegrasDeAtencao() {
     onSuccess: (x) => { setR(x); toast('Regras salvas.'); qc.invalidateQueries({ queryKey: ['regras-atencao'] }); qc.invalidateQueries({ queryKey: ['atencao'] }) },
     onError: (e) => setErro((e as Error).message),
   })
-  if (q.isLoading) return <p className="hv-panel-body muted" role="status">Carregando…</p>
+  if (q.isLoading) return <Carregando painel texto="Carregando…" />
   if (q.isError || !atual) return <ErrorState onRetry={() => q.refetch()} />
   const mudar = (k: keyof RegrasAtencao, v: number) => setR({ ...atual, [k]: v })
   const statuses = [...new Set((etapas.data ?? []).map((e) => e.status))]
@@ -311,7 +312,7 @@ function Falhas() {
     onSuccess: () => { toast('Falha marcada como resolvida.'); qc.invalidateQueries({ queryKey: ['falhas'] }) },
     onError: (e) => toast((e as Error).message),
   })
-  if (q.isLoading) return <p className="hv-panel-body muted" role="status">Carregando…</p>
+  if (q.isLoading) return <Carregando painel texto="Carregando…" />
   if (q.isError) return <ErrorState onRetry={() => q.refetch()} />
   if (!q.data?.length) return <Empty title="Nenhuma falha nos últimos 60 dias.">Quando um agente ou o rodízio não conseguir concluir, aparece aqui para você conferir.</Empty>
   return (
@@ -413,7 +414,7 @@ export function Configuracoes() {
   )
 
   const agentes = <>
-    {ag.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+    {ag.isLoading && <Carregando painel texto="Carregando…" />}
     {ag.isError && <ErrorState onRetry={() => ag.refetch()} />}
     {ag.isSuccess && ag.data.length === 0 && <Empty title="Os agentes ainda não foram ativados no servidor." />}
     {ag.isSuccess && ag.data.length > 0 && <ul className="agentes">{ag.data.map((a) => <LinhaAgente key={a.agente} a={a} integracoes={integ.data ?? []} aoMudar={atualizar} />)}</ul>}

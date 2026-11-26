@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -107,7 +108,7 @@ export function Publicacoes() {
       )}
 
       <Panel>
-        {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+        {q.isLoading && <Carregando painel texto="Carregando…" />}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && q.data.length === 0 && <Empty title={`Nada nos últimos ${dias} dias.`}>As publicações chegam sozinhas, uma vez por dia, pelas OABs do escritório.</Empty>}
         {grupos.map((g) => (

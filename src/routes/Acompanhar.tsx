@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useParams } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
 import { useApi } from '../lib/contexto'
@@ -29,7 +30,7 @@ export function Acompanhar() {
             </div>
           </Panel>
         )}
-        {q.isLoading && <p className="muted" role="status">Carregando…</p>}
+        {q.isLoading && <Carregando texto="Carregando…" />}
         {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
         {p && <>
           <header className="acomp-cabeca">

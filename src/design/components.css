@@ -102,3 +102,16 @@
 .hv-senha-ver { position: absolute; top: 50%; right: 6px; transform: translateY(-50%); min-height: 36px; padding: 0 10px; border: 0; border-radius: 8px; background: none; color: var(--accent-text); font: inherit; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
 .hv-senha-ver:hover { background: var(--surface-2); }
 .hv-senha-ver:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Esqueleto de carregamento */
+.hv-esq { display: flex; flex-direction: column; gap: 14px; padding: 6px 0; }
+.hv-esq-linha { display: flex; gap: 12px; align-items: center; }
+.hv-esq-linha > span { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.hv-esq i { display: block; height: 12px; border-radius: 6px; background: linear-gradient(90deg, var(--surface-2) 0%, var(--line) 50%, var(--surface-2) 100%); background-size: 200% 100%; animation: hv-brilho 1.3s ease-in-out infinite; }
+.hv-esq i + i { height: 10px; opacity: .7; }
+.hv-esq .hv-esq-av { flex: none; width: 40px; height: 40px; border-radius: 50%; }
+@keyframes hv-brilho { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .hv-esq i { animation: none; } }
+.hv-toast-x { margin-left: 4px; border: 0; background: transparent; color: inherit; opacity: .7; font-size: 20px; line-height: 1; width: 32px; height: 32px; border-radius: 8px; cursor: pointer; flex: none; }
+.hv-toast-x:hover { opacity: 1; background: rgb(255 255 255 / .08); }
+.hv-toast-x:focus-visible { outline: 2px solid var(--focus); }

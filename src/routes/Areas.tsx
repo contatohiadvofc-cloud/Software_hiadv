@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useState } from 'react'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { useAreas, useRecursos } from '../data/consultas'
@@ -28,7 +29,7 @@ export function Areas() {
         aoCriar={(_id, area) => { setNovoCaso(false); nav({ to: '/area/$slug', params: { slug: area } }) }} />
       <OfficeSwitcher />
       <Panel>
-        {areas.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+        {areas.isLoading && <Carregando painel texto="Carregando…" />}
         {areas.isError && <ErrorState onRetry={() => areas.refetch()} />}
         {areas.data?.length === 0 && <Empty title={TEXTO_SEM_AREAS}>O Gestor Master ativa as áreas do escritório em Configurações.</Empty>}
         {!!areas.data?.length && (

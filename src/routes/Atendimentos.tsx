@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useEffect, useMemo, useState, type DragEvent, type FormEvent } from 'react'
 import { useNavigate } from '@tanstack/react-router'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -256,7 +257,7 @@ export function Atendimentos() {
         <div className="pagina-acoes"><Button onClick={() => setNovo(true)}>Novo atendimento</Button></div>
       </div>
 
-      {q.isLoading && <p className="muted" role="status">Carregando os atendimentos…</p>}
+      {q.isLoading && <Carregando texto="Carregando os atendimentos…" />}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
       {q.isSuccess && q.data.length === 0 && (
         <Panel><Empty title="Nenhum atendimento ainda." action={<Button onClick={() => setNovo(true)}>Incluir o primeiro</Button>}>Inclua aqui cada pessoa que chamar no WhatsApp, Instagram ou telefone, para ninguém ficar sem resposta.</Empty></Panel>

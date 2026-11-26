@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useApi, useSessao } from '../lib/contexto'
@@ -93,7 +94,7 @@ export function Adesoes() {
       <div className="segmentos" role="group" aria-label="Filtrar pedidos">
         {FILTROS.map(([f, nome]) => <button key={f} type="button" aria-pressed={filtro === f} onClick={() => setFiltro(f)}>{nome}</button>)}
       </div>
-      {q.isLoading && <p className="muted" role="status">Carregando…</p>}
+      {q.isLoading && <Carregando texto="Carregando…" />}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
       {q.isSuccess && lista.length === 0 && <Panel><Empty title="Nenhum pedido aqui.">Os pedidos chegam pela página Aderir do site e pelos links de indicação.</Empty></Panel>}
       {lista.length > 0 && <Panel><ul className="adm-lista">{lista.map((a) => <Pedido key={a.id} a={a} />)}</ul></Panel>}

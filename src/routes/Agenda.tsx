@@ -1,3 +1,4 @@
+import { Carregando } from '../design/components/Carregando'
 import { useMemo, useState } from 'react'
 import { Link } from '@tanstack/react-router'
 import { useQuery } from '@tanstack/react-query'
@@ -45,7 +46,7 @@ export function Agenda() {
         </div>
       </div>
       <Panel>
-        {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
+        {q.isLoading && <Carregando painel texto="Carregando…" />}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
         {q.isSuccess && total === 0 && <Empty title="Nada marcado nos próximos 30 dias.">Perícias, audiências e prazos aparecem aqui sozinhos quando são lançados nos casos ou chegam pelas publicações.</Empty>}
         {q.isSuccess && dias.map((d) => (
