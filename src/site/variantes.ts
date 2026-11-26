@@ -4,14 +4,14 @@
  * Tudo respeita "reduzir movimento".
  */
 type Win = Window & typeof globalThis
-export type Variante = 'a' | 'b' | 'c'
+export type Variante = 'a' | 'b' | 'c' | '1' | '2' | '3' | '4' | '5' | '6'
 
 const limitar = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v))
 
 /** Lê a versão pedida na URL; qualquer outro valor cai na A. */
 export function lerVariante(busca: string): Variante {
   const v = new URLSearchParams(busca).get('v')?.toLowerCase()
-  return v === 'b' || v === 'c' ? v : 'a'
+  return v && ['b', 'c', '1', '2', '3', '4', '5', '6'].includes(v) ? v as Variante : 'a'
 }
 
 /** Texto embaralhado que vai se acertando da esquerda para a direita (p de 0 a 1). */
@@ -21,7 +21,7 @@ export function embaralhar(alvo: string, p: number, sorteio: () => number = Math
   return [...alvo].map((ch, i) => (i < certas || ch === ' ' ? ch : sinais[Math.floor(sorteio() * sinais.length)])).join('')
 }
 
-const NOMES: Record<Variante, string> = { a: 'Noite', b: 'Papel', c: 'Linha do processo' }
+const NOMES: Record<Variante, string> = { '1': 'Abertura de cinema', '2': 'Palavra-janela', '3': 'Travessia horizontal', '4': 'Pilha de telas', '5': 'Galeria 3D', '6': 'Manifesto', a: 'Noite', b: 'Papel', c: 'Linha do processo' }
 
 export function montarVariantes(doc: Document, win: Win): Variante {
   const v = lerVariante(win.location.search)
@@ -32,10 +32,11 @@ export function montarVariantes(doc: Document, win: Win): Variante {
   // Seletor flutuante de versões
   const nav = doc.createElement('nav')
   nav.className = 'vr-seletor'; nav.setAttribute('aria-label', 'Versões do site')
-  nav.innerHTML = `<span>Versão</span>${(['a', 'b', 'c'] as Variante[]).map((k) =>
-    `<a href="?v=${k}"${k === v ? ' aria-current="page"' : ''} title="${NOMES[k]}">${k.toUpperCase()}<small>${NOMES[k]}</small></a>`).join('')}`
+  nav.innerHTML = `<span>Versão</span>${(['1', '2', '3', '4', '5', '6', 'a', 'b', 'c'] as Variante[]).map((k) =>
+    `<a href="?v=${k}"${k === v ? ' aria-current="page"' : ''} title="${NOMES[k]}" class="${/\d/.test(k) ? 'vr-cinema' : 'vr-antiga'}">${k.toUpperCase()}<small>${NOMES[k]}</small></a>`).join('')}`
   doc.body.append(nav)
 
+  if (/\d/.test(v)) void import('./cinema').then((c) => c.montarCinema(doc, win, v as '1'))
   if (v === 'b') montarPapel(doc, win, reduzir, fino)
   if (v === 'c') montarLinha(doc, win, reduzir, fino)
   return v
