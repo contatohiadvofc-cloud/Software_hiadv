@@ -122,7 +122,7 @@ export const PAGINAS: Pagina[] = [
       ['Preço por escritório', 'Planos mensais por escritório, de R$ 119,90 a R$ 524,50, com teste grátis de 14 dias.'],
     ],
     perguntas: [
-      ['Funciona sem internet?', 'As telas abrem como aplicativo, mas os dados ficam no servidor, então é preciso conexão para ver e salvar informações atualizadas.'],
+      ['Funciona sem internet?', 'Em parte. O que já foi aberto fica guardado no aparelho para consulta sem internet e é apagado ao sair da conta. Para salvar e ver informações atualizadas, é preciso conexão.'],
       ['Dá para importar meus clientes?', 'Sim. Os clientes podem ser importados por planilha, com aviso de cadastro duplicado.'],
     ],
   },
@@ -137,6 +137,8 @@ export const PAGINAS: Pagina[] = [
       ['Carga da equipe', 'Tarefas abertas e casos de cada pessoa, com distribuição automática de casos novos por carga.'],
       ['Honorários sob controle', 'Fixos, de êxito ou mistos, com parcelas, atrasos e lembrete pronto para o WhatsApp.'],
       ['Funil de atendimentos', 'De onde vêm os clientes que fecham e em que etapa os contatos param.'],
+      ['Equipe conversando no próprio sistema', 'Chat, áudio, chamadas de voz e vídeo e grupos com administradores, separados do WhatsApp pessoal de cada um.'],
+      ['Contratação organizada', 'Do Pleno em diante: vaga com página pública, inscrições, funil por etapa, convite para entrevista e proposta.'],
     ],
     perguntas: [
       ['Os relatórios estão em qual plano?', 'Relatórios, financeiro e rodízio da equipe estão a partir do plano Pleno, de R$ 197,90 por mês.'],
@@ -153,7 +155,7 @@ export const PAGINAS: Pagina[] = [
       ['Feito dentro de um escritório', 'Cada tela nasceu de um problema do dia a dia: prazo que escapava na planilha, cliente perguntando pelo WhatsApp em que fase está o caso, documento que ninguém sabia se tinha chegado.'],
       ['Sigilo e LGPD', 'Cada escritório só enxerga os próprios dados. A conexão é criptografada, o acesso é por pessoa com papéis definidos pelo Gestor Master, as ações importantes ficam registradas e laudos e exames são tratados como dados sensíveis.'],
       ['Ética da advocacia', 'O sistema organiza, avisa e agenda. Nenhuma mensagem sai para o cliente sem alguém da equipe conferir, e a IA só prepara rascunhos marcados para revisão do advogado.'],
-      ['Implantação e suporte', 'Os 20 primeiros escritórios têm implantação assistida sem custo: a equipe do HiAdv ajuda a importar os clientes e a configurar as áreas. O atendimento é pelo WhatsApp (49) 99973-0572 e pelo e-mail hiadvofc@gmail.com.'],
+      ['Implantação e suporte', 'O escritório pode implantar sozinho, pelo manual, ou contratar a implantação assistida de 6 semanas, em que a equipe do HiAdv configura, integra e treina a equipe. O atendimento é pelo WhatsApp (49) 99973-0572 e pelo e-mail hiadvofc@gmail.com.'],
     ],
     perguntas: [
       ['O HiAdv atende escritórios de outros estados?', 'Sim. O HiAdv é 100% online e atende escritórios de todo o Brasil.'],

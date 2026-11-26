@@ -4,14 +4,14 @@ import type { PlanoId } from './adesao'
 export const RECURSOS_POR_PLANO: Record<PlanoId, string[]> = {
   // Júnior: tudo o que o advogado sozinho precisa para não perder prazo e organizar os casos.
   pro: ['casos', 'atendimentos', 'clientes', 'prazos', 'publicacoes', 'agenda', 'acompanhamento', 'documentos', 'celular',
-    'intimacoes_conectadas', 'calc_prazos'],
+    'intimacoes_conectadas', 'calc_prazos', 'conversas'],
   premium: [],
   senior: [],
   supremo: [],
 }
 // Pleno: equipe, dinheiro e as calculadoras de cada área (inclui o Bancário).
 RECURSOS_POR_PLANO.premium = [...RECURSOS_POR_PLANO.pro, 'financeiro', 'relatorios', 'horas', 'atencao',
-  'calculadoras', 'assinatura', 'cobranca']
+  'calculadoras', 'assinatura', 'cobranca', 'recrutamento']
 // Sênior: Drive com identificador e leitor, WhatsApp oficial, API e a IA própria (chave da Claude do escritório, em Integrações).
 RECURSOS_POR_PLANO.senior = [...RECURSOS_POR_PLANO.premium, 'drive', 'identificador', 'whatsapp', 'api', 'ia']
 // Sênior + Sara: o Sênior com a Sara Integrada (IA do sistema, uso incluído, sem chave própria).
