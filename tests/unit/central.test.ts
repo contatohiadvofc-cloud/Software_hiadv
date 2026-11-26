@@ -51,3 +51,8 @@ describe('Central v2: datas e saúde', () => {
     expect(faixaSaude(82).tom).toBe('ok'); expect(faixaSaude(55).tom).toBe('atencao'); expect(faixaSaude(10).tom).toBe('risco'); expect(faixaSaude(null).tom).toBe('sem')
   })
 })
+
+import { recursoDaRota as rotaRecurso } from '../../src/data/central'
+describe('Recrutamento a partir do Pleno', () => {
+  it('a tela de recrutamento usa o recurso recrutamento', () => { expect(rotaRecurso('/recrutamento')).toBe('recrutamento'); expect(rotaRecurso('/recrutamento/vaga/1')).toBe('recrutamento') })
+})

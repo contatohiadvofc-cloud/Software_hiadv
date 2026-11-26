@@ -10,6 +10,7 @@ export const NOMES_RECURSO: Record<string, string> = {
   agenda: 'Agenda e Google Agenda', acompanhamento: 'Acompanhamento pelo cliente', documentos: 'Documentos a partir de modelos', celular: 'App no celular',
   financeiro: 'Financeiro e honorários', relatorios: 'Relatórios', horas: 'Horas trabalhadas', atencao: 'Avisos e rodízio', drive: 'Google Drive',
   ia: 'IA própria do escritório (chave em Integrações)', sara: 'Sara Integrada (IA do HiAdv)', zapsign: 'Assinatura digital', whatsapp: 'WhatsApp oficial', api: 'API e webhooks',
+  conversas: 'Conversas da equipe', recrutamento: 'Recrutamento',
 }
 export const nomeRecurso = (r: string) => NOMES_RECURSO[r] ?? r
 
@@ -34,6 +35,7 @@ export function recursoDaRota(caminho: string): string | null {
   if (caminho.startsWith('/agenda')) return 'agenda'
   if (caminho.startsWith('/clientes')) return 'clientes'
   if (caminho.startsWith('/biblioteca')) return 'documentos'
+  if (caminho.startsWith('/recrutamento')) return 'recrutamento'
   return null
 }
 

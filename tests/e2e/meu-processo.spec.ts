@@ -12,6 +12,7 @@ test('Meu Processo (demonstração): etapa, compromisso, novidades e conversa', 
   await expect(page.getByRole('heading', { name: 'Aguardando a perícia' })).toBeVisible()
   await expect(page.locator('[aria-current="step"]')).toContainText('Perícia ou audiência')
   await expect(page.getByText(/Perícia em \d+ dias/)).toBeVisible()
+  await expect(page.getByText('Os andamentos do seu processo são informados somente aqui no app', { exact: false })).toBeVisible()
   await expect(page.getByText('Exame de raio-X do joelho')).toBeVisible()
   await expect(page.getByText('1 nova')).toBeVisible()
   const larg = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)

@@ -206,7 +206,7 @@ export function MeuProcesso({ api, demo }: { api: MpApi; demo: boolean }) {
           <Novidades d={dados} novas={novas} />
           <Instalar />
           <footer className="mp-rodape">
-            <p>As novidades são conferidas pela equipe do escritório antes de aparecerem aqui.</p>
+            <p>Os andamentos do seu processo são informados somente aqui no app, depois de conferidos pela equipe do escritório.</p>
             {whats && <a className="mp-link" href={whats} target="_blank" rel="noopener noreferrer">Falar no WhatsApp do escritório</a>}
             <p className="mp-hiadv">Meu Processo · HiAdv</p>
           </footer>
