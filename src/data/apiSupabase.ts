@@ -21,7 +21,7 @@ import type { Portal } from './portal'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
 import type { Candidatura, RespostaPublica, Vaga } from './recrutamento'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
-import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato, type ResultadoBusca, type ChamadaAtiva, type ReuniaoPassada, type Fala } from './conversas'
+import { caminhoAnexo, type Anexo, type Comunidade, type Conversa, type Mensagem, type PedidoEntrada, type Contato, type ResultadoBusca, type ChamadaAtiva, type ReuniaoPassada, type Fala, type GrupoInfo } from './conversas'
 import { ICE, type Presenca, type Sinal } from './chamada'
 
 
@@ -801,6 +801,13 @@ export function criarApiSupabase(url: string, chave: string): Api {
       const r = okOuErro(verificar(await sb.rpc('chat_grupo_salvar', { p_conversa: id ?? null, p_titulo: titulo, p_emails: emails })))
       return String(r.id)
     },
+    async grupoInfo(conversa) { return verificar(await sb.rpc('chat_grupo_info', { p_conversa: conversa })) as GrupoInfo },
+    async grupoEditar(conversa, titulo, descricao) { okOuErro(verificar(await sb.rpc('chat_grupo_editar', { p_conversa: conversa, p_titulo: titulo, p_descricao: descricao }))) },
+    async grupoRegras(conversa, r) { okOuErro(verificar(await sb.rpc('chat_grupo_regras', { p_conversa: conversa, p_so_admins_enviam: r.soAdminsEnviam ?? null, p_so_admins_editam: r.soAdminsEditam ?? null }))) },
+    async grupoAdicionar(conversa, emails) { okOuErro(verificar(await sb.rpc('chat_grupo_adicionar', { p_conversa: conversa, p_emails: emails }))) },
+    async grupoRemover(conversa, email) { okOuErro(verificar(await sb.rpc('chat_grupo_remover', { p_conversa: conversa, p_email: email }))) },
+    async grupoAdmin(conversa, email, admin) { okOuErro(verificar(await sb.rpc('chat_grupo_admin', { p_conversa: conversa, p_email: email, p_admin: admin }))) },
+    async grupoSair(conversa) { okOuErro(verificar(await sb.rpc('chat_grupo_sair', { p_conversa: conversa }))) },
     async chatLido(conversa) { verificar(await sb.rpc('chat_lido', { p_conversa: conversa })) },
     async chatReagir(msg, emoji) { verificar(await sb.rpc('chat_reagir', { p_id: msg, p_emoji: emoji })) },
     async chatApagar(msg) { verificar(await sb.rpc('chat_cancelar_envio', { p_id: msg })) },

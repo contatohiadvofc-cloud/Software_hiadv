@@ -304,3 +304,18 @@ export function trecho(texto: string, termo: string, raio = 50): string {
 
 export type ReuniaoPassada = { id: string; video: boolean; iniciadaPor: string; inicio: string; fim: string | null; participantes: string[]; recusados: string[]; falas: number }
 export type Fala = { autor: string; texto: string; faladoEm: string }
+
+// ===== Grupos no padrão do WhatsApp =====
+export type MembroGrupo = { email: string; admin: boolean; entrouEm: string }
+export type GrupoInfo = { id: string; titulo: string; descricao: string | null; criadoPor: string | null; criadoEm: string
+  soAdminsEnviam: boolean; soAdminsEditam: boolean; euAdmin: boolean; membros: MembroGrupo[] }
+export const AUTOR_SISTEMA = 'sistema'
+export const ehAviso = (m: Pick<Mensagem, 'autor'>) => m.autor === AUTOR_SISTEMA
+/** O que cada um pode fazer no grupo, com as mesmas regras do servidor. */
+export function podeNoGrupo(g: Pick<GrupoInfo, 'euAdmin' | 'soAdminsEnviam' | 'soAdminsEditam'>) {
+  return { enviar: g.euAdmin || !g.soAdminsEnviam, editarDados: g.euAdmin || !g.soAdminsEditam, gerenciar: g.euAdmin }
+}
+/** Admins primeiro, depois por ordem de entrada (como a lista de participantes do WhatsApp), com "Você" no topo do seu grupo. */
+export function ordenarMembros(lista: MembroGrupo[], eu: string): MembroGrupo[] {
+  return [...lista].sort((a, b) => Number(b.email === eu) - Number(a.email === eu) || Number(b.admin) - Number(a.admin) || a.entrouEm.localeCompare(b.entrouEm) || a.email.localeCompare(b.email))
+}

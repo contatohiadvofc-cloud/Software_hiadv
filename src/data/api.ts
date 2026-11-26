@@ -1,4 +1,4 @@
-import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, ChamadaAtiva, Contato, Fala, ReuniaoPassada, ContatoForm, PedidoEntrada, ResultadoBusca, PessoaComunidade, PessoaEquipe } from './conversas'
+import type { Anexo, Comunidade, ComunidadeForm, Conversa, Mensagem, ChamadaAtiva, Contato, Fala, ReuniaoPassada, ContatoForm, PedidoEntrada, ResultadoBusca, PessoaComunidade, PessoaEquipe, GrupoInfo } from './conversas'
 import type { CanalChamada } from './chamada'
 import type { ItemDia } from './seuDia'
 import type { Quadro } from './quadro'
@@ -228,6 +228,13 @@ export interface Api {
   chatEnviar(conversa: string, texto: string | null, anexo?: Anexo | null, respostaA?: string | null): Promise<Mensagem>
   chatDireta(email: string): Promise<string>
   chatGrupo(titulo: string, emails: string[], id?: string | null): Promise<string>
+  grupoInfo(conversa: string): Promise<GrupoInfo>
+  grupoEditar(conversa: string, titulo: string, descricao: string): Promise<void>
+  grupoRegras(conversa: string, r: { soAdminsEnviam?: boolean; soAdminsEditam?: boolean }): Promise<void>
+  grupoAdicionar(conversa: string, emails: string[]): Promise<void>
+  grupoRemover(conversa: string, email: string): Promise<void>
+  grupoAdmin(conversa: string, email: string, admin: boolean): Promise<void>
+  grupoSair(conversa: string): Promise<void>
   chatLido(conversa: string): Promise<void>
   chatReagir(msg: string, emoji: string): Promise<void>
   chatApagar(msg: string): Promise<void>

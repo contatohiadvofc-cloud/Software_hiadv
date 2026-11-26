@@ -9,8 +9,9 @@ import { Button } from '../design/components/Button'
 import {
   INTERVALOS, LIMITE_AUDIO_SEG, linkWhatsApp, nomesComApelidos, dataHoraCompleta, trecho, eventoChamada, textoChamada, estaOnline, vistoTela, type EventoChamada, normalizarTelefone, telefoneTela, type Contato, type PessoaEquipe, type ReuniaoPassada, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
   primeiroNome, publicoComunidade, quandoCurto, resumo, tamanhoTela, tipoAnexo, tituloConversa, validarArquivo, validarComunidade,
-  type Anexo, type Comunidade, type ComunidadeForm, type Conversa, type Mensagem,
+  type Anexo, type Comunidade, type ComunidadeForm, type Conversa, type Mensagem, ehAviso, podeNoGrupo,
 } from '../data/conversas'
+import { GrupoPainel } from './GrupoPainel'
 import { Chamada } from './Chamada'
 import { abrirMicLimpo, type MicLimpo } from '../lib/audioLimpo'
 import { SONS, lerPrefs, marcarAberta, salvarPrefs, tocar, type PrefsAvisos } from '../lib/avisos'
@@ -63,6 +64,7 @@ function Avatar({ nome, tipo, tam = 44, online }: { nome: string; tipo?: 'equipe
 // ---------- página ----------
 export function Conversas() {
   const api = useApi()
+  const qc = useQueryClient()
   const { perfil } = useSessao()
   const eu = perfil?.email ?? ''
   const [aba, setAba] = useState<Aba>(() => (new URLSearchParams(location.search).get('aba') === 'comunidades' ? 'comunidades' : 'equipe'))
@@ -125,7 +127,7 @@ export function Conversas() {
                   online={c.tipo === 'direta' ? estaOnline((pessoas.data ?? []).find((x) => x.email !== eu && c.membros.includes(x.email))?.vistoEm) : undefined} />
                 <span className="cv-item-meio">
                   <span className="cv-item-nome">{tituloConversa(c, eu, nomes)}</span>
-                  <span className="cv-item-prev" data-nao={c.naoLidas > 0 || undefined}>{c.ultima && c.tipo !== 'direta' && c.ultima.autor !== eu ? `${primeiroNome(nomes.get(c.ultima.autor) ?? c.ultima.autor)}: ` : c.ultima?.autor === eu ? 'Você: ' : ''}{resumo(c.ultima)}</span>
+                  <span className="cv-item-prev" data-nao={c.naoLidas > 0 || undefined}>{c.ultima && c.tipo !== 'direta' && c.ultima.autor !== eu && c.ultima.autor !== 'sistema' ? `${primeiroNome(nomes.get(c.ultima.autor) ?? c.ultima.autor)}: ` : c.ultima?.autor === eu ? 'Você: ' : ''}{resumo(c.ultima)}</span>
                 </span>
                 <span className="cv-item-fim">
                   {c.ultima && <time>{quandoCurto(c.ultima.criadoEm)}</time>}
@@ -181,7 +183,7 @@ export function Conversas() {
       </aside>
 
       <section className="cv-conversa" aria-label="Conversa aberta">
-        {conv && <ConversaEquipe key={conv.id} c={conv} eu={eu} nomes={nomes} pessoas={pessoas.data ?? []} voltar={() => setSel(null)} atender={atender} />}
+        {conv && <ConversaEquipe key={conv.id} c={conv} eu={eu} nomes={nomes} pessoas={pessoas.data ?? []} voltar={() => setSel(null)} atender={atender} conversarCom={(email) => { void api.chatDireta(email).then((id) => { qc.invalidateQueries({ queryKey: ['chat-lista'] }); setSel({ tipo: 'conv', id }) }) }} />}
         {comu && <ConversaComunidade key={comu.id} c={comu} eu={eu} voltar={() => setSel(null)} moderar={() => setModerar(comu)} />}
         {(sel?.tipo === 'pessoa' || sel?.tipo === 'contato' || sel?.tipo === 'novo-contato') && (
           <PainelContato key={sel.tipo + sel.id} sel={sel} eu={eu} pessoas={pessoas.data ?? []} contatos={contatos.data ?? []} nomes={nomes}
@@ -213,7 +215,7 @@ export function Conversas() {
 }
 
 // ---------- conversa da equipe ----------
-function ConversaEquipe({ c, eu, nomes, pessoas, voltar, atender }: { c: Conversa; eu: string; nomes: Map<string, string>; pessoas: PessoaEquipe[]; voltar: () => void; atender?: string | null }) {
+function ConversaEquipe({ c, eu, nomes, pessoas, voltar, atender, conversarCom }: { c: Conversa; eu: string; nomes: Map<string, string>; pessoas: PessoaEquipe[]; voltar: () => void; atender?: string | null; conversarCom: (email: string) => void }) {
   const api = useApi()
   const qc = useQueryClient()
   const toast = useToast()
@@ -221,6 +223,9 @@ function ConversaEquipe({ c, eu, nomes, pessoas, voltar, atender }: { c: Convers
   const gestor = papel === 'master' || papel === 'code'
   const [chamada, setChamada] = useState<{ id: string; video: boolean } | null>(null)
   const [historico, setHistorico] = useState(false)
+  const [dadosGrupo, setDadosGrupo] = useState(false)
+  const grupo = useQuery({ queryKey: ['grupo', c.id], queryFn: () => api.grupoInfo(c.id), enabled: c.tipo === 'grupo' })
+  const podeGrupo = grupo.data ? podeNoGrupo(grupo.data) : null
   const ativa = useQuery({ queryKey: ['reuniao', c.id], queryFn: () => api.reuniaoAtiva(c.id), refetchInterval: 15000 })
   const titulo = tituloConversa(c, eu, nomes)
   // veio do aviso "Atender": entra direto na chamada
@@ -251,7 +256,10 @@ function ConversaEquipe({ c, eu, nomes, pessoas, voltar, atender }: { c: Convers
         assinar={(fn) => api.chatAssinar(c.id, fn)} onde="chat" pasta={c.id} permite={{ anexos: true, audios: true, postar: true }}
         chamadas={eventos} nomePessoa={(e) => nomes.get(e) ?? e}
         aoEntrarChamada={ativa.data ? () => setChamada({ id: ativa.data!.id, video: ativa.data!.video }) : undefined}
+        bloqueio={podeGrupo && !podeGrupo.enviar ? 'Só administradores podem enviar mensagens neste grupo.' : undefined}
+        aoTocarTitulo={c.tipo === 'grupo' ? () => setDadosGrupo(true) : undefined}
         acoes={<>
+          {c.tipo === 'grupo' && <button type="button" className="cv-icone-bt" aria-label="Dados do grupo" title="Dados do grupo" onClick={() => setDadosGrupo(true)}><Ic d="M12 8h.01M11 12h1v4h1M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z" /></button>}
           <button type="button" className="cv-icone-bt" aria-label="Chamadas anteriores e transcrições" title="Chamadas anteriores" onClick={() => setHistorico(true)}><Ic d={I.relogio} /></button>
           <button type="button" className="cv-icone-bt" aria-label="Chamada de voz" title="Chamada de voz" onClick={() => ligar(false)}><Ic d={I.fone} /></button>
           <button type="button" className="cv-icone-bt" aria-label="Chamada de vídeo" title="Chamada de vídeo" onClick={() => ligar(true)}><Ic d={I.video} /></button>
@@ -265,6 +273,8 @@ function ConversaEquipe({ c, eu, nomes, pessoas, voltar, atender }: { c: Convers
           </div>
         ) : null}
       />
+      {c.tipo === 'grupo' && <GrupoPainel conversa={c.id} eu={eu} nomes={nomes} pessoas={pessoas} aberto={dadosGrupo} aoFechar={() => setDadosGrupo(false)}
+        conversarCom={conversarCom} aoSair={() => { setDadosGrupo(false); voltar(); qc.invalidateQueries({ queryKey: ['chat-lista'] }) }} />}
       {historico && <HistoricoChamadas conversa={c.id} nomes={nomes} eu={eu} aoFechar={() => setHistorico(false)} />}
       {chamada && <Chamada id={chamada.id} video={chamada.video} titulo={titulo} eu={{ email: eu, nome: nomes.get(eu) ?? eu }} aoSair={() => { setChamada(null); qc.invalidateQueries({ queryKey: ['reuniao', c.id] }) }} />}
     </>
@@ -324,7 +334,7 @@ type FioProps = {
   lido: () => Promise<unknown>; assinar?: (fn: () => void) => () => void; intervalo?: number
   onde: 'chat' | 'comunidade'; pasta: string; permite: { anexos: boolean; audios: boolean; postar: boolean }; bloqueio?: string | null
   acoes?: ReactNode; faixa?: ReactNode
-  chamadas?: EventoChamada[]; nomePessoa?: (email: string) => string; aoEntrarChamada?: () => void
+  chamadas?: EventoChamada[]; nomePessoa?: (email: string) => string; aoEntrarChamada?: () => void; aoTocarTitulo?: () => void
 }
 
 function Fio(p: FioProps) {
@@ -374,7 +384,9 @@ function Fio(p: FioProps) {
       <header className="cv-fio-cabeca">
         <button type="button" className="cv-icone-bt cv-so-cel" aria-label="Voltar para a lista" onClick={p.voltar}><Ic d={I.voltar} /></button>
         {p.avatar}
-        <div className="cv-fio-tit"><h2>{p.titulo}</h2><p>{p.subtitulo}</p></div>
+        {p.aoTocarTitulo
+          ? <button type="button" className="cv-fio-tit cv-fio-tit-bt" onClick={p.aoTocarTitulo} aria-label={`${p.titulo}: ver dados do grupo`}><h2>{p.titulo}</h2><p>{p.subtitulo}</p></button>
+          : <div className="cv-fio-tit"><h2>{p.titulo}</h2><p>{p.subtitulo}</p></div>}
         <div className="cv-fio-acoes">{p.acoes}</div>
       </header>
       {p.faixa}
@@ -386,6 +398,8 @@ function Fio(p: FioProps) {
           ? <div key={`d-${b.chave}`} className="cv-dia"><span>{b.rotulo}</span></div>
           : b.tipo === 'chamada'
           ? <CartaoChamada key={`c-${b.e.id}`} e={b.e} meu={b.e.iniciadaPor === p.eu} nome={p.nomePessoa?.(b.e.iniciadaPor) ?? b.e.iniciadaPor} entrar={p.aoEntrarChamada} />
+          : ehAviso(b.m)
+          ? <div key={b.m.id} className="cv-aviso" role="note">{b.m.texto}</div>
           : <Balao key={b.m.id} m={b.m} meu={b.m.autor === p.eu} eu={p.eu} agrupada={b.agrupada} ultima={b.ultimaDoGrupo}
               nome={p.mostrarAutor ? p.nomeDe(b.m) : null} escritorio={p.escritorioDe?.(b.m) ?? null}
               citada={b.m.respostaA ? porId.get(b.m.respostaA) ?? null : null} nomeCitada={(m) => (m.autor === p.eu ? 'Você' : p.nomeDe(m))}

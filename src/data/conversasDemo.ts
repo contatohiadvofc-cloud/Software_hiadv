@@ -10,13 +10,14 @@ const PESSOAS = [
   { email: 'julia@silvaprado.exemplo.br', nome: 'Júlia Reis', papel: 'colaborador' },
   { email: 'marcos@silvaprado.exemplo.br', nome: 'Marcos Lima', papel: 'colaborador' },
 ]
+const nome = (e: string) => PESSOAS.find((p) => p.email === e)?.nome ?? e.split('@')[0]
 const min = (m: number) => new Date(Date.now() - m * 60e3).toISOString()
 let seq = 100
 const novoId = () => `m${++seq}`
 const msg = (autor: string, texto: string, ha: number, extra: Partial<Mensagem> = {}): Mensagem =>
   ({ id: novoId(), autor, texto, anexo: null, respostaA: null, reacoes: {}, criadoEm: min(ha), editadoEm: null, ...extra })
 
-type Conv = Conversa & { msgs: Mensagem[] }
+type Conv = Conversa & { msgs: Mensagem[]; admins?: string[]; descricao?: string | null; soAdminsEnviam?: boolean; soAdminsEditam?: boolean; entrou?: Record<string, string> }
 const CONVERSAS: Conv[] = [
   { id: 'cv-equipe', tipo: 'equipe', titulo: 'Equipe Silva & Prado', membros: [], naoLidas: 2, ultima: null, ultimaEm: '', msgs: [
     msg('rafael@silvaprado.exemplo.br', 'Bom dia! Meta da semana: protocolar os 6 requerimentos que estão em "Fazendo req adm".', 190),
@@ -29,7 +30,7 @@ const CONVERSAS: Conv[] = [
     msg(EU, 'Júlia, consegue revisar a inicial da Rosa hoje?', 95),
     msg('julia@silvaprado.exemplo.br', 'Consigo sim, até as 16h te devolvo com os ajustes.', 8),
   ] },
-  { id: 'cv-prev', tipo: 'grupo', titulo: 'Previdenciário', membros: [EU, 'julia@silvaprado.exemplo.br', 'marcos@silvaprado.exemplo.br'], naoLidas: 0, ultima: null, ultimaEm: '', msgs: [
+  { id: 'cv-prev', tipo: 'grupo', titulo: 'Previdenciário', admins: [EU], descricao: 'Casos de auxílio-acidente e B31 da equipe.', membros: [EU, 'julia@silvaprado.exemplo.br', 'marcos@silvaprado.exemplo.br'], naoLidas: 0, ultima: null, ultimaEm: '', msgs: [
     msg('marcos@silvaprado.exemplo.br', 'Saiu a exigência do INSS no caso da Carla: CTPS completa.', 600),
     msg(EU, 'Pedi a CTPS pelo app do cliente. Prazo de 30 dias.', 590),
   ] },
@@ -87,7 +88,7 @@ function responder(c: Conv) {
   setTimeout(() => { c.msgs.push(msg(outro, 'Combinado! 👍', 0)); avisar(c.id) }, 1800)
 }
 
-type ConversasApi = Pick<Api, 'chatLista' | 'chatPessoas' | 'chatMensagens' | 'chatEnviar' | 'chatDireta' | 'chatGrupo' | 'chatLido' | 'chatReagir' | 'chatApagar' | 'chatSubir' | 'chatUrl' | 'chatAssinar'
+type ConversasApi = Pick<Api, 'grupoInfo' | 'grupoEditar' | 'grupoRegras' | 'grupoAdicionar' | 'grupoRemover' | 'grupoAdmin' | 'grupoSair' | 'chatLista' | 'chatPessoas' | 'chatMensagens' | 'chatEnviar' | 'chatDireta' | 'chatGrupo' | 'chatLido' | 'chatReagir' | 'chatApagar' | 'chatSubir' | 'chatUrl' | 'chatAssinar'
   | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'contatoLista' | 'chatTranscrever' | 'chatTranscreverPrevia' | 'presencaPing' | 'reuniaoRecusar' | 'chatTranscricaoSalvar' | 'chatBuscar' | 'reuniaoMinhasAtivas' | 'reuniaoFalaEnviar' | 'reuniaoHistorico' | 'reuniaoFalas' | 'contatoSalvar' | 'contatoApagar' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
 
 export function conversasDemo(): ConversasApi {
@@ -95,12 +96,53 @@ export function conversasDemo(): ConversasApi {
     const m = lista.find((x) => x.id === id); if (!m) return
     if (m.reacoes[EU] === e) { const { [EU]: _x, ...r } = m.reacoes; m.reacoes = r } else m.reacoes = { ...m.reacoes, [EU]: e }
   }
+  const grupo = (id: string) => { const c = achar(id); if (!c || c.tipo !== 'grupo') throw new Error('Grupo não encontrado.'); c.admins ??= [EU]; return c }
+  const souAdmin = (c: Conv) => (c.admins ?? []).includes(EU)
+  const aviso = (c: Conv, t: string) => { c.msgs.push(msg('sistema', t, 0)); avisar(c.id) }
   return {
+    async grupoInfo(id) {
+      const c = grupo(id)
+      return { id, titulo: c.titulo ?? 'Grupo', descricao: c.descricao ?? null, criadoPor: EU, criadoEm: min(9000), soAdminsEnviam: !!c.soAdminsEnviam, soAdminsEditam: c.soAdminsEditam ?? true,
+        euAdmin: souAdmin(c), membros: c.membros.map((e, i) => ({ email: e, admin: (c.admins ?? []).includes(e), entrouEm: c.entrou?.[e] ?? min(9000 - i) })) }
+    },
+    async grupoEditar(id, titulo, descricao) {
+      const c = grupo(id); if ((c.soAdminsEditam ?? true) && !souAdmin(c)) throw new Error('Só administradores podem editar os dados do grupo.')
+      if (titulo.trim().length < 2) throw new Error('O nome do grupo precisa ter entre 2 e 80 caracteres.')
+      if (titulo.trim() !== c.titulo) aviso(c, `${nome(EU)} mudou o nome do grupo para "${titulo.trim()}"`)
+      if ((descricao.trim() || null) !== (c.descricao ?? null)) aviso(c, `${nome(EU)} mudou a descrição do grupo`)
+      c.titulo = titulo.trim(); c.descricao = descricao.trim() || null
+    },
+    async grupoRegras(id, r) {
+      const c = grupo(id); if (!souAdmin(c)) throw new Error('Só administradores mudam as regras do grupo.')
+      if (r.soAdminsEnviam !== undefined && r.soAdminsEnviam !== !!c.soAdminsEnviam) { c.soAdminsEnviam = r.soAdminsEnviam; aviso(c, `${nome(EU)} ${r.soAdminsEnviam ? 'definiu que só administradores enviam mensagens' : 'liberou o envio de mensagens para todos'}`) }
+      if (r.soAdminsEditam !== undefined && r.soAdminsEditam !== (c.soAdminsEditam ?? true)) { c.soAdminsEditam = r.soAdminsEditam; aviso(c, `${nome(EU)} ${r.soAdminsEditam ? 'definiu que só administradores editam os dados do grupo' : 'liberou a edição dos dados do grupo para todos'}`) }
+    },
+    async grupoAdicionar(id, emails) {
+      const c = grupo(id); if (!souAdmin(c)) throw new Error('Só administradores adicionam pessoas.')
+      for (const e of emails) if (!c.membros.includes(e)) { c.membros.push(e); (c.entrou ??= {})[e] = new Date().toISOString(); aviso(c, `${nome(EU)} adicionou ${nome(e)}`) }
+    },
+    async grupoRemover(id, email) {
+      const c = grupo(id); if (!souAdmin(c)) throw new Error('Só administradores removem pessoas.')
+      if (email === EU) throw new Error('Para sair, use "Sair do grupo".')
+      c.membros = c.membros.filter((m) => m !== email); c.admins = (c.admins ?? []).filter((m) => m !== email); aviso(c, `${nome(EU)} removeu ${nome(email)}`)
+    },
+    async grupoAdmin(id, email, admin) {
+      const c = grupo(id); if (!souAdmin(c)) throw new Error('Só administradores mudam administradores.')
+      const resto = (c.admins ?? []).filter((m) => m !== email)
+      if (!admin && resto.length === 0) throw new Error('O grupo precisa de pelo menos um administrador.')
+      c.admins = admin ? [...resto, email] : resto; aviso(c, `${nome(email)} ${admin ? 'agora é administrador' : 'não é mais administrador'}`)
+    },
+    async grupoSair(id) {
+      const c = grupo(id); c.membros = c.membros.filter((m) => m !== EU); c.admins = (c.admins ?? []).filter((m) => m !== EU); aviso(c, `${nome(EU)} saiu`)
+      if (!c.admins.length && c.membros[0]) { c.admins = [c.membros[0]]; aviso(c, `${nome(c.membros[0])} agora é administrador`) }
+      const i = CONVERSAS.indexOf(c); if (i >= 0) CONVERSAS.splice(i, 1)
+    },
     async chatLista() { return CONVERSAS.map(resumoConv).sort((a, b) => b.ultimaEm.localeCompare(a.ultimaEm)) },
     async chatPessoas() { return PESSOAS.map((p, i) => ({ ...p, vistoEm: p.email === EU || i % 2 ? new Date().toISOString() : new Date(Date.now() - 47 * 6e4).toISOString() })) },
     async chatMensagens(id) { return [...(achar(id)?.msgs ?? [])] },
     async chatEnviar(id, texto, anexo, respostaA) {
       const c = achar(id); if (!c) throw new Error('Conversa não encontrada.')
+      if (c.tipo === 'grupo' && c.soAdminsEnviam && !(c.admins ?? []).includes(EU)) throw new Error('Só administradores podem enviar mensagens neste grupo.')
       const m = msg(EU, texto ?? '', 0, { texto: texto || null, anexo: anexo ?? null, respostaA: respostaA ?? null })
       c.msgs.push(m); avisar(id); responder(c)
       return m
@@ -115,7 +157,7 @@ export function conversasDemo(): ConversasApi {
       if (titulo.trim().length < 2) throw new Error('O nome do grupo precisa ter entre 2 e 80 caracteres.')
       if (!emails.length) throw new Error('Escolha pelo menos mais uma pessoa.')
       if (id) { const c = achar(id)!; c.titulo = titulo; c.membros = [EU, ...emails]; return id }
-      const c: Conv = { id: `cv-g${++seq}`, tipo: 'grupo', titulo, membros: [EU, ...emails], naoLidas: 0, ultima: null, ultimaEm: '', msgs: [] }
+      const c: Conv = { id: `cv-g${++seq}`, tipo: 'grupo', titulo, admins: [EU], membros: [EU, ...emails], naoLidas: 0, ultima: null, ultimaEm: '', msgs: [msg('sistema', `${nome(EU)} criou o grupo "${titulo}"`, 0)] }
       CONVERSAS.push(c); return c.id
     },
     async chatLido(id) { const c = achar(id); if (c) c.naoLidas = 0 },
