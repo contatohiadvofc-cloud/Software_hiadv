@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import type { Plugin } from 'vite'
 import { writeFileSync, readFileSync } from 'node:fs'
+import { rotasDoCodigo, gerarRedirects, gerarHeaders } from './scripts/cloudflare'
 
 // páginas de busca geradas por scripts/paginas-seo.ts
 const PAGINAS_SEO: string[] = JSON.parse(readFileSync(new URL('./scripts/paginas-seo.json', import.meta.url), 'utf8'))
@@ -52,6 +53,11 @@ function rotasDoApp(): Plugin {
     writeBundle(opts, bundle) {
       const app = bundle['app.html']
       if (app && app.type === 'asset' && opts.dir) writeFileSync(opts.dir + '/404.html', String(app.source))
+      // Cloudflare Pages: rotas do app com status 200 e cabeçalhos de segurança
+      if (app && opts.dir) {
+        writeFileSync(opts.dir + '/_redirects', gerarRedirects(rotasDoCodigo(readFileSync(new URL('./src/app.tsx', import.meta.url), 'utf8')), ['/experimentar']))
+        writeFileSync(opts.dir + '/_headers', gerarHeaders())
+      }
     },
     configureServer(s) { s.middlewares.use(reescrever) },
     configurePreviewServer(s) { s.middlewares.use(reescrever) },
