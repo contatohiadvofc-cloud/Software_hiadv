@@ -40,5 +40,5 @@ test('colaborador não vê relatórios', async ({ page }) => {
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)
   await page.goto('/relatorios')
-  await expect(page.getByText('Os relatórios ficam com o Gestor Master.')).toBeVisible()
+  await expect(page.getByText('Os relatórios ficam com o Gestor.')).toBeVisible()
 })

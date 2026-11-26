@@ -31,7 +31,7 @@ export function Areas() {
       <Panel>
         {areas.isLoading && <Carregando painel texto="Carregando…" />}
         {areas.isError && <ErrorState onRetry={() => areas.refetch()} />}
-        {areas.data?.length === 0 && <Empty title={TEXTO_SEM_AREAS}>O Gestor Master ativa as áreas do escritório em Configurações.</Empty>}
+        {areas.data?.length === 0 && <Empty title={TEXTO_SEM_AREAS}>O Gestor ativa as áreas do escritório em Configurações.</Empty>}
         {!!areas.data?.length && (
           <ul className="areas-lista">
             {areas.data.map((a) => (

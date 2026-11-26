@@ -110,7 +110,7 @@ export type NovoEscritorio = { nome: string; cidade: string; oab: string; master
 /** Passou do limite do plano? (só aviso: quem decide é o Deividy) */
 export function acimaDoLimite(e: EscritorioCentral): string[] {
   const l: string[] = []
-  if (e.limites.masters != null && e.uso.masters > e.limites.masters) l.push(`Masters ${e.uso.masters}/${e.limites.masters}`)
+  if (e.limites.masters != null && e.uso.masters > e.limites.masters) l.push(`Gestores ${e.uso.masters}/${e.limites.masters}`)
   if (e.limites.colaboradores != null && e.uso.colaboradores > e.limites.colaboradores) l.push(`Colaboradores ${e.uso.colaboradores}/${e.limites.colaboradores}`)
   if (e.limites.oabs != null && e.uso.oabs > e.limites.oabs) l.push(`OABs ${e.uso.oabs}/${e.limites.oabs}`)
   if (e.limites.iaMensal != null && e.limites.iaMensal > 0 && e.uso.iaMes > e.limites.iaMensal) l.push(`IA ${e.uso.iaMes}/${e.limites.iaMensal}`)
@@ -119,7 +119,7 @@ export function acimaDoLimite(e: EscritorioCentral): string[] {
 
 export function validarNovo(n: NovoEscritorio): string | null {
   if (n.nome.trim().length < 2) return 'Informe o nome do escritório.'
-  if (n.masterNome.trim().length < 2) return 'Informe o nome do Gestor Master.'
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(n.masterEmail.trim())) return 'E-mail do Gestor Master inválido.'
+  if (n.masterNome.trim().length < 2) return 'Informe o nome do Gestor.'
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(n.masterEmail.trim())) return 'E-mail do Gestor inválido.'
   return null
 }

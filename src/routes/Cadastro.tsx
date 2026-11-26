@@ -167,7 +167,7 @@ export function NovoCasoDialog({ aberto, aoFechar, aoCriar, clienteId, clienteNo
           <span id="cad-area-dica" className="hv-hint">
             {area && !(areas.data ?? []).some((a) => a.area === area)
               ? `Ao abrir o caso, a área ${nomeDaArea(area)} é ligada no escritório e ganha quadro próprio.`
-              : gestor ? 'Caso de outra área? Escolha em "Ligar outra área".' : 'Caso de outra área? Peça ao Gestor Master para ligar a área em Configurações.'}
+              : gestor ? 'Caso de outra área? Escolha em "Ligar outra área".' : 'Caso de outra área? Peça ao Gestor para ligar a área em Configurações.'}
           </span>
         </div>
         {areaPrevidenciaria(area) && (

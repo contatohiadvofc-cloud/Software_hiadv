@@ -44,7 +44,7 @@ export function OabsAcompanhadas() {
           ))}
         </ul>
       )}
-      {daEquipe.length > 0 && <p className="hv-hint">Também acompanhadas pelo cadastro dos Gestores Master: {daEquipe.map((e) => `${e.oab} (${e.nome})`).join(', ')}.</p>}
+      {daEquipe.length > 0 && <p className="hv-hint">Também acompanhadas pelo cadastro dos Gestores: {daEquipe.map((e) => `${e.oab} (${e.nome})`).join(', ')}.</p>}
       <form className="oab-nova" onSubmit={(e) => { e.preventDefault(); adicionar() }}>
         <div className="hv-field">
           <label htmlFor="oab-nova">Adicionar OAB</label>

@@ -6,7 +6,7 @@ import { Button } from '../design/components/Button'
 import { Field } from '../design/components/Field'
 import { useToast } from '../design/components/Toast'
 
-/** Dados de contato do escritório (só Gestor Master). O WhatsApp aparece no link de acompanhamento do cliente. */
+/** Dados de contato do escritório (só Gestor). O WhatsApp aparece no link de acompanhamento do cliente. */
 export function ContatoEscritorio() {
   const api = useApi()
   const qc = useQueryClient()

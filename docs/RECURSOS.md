@@ -52,13 +52,13 @@ Procuração, contrato e declarações em Word, preenchidos com os dados do clie
 
 Onde fica: Biblioteca.
 
-### Financeiro e honorários (Gestor Master)
+### Financeiro e honorários (Gestor)
 
 Fixo, êxito ou misto, parcelas, atrasos e cobrança pronta no WhatsApp.
 
 Onde fica: Financeiro.
 
-### Relatórios (Gestor Master)
+### Relatórios (Gestor)
 
 Gargalos por etapa, produtividade da equipe, atendimentos e dinheiro.
 
@@ -78,7 +78,7 @@ Onde fica: Este aparelho.
 
 ## Para ativar
 
-### Assistente de IA (plano Sênior) (Gestor Master)
+### Assistente de IA (plano Sênior) (Gestor)
 
 Quesitos, minutas e resumos de intimações e documentos, como rascunho para o advogado revisar. Fica na página do cliente e em Publicações.
 
@@ -92,7 +92,7 @@ Onde fica: Integrações.
 
 Custo: Pago por uso na conta Anthropic do escritório. Dá para definir um limite por mês.
 
-### Google Drive do escritório (Gestor Master)
+### Google Drive do escritório (Gestor)
 
 No Assistente de IA, escolha arquivos do Drive para a IA ler (PDF, Word, Google Docs, fotos) e salve o rascunho de volta na pasta do cliente. Os arquivos não são copiados para o HiAdv.
 
@@ -106,7 +106,7 @@ Custo: Sem custo.
 
 ## Em preparação
 
-### Assinatura digital (ZapSign) (Gestor Master)
+### Assinatura digital (ZapSign) (Gestor)
 
 Envia o kit do cliente (contrato, procuração, declaração) para assinar pelo celular, com validade jurídica.
 
@@ -129,10 +129,10 @@ Número oficial do escritório respondendo e qualificando contatos, que entram s
 
 Custo: Cobrança da Meta por conversa, na conta do escritório.
 
-### Conexão com outros sistemas (API) (Gestor Master)
+### Conexão com outros sistemas (API) (Gestor)
 
 Receber contatos do site ou de formulários e avisar outros sistemas quando um caso muda de etapa.
 
-- Quando ligar: o Gestor Master gera uma chave de acesso aqui, com permissões limitadas, e pode desligá-la a qualquer momento.
+- Quando ligar: o Gestor gera uma chave de acesso aqui, com permissões limitadas, e pode desligá-la a qualquer momento.
 
 Custo: Sem custo no HiAdv.

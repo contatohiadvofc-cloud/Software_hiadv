@@ -24,7 +24,7 @@ import type { AssinaturaForm, DetalheCentral, EscritorioCentral, MeusRecursos, N
 import type { Agente, EtapaEscritorio, Integracao, ItemBiblioteca, NovoItemBiblioteca, PacoteBiblioteca, Servico } from './escritorio'
 
 export type Papel = 'code' | 'master' | 'colaborador' | 'parceiro'
-/** code = acesso à área do Coder (papel code, ou acesso_code ligado para um Master, como o Felipe). */
+/** code = acesso à área do Coder (papel code, ou acesso_code ligado para um gestor, como o Felipe). */
 export type Perfil = { email: string; nome: string; papel: Papel | null; code: boolean; escritorioId: string | null; escritorioNome: string }
 export type Area = { area: string; nome: string; ordem: number }
 export type Escritorio = { id: string; nome: string; atual: boolean }
@@ -57,10 +57,10 @@ export interface Api {
   /** Publicações (DJEN) e andamentos (DataJud) dos processos do escritório, com a tarefa gerada. */
   publicacoes(dias: number, soPublicacoes: boolean): Promise<Publicacao[]>
   oabs(): Promise<Oabs>
-  /** Só o Gestor Master. Devolve as OABs normalizadas. */
+  /** Só o Gestor. Devolve as OABs normalizadas. */
   salvarOabs(oabs: string[]): Promise<string[]>
   calcularPrazo(p: PedidoPrazo): Promise<ResultadoPrazo>
-  /** Financeiro (só Gestor Master): lançamentos com vencimento no período e os atrasados de antes. */
+  /** Financeiro (só Gestor): lançamentos com vencimento no período e os atrasados de antes. */
   finLista(de: string, ate: string): Promise<Lancamento[]>
   finLancar(l: NovoLancamento): Promise<void>
   /** Marca como pago na data (ou desfaz com null). */
@@ -73,11 +73,11 @@ export interface Api {
   documentoDados(clienteId: string, casoId: string | null): Promise<DadosDocumento>
   /** Dados de qualificação do cliente; campo vazio apaga. */
   salvarDadosCliente(clienteId: string, dados: Partial<DadosCliente>): Promise<void>
-  /** Só Gestor Master: indicadores dos últimos N dias. */
+  /** Só Gestor: indicadores dos últimos N dias. */
   relatorio(dias: number): Promise<Relatorio>
   /** Baixa o arquivo de um item da Biblioteca (para preencher um modelo .docx). */
   arquivoBiblioteca(caminho: string): Promise<ArrayBuffer>
-  /** Só o Gestor Master. Liga ou desliga uma área do catálogo no escritório; os casos ficam guardados. */
+  /** Só o Gestor. Liga ou desliga uma área do catálogo no escritório; os casos ficam guardados. */
   ativarArea(area: string, ativa: boolean): Promise<void>
   busca(q: string): Promise<Achado[]>
   itensDoDia(email: string): Promise<ItemDia[]>
@@ -170,7 +170,7 @@ export interface Api {
   /** Página pública do cliente (sem login); null se o link não vale mais. */
   portal(token: string): Promise<Portal | null>
   contatoEscritorio(): Promise<{ nome: string; cidade: string | null; whatsapp: string | null }>
-  /** Só o Gestor Master. */
+  /** Só o Gestor. */
   salvarContatoEscritorio(cidade: string, whatsapp: string): Promise<void>
   /** Gera (ou troca) o link pessoal da agenda; o anterior deixa de funcionar. Devolve o endereço para o Google Agenda. */
   agendaLinkGerar(): Promise<string>
@@ -208,7 +208,7 @@ export interface Api {
   centralEscritorio(id: string): Promise<DetalheCentral>
   centralAssinatura(id: string, f: AssinaturaForm): Promise<void>
   centralAjuste(id: string, recurso: string, valor: 'plano' | 'liberado' | 'bloqueado', validoAte: string | null): Promise<void>
-  /** Code em qualquer escritório; o Gestor Master só no próprio. */
+  /** Code em qualquer escritório; o Gestor só no próprio. */
   pessoaAjuste(id: string, email: string, recurso: string, bloquear: boolean, validoAte: string | null): Promise<void>
   centralNovo(n: NovoEscritorio): Promise<string>
   centralPainel(mes?: string): Promise<PainelCentral>

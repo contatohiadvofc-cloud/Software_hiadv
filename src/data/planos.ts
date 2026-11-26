@@ -14,7 +14,7 @@ RECURSOS_POR_PLANO.premium = [...RECURSOS_POR_PLANO.pro, 'financeiro', 'relatori
   'calculadoras', 'assinatura', 'cobranca', 'recrutamento']
 // Sênior: Drive com identificador e leitor, WhatsApp oficial, API e a IA própria (chave da Claude do escritório, em Integrações).
 RECURSOS_POR_PLANO.senior = [...RECURSOS_POR_PLANO.premium, 'drive', 'identificador', 'whatsapp', 'api', 'ia']
-// Sênior + Sara: o Sênior com a Sara Integrada (IA do sistema, uso incluído, sem chave própria).
+// Master: o Sênior com a Sara Integrada (IA do sistema, uso incluído, sem chave própria).
 RECURSOS_POR_PLANO.supremo = [...RECURSOS_POR_PLANO.senior, 'sara']
 
 /** Plano mínimo que inclui o recurso (para o selo "no plano Pleno"). */

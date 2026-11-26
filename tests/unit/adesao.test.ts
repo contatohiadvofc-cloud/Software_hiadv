@@ -12,9 +12,9 @@ describe('adesão', () => {
     expect(recomendar({ atuacao: 'sozinho', prioridades: ['financeiro'] }).plano).toBe('premium')
     expect(recomendar({ atuacao: 'grande', oabs: '4mais' }).motivos.join(' ')).toContain('adicional')
   })
-  it('IA leva ao Sênior, com plano para começar enquanto não é liberado', () => {
-    expect(recomendar({ atuacao: 'sozinho', prioridades: ['ia'] })).toMatchObject({ plano: 'supremo', comecarCom: 'pro' })
-    expect(recomendar({ atuacao: 'equipe', prioridades: ['ia'] })).toMatchObject({ plano: 'supremo', comecarCom: 'premium' })
+  it('IA leva ao Sênior, já liberado, com a IA própria do escritório', () => {
+    expect(recomendar({ atuacao: 'sozinho', prioridades: ['ia'] })).toMatchObject({ plano: 'senior', comecarCom: null })
+    expect(recomendar({ atuacao: 'grande', prioridades: ['ia'] }).motivos.join(' ')).toMatch(/Master/)
   })
   it('preços e fundador conferem com o documento de planos', () => {
     expect(PLANOS.map((p) => [p.id, p.preco, p.fundador])).toEqual([['pro', 119.9, 119.9], ['premium', 197.9, 197.9], ['senior', 397.5, 397.5], ['supremo', 524.5, 524.5]])

@@ -261,8 +261,8 @@ export function validarComunidade(f: ComunidadeForm): string | null {
 
 /** Quem pode ver a comunidade, em uma frase. */
 export function publicoComunidade(c: Pick<Comunidade, 'soMasters' | 'areas'>): string {
-  const quem = c.soMasters ? 'Gestores Master' : 'Equipes'
-  if (!c.areas?.length) return c.soMasters ? 'Gestores Master de todos os escritórios' : 'Todas as equipes de todos os escritórios'
+  const quem = c.soMasters ? 'Gestores' : 'Equipes'
+  if (!c.areas?.length) return c.soMasters ? 'Gestores de todos os escritórios' : 'Todas as equipes de todos os escritórios'
   return `${quem} que atuam em ${c.areas.map((a) => NOMES_AREAS[a] ?? a).join(', ').replace(/, ([^,]*)$/, ' ou $1')}`
 }
 

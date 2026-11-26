@@ -122,7 +122,7 @@ export function Login() {
             <form onSubmit={criar} noValidate className="login-form">
               <Field label="E-mail" type="email" autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} />
               <Field label="Senha mestra" type="password" autoComplete="off" value={mestra} onChange={(e) => setMestra(e.target.value)}
-                hint="Recebida do Gestor Master do escritório." />
+                hint="Recebida do Gestor do escritório." />
               <Field label="Nova senha pessoal" type="password" autoComplete="new-password" value={nova} onChange={(e) => setNova(e.target.value)} />
               <Field label="Repita a nova senha" type="password" autoComplete="new-password" value={nova2} onChange={(e) => setNova2(e.target.value)}
                 error={erro ?? undefined} />
@@ -136,7 +136,7 @@ export function Login() {
             <button type="button" className="login-link" onClick={voltar}>Voltar para entrar</button>
           </>
         )}
-        <p className="muted login-rodape">O acesso é liberado pelo Gestor Master do seu escritório.</p>
+        <p className="muted login-rodape">O acesso é liberado pelo Gestor do seu escritório.</p>
       </div>
     </div>
   )

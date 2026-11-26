@@ -409,7 +409,7 @@ export function Configuracoes() {
   const titulo = <h1>Configurações</h1>
 
   if (perfil && !gestor) return (
-    <Paginado grupos={[{ ...seuAcesso, secoes: [...seuAcesso.secoes, { id: 'escritorio-aviso', titulo: 'Configurações do escritório', dica: 'Contato, OABs, áreas, regras e integrações.', corpo: <Empty title="As configurações do escritório ficam com o Gestor Master." /> }] }, ajuda]}
+    <Paginado grupos={[{ ...seuAcesso, secoes: [...seuAcesso.secoes, { id: 'escritorio-aviso', titulo: 'Configurações do escritório', dica: 'Contato, OABs, áreas, regras e integrações.', corpo: <Empty title="As configurações do escritório ficam com o Gestor." /> }] }, ajuda]}
       cabeca={<div className="pagina-cabeca"><div>{titulo}</div></div>} />
   )
 

@@ -73,5 +73,5 @@ test('no computador não aparece a oferta; colaborador vê "Este aparelho" em Co
   await expect(page.getByRole('button', { name: 'Usar a senha do celular' })).toHaveCount(0)
   await page.goto('/configuracoes')
   await expect(page.getByRole('heading', { name: 'Este aparelho' })).toBeVisible()
-  await expect(page.getByText('As configurações do escritório ficam com o Gestor Master.')).toBeVisible()
+  await expect(page.getByText('As configurações do escritório ficam com o Gestor.')).toBeVisible()
 })

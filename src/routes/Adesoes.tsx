@@ -12,7 +12,7 @@ import { Badge } from '../design/components/Badge'
 import { useToast } from '../design/components/Toast'
 
 type Filtro = 'abertas' | 'ativada' | 'supremo' | 'todas'
-const FILTROS: [Filtro, string][] = [['abertas', 'Para tratar'], ['ativada', 'Ativadas'], ['supremo', 'Lista do Sênior'], ['todas', 'Todas']]
+const FILTROS: [Filtro, string][] = [['abertas', 'Para tratar'], ['ativada', 'Ativadas'], ['supremo', 'Lista do Master'], ['todas', 'Todas']]
 
 function respostasTela(a: Adesao): string {
   return PERGUNTAS.map((p) => {
@@ -83,14 +83,14 @@ export function Adesoes() {
   const q = useQuery({ queryKey: ['adesoes'], queryFn: () => api.adesoes(), enabled: !!perfil && code })
   const vagas = useQuery({ queryKey: ['adesao-vagas'], queryFn: () => api.adesaoVagas(), enabled: !!perfil && code })
   const [filtro, setFiltro] = useState<Filtro>('abertas')
-  const lista = useMemo(() => (q.data ?? []).filter((a) => filtro === 'todas' ? true : filtro === 'supremo' ? (a.plano === 'supremo' || a.plano === 'senior') && a.status !== 'ativada'
-    : filtro === 'ativada' ? a.status === 'ativada' : (a.status === 'nova' || a.status === 'em_contato') && a.plano !== 'supremo' && a.plano !== 'senior'), [q.data, filtro])
-  const supremo = (q.data ?? []).filter((a) => (a.plano === 'supremo' || a.plano === 'senior') && a.status !== 'recusada').length
+  const lista = useMemo(() => (q.data ?? []).filter((a) => filtro === 'todas' ? true : filtro === 'supremo' ? a.plano === 'supremo' && a.status !== 'ativada'
+    : filtro === 'ativada' ? a.status === 'ativada' : (a.status === 'nova' || a.status === 'em_contato') && a.plano !== 'supremo'), [q.data, filtro])
+  const supremo = (q.data ?? []).filter((a) => a.plano === 'supremo' && a.status !== 'recusada').length
   if (perfil && !code) return <div className="pagina"><Panel><Empty title="Esta tela é da administração do HiAdv." /></Panel></div>
   return (
     <div className="pagina">
       <div className="pagina-cabeca"><div><h1>Adesões</h1>
-        <p className="muted">{vagas.data !== undefined ? `${vagas.data} de 20 vagas de fundador restantes. ` : ''}{supremo ? `${supremo} ${supremo === 1 ? 'pessoa' : 'pessoas'} na lista do Sênior.` : ''}</p></div></div>
+        <p className="muted">{vagas.data !== undefined ? `${vagas.data} de 20 vagas de fundador restantes. ` : ''}{supremo ? `${supremo} ${supremo === 1 ? 'pessoa' : 'pessoas'} na lista do Master.` : ''}</p></div></div>
       <div className="segmentos" role="group" aria-label="Filtrar pedidos">
         {FILTROS.map(([f, nome]) => <button key={f} type="button" aria-pressed={filtro === f} onClick={() => setFiltro(f)}>{nome}</button>)}
       </div>

@@ -132,7 +132,7 @@ export function Area() {
       })()}
       {q.isLoading && <Carregando texto="Carregando os casos…" />}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
-      {q.isSuccess && q.data.etapas.length === 0 && <Panel><Empty title="Esta área ainda não tem etapas configuradas.">O Gestor Master define as etapas em Configurações, no grupo Rotina da equipe.</Empty></Panel>}
+      {q.isSuccess && q.data.etapas.length === 0 && <Panel><Empty title="Esta área ainda não tem etapas configuradas.">O Gestor define as etapas em Configurações, no grupo Rotina da equipe.</Empty></Panel>}
 
       {q.isSuccess && q.data.etapas.length > 0 && visao === 'quadro' && (
         <>

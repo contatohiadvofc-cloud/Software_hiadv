@@ -18,7 +18,7 @@ function gravarCrono(c: Crono | null) {
   try { if (c) localStorage.setItem(CHAVE_CRONO, JSON.stringify(c)); else localStorage.removeItem(CHAVE_CRONO) } catch { /* sem armazenamento: vale só nesta tela */ }
 }
 
-/** Horas trabalhadas no cliente: cronômetro ou lançamento manual. O colaborador vê as dele; o Gestor Master vê todas. */
+/** Horas trabalhadas no cliente: cronômetro ou lançamento manual. O colaborador vê as dele; o Gestor vê todas. */
 export function HorasCliente({ clienteId }: { clienteId: string }) {
   const api = useApi()
   const qc = useQueryClient()

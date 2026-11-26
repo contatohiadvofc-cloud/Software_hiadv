@@ -41,7 +41,7 @@ export const MANUAL: ParteManual[] = [
   },
   {
     id: 'tarefas', titulo: 'Tarefas e prazos', grupo: 'Dia a dia', rota: '/tarefas',
-    quem: 'Todos (o Gestor Master vê a equipe inteira)',
+    quem: 'Todos (o Gestor vê a equipe inteira)',
     paraQue: 'Cada coisa a fazer tem responsável e prazo. Os prazos processuais são calculados com feriados e suspensões dos tribunais.',
     passos: ['Toque em “Nova tarefa”, escreva o que fazer, escolha o responsável e o prazo.', 'Para prazo processual, use “Calcular prazo”: informe a data de início e os dias; o HiAdv conta os dias úteis.', 'Marque o círculo para concluir; dá para desfazer logo em seguida.'],
     marcadores: [
@@ -76,7 +76,7 @@ export const MANUAL: ParteManual[] = [
     id: 'clientes', titulo: 'Clientes', grupo: 'Casos e clientes', rota: '/clientes',
     quem: 'Todos',
     paraQue: 'O cadastro de cada cliente reúne os casos, os documentos, os honorários, as horas e o link de acompanhamento.',
-    passos: ['Busque pelo nome; veja em lista ou em cartões.', 'Abra o cliente para ver e editar tudo dele.', 'O Gestor Master importa uma planilha de clientes de uma vez e confere possíveis duplicados.'],
+    passos: ['Busque pelo nome; veja em lista ou em cartões.', 'Abra o cliente para ver e editar tudo dele.', 'O Gestor importa uma planilha de clientes de uma vez e confere possíveis duplicados.'],
     marcadores: [
       { n: 1, alvo: '#cli-busca', texto: 'Busca pelo nome.' },
       { n: 2, alvo: '.hv-barra .hv-chips', texto: 'Lista ou cartões.' },
@@ -108,7 +108,7 @@ export const MANUAL: ParteManual[] = [
   },
   {
     id: 'financeiro', titulo: 'Financeiro', grupo: 'Gestão', rota: '/financeiro',
-    quem: 'Gestor Master',
+    quem: 'Gestor',
     paraQue: 'Contratos de honorários com parcelas, entradas e saídas do mês, atrasos com lembrete cordial pronto para o WhatsApp.',
     passos: ['Lance o contrato de honorários; as parcelas são criadas sozinhas.', 'Dê baixa quando receber; dá para desfazer.', 'Em atraso, toque no lembrete: a mensagem abre pronta e você revisa antes de enviar.'],
     marcadores: [
@@ -119,7 +119,7 @@ export const MANUAL: ParteManual[] = [
   },
   {
     id: 'relatorios', titulo: 'Relatórios', grupo: 'Gestão', rota: '/relatorios',
-    quem: 'Gestor Master',
+    quem: 'Gestor',
     paraQue: 'Números do escritório calculados na hora: onde os casos param, carga e pontualidade da equipe, contratos fechados e dinheiro.',
     passos: ['Escolha o período nas pílulas.', 'Use as abas Casos, Equipe, Contratos e Financeiro.', 'Etapas com média acima de 7 dias aparecem em destaque como gargalo.'],
     marcadores: [
@@ -130,35 +130,35 @@ export const MANUAL: ParteManual[] = [
   },
   {
     id: 'biblioteca', titulo: 'Biblioteca de modelos', grupo: 'Gestão', rota: '/biblioteca',
-    quem: 'Todos (o Gestor Master cria e edita)',
+    quem: 'Todos (o Gestor cria e edita)',
     paraQue: 'Modelos de procuração, contrato e declarações que viram documento pronto com os dados do cliente.',
     passos: ['Abra o cliente e toque em “Gerar documento”.', 'Escolha o modelo; a prévia já vem preenchida.', 'Baixe ou envie para assinatura digital, se estiver conectada.'],
     marcadores: [{ n: 1, alvo: '.pagina-cabeca h1', texto: 'Modelos do escritório.' }],
   },
   {
     id: 'sara', titulo: 'Sara, a assistente', grupo: 'Assistente e conexões', rota: '/seu-dia',
-    quem: 'Equipe do plano Sênior + Sara',
+    quem: 'Equipe do plano Master',
     paraQue: 'Você escreve o pedido do seu jeito e a Sara faz: cria e distribui tarefas, agenda perícias, pede documento ao cliente, muda a etapa do caso e prepara minutas para revisão. Cancelar, descartar e encerrar sempre pedem confirmação.',
     passos: ['Abra a Sara e escreva, por exemplo: “marca a perícia do João dia 12 às 9h no INSS de Joaçaba”.', 'Confira o que ela fez ou o plano que ela montou; ações sensíveis esperam o seu “Confirmar”.', 'Para peças, peça a minuta: ela sai marcada para revisão, com o que falta para completar e só com teses de fonte verificada.'],
     marcadores: [{ n: 1, alvo: '.lateral', texto: 'A Sara fica no menu do app da equipe.' }],
   },
   {
     id: 'integracoes', titulo: 'Integrações', grupo: 'Assistente e conexões', rota: '/integracoes',
-    quem: 'Gestor Master',
+    quem: 'Gestor',
     paraQue: 'Liga o HiAdv às ferramentas do escritório: Escavador ou JUDIT, Google Agenda e Drive, Asaas, assinatura digital, WhatsApp e a chave da Claude.',
     passos: ['Escolha a ferramenta e toque em conectar.', 'Cole a chave ou o token na própria tela (nunca por mensagem).', 'O selo mostra em qual plano cada conexão está disponível.'],
     marcadores: [{ n: 1, alvo: '.pagina-cabeca h1', texto: 'Conexões do escritório.' }],
   },
   {
     id: 'configuracoes', titulo: 'Configurações', grupo: 'Administração', rota: '/configuracoes',
-    quem: 'Gestor Master (cada pessoa ajusta a própria conta)',
+    quem: 'Gestor (cada pessoa ajusta a própria conta)',
     paraQue: 'Equipe e acessos, áreas ativas, OABs acompanhadas, dados do escritório, senha e este manual.',
     passos: ['Convide a equipe e escolha o papel de cada pessoa.', 'Ative as áreas que o escritório atende.', 'Cadastre as OABs para receber as publicações.'],
     marcadores: [{ n: 1, alvo: '.pagina-cabeca h1', texto: 'Configurações do escritório.' }],
   },
   {
     id: 'indicar', titulo: 'Indique o HiAdv', grupo: 'Administração', rota: '/indicar',
-    quem: 'Gestor Master',
+    quem: 'Gestor',
     paraQue: 'Seu link pessoal de indicação. Cada escritório que aderir por ele e pagar a primeira mensalidade vale 20% de desconto em uma mensalidade sua; os descontos somam.',
     passos: ['Copie o link ou envie pelo WhatsApp.', 'Acompanhe quem aderiu e o desconto de cada indicação.'],
     marcadores: [{ n: 1, alvo: '.pagina-cabeca h1', texto: 'Link e indicações.' }],

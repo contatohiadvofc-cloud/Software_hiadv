@@ -133,7 +133,7 @@ function Linha({ l, hoje, escritorio, aoBaixar }: { l: Lancamento; hoje: string;
   )
 }
 
-/** Financeiro do escritório (só Gestor Master): resumo do mês, atrasados com lembrete, a receber e lançamentos. */
+/** Financeiro do escritório (só Gestor): resumo do mês, atrasados com lembrete, a receber e lançamentos. */
 export function Financeiro() {
   const api = useApi()
   const toast = useToast()
@@ -158,7 +158,7 @@ export function Financeiro() {
   const aoBaixar = (l: Lancamento, pago: boolean) => baixar.mutate({ l, pago })
   const escritorio = perfil?.escritorioNome ?? 'escritório'
 
-  if (perfil && !gestor) return <div className="pagina"><Panel><Empty title="O financeiro fica com o Gestor Master." /></Panel></div>
+  if (perfil && !gestor) return <div className="pagina"><Panel><Empty title="O financeiro fica com o Gestor." /></Panel></div>
 
   const cartoes: [string, number, string?][] = [
     ['Recebido no mês', r.recebido], ['A receber no mês', r.aReceber], ['Em atraso', r.atrasado, 'alerta'], ['Despesas do mês', r.despesas], ['Resultado (recebido − pago)', r.resultado],

@@ -124,7 +124,7 @@ function AbaAssinatura({ e }: { e: EscritorioCentral }) {
           <details className="ct-limites">
             <summary>Limites diferentes do plano</summary>
             <div className="ct-form">
-              {([['masters', 'Masters'], ['colaboradores', 'Colaboradores'], ['oabs', 'OABs'], ['iaMensal', 'Usos de IA por mês']] as const).map(([k, rot]) => (
+              {([['masters', 'Gestores'], ['colaboradores', 'Colaboradores'], ['oabs', 'OABs'], ['iaMensal', 'Usos de IA por mês']] as const).map(([k, rot]) => (
                 <label key={k} className="adm-campo"><span>{rot}</span><input className="hv-input" type="number" min={0} max={10000} inputMode="numeric" placeholder="do plano" value={f[k]} onChange={campo(k)} /></label>
               ))}
             </div>
@@ -204,7 +204,7 @@ function AbaPessoas({ e }: { e: EscritorioCentral }) {
       <ul className="ct-pessoas">
         {d.pessoas.map((p) => (
           <li key={p.email}>
-            <span className="ct-rec-nome">{p.nome}<small>{p.email} · {p.papel === 'master' ? 'Gestor Master' : p.papel === 'parceiro' ? 'Parceiro' : 'Colaborador'}</small></span>
+            <span className="ct-rec-nome">{p.nome}<small>{p.email} · {p.papel === 'master' ? 'Gestor' : p.papel === 'parceiro' ? 'Parceiro' : 'Colaborador'}</small></span>
             <div className="ct-bloqueios">
               {p.bloqueios.map((b) => (
                 <button key={b.recurso} type="button" className="ct-chip" onClick={() => pessoa.mutate({ email: p.email, r: b.recurso, bloquear: false })} aria-label={`Devolver ${nomeRecurso(b.recurso)} para ${p.nome}`}>
@@ -237,13 +237,13 @@ function AbaResumo({ e }: { e: EscritorioCentral }) {
   const acima = acimaDoLimite(e)
   const lim = (u: number, l: number | null) => (l ? `${u} de ${l}` : String(u))
   const itens: [string, string][] = [
-    ['Gestor Master', [e.masterNome, ...e.oabsMaster].filter(Boolean).join(' · ') || '—'],
+    ['Gestor', [e.masterNome, ...e.oabsMaster].filter(Boolean).join(' · ') || '—'],
     ['Pago até', isoParaTela(e.pagoAte) || '—'],
     ['Último acesso', isoParaTela(e.ultimoAcesso) || '—'],
     ['Casos', String(e.casos ?? '—')],
   ]
   const uso: [string, string][] = [
-    ['Master', lim(e.uso.masters, e.limites.masters)],
+    ['Gestores', lim(e.uso.masters, e.limites.masters)],
     ['Colaboradores', lim(e.uso.colaboradores, e.limites.colaboradores)],
     ['OABs', lim(e.uso.oabs, e.limites.oabs)],
     ['IA no mês', lim(e.uso.iaMes, e.limites.iaMensal)],
@@ -320,7 +320,7 @@ function ConfigGoogleForm() {
 }
 
 const NOVO: NovoEscritorio = { nome: '', cidade: '', oab: '', masterNome: '', masterEmail: '', plano: 'premium', fundador: false }
-const PASSOS = ['Escritório', 'Gestor Master', 'Plano'] as const
+const PASSOS = ['Escritório', 'Gestor', 'Plano'] as const
 
 function NovoEscritorioForm({ aoCriar }: { aoCriar: (id: string) => void }) {
   const api = useApi(); const qc = useQueryClient(); const toast = useToast()
@@ -329,7 +329,7 @@ function NovoEscritorioForm({ aoCriar }: { aoCriar: (id: string) => void }) {
   const [erro, setErro] = useState<string | null>(null)
   const criar = useMutation({
     mutationFn: () => api.centralNovo(n),
-    onSuccess: (id) => { toast('Escritório criado. O Gestor Master entra pelo "Primeiro acesso".'); setN(NOVO); setPasso(0); qc.invalidateQueries({ queryKey: ['central'] }); aoCriar(id) },
+    onSuccess: (id) => { toast('Escritório criado. O Gestor entra pelo "Primeiro acesso".'); setN(NOVO); setPasso(0); qc.invalidateQueries({ queryKey: ['central'] }); aoCriar(id) },
     onError: (x) => setErro((x as Error).message),
   })
   const campo = (k: keyof NovoEscritorio) => (ev: { target: { value: string } }) => setN({ ...n, [k]: ev.target.value })
@@ -348,9 +348,9 @@ function NovoEscritorioForm({ aoCriar }: { aoCriar: (id: string) => void }) {
           <label className="adm-campo"><span>Cidade/UF</span><input className="hv-input" maxLength={80} value={n.cidade} onChange={campo('cidade')} /></label>
         </>}
         {passo === 1 && <>
-          <label className="adm-campo"><span>Nome do Gestor Master</span><input className="hv-input" autoFocus maxLength={120} value={n.masterNome} onChange={campo('masterNome')} /></label>
-          <label className="adm-campo"><span>E-mail do Gestor Master</span><input className="hv-input" type="email" maxLength={160} value={n.masterEmail} onChange={campo('masterEmail')} /></label>
-          <label className="adm-campo"><span>OAB do Gestor Master</span><input className="hv-input" maxLength={20} placeholder="OAB/SC 00.000" value={n.oab} onChange={campo('oab')} /></label>
+          <label className="adm-campo"><span>Nome do Gestor</span><input className="hv-input" autoFocus maxLength={120} value={n.masterNome} onChange={campo('masterNome')} /></label>
+          <label className="adm-campo"><span>E-mail do Gestor</span><input className="hv-input" type="email" maxLength={160} value={n.masterEmail} onChange={campo('masterEmail')} /></label>
+          <label className="adm-campo"><span>OAB do Gestor</span><input className="hv-input" maxLength={20} placeholder="OAB/SC 00.000" value={n.oab} onChange={campo('oab')} /></label>
         </>}
         {passo === 2 && <>
           <fieldset className="ct-planos"><legend>Plano</legend>
@@ -425,7 +425,7 @@ export function Central() {
                       <span className="ct-cartao-topo"><span className="fin-titulo">{e.nome}</span>{e.situacao && <Badge tone={tom(e.situacao)}>{NOMES_SITUACAO[e.situacao]}</Badge>}</span>
                       <span className="fin-sub">{[e.cidade, nomePlano(e.plano), e.fundador ? 'fundador' : null].filter(Boolean).join(' · ')}</span>
                       <span className="fin-sub">{e.situacao === 'teste' && e.testeAte ? `Teste até ${isoParaTela(e.testeAte)}` : e.pagoAte ? `Pago até ${isoParaTela(e.pagoAte)}` : 'Sem pagamento registrado'}</span>
-                      <span className="fin-sub">{e.uso.masters} Master · {e.uso.colaboradores} colaboradores · {e.uso.oabs} OAB{e.ajustes ? ` · ${e.ajustes} ajuste${e.ajustes > 1 ? 's' : ''}` : ''}</span>
+                      <span className="fin-sub">{e.uso.masters} {e.uso.masters === 1 ? 'gestor' : 'gestores'} · {e.uso.colaboradores} colaboradores · {e.uso.oabs} OAB{e.ajustes ? ` · ${e.ajustes} ajuste${e.ajustes > 1 ? 's' : ''}` : ''}</span>
                       {acima.length > 0 && <span className="ct-acima">Acima do plano: {acima.join(', ')}</span>}
                       <BarraSaude n={e.saude} />
                     </button>

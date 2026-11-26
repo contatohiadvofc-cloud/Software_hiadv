@@ -28,7 +28,7 @@ test('colaborador não liga áreas: vê só as do escritório e a orientação',
   await page.getByRole('button', { name: 'Novo caso' }).click()
   const d = page.getByRole('dialog', { name: 'Novo caso' })
   await expect(d.locator('option', { hasText: '(ligar)' })).toHaveCount(0)
-  await expect(d.getByText('Peça ao Gestor Master para ligar a área em Configurações.')).toBeVisible()
+  await expect(d.getByText('Peça ao Gestor para ligar a área em Configurações.')).toBeVisible()
 })
 
 test('configurações: liga o bancário e desliga com confirmação, sem apagar nada', async ({ page }) => {

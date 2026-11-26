@@ -76,7 +76,7 @@ test('no cliente: êxito calculado sobre o valor recebido', async ({ page }) => 
 test('colaborador não vê o financeiro nem os honorários do cliente', async ({ page }) => {
   await simularSupabase(page, { clientes, papel: 'colaborador' })
   await abrir(page, '/financeiro')
-  await expect(page.getByText('O financeiro fica com o Gestor Master.')).toBeVisible()
+  await expect(page.getByText('O financeiro fica com o Gestor.')).toBeVisible()
   await page.goto('/clientes/c1')
   await expect(page.getByRole('heading', { name: 'Bruno Teixeira' })).toBeVisible()
   await expect(page.getByRole('region', { name: 'Honorários' })).toHaveCount(0)

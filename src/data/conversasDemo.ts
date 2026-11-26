@@ -52,15 +52,15 @@ const COMUNIDADES: Com[] = [
   com('co-avisos', 'Avisos do HiAdv', 'Novidades do sistema, manutenções e dicas. Só a moderação publica.', null, false, 'moderadores', [
     de('Equipe HiAdv', '', 'Chegaram as Conversas da equipe: texto, áudio, arquivos e chamada de voz e vídeo, tudo dentro do HiAdv.', 300),
   ], 1),
-  com('co-masters', 'Masters HiAdv', 'Gestores Master de todos os escritórios: gestão, equipe e rotina.', null, true, 'todos', [
+  com('co-masters', 'Gestores HiAdv', 'Gestores de todos os escritórios: gestão, equipe e rotina.', null, true, 'todos', [
     de('Carla Nunes', 'Nunes Advocacia', 'Como vocês dividem a triagem de documentos entre a equipe? Aqui estamos usando o rodízio por carga.', 400),
     de('Bruno Alves', 'Alves & Costa', 'Rodízio por carga aqui também. Reduziu muito caso parado na etapa de documentos.', 380),
   ]),
-  com('co-prev', 'Masters Previdenciários HiAdv', 'Para quem atua no previdenciário administrativo e judicial.', ['administrativo', 'judicial'], true, 'todos', [
+  com('co-prev', 'Gestores Previdenciários HiAdv', 'Para quem atua no previdenciário administrativo e judicial.', ['administrativo', 'judicial'], true, 'todos', [
     de('Paula Ramos', 'Ramos Previdenciário', 'Alguém já organizou a lista de documentos padrão para auxílio-acidente no checklist da etapa?', 220),
     de('Rafael Souza', 'Silva & Prado Advocacia', 'Sim, usamos CAT, laudos com CID e CNIS. Posso compartilhar o checklist.', 205),
   ], 2),
-  com('co-trab', 'Masters Trabalhistas HiAdv', 'Para quem atua no trabalhista.', ['trabalhista'], true, 'todos', [
+  com('co-trab', 'Gestores Trabalhistas HiAdv', 'Para quem atua no trabalhista.', ['trabalhista'], true, 'todos', [
     de('Diego Martins', 'Martins Trabalhista', 'Dica: coloquem a audiência inicial como compromisso com 5 dias de preparação nas regras de atenção.', 1500),
   ]),
 ]

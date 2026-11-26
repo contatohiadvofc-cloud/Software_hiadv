@@ -99,7 +99,7 @@ export function Aderir() {
               <h2 id="ad-plano" className="ad-plano-nome">{dadosPlano(rec.plano).nome}</h2>
               <ul className="ad-motivos">{rec.motivos.map((m) => <li key={m}>{m}</li>)}</ul>
               {rec.plano === 'supremo' && rec.comecarCom && (
-                <p className="ad-aviso">O Sênior é liberado quando a IA e a leitura no Google Drive ficarem prontas. Você pode entrar na lista agora ou começar pelo {dadosPlano(rec.comecarCom).nome} e mudar depois.</p>
+                <p className="ad-aviso">O Master é liberado quando a Sara Integrada ficar pronta. Você pode entrar na lista agora ou começar pelo {dadosPlano(rec.comecarCom).nome} e mudar depois.</p>
               )}
             </section>
 
@@ -109,7 +109,7 @@ export function Aderir() {
                 {PLANOS.map((x) => (
                   <button key={x.id} type="button" role="radio" aria-checked={plano === x.id} className="ad-plano" onClick={() => setEscolhido(x.id)}>
                     <span className="ad-plano-topo"><strong>{x.nome}</strong>{x.id === rec.plano && <span className="ad-selo">Recomendado</span>}{x.emBreve && <span className="ad-selo ad-selo-claro">Em breve</span>}</span>
-                    <span className="ad-preco">{preco(fundador ? x.fundador : x.preco)}<small>/mês</small></span>
+                    <span className="ad-preco">{x.aPartirDe && <small>a partir de </small>}{preco(fundador ? x.fundador : x.preco)}<small>/mês</small></span>
                     {fundador && x.fundador < x.preco && <span className="ad-depois">Fundador por 12 meses, depois {preco(x.preco)}</span>}
                     <span className="ad-resumo">{x.resumo}</span>
                   </button>

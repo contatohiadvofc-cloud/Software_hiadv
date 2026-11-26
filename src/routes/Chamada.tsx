@@ -1,4 +1,6 @@
 import { useEffect, useReducer, useRef, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { limiteChamada, plano as dadosPlano } from '../data/adesao'
 import { useApi } from '../lib/contexto'
 import { useToast } from '../design/components/Toast'
 import { ChamadaMotor, type Participante } from '../lib/chamadaMotor'
@@ -115,8 +117,25 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
     return () => { clearInterval(t); removeEventListener('pagehide', fechar); if (voltar) document.removeEventListener('visibilitychange', voltar); try { navigator.mediaSession.metadata = null } catch { /* nada */ } pararTranscricao?.(); m.sair(); void trava?.release().catch(() => {}) }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // capacidade da chamada = total de acessos do plano (Júnior 2, Pleno 9, Sênior 13; Master conforme o contrato)
+  const meus = useQuery({ queryKey: ['meus-recursos'], queryFn: () => api.meusRecursos(), staleTime: 300_000 })
+  const limite = limiteChamada(meus.data?.plano ?? null)
+  const conferiuLotacao = useRef(false)
   const m = motor.current
   const pessoas: Participante[] = m?.participantes() ?? []
+  useEffect(() => {
+    if (!pronta || conferiuLotacao.current || !meus.isSuccess) return
+    const t = setTimeout(() => {
+      conferiuLotacao.current = true
+      const n = (motor.current?.participantes().length ?? 0) + 1
+      if (n > limite) {
+        const nome = meus.data?.plano ? dadosPlano(meus.data.plano).nome : ''
+        toast(`A chamada está cheia: ${nome ? `o plano ${nome}` : 'o plano'} permite até ${limite} pessoas por chamada.`, 'danger')
+        void sairRef.current()
+      }
+    }, 2500)
+    return () => clearTimeout(t)
+  }, [pronta, meus.isSuccess, limite]) // eslint-disable-line react-hooks/exhaustive-deps
   const chaveSom = pessoas.map((p) => p.id + (p.stream ? p.stream.id : '')).join('|')
   const [alto, setAlto] = useState(false)
   const [fone, setFone] = useState(false)

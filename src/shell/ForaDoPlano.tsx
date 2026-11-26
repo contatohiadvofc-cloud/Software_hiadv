@@ -9,7 +9,7 @@ export function ForaDoPlano({ recurso }: { recurso: string }) {
       <Panel>
         <div className="hv-panel-body fora-plano">
           <h1>{nomeRecurso(recurso)}</h1>
-          <p>Este recurso não está liberado para você. Ele faz parte do plano {planoMinimo(recurso)}; o Gestor Master do escritório pode pedir a liberação ao HiAdv.</p>
+          <p>Este recurso não está liberado para você. Ele faz parte do plano {planoMinimo(recurso)}; o Gestor do escritório pode pedir a liberação ao HiAdv.</p>
           <Link to="/seu-dia" className="hv-btn" data-variant="secondary" data-size="md">Ir para Seu dia</Link>
         </div>
       </Panel>

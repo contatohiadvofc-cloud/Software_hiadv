@@ -23,7 +23,9 @@ export const ICE: RTCIceServer[] = [
 export function qualidadeVideo(pessoas: number): { maxBitrate: number; escala: number } {
   if (pessoas <= 1) return { maxBitrate: 1_200_000, escala: 1 }
   if (pessoas <= 3) return { maxBitrate: 600_000, escala: 1.5 }
-  return { maxBitrate: 320_000, escala: 2 }
+  if (pessoas <= 5) return { maxBitrate: 320_000, escala: 2 }
+  // chamadas grandes (até 13 no Sênior): cada aparelho envia um vídeo para cada pessoa, então o vídeo fica bem leve
+  return { maxBitrate: 160_000, escala: 3 }
 }
 
 /** Quem tem o identificador maior liga; o outro só responde (evita as duas pontas ligando juntas). */

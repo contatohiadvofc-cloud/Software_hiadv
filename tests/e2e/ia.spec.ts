@@ -25,7 +25,7 @@ test('assistente de IA na página do cliente: pede a instrução da minuta e mos
 })
 
 test('erro do servidor aparece claro (ex.: chave não cadastrada)', async ({ page }) => {
-  await simularSupabase(page, { clientes, meusRecursos: { plano: 'supremo', situacao: 'ativo', recursos: TUDO }, ia: { ok: false, erro: 'A IA ainda não está ligada. O Gestor Master cadastra a chave da Claude em Configurações, Integrações.' } })
+  await simularSupabase(page, { clientes, meusRecursos: { plano: 'supremo', situacao: 'ativo', recursos: TUDO }, ia: { ok: false, erro: 'A IA ainda não está ligada. O Gestor cadastra a chave da Claude em Configurações, Integrações.' } })
   await entrar(page)
   await expect(page).toHaveURL(/\/seu-dia$/)
   await page.goto('/clientes/c1')

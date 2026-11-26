@@ -4,7 +4,7 @@ import { useAreas, useNaoLidas, useRecursos } from '../data/consultas'
 import { Marca } from './Marca'
 import { OfficeSwitcher } from './OfficeSwitcher'
 
-export const TEXTO_SEM_AREAS = 'Seu escritório ainda não tem áreas ativas. Peça ao Gestor Master para ativar.'
+export const TEXTO_SEM_AREAS = 'Seu escritório ainda não tem áreas ativas. Peça ao Gestor para ativar.'
 
 function Icone({ d }: { d: string }) {
   return <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>

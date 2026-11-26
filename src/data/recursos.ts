@@ -83,7 +83,7 @@ export const RECURSOS: Recurso[] = [
     id: 'api', grupo: 'preparo', nome: 'Conexão com outros sistemas (API)', soGestor: true,
     resumo: 'Receber contatos do site ou de formulários e avisar outros sistemas quando um caso muda de etapa.',
     custo: 'Sem custo no HiAdv.',
-    passos: ['Quando ligar: o Gestor Master gera uma chave de acesso aqui, com permissões limitadas, e pode desligá-la a qualquer momento.'],
+    passos: ['Quando ligar: o Gestor gera uma chave de acesso aqui, com permissões limitadas, e pode desligá-la a qualquer momento.'],
   },
 ]
 

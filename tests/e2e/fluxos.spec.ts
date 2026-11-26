@@ -23,7 +23,7 @@ test('escritório sem áreas mostra o aviso, sem tela em branco', async ({ page,
   test.skip(isMobile, 'a barra lateral é do computador')
   await simularSupabase(page, { areas: 'sem-funcao' })
   await entrar(page)
-  await expect(page.getByText('Seu escritório ainda não tem áreas ativas. Peça ao Gestor Master para ativar.')).toBeVisible()
+  await expect(page.getByText('Seu escritório ainda não tem áreas ativas. Peça ao Gestor para ativar.')).toBeVisible()
 })
 
 test('Code troca de escritório e a barra lateral recarrega', async ({ page, isMobile }) => {

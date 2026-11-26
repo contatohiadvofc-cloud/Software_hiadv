@@ -20,10 +20,10 @@ export const PAGINAS: Pagina[] = [
       ['Casos por área, em etapas', 'Cada área do escritório (trabalhista, cível e família, bancário, penal, previdenciário e extrajudicial) tem um quadro com as etapas prontas. O caso anda de etapa em etapa com o que falta para avançar à vista, e quem assume recebe um resumo da passagem.'],
       ['Prazos e publicações sem planilha', 'As publicações chegam pela OAB acompanhada, os prazos são contados com os feriados dos tribunais e tudo aparece na tela "Seu dia" de quem é o responsável.'],
       ['No celular e no computador', 'O HiAdv se instala pelo navegador no Android, no iPhone e no computador e funciona como aplicativo. Não precisa de servidor no escritório.'],
-      ['Sigilo e LGPD', 'Cada escritório só enxerga os próprios dados, o acesso é por pessoa com papéis definidos pelo Gestor Master e as ações importantes ficam registradas.'],
+      ['Sigilo e LGPD', 'Cada escritório só enxerga os próprios dados, o acesso é por pessoa com papéis definidos pelo Gestor e as ações importantes ficam registradas.'],
     ],
     perguntas: [
-      ['Quanto custa o HiAdv?', 'Os planos começam em R$ 119,90 por mês no Júnior. O Pleno custa R$ 197,90, o Sênior R$ 397,50 e o Sênior + Sara R$ 524,50.'],
+      ['Quanto custa o HiAdv?', 'Os planos começam em R$ 119,90 por mês no Júnior. O Pleno custa R$ 197,90, o Sênior R$ 397,50 e o Master a partir de R$ 524,50.'],
       ['Tem teste grátis?', 'Sim, 14 dias com os dados do seu escritório.'],
       ['Serve para escritório pequeno?', 'Sim. O Júnior foi pensado para o advogado autônomo, com ou sem um assistente.'],
     ],
@@ -42,7 +42,7 @@ export const PAGINAS: Pagina[] = [
     ],
     perguntas: [
       ['Preciso instalar alguma coisa no computador?', 'Não. O HiAdv roda no navegador e pode ser instalado como aplicativo no celular e no computador.'],
-      ['Quantas pessoas podem usar?', 'Depende do plano: do Júnior (1 Master e 1 colaborador) ao Sênior (até 5 Masters e 20 colaboradores).'],
+      ['Quantas pessoas podem usar?', 'Depende do plano: do Júnior (2 acessos) ao Sênior (5 gestores e 8 colaboradores). No Master, os acessos são sob medida.'],
     ],
   },
   {
@@ -89,7 +89,7 @@ export const PAGINAS: Pagina[] = [
       ['Agenda por pessoa', 'Prazos, audiências e perícias ficam na agenda e na tela "Seu dia" do responsável, com os atrasados no topo.'],
     ],
     perguntas: [
-      ['Quantas OABs posso acompanhar?', 'Uma no Júnior, três no Pleno e dez nos planos Sênior.'],
+      ['Quantas OABs posso acompanhar?', 'Uma no Júnior, três no Pleno e dez no Sênior; no Master, sob medida.'],
     ],
   },
   {
@@ -118,7 +118,7 @@ export const PAGINAS: Pagina[] = [
     blocos: [
       ['Sem instalação complicada', 'Abre no Chrome, Edge ou Safari e se instala como aplicativo em um toque. As atualizações chegam sozinhas.'],
       ['Toda a rotina num lugar', 'Atendimentos, clientes, casos por área, prazos, agenda, publicações, documentos, honorários e relatórios.'],
-      ['Cada pessoa com o próprio acesso', 'O Gestor Master define quem vê o quê, e as ações importantes ficam registradas.'],
+      ['Cada pessoa com o próprio acesso', 'O Gestor define quem vê o quê, e as ações importantes ficam registradas.'],
       ['Preço por escritório', 'Planos mensais por escritório, de R$ 119,90 a R$ 524,50, com teste grátis de 14 dias.'],
     ],
     perguntas: [
@@ -153,7 +153,7 @@ export const PAGINAS: Pagina[] = [
     blocos: [
       ['Quem faz o HiAdv', 'Felipe Schena Lanhi é advogado (OAB/SC 30.297) e conduz o produto a partir da prática do escritório. Deividy Ryan de Jesus Batista é o responsável pelo desenvolvimento da plataforma. Os dois fundaram o HiAdv e respondem por ele.'],
       ['Feito dentro de um escritório', 'Cada tela nasceu de um problema do dia a dia: prazo que escapava na planilha, cliente perguntando pelo WhatsApp em que fase está o caso, documento que ninguém sabia se tinha chegado.'],
-      ['Sigilo e LGPD', 'Cada escritório só enxerga os próprios dados. A conexão é criptografada, o acesso é por pessoa com papéis definidos pelo Gestor Master, as ações importantes ficam registradas e laudos e exames são tratados como dados sensíveis.'],
+      ['Sigilo e LGPD', 'Cada escritório só enxerga os próprios dados. A conexão é criptografada, o acesso é por pessoa com papéis definidos pelo Gestor, as ações importantes ficam registradas e laudos e exames são tratados como dados sensíveis.'],
       ['Ética da advocacia', 'O sistema organiza, avisa e agenda. Nenhuma mensagem sai para o cliente sem alguém da equipe conferir, e a IA só prepara rascunhos marcados para revisão do advogado.'],
       ['Implantação e suporte', 'O escritório pode implantar sozinho, pelo manual, ou contratar a implantação assistida de 6 semanas, em que a equipe do HiAdv configura, integra e treina a equipe. O atendimento é pelo WhatsApp (49) 99973-0572 e pelo e-mail hiadvofc@gmail.com.'],
     ],

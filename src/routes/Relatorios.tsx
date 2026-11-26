@@ -25,7 +25,7 @@ function Barra({ rotulo, valor, max, texto, tom }: { rotulo: string; valor: numb
   )
 }
 
-/** Relatórios do escritório (só Gestor Master): casos, gargalos, equipe, clientes, prazos e dinheiro. */
+/** Relatórios do escritório (só Gestor): casos, gargalos, equipe, clientes, prazos e dinheiro. */
 export function Relatorios() {
   const api = useApi()
   const { perfil } = useSessao()
@@ -33,7 +33,7 @@ export function Relatorios() {
   const [dias, setDias] = useState(90)
   const [aba, setAba] = useState<'casos' | 'equipe' | 'contratos' | 'financeiro'>('casos')
   const q = useQuery({ queryKey: ['relatorio', perfil?.escritorioId, dias], queryFn: () => api.relatorio(dias), enabled: !!perfil && gestor })
-  if (perfil && !gestor) return <div className="pagina"><Panel><Empty title="Os relatórios ficam com o Gestor Master." /></Panel></div>
+  if (perfil && !gestor) return <div className="pagina"><Panel><Empty title="Os relatórios ficam com o Gestor." /></Panel></div>
   const r = q.data
   const gs = r ? gargalos(r) : []
   const maxEtapa = Math.max(1, ...(r?.etapas ?? []).map((e) => e.media_dias))

@@ -11,7 +11,7 @@ import { NovoHonorarioDialog } from './Financeiro'
 
 const TIPO: Record<Honorario['tipo'], string> = { fixo: 'Valor fixo', exito: 'Êxito', misto: 'Fixo + êxito' }
 
-/** Honorários do cliente (só Gestor Master): contratos, quanto entrou, quanto falta e o lançamento do êxito. */
+/** Honorários do cliente (só Gestor): contratos, quanto entrou, quanto falta e o lançamento do êxito. */
 export function HonorariosCliente({ cliente }: { cliente: { id: string; nome: string } }) {
   const api = useApi()
   const qc = useQueryClient()

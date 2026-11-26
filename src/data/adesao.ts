@@ -38,18 +38,35 @@ export const PERGUNTAS: Pergunta[] = [
   ] },
 ]
 
-export type Plano = { id: PlanoId; nome: string; preco: number; fundador: number; resumo: string; limites: string; destaques: string[]; emBreve?: boolean }
+export type Plano = { id: PlanoId; nome: string; preco: number; fundador: number; resumo: string; limites: string; destaques: string[]; emBreve?: boolean; aPartirDe?: boolean
+  /** Acessos: gestores, colaboradores e o total que o plano permite (Júnior: 2 no total, em qualquer combinação). */
+  acessos: { gestores: number; colaboradores: number; total: number }
+}
 
 export const PLANOS: Plano[] = [
-  { id: 'pro', nome: 'Júnior', preco: 119.9, fundador: 119.9, resumo: 'Para o advogado autônomo, com ou sem um assistente.', limites: '1 acesso Master, 1 colaborador e 1 OAB acompanhada',
-    destaques: ['Casos por área, em etapas, com o que falta para avançar', 'Prazos com feriados dos tribunais', 'Publicações pela OAB e Escavador ou JUDIT conectados', 'Atendimentos, do contato até virar cliente', 'Link de acompanhamento para o cliente', 'Conversas da equipe: chat, áudio, chamadas e grupos'] },
-  { id: 'premium', nome: 'Pleno', preco: 197.9, fundador: 197.9, resumo: 'Para o escritório com equipe e financeiro.', limites: 'Até 3 acessos Master, 8 colaboradores e 3 OABs',
+  { id: 'pro', nome: 'Júnior', preco: 119.9, fundador: 119.9, resumo: 'Para o advogado autônomo, com ou sem um assistente.', limites: '2 acessos (2 gestores, ou 1 gestor e 1 colaborador) e 1 OAB acompanhada',
+    acessos: { gestores: 2, colaboradores: 1, total: 2 },
+    destaques: ['Casos por área, em etapas, com o que falta para avançar', 'Prazos com feriados dos tribunais', 'Publicações pela OAB e Escavador ou JUDIT conectados', 'Atendimentos, do contato até virar cliente', 'App Meu Processo para o cliente acompanhar o caso', 'Conversas da equipe: chat, áudio, chamadas e grupos'] },
+  { id: 'premium', nome: 'Pleno', preco: 197.9, fundador: 197.9, resumo: 'Para o escritório com equipe e financeiro.', limites: '3 gestores, 6 colaboradores e 3 OABs',
+    acessos: { gestores: 3, colaboradores: 6, total: 9 },
     destaques: ['Tudo do Júnior', 'Financeiro, honorários e cobrança pelo Asaas', 'Calculadoras de cada área, inclusive Bancário', 'Assinatura digital (ZapSign, Clicksign ou D4Sign)', 'Relatórios, horas e rodízio da equipe', 'Recrutamento: vagas, inscrições, entrevista e proposta'] },
-  { id: 'senior', nome: 'Sênior', preco: 397.5, fundador: 397.5, resumo: 'Tudo do HiAdv para escritórios maiores, com a IA do próprio escritório conectada.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs', emBreve: true,
-    destaques: ['Tudo do Pleno', 'IA própria: o escritório conecta a sua chave de IA e usa os agentes dentro do HiAdv', 'Google Drive com identificador e leitor de documentos', 'WhatsApp oficial e acesso à API', 'Mais acessos e OABs acompanhadas'] },
-  { id: 'supremo', nome: 'Sênior + Sara', preco: 524.5, fundador: 524.5, resumo: 'O Sênior com a Sara Integrada, a IA do HiAdv, já ligada e com uso incluído.', limites: 'Até 5 acessos Master, 20 colaboradores e 10 OABs; 300 usos de IA por mês incluídos, sem precisar de chave própria', emBreve: true,
-    destaques: ['Tudo do Sênior', 'Sara Integrada: a IA do sistema, sem contratar nem configurar chave', 'Sara executando as ações pedidas pela equipe, com registro', 'Minutas para revisão a partir dos modelos do escritório', 'Teses com fonte oficial verificada, marcadas para conferência', 'Leitura de intimações e laudos com resumo do que fazer'] },
+  { id: 'senior', nome: 'Sênior', preco: 397.5, fundador: 397.5, resumo: 'Para escritórios maiores, com a IA que o próprio escritório já usa conectada ao HiAdv.', limites: '5 gestores, 8 colaboradores e 10 OABs',
+    acessos: { gestores: 5, colaboradores: 8, total: 13 },
+    destaques: ['Tudo do Pleno', 'IA própria: o escritório conecta a chave da IA que já usa e trabalha com os agentes dentro do HiAdv', 'Minutas e resumos para revisão do advogado, a partir dos dados do caso', 'Google Drive do escritório com identificador e leitor de documentos', 'WhatsApp oficial e API incluídos quando forem lançados'] },
+  { id: 'supremo', nome: 'Master', preco: 524.5, fundador: 524.5, aPartirDe: true, resumo: 'O plano completo: a Sara Integrada, a IA do HiAdv, já ligada, e acessos sob medida para a equipe.', limites: 'A partir de 5 gestores e 8 colaboradores, com acessos extras sob medida; 300 usos de IA por mês incluídos', emBreve: true,
+    acessos: { gestores: 5, colaboradores: 8, total: 13 },
+    destaques: ['Tudo do Sênior', 'Sara Integrada: a IA do HiAdv, sem contratar nem configurar chave', 'Sara executando as ações pedidas pela equipe, com registro', 'Acessos personalizados: mais gestores e colaboradores, com custo por acesso extra', 'Combo sob medida com a implantação assistida', 'Leitura de intimações e laudos com resumo do que fazer'] },
 ]
+
+/** Quantas pessoas cabem numa chamada de voz ou vídeo: o total de acessos do plano (no Master, o contratado). */
+export function limiteChamada(plano: PlanoId | null | undefined, contratado?: number | null): number {
+  if (!plano) return 13
+  if (plano === 'supremo' && contratado && contratado > 0) return contratado
+  return PLANOS.find((p) => p.id === plano)!.acessos.total
+}
+
+/** Preço como aparece no site: "a partir de" no Master. */
+export const precoTela = (p: Plano, brl: (v: number) => string) => (p.aPartirDe ? `a partir de ${brl(p.preco)}` : brl(p.preco))
 export const plano = (id: PlanoId) => PLANOS.find((p) => p.id === id)!
 
 const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -61,9 +78,10 @@ export function recomendar(r: Respostas): { plano: PlanoId; motivos: string[]; c
   const motivos: string[] = []
   const temEquipe = r.atuacao === 'equipe' || r.atuacao === 'grande'
   if (pr.includes('ia')) {
-    motivos.push('Você quer usar IA nas peças e documentos: isso é a Sara, que vem no Sênior + Sara.')
-    if (temEquipe) motivos.push('Com equipe, o financeiro e os relatórios do Pleno já ajudam desde o primeiro dia.')
-    return { plano: 'supremo', motivos, comecarCom: temEquipe || pr.includes('financeiro') ? 'premium' : 'pro' }
+    motivos.push('Você quer usar IA nas peças e documentos: no Sênior, o escritório conecta a IA que já usa e trabalha com os agentes dentro do HiAdv.')
+    if (temEquipe) motivos.push('Com equipe, o financeiro e os relatórios já vêm junto.')
+    if (r.atuacao === 'grande') motivos.push('Para a Sara Integrada e acessos sob medida, o plano Master está chegando; você pode entrar na lista.')
+    return { plano: 'senior', motivos, comecarCom: null }
   }
   if (temEquipe) motivos.push('Com equipe, você acompanha quem faz o quê e a carga de cada pessoa.')
   if (r.oabs && r.oabs !== '1') motivos.push('O Pleno acompanha até 3 OABs nas publicações.')
@@ -75,7 +93,7 @@ export function recomendar(r: Respostas): { plano: PlanoId; motivos: string[]; c
   }
   if (pr.includes('prazos') || !pr.length) motivos.push('Prazos, publicações e intimações já vêm no Júnior.')
   if (pr.includes('contatos')) motivos.push('Os atendimentos, do contato até virar cliente, já vêm no Júnior.')
-  if (pr.includes('cliente')) motivos.push('O link de acompanhamento para o cliente já vem no Júnior.')
+  if (pr.includes('cliente')) motivos.push('O app Meu Processo, para o cliente acompanhar o caso, já vem no Júnior.')
   if (pr.includes('organizar')) motivos.push('Casos por área e documentos a partir de modelos já vêm no Júnior.')
   return { plano: 'pro', motivos, comecarCom: null }
 }

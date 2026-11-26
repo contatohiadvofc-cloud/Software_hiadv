@@ -163,7 +163,7 @@ export function Conversas() {
           {aba === 'comunidades' && listaCom.map((c) => (
             <li key={c.id}>
               <button type="button" className="cv-item" aria-current={sel?.id === c.id || undefined} onClick={() => setSel({ tipo: 'com', id: c.id })}>
-                <span className="cv-av cv-av-com" aria-hidden="true">{c.quemPosta === 'moderadores' ? <Ic d={I.megafone} t={20} /> : iniciais(c.nome.replace(/HiAdv|Masters/g, '').trim() || c.nome)}</span>
+                <span className="cv-av cv-av-com" aria-hidden="true">{c.quemPosta === 'moderadores' ? <Ic d={I.megafone} t={20} /> : iniciais(c.nome.replace(/HiAdv|Masters|Gestores/g, '').trim() || c.nome)}</span>
                 <span className="cv-item-meio">
                   <span className="cv-item-nome">{c.nome}{!c.ativa && <small className="cv-pausada">pausada</small>}</span>
                   <span className="cv-item-prev" data-nao={c.naoLidas > 0 || undefined}>{c.ultima ? `${primeiroNome(c.ultima.autorNome ?? '')}: ${resumo(c.ultima)}` : (c.descricao ?? 'Nenhuma mensagem ainda')}</span>
@@ -176,7 +176,7 @@ export function Conversas() {
             </li>
           ))}
           {aba === 'comunidades' && coms.isSuccess && listaCom.length === 0 && (
-            <li className="cv-vazio">{termo ? 'Nenhuma comunidade com esse nome.' : 'As comunidades do HiAdv reúnem os Gestores Master de todos os escritórios, por área. Elas aparecem aqui assim que forem abertas para o seu perfil.'}</li>
+            <li className="cv-vazio">{termo ? 'Nenhuma comunidade com esse nome.' : 'As comunidades do HiAdv reúnem os Gestores de todos os escritórios, por área. Elas aparecem aqui assim que forem abertas para o seu perfil.'}</li>
           )}
           {aba === 'contatos' && <ListaContatos termo={termo} eu={eu} pessoas={pessoas.data ?? []} contatos={contatos.data ?? []} nomes={nomes} sel={sel} escolher={setSel} />}
         </ul>
@@ -193,7 +193,7 @@ export function Conversas() {
           <div className="cv-nada">
             <span className="cv-nada-pasta" aria-hidden="true"><i /><b><Ic d={aba === 'equipe' ? I.grupo : I.megafone} t={30} /></b></span>
             <h2>{aba === 'equipe' ? 'Converse com a sua equipe' : 'Comunidades HiAdv'}</h2>
-            <p>{aba === 'equipe' ? 'Texto, áudio, arquivos e chamada de voz ou vídeo, só com quem é do seu escritório.' : 'Troque experiência com Gestores Master de outros escritórios, por área de atuação.'}</p>
+            <p>{aba === 'equipe' ? 'Texto, áudio, arquivos e chamada de voz ou vídeo, só com quem é do seu escritório.' : 'Troque experiência com Gestores de outros escritórios, por área de atuação.'}</p>
             {aba === 'equipe' && <Button onClick={() => setNova(true)}>Nova conversa</Button>}
           </div>
         )}
@@ -304,7 +304,7 @@ function ConversaComunidade({ c, eu, voltar, moderar }: { c: Comunidade; eu: str
         {c.entrada === 'pendente' ? <p className="cv-entrada-status">Pedido enviado. Aguardando a moderação do HiAdv.</p>
           : c.entrada === 'recusado' ? <p className="cv-entrada-status">A moderação não aprovou a entrada do seu escritório por enquanto.</p>
           : <Button loading={pedir.isPending} onClick={() => pedir.mutate()}>Pedir entrada do escritório</Button>}
-        <small>O pedido é feito por um Gestor Master e vale para a equipe do escritório.</small>
+        <small>O pedido é feito por um Gestor e vale para a equipe do escritório.</small>
       </div>
     </div>
   )
@@ -312,7 +312,7 @@ function ConversaComunidade({ c, eu, voltar, moderar }: { c: Comunidade; eu: str
   return (
     <Fio
       chave={['com-msgs', c.id]} titulo={c.nome} subtitulo={publicoComunidade(c)}
-      avatar={<span className="cv-av cv-av-com" style={{ width: 40, height: 40 }} aria-hidden="true">{c.quemPosta === 'moderadores' ? <Ic d={I.megafone} t={18} /> : iniciais(c.nome.replace(/HiAdv|Masters/g, '').trim() || c.nome)}</span>}
+      avatar={<span className="cv-av cv-av-com" style={{ width: 40, height: 40 }} aria-hidden="true">{c.quemPosta === 'moderadores' ? <Ic d={I.megafone} t={18} /> : iniciais(c.nome.replace(/HiAdv|Masters|Gestores/g, '').trim() || c.nome)}</span>}
       voltar={voltar} eu={eu} mostrarAutor nomeDe={(m) => m.autorNome ?? m.autor} escritorioDe={(m) => m.autorEscritorio ?? null}
       carregar={() => api.comMensagens(c.id)}
       enviar={(t, a, r) => (!c.links && !c.moderador && t && temLink(t) ? Promise.reject(new Error('Esta comunidade não aceita links externos.')) : api.comEnviar(c.id, t, a, r))}
@@ -779,7 +779,7 @@ function NovaConversa({ eu, aoAbrir, aoFechar }: { eu: string; aoAbrir: (id: str
           {outros.map((x) => (
             <li key={x.email}>
               {modo === 'direta'
-                ? <button type="button" className="cv-pessoa" disabled={direta.isPending} onClick={() => direta.mutate(x.email)}><Avatar nome={x.nome} tam={36} /><span>{x.nome}<small>{x.papel === 'master' ? 'Gestor Master' : x.papel === 'code' ? 'Coder' : 'Colaborador'}</small></span></button>
+                ? <button type="button" className="cv-pessoa" disabled={direta.isPending} onClick={() => direta.mutate(x.email)}><Avatar nome={x.nome} tam={36} /><span>{x.nome}<small>{x.papel === 'master' ? 'Gestor' : x.papel === 'code' ? 'Coder' : 'Colaborador'}</small></span></button>
                 : <label className="cv-pessoa"><input type="checkbox" checked={escolhidos.includes(x.email)} onChange={(e) => setEscolhidos(e.target.checked ? [...escolhidos, x.email] : escolhidos.filter((y) => y !== x.email))} /><Avatar nome={x.nome} tam={36} /><span>{x.nome}</span></label>}
             </li>
           ))}
@@ -893,7 +893,7 @@ function ListaContatos({ termo, eu, pessoas, contatos, nomes, sel, escolher }: {
         <li key={p.email}>
           <button type="button" className="cv-item" aria-current={(sel?.tipo === 'pessoa' && sel.id === p.email) || undefined} onClick={() => escolher({ tipo: 'pessoa', id: p.email })}>
             <Avatar nome={nomes.get(p.email) ?? p.nome} online={estaOnline(p.vistoEm)} />
-            <span className="cv-item-meio"><span className="cv-item-nome">{nomes.get(p.email) ?? p.nome}</span><span className="cv-item-prev">{p.papel === 'master' ? 'Gestor Master' : p.papel === 'code' ? 'Coder' : 'Colaborador'} · {vistoTela(p.vistoEm)}</span></span>
+            <span className="cv-item-meio"><span className="cv-item-nome">{nomes.get(p.email) ?? p.nome}</span><span className="cv-item-prev">{p.papel === 'master' ? 'Gestor' : p.papel === 'code' ? 'Coder' : 'Colaborador'} · {vistoTela(p.vistoEm)}</span></span>
           </button>
         </li>
       ))}
@@ -1018,12 +1018,12 @@ function Moderacao({ c, aoFechar }: { c: Comunidade | null; aoFechar: () => void
   return (
     <Dialog open onOpenChange={(v) => { if (!v) aoFechar() }} title={c ? `Moderar: ${c.nome}` : 'Nova comunidade'} variant="painel">
       <form className="hv-dialog-body cv-mod" onSubmit={(e) => { e.preventDefault(); const v = validarComunidade(f); if (v) return setErro(v); setErro(null); salvar.mutate() }}>
-        <label className="hv-field"><span>Nome</span><input className="hv-input" maxLength={60} value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} placeholder="Ex.: Masters Trabalhistas HiAdv" /></label>
+        <label className="hv-field"><span>Nome</span><input className="hv-input" maxLength={60} value={f.nome} onChange={(e) => setF({ ...f, nome: e.target.value })} placeholder="Ex.: Gestores Trabalhistas HiAdv" /></label>
         <label className="hv-field"><span>Descrição</span><input className="hv-input" maxLength={200} value={f.descricao} onChange={(e) => setF({ ...f, descricao: e.target.value })} placeholder="Para quem é e sobre o que se fala aqui" /></label>
         <fieldset className="cv-mod-grupo">
           <legend>Quem participa</legend>
           <div className="cv-seg">
-            <button type="button" aria-pressed={f.soMasters} onClick={() => chave('soMasters', true)}>Só Gestores Master</button>
+            <button type="button" aria-pressed={f.soMasters} onClick={() => chave('soMasters', true)}>Só gestores</button>
             <button type="button" aria-pressed={!f.soMasters} onClick={() => chave('soMasters', false)}>Toda a equipe</button>
           </div>
           <p className="cv-mod-dica">Áreas (sem nenhuma marcada, vale para todas):</p>

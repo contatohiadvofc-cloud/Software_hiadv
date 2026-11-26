@@ -32,7 +32,7 @@ export function AssistenteIA({ open, onOpenChange, ctx }: { open: boolean; onOpe
   const [erro, setErro] = useState<string | null>(null)
   const cfg = google.data?.cfg ?? null
   const podeDrive = recursos.pode('drive') && !!cfg && !!google.data?.driveLigado
-  const avisoDrive = !recursos.pode('drive') ? null : !cfg ? 'O Google Drive ainda não foi configurado pelo HiAdv.' : !google.data?.driveLigado ? 'Para usar arquivos do Drive, o Gestor Master liga o Google Drive em Configurações, Integrações.' : null
+  const avisoDrive = !recursos.pode('drive') ? null : !cfg ? 'O Google Drive ainda não foi configurado pelo HiAdv.' : !google.data?.driveLigado ? 'Para usar arquivos do Drive, o Gestor liga o Google Drive em Configurações, Integrações.' : null
 
   const caso = ctx.casos?.find((c) => c.id === casoId)
   const pedido = (): PedidoIA => ({

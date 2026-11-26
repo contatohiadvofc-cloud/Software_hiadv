@@ -102,7 +102,7 @@ export function Publicacoes() {
       {oabs.isSuccess && oabs.data.oabs.length === 0 && (
         <Panel>
           <Empty title="Nenhuma OAB acompanhada ainda.">
-            {gestor ? <>Cadastre as OABs do escritório em <Link to="/configuracoes" hash="oabs">Configurações › OABs acompanhadas</Link>. O HiAdv busca as publicações uma vez por dia.</> : 'Peça ao Gestor Master para cadastrar as OABs do escritório em Configurações.'}
+            {gestor ? <>Cadastre as OABs do escritório em <Link to="/configuracoes" hash="oabs">Configurações › OABs acompanhadas</Link>. O HiAdv busca as publicações uma vez por dia.</> : 'Peça ao Gestor para cadastrar as OABs do escritório em Configurações.'}
           </Empty>
         </Panel>
       )}

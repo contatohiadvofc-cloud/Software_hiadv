@@ -2,7 +2,7 @@
 // Rodar: npx tsx scripts/paginas-legais.ts. Texto revisável pelos fundadores; data da versão no topo.
 import { mkdirSync, writeFileSync, readFileSync } from 'node:fs'
 
-const VERSAO = '25 de novembro de 2026'
+const VERSAO = '26 de novembro de 2026'
 const CONTATO = 'hiadvofc@gmail.com'
 
 type Secao = [string, string[]]
@@ -28,7 +28,7 @@ const SECOES: Secao[] = [
     `Não vendemos dados pessoais, não os usamos para publicidade de terceiros e não fazemos captação de clientes para os escritórios.`,
   ]],
   ['Inteligência artificial', [
-    `Os recursos de IA são opcionais e só existem nos planos Sênior. No Sênior, o escritório conecta a própria chave de IA, e o uso segue o contrato do escritório com esse fornecedor. No Sênior + Sara, a Sara Integrada usa o fornecedor de IA contratado pelo HiAdv.`,
+    `Os recursos de IA são opcionais e só existem nos planos Sênior e Master. No Sênior, o escritório conecta a própria chave de IA, e o uso segue o contrato do escritório com esse fornecedor. No Master, a Sara Integrada usa o fornecedor de IA contratado pelo HiAdv.`,
     `Antes de enviar um pedido à IA, o sistema troca nomes, CPF, telefones e números de processo por marcadores. A IA devolve rascunhos para revisão do advogado: nada é protocolado, assinado ou enviado ao cliente por ela.`,
   ]],
   ['Com quem os dados são compartilhados', [
@@ -40,7 +40,7 @@ const SECOES: Secao[] = [
     `O banco de dados de produção e alguns fornecedores ficam fora do Brasil, nos Estados Unidos. A transferência ocorre para a execução do contrato e com fornecedores que adotam garantias de proteção de dados compatíveis com a LGPD (art. 33).`,
   ]],
   ['Segurança', [
-    `Cada escritório só enxerga os próprios dados. A conexão é sempre criptografada, o acesso é por pessoa com papéis definidos pelo Gestor Master, as ações importantes ficam registradas e as chaves de integração ficam guardadas em cofre no servidor, nunca no aparelho. Nenhum sistema é totalmente imune a incidentes; se houver um incidente relevante, os afetados e a ANPD serão comunicados como manda a lei.`,
+    `Cada escritório só enxerga os próprios dados. A conexão é sempre criptografada, o acesso é por pessoa com papéis definidos pelo Gestor, as ações importantes ficam registradas e as chaves de integração ficam guardadas em cofre no servidor, nunca no aparelho. Nenhum sistema é totalmente imune a incidentes; se houver um incidente relevante, os afetados e a ANPD serão comunicados como manda a lei.`,
   ]],
   ['Por quanto tempo guardamos', [
     `Os dados de adesão e de contato ficam guardados enquanto houver relação com você e depois pelo prazo necessário para cumprir obrigações legais ou exercer direitos. Os dados do escritório ficam enquanto durar o contrato; ao final, o escritório pode pedir a exportação e, depois, a exclusão, ressalvado o que a lei mandar guardar.`,
