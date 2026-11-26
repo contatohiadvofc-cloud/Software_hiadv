@@ -311,6 +311,11 @@ body.sv { margin: 0; background: var(--papel); color: var(--tinta); font-family:
 .sv-gal-moldura::before { content: ''; display: block; height: 18px; background: #1b1b1a radial-gradient(circle at 12px 9px, #4a4a47 3.5px, transparent 4px), radial-gradient(circle at 26px 9px, #4a4a47 3.5px, transparent 4px), radial-gradient(circle at 40px 9px, #4a4a47 3.5px, transparent 4px); background-repeat: no-repeat; border-bottom: 1px solid #333331; }
 .sv-gal-moldura img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 10; }
 .sv-gal-item:hover .sv-gal-moldura { transform: translateY(-3px); }
+@media (max-width: 720px) {
+  .sv-gal { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; gap: 16px; padding-bottom: 8px; margin-right: -20px; -webkit-overflow-scrolling: touch; }
+  .sv-gal > li { flex: 0 0 80%; scroll-snap-align: start; }
+  .sv-secao .sv-gal-grupo { margin-top: 36px; }
+}
 .sv-tela-grande { display: block; width: 100%; height: auto; max-height: calc(100dvh - 90px); object-fit: contain; background: #fff; }
 @media (prefers-reduced-motion: reduce) { .sv-gal-moldura { transition: none; } .sv-gal-item:hover .sv-gal-moldura { transform: none; } }
 
@@ -428,3 +433,19 @@ body.sv { overflow-x: clip; }
 .sv-dores-grade p { color:#cfcfca; margin:12px 0 0; font-size:16px; line-height:1.55 }
 .sv-dores-fim { margin:24px 0 0; color:#a9a9a4 }
 .sv-dores-fim a { color:#e48ca0 }
+
+/* Comece agora: testar, instalar e abrir sempre à mão */
+.sv-comecar { padding: 8px 0 40px; }
+.sv-comecar-grade { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.sv-comecar-item { display: flex; flex-direction: column; gap: 4px; width: 100%; height: 100%; text-align: left; padding: 18px 20px; border-radius: 14px; border: 1px solid #333331; background: #1b1b1a; color: #fff; font: inherit; text-decoration: none; cursor: pointer; transition: border-color .15s ease, transform .15s ease; min-height: 88px; }
+.sv-comecar-item strong { font-size: 18px; }
+.sv-comecar-item span { color: var(--tinta-2); font-size: 15px; line-height: 1.4; }
+.sv-comecar-item:hover { border-color: var(--rose); transform: translateY(-2px); }
+.sv-comecar-item:focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
+.sv-comecar li:first-child .sv-comecar-item { background: #9e2b48; border-color: transparent; }
+.sv-comecar li:first-child .sv-comecar-item span { color: #f3dfe4; }
+.sv-instalar-passos { padding: 4px 20px 20px; display: flex; flex-direction: column; gap: 10px; font-size: 16px; line-height: 1.5; }
+.sv-dialogo-instalar { max-width: 520px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+@media (max-width: 720px) { .sv-comecar-grade { grid-template-columns: 1fr; gap: 10px; } .sv-comecar-item { min-height: 0; padding: 14px 16px; } }
+@media (prefers-reduced-motion: reduce) { .sv-comecar-item { transition: none; } .sv-comecar-item:hover { transform: none; } }

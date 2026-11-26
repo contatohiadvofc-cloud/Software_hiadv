@@ -29,6 +29,8 @@ export function montarSite(doc: Document, win: Window) {
     })
   }
 
+  if (logado) doc.querySelectorAll<HTMLElement>('[data-abrir-titulo]').forEach((t) => { t.textContent = 'Abrir o HiAdv' })
+  montarGuiaInstalar(doc, win)
   avisoCookies(doc, win)
   montarTour(doc)
   montarTour(doc, '.sv-exp-lista', 'exp-img', 'painel-exp')
@@ -161,6 +163,34 @@ function montarInstalar(doc: Document, win: Window) {
     if (r.outcome === 'accepted') doc.querySelector<HTMLElement>('[data-instalado]')?.removeAttribute('hidden')
   }))
   win.addEventListener('appinstalled', () => { botoes.forEach((x) => x.setAttribute('hidden', '')); doc.querySelector<HTMLElement>('[data-instalado]')?.removeAttribute('hidden') })
+}
+
+export type Aparelho = 'ios' | 'android' | 'pc'
+/** Qual passo a passo mostrar. iPad novo se apresenta como Mac, por isso o toque também conta. */
+export function aparelho(ua: string, toques = 0): Aparelho {
+  if (/iPhone|iPad|iPod/i.test(ua) || (/Macintosh/i.test(ua) && toques > 1)) return 'ios'
+  if (/Android/i.test(ua)) return 'android'
+  return 'pc'
+}
+
+/** "Instalar o app": usa o pedido nativo quando o navegador oferece; senão abre o passo a passo do aparelho. */
+function montarGuiaInstalar(doc: Document, win: Window) {
+  const botoes = Array.from(doc.querySelectorAll<HTMLButtonElement>('[data-instalar-guia]'))
+  const dialogo = doc.getElementById('dialogo-instalar') as HTMLDialogElement | null
+  if (!botoes.length) return
+  if (win.matchMedia?.('(display-mode: standalone)').matches) {
+    doc.querySelectorAll<HTMLElement>('[data-instalar-texto]').forEach((t) => { t.textContent = 'Já está instalado neste aparelho.' })
+  }
+  let pedido: EventoInstalar | null = null
+  win.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); pedido = e as EventoInstalar })
+  const qual = aparelho(win.navigator.userAgent, win.navigator.maxTouchPoints ?? 0)
+  dialogo?.querySelectorAll<HTMLElement>('[data-so]').forEach((p) => { p.hidden = p.dataset.so !== qual })
+  botoes.forEach((b) => b.addEventListener('click', async () => {
+    if (pedido) { const p = pedido; pedido = null; await p.prompt(); return }
+    if (dialogo?.showModal) dialogo.showModal(); else dialogo?.setAttribute('open', '')
+  }))
+  dialogo?.querySelector('[data-fechar-instalar]')?.addEventListener('click', () => dialogo.close?.())
+  dialogo?.addEventListener('click', (e) => { if (e.target === dialogo) dialogo.close?.() })
 }
 
 /** Aviso de cookies: o HiAdv só usa armazenamento essencial (sem rastreamento), então é um aviso, não um pedido de consentimento. */

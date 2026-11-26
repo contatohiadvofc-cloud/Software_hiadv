@@ -52,3 +52,15 @@ describe('manual', () => {
     expect(MANUAL.length).toBeGreaterThan(0)
   })
 })
+
+import { aparelho } from '../../src/site/montar'
+describe('comece agora', () => {
+  it('home enxuta tem testar, instalar e abrir, sem as seções retiradas', () => {
+    expect(html).toContain('data-instalar-guia'); expect(html).toContain('Testar grátis'); expect(html).toContain('data-abrir')
+    for (const id of ['t-dores', 't-recursos', 't-dif', 't-sara', 't-passos', 't-instalar']) expect(html).not.toContain(`aria-labelledby="${id}"`)
+  })
+  it.each([
+    ['Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X)', 0, 'ios'], ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15)', 5, 'ios'],
+    ['Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15)', 0, 'pc'], ['Mozilla/5.0 (Linux; Android 14)', 5, 'android'], ['Mozilla/5.0 (Windows NT 10.0)', 0, 'pc'],
+  ])('aparelho %s', (ua, t, esperado) => { expect(aparelho(ua, t)).toBe(esperado) })
+})

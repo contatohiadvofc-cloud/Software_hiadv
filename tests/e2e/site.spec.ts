@@ -16,15 +16,6 @@ test('o site de apresentação abre em hiadv.com.br e leva ao questionário e ao
   await expect(page.getByRole('heading', { name: 'Entrar no HiAdv' })).toBeVisible()
 })
 
-test('o tour troca a tela pelo clique e pelas setas', async ({ page }) => {
-  await page.goto('/')
-  await page.getByRole('tablist', { name: 'Telas do HiAdv' }).getByRole('tab', { name: /Atendimentos/ }).click()
-  await expect(page.locator('#tour-img')).toHaveAttribute('src', '/site/atendimentos.webp')
-  await page.keyboard.press('ArrowDown')
-  await expect(page.getByRole('tab', { name: /Casos por etapas/ })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.locator('#tour-img')).toHaveAttribute('src', '/site/quadro.webp')
-})
-
 test('quem já entrou vê "Abrir o HiAdv"', async ({ page }) => {
   await page.addInitScript(() => localStorage.setItem('sb-teste-auth-token', '{}'))
   await page.goto('/')
@@ -102,4 +93,20 @@ test('aviso de cookies aparece uma vez, leva à política e some ao confirmar', 
   await page.goto('/privacidade/')
   await expect(page.getByRole('heading', { level: 1, name: 'Política de Privacidade e Cookies' })).toBeVisible()
   await expect(page.getByText(/Felipe Schena Lanhi e Deividy Ryan de Jesus Batista/).first()).toBeVisible()
+})
+
+test('site enxuto: testar, instalar e abrir à mão em qualquer aparelho', async ({ page }, info) => {
+  await page.goto('/')
+  const testar = page.getByRole('link', { name: /Testar grátis/ })
+  await expect(testar).toHaveAttribute('href', /\/aderir/)
+  await expect(page.getByRole('link', { name: /Abrir o HiAdv/ })).toHaveAttribute('href', /\/login|\/seu-dia/)
+  await page.getByRole('button', { name: /Instalar o app/ }).click()
+  const d = page.getByRole('dialog', { name: 'Instalar o HiAdv' })
+  await expect(d).toBeVisible()
+  const esperado = info.project.name === 'iphone' ? /Safari/ : info.project.name === 'celular' ? /três pontinhos/ : /barra de endereço/
+  await expect(d.locator('p:visible').first()).toContainText(esperado)
+  await d.getByRole('button', { name: 'Fechar' }).click()
+  await expect(d).toBeHidden()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1)
+  for (const t of ['Algum destes é o seu dia hoje?', 'O que muda no seu escritório', 'Como aderir']) await expect(page.getByRole('heading', { name: t })).toHaveCount(0)
 })
