@@ -23,3 +23,10 @@ describe('modelo 7 · balança', () => {
     expect(trecho(0, 1, 2)).toBe(0); expect(trecho(3, 1, 2)).toBe(1); expect(trecho(1.5, 1, 2)).toBeCloseTo(0.5)
   })
 })
+
+import { degrauQualidade } from '../../src/site/balanca'
+describe('qualidade adaptável da cena 3D', () => {
+  it('só reduz quando os quadros estão lentos, até o mínimo', () => {
+    expect(degrauQualidade(0, 16)).toBe(0); expect(degrauQualidade(0, 30)).toBe(1); expect(degrauQualidade(3, 60)).toBe(3)
+  })
+})
