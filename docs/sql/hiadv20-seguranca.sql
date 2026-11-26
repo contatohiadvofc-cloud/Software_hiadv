@@ -1,0 +1,6 @@
+-- HiAdv 20 (26/11/2026): correções da auditoria de segurança. Aplicado no TESTE e em PRODUÇÃO.
+-- 1) Login da equipe: o limite geral (25 erros/15 min travava todos) virou disjuntor alto (400); a trava por conta (5 erros/15 min) continua.
+-- 2) Adesão: limite por conexão (6/hora) em vez de 40/hora para todos.
+-- 4) Pastas chat, biblioteca e comunidade só aceitam imagem, áudio, vídeo, PDF e documentos de escritório (nada de HTML, SVG ou programa).
+-- 5) meu_escritorio ignora o cabeçalho x-hiadv-escritorio para quem está logado; removida a senha única antiga (conferir_senha_equipe).
+-- O SQL exato aplicado está na migração hiadv20_seguranca do Supabase.
