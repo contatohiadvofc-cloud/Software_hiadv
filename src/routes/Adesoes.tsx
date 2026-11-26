@@ -94,7 +94,7 @@ export function Adesoes() {
       </div>
       {q.isLoading && <p className="muted" role="status">Carregando…</p>}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
-      {q.isSuccess && lista.length === 0 && <Panel><Empty title="Nenhum pedido aqui." /></Panel>}
+      {q.isSuccess && lista.length === 0 && <Panel><Empty title="Nenhum pedido aqui.">Os pedidos chegam pela página Aderir do site e pelos links de indicação.</Empty></Panel>}
       {lista.length > 0 && <Panel><ul className="adm-lista">{lista.map((a) => <Pedido key={a.id} a={a} />)}</ul></Panel>}
     </div>
   )

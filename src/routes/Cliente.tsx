@@ -70,7 +70,7 @@ export function Cliente() {
 
       <div className="cliente-grade">
         <Panel title="Casos" labelId="cli-casos">
-          {casos.length === 0 ? <Empty title="Nenhum caso deste cliente." /> : (
+          {casos.length === 0 ? <Empty title="Nenhum caso deste cliente.">Abra um caso para acompanhar o benefício, os documentos e os prazos.</Empty> : (
             <ul className="seu-dia-lista">
               {casos.map((k) => (
                 <li key={k.id}>
@@ -85,7 +85,7 @@ export function Cliente() {
         </Panel>
 
         <Panel title="Processos" labelId="cli-proc">
-          {processos.length === 0 ? <Empty title="Nenhum processo cadastrado." /> : (
+          {processos.length === 0 ? <Empty title="Nenhum processo cadastrado.">Os processos entram quando são protocolados ou pelas publicações das OABs do escritório.</Empty> : (
             <ul className="seu-dia-lista">
               {processos.map((p) => (
                 <li key={p.id} className="hv-row cliente-caso">
@@ -102,7 +102,7 @@ export function Cliente() {
         {recursos.pode('acompanhamento') && <AcompanhamentoCliente cliente={{ id: c.id, nome: c.nome, telefone: c.telefone }} />}
         {recursos.pode('horas') && <HorasCliente clienteId={c.id} />}
         <Panel title="Tarefas abertas" labelId="cli-tar">
-          {tarefas.length === 0 ? <Empty title="Nenhuma tarefa aberta para este cliente." /> : (
+          {tarefas.length === 0 ? <Empty title="Nenhuma tarefa aberta para este cliente.">Tudo em dia com este cliente.</Empty> : (
             <ul className="seu-dia-lista">
               {tarefas.map((t) => (
                 <li key={t.id} className="hv-row cliente-caso">

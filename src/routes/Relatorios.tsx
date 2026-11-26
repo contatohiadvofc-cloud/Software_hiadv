@@ -59,7 +59,7 @@ export function Relatorios() {
           <div id="rel-painel" role="tabpanel" aria-labelledby={`rel-tab-${aba}`} className="rel-painel">
           {aba === 'casos' && <>
           <Panel title="Onde os casos param" labelId="rel-etapas">
-            {r.etapas.length === 0 ? <Empty title="Nenhum caso aberto." /> : (
+            {r.etapas.length === 0 ? <Empty title="Nenhum caso aberto.">Os números aparecem assim que os primeiros casos forem abertos.</Empty> : (
               <div className="hv-panel-body">
                 {gs.length > 0 && <p className="rel-destaque">{gs.length === 1 ? 'Gargalo' : 'Gargalos'}: {gs.slice(0, 3).map((g) => `${rotuloEtapa(g.etapa)} (${nomeDaArea(g.area)}, ${g.media_dias.toLocaleString('pt-BR')} dias em média)`).join('; ')}.</p>}
                 <ul className="rel-lista">
@@ -105,7 +105,7 @@ export function Relatorios() {
             </Panel>
           )}
 
-          {aba === 'contratos' && !r.atendimentos && <Panel><Empty title="Sem atendimentos no período." /></Panel>}
+          {aba === 'contratos' && !r.atendimentos && <Panel><Empty title="Sem atendimentos no período.">Escolha um período maior ou confira se os atendimentos estão sendo lançados.</Empty></Panel>}
           {aba === 'financeiro' && <Panel title="Dinheiro (últimos 6 meses)" labelId="rel-fin">
             <div className="hv-panel-body">
               <ul className="rel-lista">

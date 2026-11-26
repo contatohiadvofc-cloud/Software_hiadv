@@ -4,6 +4,7 @@ import { Dialog } from '../design/components/Dialog'
 import { useApi, useSessao } from '../lib/contexto'
 import { useToast } from '../design/components/Toast'
 import { useNavigate } from '@tanstack/react-router'
+import { ouvir, vozDisponivel } from '../lib/voz'
 
 export const ESPERA_MS = 250
 export const MIN_LETRAS = 2
@@ -21,6 +22,18 @@ export function CommandSearch({ open, onOpenChange }: { open: boolean; onOpenCha
   const nav = useNavigate()
   const [q, setQ] = useState('')
   const [sel, setSel] = useState(0)
+  const [ouvindo, setOuvindo] = useState<null | (() => void)>(null)
+  const temVoz = vozDisponivel()
+  function falar() {
+    if (ouvindo) { ouvindo(); return }
+    const parar = ouvir((t) => setQ(t), (erro) => {
+      setOuvindo(null)
+      if (erro === 'not-allowed' || erro === 'service-not-allowed') toast('Libere o microfone para buscar por voz.', 'danger')
+      else if (erro && erro !== 'no-speech' && erro !== 'aborted') toast('Não deu para ouvir agora. Tente de novo.', 'danger')
+    })
+    setOuvindo(() => parar)
+  }
+  useEffect(() => { if (!open) ouvindo?.() }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
   const termo = useAtraso(q.trim(), ESPERA_MS)
   const listaId = useId()
   const r = useQuery({
@@ -53,6 +66,10 @@ export function CommandSearch({ open, onOpenChange }: { open: boolean; onOpenCha
             if (e.key === 'ArrowUp') { e.preventDefault(); setSel((s) => Math.max(s - 1, 0)) }
             if (e.key === 'Enter') { e.preventDefault(); abrir(sel) }
           }} />
+        {temVoz && <button type="button" className="busca-voz" data-ouvindo={ouvindo ? '' : undefined} aria-pressed={!!ouvindo} aria-label={ouvindo ? 'Parar de ouvir' : 'Buscar falando'} title="Buscar falando" onClick={falar}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3" /><path d="M5 11a7 7 0 0 0 14 0M12 18v4" /></svg>
+        </button>}
+        {ouvindo && <p className="busca-ouvindo" role="status">Pode falar: nome do cliente, número do processo ou CPF…</p>}
         <ul id={listaId} role="listbox" className="busca-lista" aria-label="Resultados">
           {itens.map((it, i) => (
             <li key={`${it.tipo}-${it.titulo}-${i}`} id={`${listaId}-${i}`} role="option" aria-selected={i === sel}

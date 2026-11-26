@@ -78,7 +78,7 @@ export function Clientes() {
         </div>
         {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
-        {q.isSuccess && q.data.length === 0 && <Empty title={termo.length >= 2 ? 'Nenhum cliente com esse nome.' : 'Nenhum cliente cadastrado ainda.'} />}
+        {q.isSuccess && q.data.length === 0 && <Empty title={termo.length >= 2 ? 'Nenhum cliente com esse nome.' : 'Nenhum cliente cadastrado ainda.'}>{termo.length >= 2 ? 'Confira a grafia ou busque pelo CPF ou pelo número do processo.' : 'Os clientes entram aqui ao converter um atendimento em contrato, ou pelo cadastro manual.'}</Empty>}
         {q.isSuccess && q.data.length > 0 && visao === 'cartoes' && (
           <ul className="hv-cartoes">
             {q.data.map((c) => (

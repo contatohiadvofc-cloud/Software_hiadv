@@ -47,7 +47,7 @@ export function Agenda() {
       <Panel>
         {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
-        {q.isSuccess && total === 0 && <Empty title="Nada marcado nos próximos 30 dias." />}
+        {q.isSuccess && total === 0 && <Empty title="Nada marcado nos próximos 30 dias.">Perícias, audiências e prazos aparecem aqui sozinhos quando são lançados nos casos ou chegam pelas publicações.</Empty>}
         {q.isSuccess && dias.map((d) => (
           <div key={d.dia}>
             <h3 className="hv-group-title" data-hoje={d.rotulo === 'Hoje' ? 'true' : undefined}><span>{d.rotulo}</span><span>{d.itens.length}</span></h3>

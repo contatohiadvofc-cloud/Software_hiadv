@@ -131,7 +131,7 @@ export function Area() {
       })()}
       {q.isLoading && <p className="muted" role="status">Carregando os casos…</p>}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
-      {q.isSuccess && q.data.etapas.length === 0 && <Panel><Empty title="Esta área ainda não tem etapas configuradas." /></Panel>}
+      {q.isSuccess && q.data.etapas.length === 0 && <Panel><Empty title="Esta área ainda não tem etapas configuradas.">O Gestor Master define as etapas em Configurações, no grupo Rotina da equipe.</Empty></Panel>}
 
       {q.isSuccess && q.data.etapas.length > 0 && visao === 'quadro' && (
         <>
@@ -161,7 +161,7 @@ export function Area() {
 
       {q.isSuccess && q.data.etapas.length > 0 && visao === 'lista' && (
         <Panel>
-          {total === 0 ? <Empty title="Nenhum caso nesta área ainda." /> : (
+          {total === 0 ? <Empty title="Nenhum caso nesta área ainda.">Quando um caso chegar a uma etapa desta área, ele aparece aqui, com o responsável e o prazo.</Empty> : (
             <div className="tabela-caixa">
               <table className="tabela">
                 <thead><tr><th scope="col">Cliente</th><th scope="col">Etapa</th><th scope="col">Na etapa</th><th scope="col">Checklist</th></tr></thead>

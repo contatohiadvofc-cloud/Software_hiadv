@@ -75,6 +75,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
     async sair(msg) {
       await api.sair()
       qc.clear()
+      try { localStorage.removeItem('hiadv-cache') } catch { /* sem armazenamento */ }
       setPerfil(null)
       setEstado('fora')
       setAviso(msg ?? null)
@@ -83,6 +84,7 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
       await api.trocarEscritorio(id)
       // Nada do escritório anterior pode sobrar na memória.
       qc.clear()
+      try { localStorage.removeItem('hiadv-cache') } catch { /* sem armazenamento */ }
       await carregarPerfil()
     },
   }

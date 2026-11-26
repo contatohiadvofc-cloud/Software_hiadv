@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { useItensDoDia } from '../data/consultas'
@@ -89,6 +89,41 @@ function Atencao() {
   )
 }
 
+/** Modo foco: só as 5 coisas mais urgentes, em tela cheia, sem distrações. */
+export function focoDoDia(g: ReturnType<typeof agruparSeuDia>, n = 5): ItemDia[] {
+  return [...g.atrasados, ...g.hoje, ...g.proximos7].slice(0, n)
+}
+function ModoFoco({ itens, agora, sair }: { itens: ItemDia[]; agora: Date; sair: () => void }) {
+  useEffect(() => {
+    const f = (e: KeyboardEvent) => { if (e.key === 'Escape' || (e.key.toLowerCase() === 'f' && !(e.target as HTMLElement).closest('input,textarea'))) sair() }
+    addEventListener('keydown', f); document.body.style.overflow = 'hidden'
+    return () => { removeEventListener('keydown', f); document.body.style.overflow = '' }
+  }, [sair])
+  return (
+    <div className="foco" role="dialog" aria-modal="true" aria-labelledby="foco-titulo">
+      <div className="foco-topo">
+        <div><h2 id="foco-titulo">Modo foco</h2><p>{itens.length ? `${itens.length === 1 ? 'A coisa' : `As ${itens.length} coisas`} mais urgentes. O resto pode esperar.` : 'Nada urgente agora.'}</p></div>
+        <Button variant="secondary" onClick={sair}>Sair do foco</Button>
+      </div>
+      {itens.length ? (
+        <ol className="foco-lista">
+          {itens.map((it, i) => (
+            <li key={it.id} className="foco-item" data-atrasado={quandoTexto(it, agora).toLowerCase().includes('atras') || undefined}>
+              <span className="foco-n" aria-hidden="true">{i + 1}</span>
+              <span className="foco-txt">
+                <span className="foco-tipo"><span className="hv-dot" style={{ background: COR[it.tipo] }} aria-hidden="true" />{ROTULO[it.tipo]} · {quandoTexto(it, agora)}</span>
+                <b>{it.titulo}</b>
+                {it.sub && <span className="foco-sub">{it.sub}</span>}
+              </span>
+            </li>
+          ))}
+        </ol>
+      ) : <p className="foco-vazio">Você está em dia. Aproveite para revisar um caso ou responder a equipe.</p>}
+      <p className="foco-dica">Esc ou F para sair</p>
+    </div>
+  )
+}
+
 export function SeuDia() {
   const { perfil } = useSessao()
   const q = useItensDoDia()
@@ -102,6 +137,11 @@ export function SeuDia() {
   const filtra = (l: ItemDia[]) => (tipo === 'todos' ? l : l.filter((x) => x.tipo === tipo))
   const conta = (t: ItemDia['tipo']) => [...g.atrasados, ...g.hoje, ...g.proximos7, ...g.semPrazo].filter((x) => x.tipo === t).length
   const mostra = (f: string) => !faixa || faixa === f
+  const [foco, setFoco] = useState(false)
+  useEffect(() => {
+    const f = (e: KeyboardEvent) => { if (e.key.toLowerCase() === 'f' && !e.ctrlKey && !e.metaKey && !(e.target as HTMLElement).closest('input,textarea,[contenteditable]')) setFoco(true) }
+    addEventListener('keydown', f); return () => removeEventListener('keydown', f)
+  }, [])
 
   return (
     <div className="pagina">
@@ -110,7 +150,9 @@ export function SeuDia() {
           <p className="muted pagina-data">{data.charAt(0).toUpperCase() + data.slice(1)}</p>
           <h1>{saudacao(agora)}{primeiroNome ? `, ${primeiroNome}` : ''}</h1>
         </div>
+        <Button variant="secondary" onClick={() => setFoco(true)} title="Atalho: F">Modo foco</Button>
       </div>
+      {foco && <ModoFoco itens={focoDoDia(g)} agora={agora} sair={() => setFoco(false)} />}
 
       <Indicadores rotulo="Resumo do seu dia" ativo={faixa} aoEscolher={setFaixa} itens={[
         { id: 'atrasados', rotulo: 'Atrasados', valor: q.isSuccess ? g.atrasados.length : '–', tom: g.atrasados.length ? 'risco' : undefined },

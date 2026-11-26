@@ -128,7 +128,7 @@ export function Tarefas() {
         </div>
         {q.isLoading && <p className="hv-panel-body muted" role="status">Carregando…</p>}
         {q.isError && <ErrorState onRetry={() => q.refetch()} />}
-        {q.isSuccess && total === 0 && <Empty title="Nenhuma tarefa aberta aqui.">Crie uma em “Nova tarefa”.</Empty>}
+        {q.isSuccess && total === 0 && <Empty title="Nenhuma tarefa aberta aqui." action={<Button onClick={() => setNovaAberta(true)}>Nova tarefa</Button>}>Tudo em dia. Crie uma tarefa para lembrar alguém da equipe, com prazo e caso ligado.</Empty>}
         {q.isSuccess && total > 0 && grupos.filter(([titulo]) => !grupo || grupo === titulo).map(([titulo, itens, urgente]) => itens.length > 0 && (
           <div key={titulo}>
             <h3 className="hv-group-title"><span>{titulo}</span><span>{itens.length}</span></h3>

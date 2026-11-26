@@ -48,7 +48,7 @@ async function iniciar() {
   }
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
-      <App api={api} />
+      <App api={api} guardar={!demo} />
     </StrictMode>,
   )
 }

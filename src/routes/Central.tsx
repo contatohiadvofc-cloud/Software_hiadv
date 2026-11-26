@@ -395,7 +395,7 @@ export function Central() {
       <Panel><div className="hv-panel-body"><PainelReceita /></div></Panel>
       {q.isLoading && <p className="muted" role="status">Carregando…</p>}
       {q.isError && <Panel><ErrorState onRetry={() => q.refetch()} /></Panel>}
-      {q.isSuccess && q.data.length === 0 && <Panel><Empty title="Nenhum escritório ainda." /></Panel>}
+      {q.isSuccess && q.data.length === 0 && <Panel><Empty title="Nenhum escritório ainda.">Os escritórios aparecem aqui quando uma adesão é ativada.</Empty></Panel>}
       {q.data && q.data.length > 0 && (
         <Panel>
           <div className="ct-barra">

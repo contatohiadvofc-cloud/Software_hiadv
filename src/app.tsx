@@ -1,4 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
+import { createSyncStoragePersister } from '@tanstack/query-sync-storage-persister'
 import { createHashHistory, createRootRoute, createRoute, createRouter, lazyRouteComponent, Outlet, redirect, RouterProvider } from '@tanstack/react-router'
 import type { Api } from './data/api'
 import { SessaoExpirada } from './data/api'
@@ -97,9 +99,12 @@ export function criarQueryClient() {
   })
 }
 
-export function App({ api, router = criarRouter(), qc = criarQueryClient() }: { api: Api; router?: ReturnType<typeof criarRouter>; qc?: QueryClient }) {
-  return (
-    <QueryClientProvider client={qc}>
+/** Guarda no aparelho o que já foi carregado: o HiAdv abre e mostra o último estado mesmo sem internet (apagado ao sair). */
+export const CHAVE_CACHE = 'hiadv-cache'
+const persistidor = typeof localStorage !== 'undefined' ? createSyncStoragePersister({ storage: localStorage, key: CHAVE_CACHE, throttleTime: 2000 }) : null
+
+export function App({ api, router = criarRouter(), qc = criarQueryClient(), guardar = false }: { api: Api; router?: ReturnType<typeof criarRouter>; qc?: QueryClient; guardar?: boolean }) {
+  const miolo = (
       <ApiProvider api={api}>
         <ToastProvider>
           <SessaoProvider>
@@ -107,6 +112,9 @@ export function App({ api, router = criarRouter(), qc = criarQueryClient() }: { 
           </SessaoProvider>
         </ToastProvider>
       </ApiProvider>
-    </QueryClientProvider>
   )
+  return guardar && persistidor
+    ? <PersistQueryClientProvider client={qc} persistOptions={{ persister: persistidor, maxAge: 24 * 3600_000, buster: 'v1',
+        dehydrateOptions: { shouldDehydrateQuery: (q) => q.state.status === 'success' && !String(q.queryKey[0]).startsWith('chat-busca') } }}>{miolo}</PersistQueryClientProvider>
+    : <QueryClientProvider client={qc}>{miolo}</QueryClientProvider>
 }

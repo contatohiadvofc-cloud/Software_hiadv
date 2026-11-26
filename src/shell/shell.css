@@ -1253,3 +1253,38 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 @media (min-width: 900px) { .ch-grade[data-dupla] .ch-tile[data-eu] { aspect-ratio:16 / 10 } }
 
 .cv-revisao-dica { margin:0; font-size:.78rem; color:var(--muted) }
+
+/* Busca por voz */
+.busca { position:relative }
+.busca-voz { position:absolute; right:10px; top:10px; width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--accent-text); display:grid; place-items:center; cursor:pointer }
+.busca-voz[data-ouvindo] { background:var(--accent); color:#fff; border-color:var(--accent); animation:busca-pulso 1.2s infinite }
+@keyframes busca-pulso { 0% { box-shadow:0 0 0 0 rgb(158 43 72 / .5) } 100% { box-shadow:0 0 0 12px rgb(158 43 72 / 0) } }
+@media (prefers-reduced-motion: reduce) { .busca-voz[data-ouvindo] { animation:none } }
+.busca-campo { padding-right:56px }
+.busca-ouvindo { margin:8px 4px 0; font-size:.85rem; color:var(--muted) }
+
+/* Modo foco */
+.foco { position:fixed; inset:0; z-index:80; background:var(--bg); overflow:auto; padding:max(24px, env(safe-area-inset-top)) clamp(16px, 6vw, 80px) 40px; display:flex; flex-direction:column; gap:24px }
+.foco-topo { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; max-width:760px; width:100%; margin:0 auto }
+.foco-topo h2 { margin:0; font-size:1.6rem }
+.foco-topo p { margin:4px 0 0; color:var(--muted) }
+.foco-lista { list-style:none; margin:0 auto; padding:0; display:flex; flex-direction:column; gap:12px; max-width:760px; width:100% }
+.foco-item { display:flex; gap:16px; align-items:flex-start; padding:18px 20px; border-radius:18px; border:1px solid var(--line); background:var(--surface) }
+.foco-item[data-atrasado] { border-left:4px solid #e0303a }
+.foco-n { font-size:1.6rem; font-weight:800; color:var(--gold); min-width:28px }
+.foco-txt { display:flex; flex-direction:column; gap:4px; min-width:0 }
+.foco-txt b { font-size:1.08rem }
+.foco-tipo { display:inline-flex; align-items:center; gap:6px; font-size:.8rem; color:var(--muted) }
+.foco-sub { color:var(--muted); font-size:.9rem }
+.foco-vazio { max-width:760px; margin:0 auto; color:var(--muted) }
+.foco-dica { text-align:center; color:var(--muted); font-size:.8rem; margin-top:auto }
+@media (pointer: coarse) { .foco-dica { display:none } }
+
+.atalhos h3 { margin:12px 0 6px; font-size:.8rem; color:var(--muted); font-weight:700 }
+.atalhos dl { margin:0; display:flex; flex-direction:column; gap:6px }
+.atalhos dl > div { display:flex; justify-content:space-between; gap:12px; align-items:center }
+.atalhos dd { margin:0; color:var(--text) }
+
+/* Sem internet */
+.sem-net { position:fixed; z-index:95; left:50%; transform:translateX(-50%); top:calc(8px + env(safe-area-inset-top)); max-width:min(560px, calc(100vw - 24px)); padding:10px 16px; border-radius:14px; background:#3a2f12; color:#f3dfb0; border:1px solid #6b5520; font-size:.85rem; box-shadow:0 8px 24px rgb(0 0 0 / .35); text-align:center }
+.sem-net[data-voltou] { background:#123a24; color:#bdf0d2; border-color:#1f6b40 }

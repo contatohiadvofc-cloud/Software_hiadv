@@ -15,6 +15,8 @@ import { Kbd } from '../design/components/Kbd'
 import { useRecursos } from '../data/consultas'
 import { avisoAssinatura, recursoDaRota } from '../data/central'
 import { ForaDoPlano } from './ForaDoPlano'
+import { Atalhos, IR_PARA } from './Atalhos'
+import { AvisoSemInternet } from './SemInternet'
 
 export function AppShell({ children }: { children: ReactNode }) {
   const sessao = useSessao()
@@ -22,6 +24,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const nav = useNavigate()
   const qc = useQueryClient()
   const [buscando, setBuscando] = useState(false)
+  const [atalhos, setAtalhos] = useState(false)
   const indo = useRef(false)
   const [livre, setLivre] = useState(false)
   const recursos = useRecursos()
@@ -44,13 +47,20 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   // Ctrl+K e "/" abrem a busca (registrado logo ao montar, antes da primeira tecla).
   useLayoutEffect(() => {
+    let g = 0
     function tecla(e: KeyboardEvent) {
       const alvo = e.target as HTMLElement
-      const digitando = alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.isContentEditable)
+      const digitando = alvo && (alvo.tagName === 'INPUT' || alvo.tagName === 'TEXTAREA' || alvo.tagName === 'SELECT' || alvo.isContentEditable)
       if ((e.key.toLowerCase() === 'k' && (e.ctrlKey || e.metaKey)) || (e.key === '/' && !digitando)) {
         e.preventDefault()
         setBuscando(true)
+        return
       }
+      if (digitando || e.ctrlKey || e.metaKey || e.altKey) return
+      if (e.key === '?') { e.preventDefault(); setAtalhos(true); return }
+      const k = e.key.toLowerCase()
+      if (Date.now() - g < 1200 && IR_PARA[k]) { e.preventDefault(); g = 0; void nav({ to: IR_PARA[k]!.rota as never }); return }
+      g = k === 'g' ? Date.now() : 0
     }
     window.addEventListener('keydown', tecla)
     return () => window.removeEventListener('keydown', tecla)
@@ -90,6 +100,8 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
       <BottomBar />
       <AvisosConversas />
+      <AvisoSemInternet />
+      {atalhos && <Atalhos aoFechar={() => setAtalhos(false)} />}
       <CommandSearch open={buscando} onOpenChange={setBuscando} />
     </div>
   )
