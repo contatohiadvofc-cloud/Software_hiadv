@@ -86,7 +86,15 @@ export function criarRpc(url: string, chave: string): Rpc {
 export function criarMpApi(rpc: Rpc, token: string): MpApi {
   return {
     async inicio() {
-      const r = (await rpc('mp_inicio', { p_token: token })) as Record<string, unknown> & { ok?: boolean }
+      let r: Record<string, unknown> & { ok?: boolean }
+      try { r = (await rpc('mp_inicio', { p_token: token })) as typeof r } catch (e) {
+        // banco ainda sem o Meu Processo completo: mostra o acompanhamento básico (fase e compromissos)
+        const b = (await rpc('hiadv_portal', { p_token: token }).catch(() => { throw e })) as Record<string, unknown> & { ok?: boolean }
+        if (!b?.ok) return null
+        return { escritorio: { cidade: null, ...(b.escritorio as object) } as MpInicio['escritorio'], cliente: String(b.cliente ?? ''),
+          casos: ((b.casos as MpCaso[]) ?? []).map((c) => ({ ...c, etapa: null, etapas: null })), compromissos: (b.compromissos as MpCompromisso[]) ?? [],
+          atualizacoes: [], pendencias: [], naoLidas: 0, expiraEm: String(b.expira_em ?? '') }
+      }
       if (!r?.ok) return null
       const { ok: _ok, ...resto } = r
       return resto as unknown as MpInicio

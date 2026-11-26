@@ -56,6 +56,11 @@ describe('Meu Processo: chamadas ao banco', () => {
     await api.lidas(['x']); expect(rpc).toHaveBeenLastCalledWith('mp_lida', { p_token: tok, p_ids: ['x'] })
     await api.enviar('oi'); expect(rpc).toHaveBeenLastCalledWith('mp_enviar', { p_token: tok, p_texto: 'oi' })
   })
+  it('sem as funções novas no banco, cai no acompanhamento básico', async () => {
+    const api = criarMpApi(async (fn) => { if (fn === 'mp_inicio') throw new Error('404'); return { ok: true, cliente: 'Ana', escritorio: { nome: 'X', whatsapp: null }, casos: [{ area: 'Prev', fase: 'Concluído', desde: null, concluido: true }], compromissos: [], expira_em: 'z' } }, tok)
+    const d = await api.inicio()
+    expect(d?.casos[0].etapa).toBeNull(); expect(d?.atualizacoes).toEqual([]); expect(d?.escritorio.cidade).toBeNull()
+  })
   it('link vencido devolve null e erro de envio aparece', async () => {
     const api = criarMpApi(async (fn) => (fn === 'mp_inicio' ? { ok: false } : { ok: false, erro: 'Este link não está mais valendo.' }), tok)
     expect(await api.inicio()).toBeNull()
