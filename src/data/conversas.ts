@@ -1,7 +1,7 @@
 // Conversas da equipe (por escritório) e Comunidades HiAdv (entre escritórios).
 // Tipos e regras puras: o que é mostrado na lista, como os anexos são tratados e os limites de envio.
 
-export type Anexo = { path: string; nome: string; tipo: string; tamanho: number; duracao?: number; largura?: number; altura?: number }
+export type Anexo = { path: string; nome: string; tipo: string; tamanho: number; duracao?: number; largura?: number; altura?: number; /** transcrição feita antes do envio */ texto?: string }
 export type Reacoes = Record<string, string>
 
 export type Mensagem = {
@@ -75,7 +75,21 @@ const LINK = /(https?:\/\/|www\.|[a-z0-9-]+\.(com|br|net|org|io|me|app|site|link
 /** Mesmo critério do servidor: avisa antes de enviar. */
 export const temLink = (t: string) => LINK.test(t)
 export type PessoaComunidade = { email: string; nome: string; escritorio: string | null; silenciadoAte: string | null }
-export type PessoaEquipe = { email: string; nome: string; papel: string | null }
+export type PessoaEquipe = { email: string; nome: string; papel: string | null; vistoEm?: string | null }
+
+/** Online = HiAdv aberto nos últimos 2 minutos (o app avisa a cada minuto). */
+export const estaOnline = (vistoEm?: string | null, agora = Date.now()) => !!vistoEm && agora - new Date(vistoEm).getTime() < 2 * 60_000
+export function vistoTela(vistoEm?: string | null, agora = new Date()): string {
+  if (!vistoEm) return 'offline'
+  if (estaOnline(vistoEm, agora.getTime())) return 'online'
+  const d = new Date(vistoEm), min = Math.round((agora.getTime() - d.getTime()) / 60_000)
+  if (min < 60) return `visto há ${min} min`
+  const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })
+  if (diaChave(d) === diaChave(agora)) return `visto hoje às ${hora}`
+  const ontem = new Date(agora); ontem.setDate(ontem.getDate() - 1)
+  if (diaChave(d) === diaChave(ontem)) return `visto ontem às ${hora}`
+  return `visto em ${d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' })} às ${hora}`
+}
 
 export const REACOES = ['❤️', '👍', '😂', '😮', '🙏', '🔥', '✅', '😢'] as const
 export const LIMITE_ARQUIVO = 25 * 1024 * 1024
@@ -156,20 +170,47 @@ export function rotuloDia(iso: string, agora = new Date()): string {
   return d.toLocaleDateString('pt-BR', { timeZone: TZ, day: 'numeric', month: 'long', year: d.getFullYear() === agora.getFullYear() ? undefined : 'numeric' })
 }
 
-export type Bloco = { tipo: 'dia'; rotulo: string; chave: string } | { tipo: 'msg'; m: Mensagem; agrupada: boolean; ultimaDoGrupo: boolean }
+export type EventoChamada = { id: string; quando: string; video: boolean; estado: 'andamento' | 'concluida' | 'perdida' | 'recusada' | 'sem-resposta' | 'recusaram'; minutos: number; iniciadaPor: string }
+export type Bloco = { tipo: 'dia'; rotulo: string; chave: string } | { tipo: 'msg'; m: Mensagem; agrupada: boolean; ultimaDoGrupo: boolean } | { tipo: 'chamada'; e: EventoChamada }
+
+/** Como a chamada aparece na conversa, do ponto de vista de quem está vendo. */
+export function eventoChamada(r: { id: string; video: boolean; iniciadaPor: string; inicio: string; fim: string | null; participantes: string[]; recusados?: string[] }, eu: string, agora = Date.now()): EventoChamada {
+  const outros = r.participantes.filter((p) => p !== r.iniciadaPor)
+  const minutos = r.fim ? Math.max(1, Math.round((new Date(r.fim).getTime() - new Date(r.inicio).getTime()) / 60_000)) : 0
+  const base = { id: r.id, quando: r.inicio, video: r.video, minutos, iniciadaPor: r.iniciadaPor }
+  if (!r.fim && agora - new Date(r.inicio).getTime() < 2 * 3600_000) return { ...base, estado: 'andamento' }
+  if (outros.length) return { ...base, estado: 'concluida' }
+  const recusou = r.recusados ?? []
+  if (r.iniciadaPor === eu) return { ...base, estado: recusou.length ? 'recusaram' : 'sem-resposta' }
+  return { ...base, estado: recusou.includes(eu) ? 'recusada' : 'perdida' }
+}
+export function textoChamada(e: EventoChamada, nomeQuem: string): string {
+  const tipo = e.video ? 'Chamada de vídeo' : 'Chamada de voz'
+  switch (e.estado) {
+    case 'andamento': return `${tipo} em andamento`
+    case 'concluida': return `${tipo} · ${e.minutos} min`
+    case 'perdida': return `${tipo} perdida de ${nomeQuem}`
+    case 'recusada': return `Você recusou a ${tipo.toLowerCase()}`
+    case 'sem-resposta': return `${tipo} não atendida`
+    case 'recusaram': return `${tipo} recusada`
+  }
+}
 
 /** Separa por dia e junta mensagens seguidas da mesma pessoa (até 5 min), como nos apps de mensagem. */
-export function montarBlocos(msgs: Mensagem[], agora = new Date()): Bloco[] {
+export function montarBlocos(msgs: Mensagem[], agora = new Date(), chamadas: EventoChamada[] = []): Bloco[] {
   const out: Bloco[] = []
   let diaAnt = ''
+  const fila = [...chamadas].sort((a, b) => a.quando.localeCompare(b.quando))
+  const dia = (iso: string) => { const k = diaChave(new Date(iso)); if (k !== diaAnt) { out.push({ tipo: 'dia', rotulo: rotuloDia(iso, agora), chave: k }); diaAnt = k } }
   msgs.forEach((m, i) => {
-    const dia = diaChave(new Date(m.criadoEm))
-    if (dia !== diaAnt) { out.push({ tipo: 'dia', rotulo: rotuloDia(m.criadoEm, agora), chave: dia }); diaAnt = dia }
+    while (fila.length && fila[0]!.quando <= m.criadoEm) { const e = fila.shift()!; dia(e.quando); out.push({ tipo: 'chamada', e }) }
+    dia(m.criadoEm)
     const ant = msgs[i - 1], prox = msgs[i + 1]
     const junto = (a?: Mensagem, b?: Mensagem) => !!a && !!b && a.autor === b.autor && diaChave(new Date(a.criadoEm)) === diaChave(new Date(b.criadoEm))
       && Math.abs(new Date(b.criadoEm).getTime() - new Date(a.criadoEm).getTime()) < 5 * 60e3
     out.push({ tipo: 'msg', m, agrupada: junto(ant, m), ultimaDoGrupo: !junto(m, prox) })
   })
+  for (const e of fila) { dia(e.quando); out.push({ tipo: 'chamada', e }) }
   return out
 }
 
@@ -202,7 +243,8 @@ export function caminhoAnexo(pasta: string, nome: string, agora = Date.now()): s
 
 /** Formato de áudio que o aparelho grava, do mais leve ao mais compatível (iPhone grava em mp4). */
 export function formatoAudio(suporta: (t: string) => boolean): string | undefined {
-  return ['audio/webm;codecs=opus', 'audio/ogg;codecs=opus', 'audio/mp4;codecs=mp4a.40.2', 'audio/mp4'].find(suporta)
+  // AAC (mp4) primeiro: toca em todo aparelho, inclusive iPhone; webm/opus só onde mp4 não grava
+  return ['audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/webm;codecs=opus', 'audio/ogg;codecs=opus'].find(suporta)
 }
 
 export const NOMES_AREAS: Record<string, string> = {
@@ -260,5 +302,5 @@ export function trecho(texto: string, termo: string, raio = 50): string {
   return (ini > 0 ? '…' : '') + texto.slice(ini, fim) + (fim < texto.length ? '…' : '')
 }
 
-export type ReuniaoPassada = { id: string; video: boolean; iniciadaPor: string; inicio: string; fim: string | null; participantes: string[]; falas: number }
+export type ReuniaoPassada = { id: string; video: boolean; iniciadaPor: string; inicio: string; fim: string | null; participantes: string[]; recusados: string[]; falas: number }
 export type Fala = { autor: string; texto: string; faladoEm: string }

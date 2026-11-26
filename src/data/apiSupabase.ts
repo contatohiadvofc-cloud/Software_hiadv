@@ -28,7 +28,7 @@ function lerAnexo(a: unknown): Anexo | null {
   const x = a as Record<string, unknown>
   if (!x.path) return null
   return { path: String(x.path), nome: String(x.nome ?? 'arquivo'), tipo: String(x.tipo ?? 'application/octet-stream'), tamanho: Number(x.tamanho ?? 0),
-    duracao: x.duracao != null ? Number(x.duracao) : undefined, largura: x.largura != null ? Number(x.largura) : undefined, altura: x.altura != null ? Number(x.altura) : undefined }
+    duracao: x.duracao != null ? Number(x.duracao) : undefined, largura: x.largura != null ? Number(x.largura) : undefined, altura: x.altura != null ? Number(x.altura) : undefined, texto: typeof x.texto === 'string' ? x.texto : undefined }
 }
 function lerMensagem(m: Record<string, unknown>): Mensagem {
   return { id: String(m.id), autor: String(m.autor), autorNome: (m.autor_nome as string) ?? null, autorEscritorio: (m.autor_esc as string) ?? null,
@@ -707,7 +707,7 @@ export function criarApiSupabase(url: string, chave: string): Api {
     },
     async chatPessoas() {
       const r = (verificar(await sb.rpc('chat_pessoas')) ?? []) as Record<string, unknown>[]
-      return r.map((p) => ({ email: String(p.email), nome: String(p.nome || p.email), papel: (p.papel as string) ?? null }))
+      return r.map((p) => ({ email: String(p.email), nome: String(p.nome || p.email), papel: (p.papel as string) ?? null, vistoEm: (p.visto_em as string) ?? null }))
     },
     async chatMensagens(conversa, antes) {
       const r = (verificar(await sb.rpc('chat_mensagens_de', { p_conversa: conversa, p_antes: antes ?? null })) ?? []) as Record<string, unknown>[]
@@ -774,6 +774,19 @@ export function criarApiSupabase(url: string, chave: string): Api {
         return { ok: false, erro: 'Não deu para transcrever agora.' }
       } catch { return { ok: false, erro: 'Não deu para transcrever agora.' } }
     },
+    async chatTranscreverPrevia(audio) {
+      try {
+        const f = new FormData()
+        f.append('previa', '1')
+        f.append('arquivo', new File([audio], `audio.${audio.type.includes('mp4') ? 'm4a' : audio.type.includes('ogg') ? 'ogg' : 'webm'}`, { type: audio.type }))
+        const r = await sb.functions.invoke('transcrever', { body: f })
+        const d = r.data as { ok?: boolean; texto?: string; erro?: string; configurada?: boolean } | null
+        return d ? { ok: !!d.ok, texto: d.texto, erro: d.erro, configurada: d.configurada } : { ok: false, erro: 'Não deu para transcrever agora.' }
+      } catch { return { ok: false, erro: 'Não deu para transcrever agora.' } }
+    },
+    async presencaPing() { await sb.rpc('presenca_ping') },
+    async reuniaoRecusar(id) { await sb.rpc('reuniao_recusar', { p_reuniao: id }) },
+    async chatTranscricaoSalvar(msg, texto) { await sb.rpc('chat_transcricao_salvar', { p_msg: msg, p_texto: texto }) },
     async chatBuscar(termo) {
       const r = await sb.rpc('chat_buscar', { p_termo: termo })
       if (r.error && /function|does not exist/i.test(r.error.message)) return []
@@ -789,7 +802,7 @@ export function criarApiSupabase(url: string, chave: string): Api {
     async reuniaoHistorico(conversa) {
       const r = await sb.rpc('reuniao_historico', { p_conversa: conversa })
       if (r.error) return []
-      return ((r.data ?? []) as Record<string, unknown>[]).map((x) => ({ id: String(x.id), video: !!x.video, iniciadaPor: String(x.iniciada_por), inicio: String(x.inicio), fim: (x.fim as string) ?? null, participantes: (x.participantes as string[]) ?? [], falas: Number(x.falas ?? 0) }) satisfies ReuniaoPassada)
+      return ((r.data ?? []) as Record<string, unknown>[]).map((x) => ({ id: String(x.id), video: !!x.video, iniciadaPor: String(x.iniciada_por), inicio: String(x.inicio), fim: (x.fim as string) ?? null, participantes: (x.participantes as string[]) ?? [], recusados: (x.recusados as string[]) ?? [], falas: Number(x.falas ?? 0) }) satisfies ReuniaoPassada)
     },
     async reuniaoFalas(reuniao) {
       const r = await sb.rpc('reuniao_falas_de', { p_reuniao: reuniao })

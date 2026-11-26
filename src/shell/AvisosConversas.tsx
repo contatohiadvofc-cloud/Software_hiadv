@@ -20,10 +20,19 @@ export function AvisosConversas() {
   const vistos = useRef<Map<string, string> | null>(null)
   const chamadasVistas = useRef<Set<string> | null>(null)
 
+  // online: avisa a cada minuto e quando a pessoa volta para o HiAdv
+  useEffect(() => {
+    if (!perfil) return
+    const ping = () => { if (document.visibilityState === 'visible') void api.presencaPing().catch(() => {}) }
+    ping()
+    const t = setInterval(ping, 60_000)
+    document.addEventListener('visibilitychange', ping)
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', ping) }
+  }, [perfil?.email]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { destravarSom(); const f = () => setPrefs(lerPrefs()); addEventListener('hiadv-avisos', f); return () => removeEventListener('hiadv-avisos', f) }, [])
 
   const convs = useQuery({ queryKey: ['chat-lista', perfil?.escritorioId], queryFn: () => api.chatLista(), enabled: !!perfil, refetchInterval: 10_000, retry: false })
-  const pessoas = useQuery({ queryKey: ['chat-pessoas', perfil?.escritorioId], queryFn: () => api.chatPessoas(), enabled: !!perfil, staleTime: 300_000, retry: false })
+  const pessoas = useQuery({ queryKey: ['chat-pessoas', perfil?.escritorioId], queryFn: () => api.chatPessoas(), enabled: !!perfil, refetchInterval: 60_000, retry: false })
   const contatos = useQuery({ queryKey: ['contatos', perfil?.escritorioId], queryFn: () => api.contatoLista(), enabled: !!perfil, staleTime: 60_000, retry: false })
   const chamadas = useQuery({ queryKey: ['chamadas-ativas', perfil?.escritorioId], queryFn: () => api.reuniaoMinhasAtivas(), enabled: !!perfil && prefs.chamada, refetchInterval: 8_000, retry: false })
   const nomes = useMemo(() => nomesComApelidos(pessoas.data ?? [], contatos.data ?? []), [pessoas.data, contatos.data])
@@ -87,7 +96,7 @@ export function AvisosConversas() {
           <span className="av-pulso" aria-hidden="true" />
           <div className="av-txt"><b>{primeiroNome(nomes.get(tocando.iniciadaPor) ?? tocando.iniciadaPor)} está chamando</b><span>{tocando.video ? 'Chamada de vídeo' : 'Chamada de voz'}</span></div>
           <div className="av-bts">
-            <button type="button" className="av-recusar" onClick={encerrarToque}>Recusar</button>
+            <button type="button" className="av-recusar" onClick={() => { void api.reuniaoRecusar(tocando.id).catch(() => {}); encerrarToque() }}>Recusar</button>
             <button type="button" className="av-atender" onClick={() => { encerrarToque(); abrir(tocando.conversaId, tocando.id) }}>Atender</button>
           </div>
         </div>

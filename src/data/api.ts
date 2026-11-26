@@ -234,6 +234,14 @@ export interface Api {
   chatTranscrever(msg: string, path: string): Promise<{ ok: boolean; texto?: string; erro?: string; configurada?: boolean }>
   /** Busca no que foi escrito ou falado nas conversas da equipe. */
   chatBuscar(termo: string): Promise<ResultadoBusca[]>
+  /** Transcreve um áudio antes de enviar (nada fica guardado). */
+  chatTranscreverPrevia(audio: Blob): Promise<{ ok: boolean; texto?: string; erro?: string; configurada?: boolean }>
+  /** Guarda o texto já transcrito de um áudio enviado. */
+  chatTranscricaoSalvar(msg: string, texto: string): Promise<void>
+  /** Avisa que a pessoa está com o HiAdv aberto (online). */
+  presencaPing(): Promise<void>
+  /** Registra que a pessoa recusou a chamada. */
+  reuniaoRecusar(id: string): Promise<void>
   /** Chamadas acontecendo agora nas minhas conversas. */
   reuniaoMinhasAtivas(): Promise<ChamadaAtiva[]>
   /** Manda um pedaço da própria voz na chamada para virar texto (o áudio não é guardado). */

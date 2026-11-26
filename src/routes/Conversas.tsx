@@ -5,7 +5,7 @@ import { useToast } from '../design/components/Toast'
 import { Dialog } from '../design/components/Dialog'
 import { Button } from '../design/components/Button'
 import {
-  INTERVALOS, LIMITE_AUDIO_SEG, linkWhatsApp, nomesComApelidos, dataHoraCompleta, trecho, normalizarTelefone, telefoneTela, type Contato, type PessoaEquipe, type ReuniaoPassada, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
+  INTERVALOS, LIMITE_AUDIO_SEG, linkWhatsApp, nomesComApelidos, dataHoraCompleta, trecho, eventoChamada, textoChamada, estaOnline, vistoTela, type EventoChamada, normalizarTelefone, telefoneTela, type Contato, type PessoaEquipe, type ReuniaoPassada, LIMITE_CHAMADA, LIMITE_TEXTO, temLink, NOMES_AREAS, REACOES, contarReacoes, duracaoTela, formatoAudio, horaMensagem, iniciais, montarBlocos,
   primeiroNome, publicoComunidade, quandoCurto, resumo, tamanhoTela, tipoAnexo, tituloConversa, validarArquivo, validarComunidade,
   type Anexo, type Comunidade, type ComunidadeForm, type Conversa, type Mensagem,
 } from '../data/conversas'
@@ -34,6 +34,7 @@ const I = {
   arquivo: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8zM14 2v6h6',
   grupo: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8',
   predio: 'M3 21h18M5 21V7l7-4 7 4v14M9 9h1M14 9h1M9 13h1M14 13h1M10 21v-4h4v4',
+  parar: 'M7 7h10v10H7z',
   relogio: 'M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20zM12 6v6l4 2',
   sino: 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0',
   texto: 'M4 6h16M4 12h16M4 18h10',
@@ -47,11 +48,12 @@ export function Ic({ d, t = 20 }: { d: string; t?: number }) {
   return <svg width={t} height={t} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
 }
 
-function Avatar({ nome, tipo, tam = 44 }: { nome: string; tipo?: 'equipe' | 'grupo' | 'comunidade' | 'pessoa'; tam?: number }) {
+function Avatar({ nome, tipo, tam = 44, online }: { nome: string; tipo?: 'equipe' | 'grupo' | 'comunidade' | 'pessoa'; tam?: number; online?: boolean }) {
   const icone = tipo === 'equipe' ? I.predio : tipo === 'grupo' ? I.grupo : null
   return (
     <span className="cv-av" data-tipo={tipo ?? 'pessoa'} style={{ width: tam, height: tam, fontSize: tam * 0.36 }} aria-hidden="true">
       {icone ? <Ic d={icone} t={tam * 0.46} /> : iniciais(nome)}
+      {online !== undefined && <i className="cv-presenca" data-on={online || undefined} />}
     </span>
   )
 }
@@ -71,7 +73,7 @@ export function Conversas() {
   const [moderar, setModerar] = useState<Comunidade | 'nova' | null>(null)
   const convs = useQuery({ queryKey: ['chat-lista', perfil?.escritorioId], queryFn: () => api.chatLista(), refetchInterval: 20000 })
   const coms = useQuery({ queryKey: ['com-lista'], queryFn: () => api.comLista(), refetchInterval: 30000 })
-  const pessoas = useQuery({ queryKey: ['chat-pessoas', perfil?.escritorioId], queryFn: () => api.chatPessoas(), staleTime: 300000 })
+  const pessoas = useQuery({ queryKey: ['chat-pessoas', perfil?.escritorioId], queryFn: () => api.chatPessoas(), refetchInterval: 60_000 })
   const contatos = useQuery({ queryKey: ['contatos', perfil?.escritorioId], queryFn: () => api.contatoLista(), staleTime: 60000 })
   const nomes = useMemo(() => nomesComApelidos(pessoas.data ?? [], contatos.data ?? []), [pessoas.data, contatos.data])
   const naoEquipe = (convs.data ?? []).reduce((s, c) => s + c.naoLidas, 0)
@@ -117,7 +119,8 @@ export function Conversas() {
           {aba === 'equipe' && listaConv.map((c) => (
             <li key={c.id}>
               <button type="button" className="cv-item" aria-current={sel?.id === c.id || undefined} onClick={() => setSel({ tipo: 'conv', id: c.id })}>
-                <Avatar nome={tituloConversa(c, eu, nomes)} tipo={c.tipo === 'direta' ? 'pessoa' : c.tipo} />
+                <Avatar nome={tituloConversa(c, eu, nomes)} tipo={c.tipo === 'direta' ? 'pessoa' : c.tipo}
+                  online={c.tipo === 'direta' ? estaOnline((pessoas.data ?? []).find((x) => x.email !== eu && c.membros.includes(x.email))?.vistoEm) : undefined} />
                 <span className="cv-item-meio">
                   <span className="cv-item-nome">{tituloConversa(c, eu, nomes)}</span>
                   <span className="cv-item-prev" data-nao={c.naoLidas > 0 || undefined}>{c.ultima && c.tipo !== 'direta' && c.ultima.autor !== eu ? `${primeiroNome(nomes.get(c.ultima.autor) ?? c.ultima.autor)}: ` : c.ultima?.autor === eu ? 'Você: ' : ''}{resumo(c.ultima)}</span>
@@ -176,7 +179,7 @@ export function Conversas() {
       </aside>
 
       <section className="cv-conversa" aria-label="Conversa aberta">
-        {conv && <ConversaEquipe key={conv.id} c={conv} eu={eu} nomes={nomes} voltar={() => setSel(null)} atender={atender} />}
+        {conv && <ConversaEquipe key={conv.id} c={conv} eu={eu} nomes={nomes} pessoas={pessoas.data ?? []} voltar={() => setSel(null)} atender={atender} />}
         {comu && <ConversaComunidade key={comu.id} c={comu} eu={eu} voltar={() => setSel(null)} moderar={() => setModerar(comu)} />}
         {(sel?.tipo === 'pessoa' || sel?.tipo === 'contato' || sel?.tipo === 'novo-contato') && (
           <PainelContato key={sel.tipo + sel.id} sel={sel} eu={eu} pessoas={pessoas.data ?? []} contatos={contatos.data ?? []} nomes={nomes}
@@ -208,7 +211,7 @@ export function Conversas() {
 }
 
 // ---------- conversa da equipe ----------
-function ConversaEquipe({ c, eu, nomes, voltar, atender }: { c: Conversa; eu: string; nomes: Map<string, string>; voltar: () => void; atender?: string | null }) {
+function ConversaEquipe({ c, eu, nomes, pessoas, voltar, atender }: { c: Conversa; eu: string; nomes: Map<string, string>; pessoas: PessoaEquipe[]; voltar: () => void; atender?: string | null }) {
   const api = useApi()
   const qc = useQueryClient()
   const toast = useToast()
@@ -224,7 +227,13 @@ function ConversaEquipe({ c, eu, nomes, voltar, atender }: { c: Conversa; eu: st
     if (atender && !atendida.current && ativa.data?.id === atender) { atendida.current = true; setChamada({ id: ativa.data.id, video: ativa.data.video }) }
   }, [atender, ativa.data])
   useEffect(() => { marcarAberta(c.id); return () => marcarAberta(null) }, [c.id])
-  const sub = c.tipo === 'equipe' ? 'Toda a equipe do escritório' : c.tipo === 'grupo' ? c.membros.map((m) => primeiroNome(nomes.get(m) ?? m)).join(', ') : 'Conversa direta'
+  const passadas = useQuery({ queryKey: ['reunioes', c.id], queryFn: () => api.reuniaoHistorico(c.id), refetchInterval: 15000 })
+  const eventos = useMemo(() => (passadas.data ?? []).map((r) => eventoChamada(r, eu)), [passadas.data, eu])
+  const outro = c.tipo === 'direta' ? pessoas.find((x) => x.email !== eu && c.membros.includes(x.email)) : undefined
+  const online = pessoas.filter((x) => x.email !== eu && estaOnline(x.vistoEm)).length
+  const sub = c.tipo === 'equipe' ? (online ? `Toda a equipe · ${online} online` : 'Toda a equipe do escritório')
+    : c.tipo === 'grupo' ? c.membros.map((m) => primeiroNome(nomes.get(m) ?? m)).join(', ')
+    : vistoTela(outro?.vistoEm)
   async function ligar(video: boolean) {
     try { const id = await api.reuniaoIniciar(c.id, video); setChamada({ id, video }); qc.invalidateQueries({ queryKey: ['reuniao', c.id] }) }
     catch (e) { toast((e as Error).message, 'danger') }
@@ -238,6 +247,8 @@ function ConversaEquipe({ c, eu, nomes, voltar, atender }: { c: Conversa; eu: st
         reagir={(id, e) => api.chatReagir(id, e)} apagar={(id) => api.chatApagar(id)} podeApagar={(m) => m.autor === eu || (gestor && c.tipo !== 'direta')}
         lido={() => api.chatLido(c.id).then(() => qc.invalidateQueries({ queryKey: ['chat-lista'] }))}
         assinar={(fn) => api.chatAssinar(c.id, fn)} onde="chat" pasta={c.id} permite={{ anexos: true, audios: true, postar: true }}
+        chamadas={eventos} nomePessoa={(e) => nomes.get(e) ?? e}
+        aoEntrarChamada={ativa.data ? () => setChamada({ id: ativa.data!.id, video: ativa.data!.video }) : undefined}
         acoes={<>
           <button type="button" className="cv-icone-bt" aria-label="Chamadas anteriores e transcrições" title="Chamadas anteriores" onClick={() => setHistorico(true)}><Ic d={I.relogio} /></button>
           <button type="button" className="cv-icone-bt" aria-label="Chamada de voz" title="Chamada de voz" onClick={() => ligar(false)}><Ic d={I.fone} /></button>
@@ -311,6 +322,7 @@ type FioProps = {
   lido: () => Promise<unknown>; assinar?: (fn: () => void) => () => void; intervalo?: number
   onde: 'chat' | 'comunidade'; pasta: string; permite: { anexos: boolean; audios: boolean; postar: boolean }; bloqueio?: string | null
   acoes?: ReactNode; faixa?: ReactNode
+  chamadas?: EventoChamada[]; nomePessoa?: (email: string) => string; aoEntrarChamada?: () => void
 }
 
 function Fio(p: FioProps) {
@@ -334,7 +346,7 @@ function Fio(p: FioProps) {
   }, [msgs.length, pendentes.length])
   useEffect(() => { fim.current?.scrollIntoView({ block: 'end' }) }, [q.isSuccess])
 
-  const blocos = montarBlocos(msgs)
+  const blocos = montarBlocos(msgs, new Date(), p.chamadas ?? [])
   const porId = new Map(msgs.map((m) => [m.id, m]))
 
   async function mandar(texto: string | null, anexo: Anexo | null) {
@@ -362,6 +374,8 @@ function Fio(p: FioProps) {
         {q.isSuccess && msgs.length === 0 && <p className="cv-vazio cv-vazio-fio">Nenhuma mensagem ainda. Diga um oi 👋</p>}
         {blocos.map((b) => b.tipo === 'dia'
           ? <div key={`d-${b.chave}`} className="cv-dia"><span>{b.rotulo}</span></div>
+          : b.tipo === 'chamada'
+          ? <CartaoChamada key={`c-${b.e.id}`} e={b.e} meu={b.e.iniciadaPor === p.eu} nome={p.nomePessoa?.(b.e.iniciadaPor) ?? b.e.iniciadaPor} entrar={p.aoEntrarChamada} />
           : <Balao key={b.m.id} m={b.m} meu={b.m.autor === p.eu} eu={p.eu} agrupada={b.agrupada} ultima={b.ultimaDoGrupo}
               nome={p.mostrarAutor ? p.nomeDe(b.m) : null} escritorio={p.escritorioDe?.(b.m) ?? null}
               citada={b.m.respostaA ? porId.get(b.m.respostaA) ?? null : null} nomeCitada={(m) => (m.autor === p.eu ? 'Você' : p.nomeDe(m))}
@@ -440,12 +454,27 @@ function useUrl(onde: 'chat' | 'comunidade', path: string) {
   return { url, erro }
 }
 
+/** Registro da chamada no meio da conversa: iniciada, em andamento, perdida, recusada ou concluída. */
+function CartaoChamada({ e, meu, nome, entrar }: { e: EventoChamada; meu: boolean; nome: string; entrar?: () => void }) {
+  const ruim = e.estado === 'perdida' || e.estado === 'sem-resposta' || e.estado === 'recusada' || e.estado === 'recusaram'
+  return (
+    <div className="cv-chamada-ev" data-meu={meu || undefined} data-estado={e.estado}>
+      <span className="cv-chamada-ic" data-ruim={ruim || undefined} aria-hidden="true"><Ic d={e.video ? I.video : I.fone} t={16} /></span>
+      <span className="cv-chamada-txt">
+        <b>{textoChamada(e, primeiroNome(nome))}</b>
+        <small title={dataHoraCompleta(e.quando)}>{meu ? 'Você ligou' : `${primeiroNome(nome)} ligou`} · {horaMensagem(e.quando)}</small>
+      </span>
+      {e.estado === 'andamento' && entrar && <button type="button" className="cv-chamada-entrar" onClick={entrar}>Entrar</button>}
+    </div>
+  )
+}
+
 /** Texto do áudio: o próprio áudio é transcrito sozinho logo após o envio; nos outros, um toque pede a transcrição. */
 const tentados = new Set<string>()
 function Transcricao({ m, meu }: { m: Mensagem; meu: boolean }) {
   const api = useApi()
   const qc = useQueryClient()
-  const [texto, setTexto] = useState(m.transcricao ?? null)
+  const [texto, setTexto] = useState(m.transcricao ?? m.anexo?.texto ?? null)
   const [aberta, setAberta] = useState(false)
   const [estado, setEstado] = useState<'parado' | 'indo' | 'erro'>('parado')
   const [erro, setErro] = useState<string | null>(null)
@@ -456,10 +485,11 @@ function Transcricao({ m, meu }: { m: Mensagem; meu: boolean }) {
     if (r.ok && r.texto) { setTexto(r.texto); setAberta(true); setEstado('parado'); void qc.invalidateQueries({ queryKey: ['chat-msgs'] }) }
     else { setEstado(r.configurada === false ? 'parado' : 'erro'); setErro(r.erro ?? 'Não deu para transcrever.') }
   }
-  useEffect(() => { setTexto(m.transcricao ?? null) }, [m.transcricao])
-  // meu áudio recém-enviado: transcreve sozinho
+  useEffect(() => { setTexto(m.transcricao ?? m.anexo?.texto ?? null) }, [m.transcricao, m.anexo?.texto])
+  // meu áudio recém-enviado: guarda o texto que já veio da revisão, ou transcreve sozinho
   useEffect(() => {
-    if (meu && !m.transcricao && Date.now() - new Date(m.criadoEm).getTime() < 3 * 60_000 && !tentados.has(m.id)) void transcrever()
+    if (meu && !m.transcricao && m.anexo?.texto && !tentados.has(m.id)) { tentados.add(m.id); void api.chatTranscricaoSalvar(m.id, m.anexo.texto).catch(() => {}); return }
+    if (meu && !m.anexo?.texto && !m.transcricao && Date.now() - new Date(m.criadoEm).getTime() < 3 * 60_000 && !tentados.has(m.id)) void transcrever()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
   if (texto) return (
     <div className="cv-transcricao">
@@ -503,11 +533,12 @@ function Audio({ url, duracao, meu }: { url: string | null; duracao?: number; me
   const [pos, setPos] = useState(0)
   const [dur, setDur] = useState(duracao ?? 0)
   const [vel, setVel] = useState(1)
+  const [falhou, setFalhou] = useState(false)
   const barras = useMemo(() => Array.from({ length: 28 }, (_, i) => 30 + Math.round(Math.abs(Math.sin(i * 1.7 + (duracao ?? 3))) * 70)), [duracao])
   const pct = dur ? pos / dur : 0
   return (
     <div className="cv-audio" data-meu={meu || undefined}>
-      <button type="button" aria-label={tocando ? 'Pausar áudio' : 'Ouvir áudio'} disabled={!url} onClick={() => { const a = el.current!; if (a.paused) void a.play(); else a.pause() }}>
+      <button type="button" aria-label={tocando ? 'Pausar áudio' : 'Ouvir áudio'} disabled={!url} onClick={() => { const a = el.current!; if (a.paused) void a.play().then(() => setFalhou(false), () => setFalhou(true)); else a.pause() }}>
         <Ic d={tocando ? I.pausa : I.play} t={16} />
       </button>
       <div className="cv-onda" onClick={(e) => { const a = el.current; if (!a || !dur) return; const r = (e.currentTarget as HTMLDivElement).getBoundingClientRect(); a.currentTime = ((e.clientX - r.left) / r.width) * dur }}>
@@ -516,7 +547,8 @@ function Audio({ url, duracao, meu }: { url: string | null; duracao?: number; me
       <span className="cv-audio-t">{duracaoTela(tocando || pos ? pos : dur)}</span>
       <button type="button" className="cv-vel" aria-label="Velocidade" onClick={() => { const v = vel === 1 ? 1.5 : vel === 1.5 ? 2 : 1; setVel(v); if (el.current) el.current.playbackRate = v }}>{String(vel).replace('.', ',')}x</button>
       {url && <audio ref={el} src={url} preload="metadata" onPlay={() => setTocando(true)} onPause={() => setTocando(false)} onEnded={() => { setTocando(false); setPos(0) }}
-        onTimeUpdate={(e) => setPos(e.currentTarget.currentTime)} onLoadedMetadata={(e) => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d) }} />}
+        onError={() => setFalhou(true)} onTimeUpdate={(e) => setPos(e.currentTarget.currentTime)} onLoadedMetadata={(e) => { const d = e.currentTarget.duration; if (Number.isFinite(d)) setDur(d) }} />}
+      {falhou && url && <a className="cv-audio-falha" href={url} target="_blank" rel="noopener noreferrer" download>Este aparelho não tocou o áudio aqui. Toque para abrir.</a>}
     </div>
   )
 }
@@ -540,11 +572,13 @@ function Compositor(p: {
   subir: (b: Blob, nome: string, extra?: Partial<Anexo>) => Promise<Anexo>
 }) {
   const toast = useToast()
+  const api = useApi()
   const [texto, setTexto] = useState('')
   const [subindo, setSubindo] = useState(false)
   const [gravando, setGravando] = useState<{ inicio: number } | null>(null)
   const [agora, setAgora] = useState(Date.now())
-  const rec = useRef<{ mr: MediaRecorder; partes: Blob[]; cancelado: boolean; mic: MicLimpo } | null>(null)
+  const rec = useRef<{ mr: MediaRecorder; partes: Blob[]; cancelado: boolean; direto: boolean; mic: MicLimpo } | null>(null)
+  const [revisao, setRevisao] = useState<{ blob: Blob; url: string; seg: number; texto: string | null; estado: 'transcrevendo' | 'pronto' | 'sem' } | null>(null)
   const [nivel, setNivel] = useState(0)
   const area = useRef<HTMLTextAreaElement>(null)
   const arq = useRef<HTMLInputElement>(null)
@@ -589,19 +623,15 @@ function Compositor(p: {
       const mic = await abrirMicLimpo()
       const tipo = formatoAudio((t) => MediaRecorder.isTypeSupported(t))
       const mr = new MediaRecorder(mic.stream, { ...(tipo ? { mimeType: tipo } : {}), audioBitsPerSecond: 48000 })
-      const r = { mr, partes: [] as Blob[], cancelado: false, mic }
+      const r = { mr, partes: [] as Blob[], cancelado: false, direto: false, mic }
       mr.ondataavailable = (e) => { if (e.data.size) r.partes.push(e.data) }
-      mr.onstop = async () => {
+      mr.onstop = () => {
         mic.parar()
         const seg = (Date.now() - inicio) / 1000
         if (r.cancelado || seg < 0.8) return
         const blob = new Blob(r.partes, { type: (mr.mimeType || 'audio/webm').split(';')[0] })
-        setSubindo(true)
-        try {
-          const ext = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm'
-          const a = await p.subir(blob, `audio-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.${ext}`, { duracao: Math.round(seg), tipo: blob.type })
-          await p.aoEnviar(null, a)
-        } catch (e) { toast((e as Error).message, 'danger') } finally { setSubindo(false) }
+        if (r.direto) void enviarAudio(blob, seg, null)
+        else abrirRevisao(blob, seg)
       }
       rec.current = r
       const inicio = Date.now()
@@ -609,9 +639,25 @@ function Compositor(p: {
       setGravando({ inicio }); setAgora(inicio)
     } catch { toast('Sem acesso ao microfone. Libere a permissão do navegador e tente de novo.', 'danger') }
   }
-  function pararGravacao(enviar: boolean) {
+  async function enviarAudio(blob: Blob, seg: number, texto: string | null) {
+    setSubindo(true)
+    try {
+      const ext = blob.type.includes('mp4') ? 'm4a' : blob.type.includes('ogg') ? 'ogg' : 'webm'
+      const a = await p.subir(blob, `audio-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.${ext}`, { duracao: Math.round(seg), tipo: blob.type, ...(texto ? { texto } : {}) })
+      await p.aoEnviar(null, a)
+    } catch (e) { toast((e as Error).message, 'danger') } finally { setSubindo(false) }
+  }
+  function abrirRevisao(blob: Blob, seg: number) {
+    const url = URL.createObjectURL(blob)
+    const transcreve = p.onde === 'chat'
+    setRevisao({ blob, url, seg, texto: null, estado: transcreve ? 'transcrevendo' : 'sem' })
+    if (transcreve) void api.chatTranscreverPrevia(blob).then((r) => setRevisao((v) => (v && v.url === url ? { ...v, texto: r.ok ? (r.texto || null) : null, estado: r.ok && r.texto ? 'pronto' : 'sem' } : v)))
+  }
+  function fecharRevisao() { if (revisao) URL.revokeObjectURL(revisao.url); setRevisao(null) }
+  function pararGravacao(enviar: boolean, direto = false) {
     const r = rec.current; if (!r) return
     r.cancelado = !enviar
+    r.direto = direto
     try { r.mr.stop() } catch { r.mic.parar() }
     rec.current = null; setGravando(null)
   }
@@ -630,7 +676,18 @@ function Compositor(p: {
           <button type="button" className="cv-icone-bt" aria-label="Descartar áudio" onClick={() => pararGravacao(false)}><Ic d={I.lixo} /></button>
           <span className="cv-rec"><i aria-hidden="true" />Gravando {duracaoTela((agora - gravando.inicio) / 1000)}</span>
           <span className="cv-medidor" aria-hidden="true">{[0.15, 0.3, 0.5, 0.7, 0.9].map((x) => <i key={x} data-on={nivel >= x * 0.35 || undefined} />)}</span>
-          <button type="button" className="cv-enviar" aria-label="Enviar áudio" onClick={() => pararGravacao(true)}><Ic d={I.enviar} t={18} /></button>
+          <button type="button" className="cv-icone-bt cv-parar" aria-label="Parar e ouvir antes de enviar" title="Parar e ouvir" onClick={() => pararGravacao(true)}><Ic d={I.parar} /></button>
+          <button type="button" className="cv-enviar" aria-label="Enviar áudio agora" onClick={() => pararGravacao(true, true)}><Ic d={I.enviar} t={18} /></button>
+        </div>
+      ) : revisao ? (
+        <div className="cv-revisao" role="group" aria-label="Revisar áudio antes de enviar">
+          <Audio url={revisao.url} duracao={revisao.seg} meu />
+          {revisao.estado === 'transcrevendo' && <p className="cv-revisao-txt" aria-live="polite"><i className="cv-pontos" aria-hidden="true"><b /><b /><b /></i>Transcrevendo o áudio…</p>}
+          {revisao.estado === 'pronto' && <p className="cv-revisao-txt">{revisao.texto}</p>}
+          <div className="cv-revisao-bts">
+            <button type="button" className="cv-revisao-excluir" onClick={fecharRevisao}><Ic d={I.lixo} t={16} />Excluir</button>
+            <button type="button" className="cv-revisao-enviar" disabled={subindo} onClick={() => { const r = revisao; void enviarAudio(r.blob, r.seg, r.texto).then(() => { URL.revokeObjectURL(r.url); setRevisao(null) }) }}><Ic d={I.enviar} t={16} />{subindo ? 'Enviando…' : 'Enviar áudio'}</button>
+          </div>
         </div>
       ) : (
         <form className="cv-comp-linha" onSubmit={enviarTexto}>
@@ -794,8 +851,8 @@ function ListaContatos({ termo, eu, pessoas, contatos, nomes, sel, escolher }: {
       {equipe.map((p) => (
         <li key={p.email}>
           <button type="button" className="cv-item" aria-current={(sel?.tipo === 'pessoa' && sel.id === p.email) || undefined} onClick={() => escolher({ tipo: 'pessoa', id: p.email })}>
-            <Avatar nome={nomes.get(p.email) ?? p.nome} />
-            <span className="cv-item-meio"><span className="cv-item-nome">{nomes.get(p.email) ?? p.nome}</span><span className="cv-item-prev">{p.papel === 'master' ? 'Gestor Master' : p.papel === 'code' ? 'Coder' : 'Colaborador'}</span></span>
+            <Avatar nome={nomes.get(p.email) ?? p.nome} online={estaOnline(p.vistoEm)} />
+            <span className="cv-item-meio"><span className="cv-item-nome">{nomes.get(p.email) ?? p.nome}</span><span className="cv-item-prev">{p.papel === 'master' ? 'Gestor Master' : p.papel === 'code' ? 'Coder' : 'Colaborador'} · {vistoTela(p.vistoEm)}</span></span>
           </button>
         </li>
       ))}

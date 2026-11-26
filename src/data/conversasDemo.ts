@@ -1,5 +1,6 @@
 // Conversas e comunidades da prévia (dados fictícios, só na memória deste aparelho).
 import type { Api } from './api'
+import { canalLocal } from './canalLocal'
 import { normalizarTelefone, type Anexo, type Comunidade, type Contato, type Conversa, type Mensagem } from './conversas'
 
 const EU = 'ana@silvaprado.exemplo.br'
@@ -33,6 +34,8 @@ const CONVERSAS: Conv[] = [
     msg(EU, 'Pedi a CTPS pelo app do cliente. Prazo de 30 dias.', 590),
   ] },
 ]
+
+let demoAtiva: { id: string; conversa: string; video: boolean; inicio: number } | null = null
 
 const CONTATOS: Contato[] = [
   { id: 'ct-1', tipo: 'externo', email: null, telefone: '+5549999990001', nome: 'Perito Dr. Exemplo (fictício)', obs: 'Agenda perícias às terças', editadoPor: EU, editadoEm: new Date().toISOString() },
@@ -85,7 +88,7 @@ function responder(c: Conv) {
 }
 
 type ConversasApi = Pick<Api, 'chatLista' | 'chatPessoas' | 'chatMensagens' | 'chatEnviar' | 'chatDireta' | 'chatGrupo' | 'chatLido' | 'chatReagir' | 'chatApagar' | 'chatSubir' | 'chatUrl' | 'chatAssinar'
-  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'contatoLista' | 'chatTranscrever' | 'chatBuscar' | 'reuniaoMinhasAtivas' | 'reuniaoFalaEnviar' | 'reuniaoHistorico' | 'reuniaoFalas' | 'contatoSalvar' | 'contatoApagar' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
+  | 'comLista' | 'comMensagens' | 'comEnviar' | 'comLido' | 'comReagir' | 'comApagar' | 'comSalvar' | 'comPessoas' | 'comSilenciar' | 'comPedirEntrada' | 'contatoLista' | 'chatTranscrever' | 'chatTranscreverPrevia' | 'presencaPing' | 'reuniaoRecusar' | 'chatTranscricaoSalvar' | 'chatBuscar' | 'reuniaoMinhasAtivas' | 'reuniaoFalaEnviar' | 'reuniaoHistorico' | 'reuniaoFalas' | 'contatoSalvar' | 'contatoApagar' | 'comPedidos' | 'comDecidirEntrada' | 'reuniaoAtiva' | 'reuniaoIniciar' | 'reuniaoEncerrar' | 'reuniaoCanal' | 'reuniaoIce'>
 
 export function conversasDemo(): ConversasApi {
   const reagir = (lista: Mensagem[], id: string, e: string) => {
@@ -94,7 +97,7 @@ export function conversasDemo(): ConversasApi {
   }
   return {
     async chatLista() { return CONVERSAS.map(resumoConv).sort((a, b) => b.ultimaEm.localeCompare(a.ultimaEm)) },
-    async chatPessoas() { return PESSOAS },
+    async chatPessoas() { return PESSOAS.map((p, i) => ({ ...p, vistoEm: p.email === EU || i % 2 ? new Date().toISOString() : new Date(Date.now() - 47 * 6e4).toISOString() })) },
     async chatMensagens(id) { return [...(achar(id)?.msgs ?? [])] },
     async chatEnviar(id, texto, anexo, respostaA) {
       const c = achar(id); if (!c) throw new Error('Conversa não encontrada.')
@@ -142,6 +145,13 @@ export function conversasDemo(): ConversasApi {
     async comSalvar() { throw new Error('Na prévia, as comunidades não podem ser alteradas.') },
     async comPessoas() { return [] },
     async comSilenciar() { throw new Error('Na prévia, a moderação não está disponível.') },
+    async chatTranscreverPrevia(audio) {
+      await new Promise((r) => setTimeout(r, 900))
+      return audio.size > 0 ? { ok: true, texto: 'Na prévia, este texto mostra onde aparece a transcrição do seu áudio. No seu escritório, aqui vem exatamente o que você falou.' } : { ok: false, erro: 'Áudio vazio.' }
+    },
+    async chatTranscricaoSalvar() {},
+    async presencaPing() {},
+    async reuniaoRecusar() {},
     async chatTranscrever() { return { ok: false, configurada: false, erro: 'Na prévia, a transcrição fica desligada. No seu escritório, o áudio vira texto em segundos.' } },
     async chatBuscar(termo) {
       const t = termo.toLowerCase()
@@ -151,7 +161,7 @@ export function conversasDemo(): ConversasApi {
     },
     async reuniaoMinhasAtivas() { return [] },
     async reuniaoFalaEnviar() {},
-    async reuniaoHistorico(conversa) { return conversa === 'cv-equipe' ? [{ id: 'rn-1', video: true, iniciadaPor: 'julia@silvaprado.exemplo.br', inicio: new Date(Date.now() - 864e5).toISOString(), fim: new Date(Date.now() - 864e5 + 18 * 6e4).toISOString(), participantes: [EU, 'julia@silvaprado.exemplo.br'], falas: 3 }] : [] },
+    async reuniaoHistorico(conversa) { return conversa === 'cv-equipe' ? [{ id: 'rn-1', video: true, iniciadaPor: 'julia@silvaprado.exemplo.br', inicio: new Date(Date.now() - 864e5).toISOString(), fim: new Date(Date.now() - 864e5 + 18 * 6e4).toISOString(), participantes: [EU, 'julia@silvaprado.exemplo.br'], recusados: [], falas: 3 }, { id: 'rn-2', video: false, iniciadaPor: 'marcos@silvaprado.exemplo.br', inicio: new Date(Date.now() - 3 * 36e5).toISOString(), fim: new Date(Date.now() - 3 * 36e5 + 4e4).toISOString(), participantes: ['marcos@silvaprado.exemplo.br'], recusados: [], falas: 0 }] : [] },
     async reuniaoFalas() {
       const t0 = Date.now() - 864e5
       return [
@@ -174,10 +184,11 @@ export function conversasDemo(): ConversasApi {
     async comPedirEntrada() { throw new Error('Na prévia, os pedidos de entrada não estão disponíveis.') },
     async comPedidos() { return [] },
     async comDecidirEntrada() { throw new Error('Na prévia, a moderação não está disponível.') },
-    async reuniaoAtiva() { return null },
-    async reuniaoIniciar() { throw new Error('Na prévia não há chamada de verdade. No seu escritório, a chamada de voz e vídeo abre aqui mesmo.') },
-    async reuniaoEncerrar() {},
-    reuniaoCanal() { return null },
+    // prévia: a chamada é de verdade, mas só entre abas deste navegador (abra a prévia em outra aba para simular um colega)
+    async reuniaoAtiva(conversa) { return demoAtiva && demoAtiva.conversa === conversa && Date.now() - demoAtiva.inicio < 36e5 ? { id: demoAtiva.id, video: demoAtiva.video, iniciadaPor: EU, inicio: new Date(demoAtiva.inicio).toISOString(), participantes: [EU] } : null },
+    async reuniaoIniciar(conversa, video) { demoAtiva = { id: `demo-${conversa}`, conversa, video, inicio: Date.now() }; return demoAtiva.id },
+    async reuniaoEncerrar() { demoAtiva = null },
+    reuniaoCanal(id) { return canalLocal(id) },
     async reuniaoIce() { return [] },
   }
 }

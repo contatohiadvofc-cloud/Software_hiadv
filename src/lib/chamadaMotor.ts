@@ -9,6 +9,8 @@ export class ChamadaMotor {
   local: MediaStream | null = null
   tela: MediaStream | null = null
   private pares = new Map<string, Par>()
+  /** Última lista de quem está no canal (para dar nome a quem chega pelo sinal antes da lista). */
+  private vivos = new Map<string, Presenca>()
   /** Servidores de conexão (STUN e, quando configurado, TURN para atravessar redes de operadora e firewalls). */
   iceServers: RTCIceServer[] = ICE
   private aoMudar: () => void
@@ -21,7 +23,8 @@ export class ChamadaMotor {
 
   async iniciar(video: boolean) {
     this.local = await navigator.mediaDevices.getUserMedia({
-      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 },
+      // cancelamento de eco e de ruído ligados; isolamento de voz onde o navegador oferece (corta vozes e sons ao redor)
+      audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: 48000, voiceIsolation: true } as MediaTrackConstraints,
       video: video ? { width: { ideal: innerWidth < 700 ? 640 : 960 }, height: { ideal: innerWidth < 700 ? 360 : 540 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' } : false,
     })
     await this.canal.entrar({ id: this.meuId, email: this.eu.email, nome: this.eu.nome, video } satisfies Presenca)
@@ -112,7 +115,9 @@ export class ChamadaMotor {
   }
 
   private async aoSinal(s: Sinal) {
-    const p = this.pares.get(s.de) ?? this.criar(s.de, s.email, s.email)
+    const conhecido = this.vivos.get(s.de)
+    const p = this.pares.get(s.de) ?? this.criar(s.de, s.email, conhecido?.nome ?? s.email)
+    if (conhecido) p.visto = true
     const pc = p.pc
     if (s.estado) { p.estado = s.estado; this.aoMudar(); return }
     if (s.descricao) {
@@ -127,6 +132,7 @@ export class ChamadaMotor {
   }
 
   private sincronizar(vivos: Presenca[]) {
+    this.vivos = new Map(vivos.map((v) => [v.id, v]))
     const ids = new Set(vivos.map((v) => v.id))
     for (const v of vivos) {
       const p = this.pares.get(v.id)

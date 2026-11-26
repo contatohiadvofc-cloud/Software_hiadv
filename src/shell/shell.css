@@ -1206,3 +1206,48 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .cv-falas-quem { display:flex; justify-content:space-between; font-size:.8rem; font-weight:700; color:var(--accent-text) }
 .cv-falas-quem time { font-weight:400; color:var(--muted) }
 .cv-falas p { margin:4px 0 0; line-height:1.5 }
+
+/* Revisar áudio antes de enviar */
+.cv-revisao { display:flex; flex-direction:column; gap:10px; padding:10px 12px; border-top:1px solid var(--line) }
+.cv-revisao .cv-audio { max-width:none }
+.cv-revisao-txt { margin:0; padding:10px 12px; border-radius:12px; background:var(--surface-2, rgb(127 127 127 / .08)); font-size:.9rem; line-height:1.45; max-height:120px; overflow:auto; display:flex; gap:8px; align-items:center }
+.cv-revisao-bts { display:flex; gap:8px; justify-content:space-between }
+.cv-revisao-bts button { display:inline-flex; align-items:center; gap:6px; min-height:42px; padding:0 16px; border-radius:999px; font:inherit; font-weight:600; cursor:pointer }
+.cv-revisao-excluir { border:1px solid var(--line); background:transparent; color:var(--text) }
+.cv-revisao-enviar { border:0; background:var(--accent); color:#fff }
+.cv-revisao-enviar:disabled { opacity:.7 }
+.cv-pontos { display:inline-flex; gap:3px }
+.cv-pontos b { width:5px; height:5px; border-radius:50%; background:var(--gold); animation:cv-ponto 1s infinite }
+.cv-pontos b:nth-child(2) { animation-delay:.15s } .cv-pontos b:nth-child(3) { animation-delay:.3s }
+@keyframes cv-ponto { 0%,100% { opacity:.3 } 50% { opacity:1 } }
+@media (prefers-reduced-motion: reduce) { .cv-pontos b { animation:none } }
+
+.cv-audio { flex-wrap:wrap }
+.cv-audio-falha { flex-basis:100%; font-size:.75rem; color:inherit; text-decoration:underline }
+
+/* Registro de chamada na conversa */
+.cv-chamada-ev { align-self:center; display:flex; align-items:center; gap:10px; margin:10px auto; padding:8px 14px 8px 8px; border-radius:16px; background:var(--surface-2, rgb(127 127 127 / .1)); border:1px solid var(--line); max-width:min(360px, 92%) }
+.cv-chamada-ic { width:32px; height:32px; border-radius:50%; display:grid; place-items:center; background:var(--gold-soft); color:var(--gold); flex:none }
+.cv-chamada-ic[data-ruim] { background:rgb(224 48 58 / .14); color:#ff6b72 }
+.cv-chamada-txt { display:flex; flex-direction:column; min-width:0 }
+.cv-chamada-txt b { font-size:.86rem }
+.cv-chamada-txt small { font-size:.74rem; color:var(--muted) }
+.cv-chamada-entrar { margin-left:6px; border:0; border-radius:999px; padding:7px 14px; background:#2fbf71; color:#0b0b0b; font:inherit; font-weight:700; cursor:pointer }
+.cv-chamada-ev[data-estado="andamento"] { border-color:#2fbf71 }
+
+/* Online / offline */
+.cv-av { position:relative }
+.cv-presenca { position:absolute; right:0; bottom:0; width:28%; height:28%; min-width:10px; min-height:10px; border-radius:50%; background:#7a7a7a; box-shadow:0 0 0 2px var(--surface, #141414) }
+.cv-presenca[data-on] { background:#2fbf71 }
+
+.ch-fone { font-size:11px; padding:3px 8px; border-radius:999px; background:rgb(255 255 255 / .1); color:#ddd }
+.ch-fone[data-fone] { background:rgb(47 191 113 / .2); color:#8fe3b4 }
+.ch-controles button[aria-pressed="true"] { background:#f2f2f2; color:#111 }
+@media (max-width: 760px) { .ch-fone { display:none } .ch-controles { gap:6px } .ch-controles button { min-width:52px; padding:8px 6px 5px } }
+
+/* Chamada a dois: o outro em tela cheia e você no cantinho, como nos apps de vídeo */
+.ch-grade[data-dupla] { display:block; position:relative }
+.ch-grade[data-dupla] .ch-tile:not([data-eu]) { position:absolute; inset:0 }
+.ch-grade[data-dupla] .ch-tile[data-eu] { position:absolute; z-index:2; right:14px; bottom:14px; width:clamp(110px, 24%, 240px); height:auto; aspect-ratio:3 / 4; box-shadow:0 8px 24px rgb(0 0 0 / .45); border:2px solid rgb(255 255 255 / .15) }
+.ch-grade[data-dupla] .ch-tile[data-eu] .ch-av { width:48px; height:48px; font-size:18px }
+@media (min-width: 900px) { .ch-grade[data-dupla] .ch-tile[data-eu] { aspect-ratio:16 / 10 } }

@@ -16,6 +16,15 @@ Deno.serve(async (req) => {
   if ((req.headers.get('content-type') ?? '').startsWith('multipart/form-data')) {
     const f = await req.formData()
     const reuniao = String(f.get('reuniao') ?? ''); const arquivo = f.get('arquivo')
+    // prévia: áudio ainda não enviado (a pessoa ouve e lê antes de mandar); nada é guardado aqui
+    if (f.get('previa') === '1' && arquivo instanceof File) {
+      const { data: equipe } = await sb.rpc('is_equipe')
+      if (equipe !== true) return resp({ ok: false, erro: 'Sem acesso.' }, 403)
+      if (arquivo.size > 25 * 1024 * 1024) return resp({ ok: false, erro: 'Áudio grande demais para transcrever.' }, 413)
+      const texto = await transcreverArquivo(chave, arquivo, arquivo.name || 'audio.webm')
+      if (texto === null) return resp({ ok: false, erro: 'O serviço de transcrição não respondeu.' }, 502)
+      return resp({ ok: true, texto })
+    }
     if (!/^[0-9a-f-]{36}$/.test(reuniao) || !(arquivo instanceof File)) return resp({ ok: false, erro: 'Pedido inválido.' }, 400)
     if (arquivo.size > 8 * 1024 * 1024) return resp({ ok: false, erro: 'Trecho grande demais.' }, 413)
     const texto = await transcreverArquivo(chave, arquivo, arquivo.name || 'trecho.webm')
