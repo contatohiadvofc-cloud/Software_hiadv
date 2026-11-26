@@ -224,7 +224,7 @@ function html(p: Pagina): string {
         <ul>${outras}<li><a href="/#planos">Planos e preços</a></li></ul>
       </section>
     </main>
-    <footer class="sv-rodape"><p class="sv-largura sv-rodape-fim">© 2026 HiAdv · <a href="/">hiadv.com.br</a> · <a href="/sobre/">Sobre</a> · <a href="/privacidade/">Privacidade e cookies</a></p></footer>
+    <footer class="sv-rodape"><p class="sv-largura sv-rodape-fim">© 2026 HiAdv · <a href="/">hiadv.com.br</a> · <a href="/sobre/">Sobre</a> · <a href="/privacidade/">Privacidade e cookies</a> · <a href="/termos/">Termos de uso</a></p></footer>
     <script type="module" src="/src/site/pagina.ts"></script>
   </body>
 </html>
@@ -239,5 +239,5 @@ ${PAGINAS.map((p) => `  <url><loc>${URL}/${p.slug}/</loc><lastmod>${HOJE}</lastm
   <url><loc>${URL}/privacidade/</loc><lastmod>${HOJE}</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
 </urlset>
 `)
-writeFileSync('scripts/paginas-seo.json', JSON.stringify([...PAGINAS.map((p) => p.slug), 'privacidade']))
+writeFileSync('scripts/paginas-seo.json', JSON.stringify([...PAGINAS.map((p) => p.slug), 'privacidade', 'termos']))
 console.log('páginas de busca geradas:', PAGINAS.length)

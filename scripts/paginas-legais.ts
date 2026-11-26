@@ -43,7 +43,7 @@ const SECOES: Secao[] = [
     `Cada escritório só enxerga os próprios dados. A conexão é sempre criptografada, o acesso é por pessoa com papéis definidos pelo Gestor, as ações importantes ficam registradas e as chaves de integração ficam guardadas em cofre no servidor, nunca no aparelho. Nenhum sistema é totalmente imune a incidentes; se houver um incidente relevante, os afetados e a ANPD serão comunicados como manda a lei.`,
   ]],
   ['Por quanto tempo guardamos', [
-    `Os dados de adesão e de contato ficam guardados enquanto houver relação com você e depois pelo prazo necessário para cumprir obrigações legais ou exercer direitos. Os dados do escritório ficam enquanto durar o contrato; ao final, o escritório pode pedir a exportação e, depois, a exclusão, ressalvado o que a lei mandar guardar.`,
+    `Os dados de adesão e de contato ficam guardados enquanto houver relação com você e depois pelo prazo necessário para cumprir obrigações legais ou exercer direitos. Os dados do escritório ficam enquanto durar o contrato. Depois do cancelamento, eles são arquivados e saem do acesso em até 72 horas; antes disso, o escritório pode pedir a exportação e, depois, a exclusão, ressalvado o que a lei mandar guardar.`,
   ]],
   ['Seus direitos', [
     `Você pode pedir a confirmação de que tratamos os seus dados, o acesso, a correção, a anonimização, o bloqueio ou a eliminação do que for desnecessário, a portabilidade, a informação sobre com quem compartilhamos e a revogação do consentimento (art. 18 da LGPD). Peça pelo e-mail ${CONTATO}. Se os dados forem de um escritório cliente do HiAdv, encaminharemos o pedido ao escritório, que é o controlador.`,
@@ -63,18 +63,49 @@ const SECOES: Secao[] = [
 ]
 
 const esc = (t: string) => t.replace(/&/g, '&amp;').replace(/</g, '&lt;')
-const corpo = SECOES.map(([t, ps], i) => `        <section aria-labelledby="pp-${i}"><h2 id="pp-${i}">${esc(t)}</h2>\n${ps.map((p) => `          <p>${esc(p)}</p>`).join('\n')}\n        </section>`).join('\n')
+const TERMOS: Secao[] = [
+  ['O que é o HiAdv', [
+    `O HiAdv é um software de gestão para escritórios de advocacia, oferecido por assinatura em hiadv.com.br e mantido pelos fundadores Felipe Schena Lanhi e Deividy Ryan de Jesus Batista. Ao aderir, o escritório aceita estes termos e a Política de Privacidade.`,
+  ]],
+  ['Responsabilidade pelo trabalho jurídico', [
+    `O HiAdv organiza, calcula, avisa e prepara rascunhos. Ele não substitui o advogado: a conferência de prazos, publicações, intimações, cálculos, documentos e de qualquer texto preparado pela IA é sempre do advogado responsável pelo processo.`,
+    `Os prazos são calculados com os feriados e as suspensões cadastrados, e as publicações chegam pelas fontes que o escritório liga (OAB, Escavador ou JUDIT). Essas fontes podem atrasar, falhar ou trazer dados incompletos, e feriados locais ou suspensões podem não estar cadastrados. Por isso, o escritório deve conferir os prazos e as publicações nos diários e sistemas oficiais.`,
+    `O HiAdv não responde por perda de prazo, prejuízo processual ou dano decorrente de dado incorreto, incompleto ou atrasado vindo de terceiros, de informação cadastrada pelo próprio escritório ou da falta de conferência pelo advogado. Quando o HiAdv identificar uma falha do próprio sistema, avisa os escritórios afetados, registra a falha e corrige o mais rápido possível.`,
+    `A responsabilidade do HiAdv, quando houver, fica limitada ao valor pago pelo escritório nos 12 meses anteriores ao fato, salvo o que a lei não permitir limitar.`,
+  ]],
+  ['Planos, acessos e preço', [
+    `Cada plano tem os recursos e o número de acessos descritos na página de planos. Acessos além do plano são combinados diretamente com o gerenciamento do HiAdv.`,
+    `O valor do plano é o combinado na adesão. Ele é revisto a cada 2 anos, por um percentual combinado entre os gestores do escritório e o gerenciamento do HiAdv. Melhorias ou recursos novos contratados à parte são cobrados à parte e não alteram o valor do plano.`,
+    `A implantação assistida é opcional, existe só no plano Master e é cobrada uma vez.`,
+  ]],
+  ['Cancelamento', [
+    `Não há fidelidade nem multa. O escritório pode cancelar a qualquer momento, avisando com no mínimo 30 dias de antecedência pelo WhatsApp ou pelo e-mail ${CONTATO}.`,
+    `Antes do fim do contrato, o escritório pode pedir a exportação dos seus dados. Depois do cancelamento, os dados são arquivados e saem do acesso em até 72 horas, como explica a Política de Privacidade.`,
+  ]],
+  ['Suporte', [
+    `O WhatsApp do HiAdv atende todos os dias, inclusive sábados, domingos e feriados, das 8h às 18h. O suporte técnico atende de segunda a sexta, em dias úteis, das 13h às 18h. Adesões, a Central HiAdv e as atualizações do sistema ficam com o fundador Deividy.`,
+  ]],
+  ['Uso adequado', [
+    `O escritório cuida das senhas e dos acessos da própria equipe, cadastra apenas dados que pode tratar e segue as regras da OAB e da LGPD. É proibido tentar acessar dados de outros escritórios, burlar travas de segurança ou usar o HiAdv para captação indevida de clientes.`,
+  ]],
+  ['Mudanças nestes termos', [
+    `Estes termos podem ser atualizados. A data da versão em vigor fica no alto da página, e mudanças relevantes são avisadas no sistema.`,
+  ]],
+]
+
+function gerar(slug: string, titulo: string, trilha: string, descricao: string, secoes: Secao[]) {
+const corpo = secoes.map(([t, ps], i) => `        <section aria-labelledby="pp-${i}"><h2 id="pp-${i}">${esc(t)}</h2>\n${ps.map((p) => `          <p>${esc(p)}</p>`).join('\n')}\n        </section>`).join('\n')
 const marca = '<span class="marca-pasta" aria-hidden="true"><i></i><b>Hi</b></span><span class="marca-nome" aria-hidden="true">Adv</span>'
 const html = `<!doctype html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>Política de Privacidade e Cookies | HiAdv</title>
-    <meta name="description" content="Como o HiAdv trata dados pessoais de visitantes, escritórios e clientes dos escritórios, quais cookies usa e como exercer os seus direitos pela LGPD." />
+    <title>${titulo} | HiAdv</title>
+    <meta name="description" content="${descricao}" />
     <meta name="robots" content="index, follow" />
     <meta name="theme-color" content="#0e0e0e" />
-    <link rel="canonical" href="https://hiadv.com.br/privacidade/" />
+    <link rel="canonical" href="https://hiadv.com.br/${slug}/" />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" href="/icons/favicon-96.png" sizes="96x96" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -86,20 +117,23 @@ const html = `<!doctype html>
     </div></header>
     <main id="conteudo" class="sv-seo sv-legal">
       <div class="sv-largura">
-        <nav class="sv-seo-trilha" aria-label="Você está em"><a href="/">HiAdv</a> / <span>Política de Privacidade</span></nav>
-        <h1>Política de Privacidade e Cookies</h1>
+        <nav class="sv-seo-trilha" aria-label="Você está em"><a href="/">HiAdv</a> / <span>${trilha}</span></nav>
+        <h1>${titulo}</h1>
         <p class="sv-legal-versao">Versão de ${VERSAO}</p>
 ${corpo}
       </div>
     </main>
-    <footer class="sv-rodape"><p class="sv-largura sv-rodape-fim">© 2026 HiAdv · Felipe Schena Lanhi e Deividy Ryan de Jesus Batista · <a href="mailto:${CONTATO}">${CONTATO}</a></p></footer>
+    <footer class="sv-rodape"><p class="sv-largura sv-rodape-fim">© 2026 HiAdv · Felipe Schena Lanhi e Deividy Ryan de Jesus Batista · <a href="mailto:${CONTATO}">${CONTATO}</a> · <a href="/privacidade/">Privacidade</a> · <a href="/termos/">Termos de uso</a></p></footer>
     <script type="module" src="/src/site/pagina.ts"></script>
   </body>
 </html>
 `
-mkdirSync('privacidade', { recursive: true })
-writeFileSync('privacidade/index.html', html)
+mkdirSync(slug, { recursive: true })
+writeFileSync(`${slug}/index.html`, html)
 // entra no build e no sitemap junto com as páginas de busca
 const lista: string[] = JSON.parse(readFileSync('scripts/paginas-seo.json', 'utf8'))
-if (!lista.includes('privacidade')) writeFileSync('scripts/paginas-seo.json', JSON.stringify([...lista, 'privacidade']))
-console.log('política gerada')
+if (!lista.includes(slug)) writeFileSync('scripts/paginas-seo.json', JSON.stringify([...lista, slug]))
+}
+gerar('privacidade', 'Política de Privacidade e Cookies', 'Política de Privacidade', 'Como o HiAdv trata dados pessoais de visitantes, escritórios e clientes dos escritórios, quais cookies usa e como exercer os seus direitos pela LGPD.', SECOES)
+gerar('termos', 'Termos de Uso', 'Termos de Uso', 'Regras de uso do HiAdv: responsabilidade pelo trabalho jurídico, planos, preço, cancelamento sem fidelidade e suporte.', TERMOS)
+console.log('política e termos gerados')
