@@ -114,7 +114,8 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/app.html',
         // o site de apresentação e os vídeos não passam pelo aplicativo
-        navigateFallbackDenylist: [/^\/$/, /^\/index\.html$/, /^\/video\//, /^\/mp(\/|$)/, /^\/meu-processo/, ...PAGINAS_SEO.map((p) => new RegExp(`^/${p}(/|$)`))],
+        // o Workbox compara caminho + parâmetros ("/?v=1"): o site público nunca pode cair no app
+        navigateFallbackDenylist: [/^\/(\?.*)?$/, /^\/index\.html(\?.*)?$/, /^\/video\//, /^\/mp(\/|\?|$)/, /^\/meu-processo/, ...PAGINAS_SEO.map((p) => new RegExp(`^/${p}(/|\\?|$)`))],
         // Dados do escritório nunca ficam no cache do aparelho: só os arquivos do aplicativo.
         runtimeCaching: [],
         globPatterns: ['**/*.{js,css,html,woff2,png,svg}'],
