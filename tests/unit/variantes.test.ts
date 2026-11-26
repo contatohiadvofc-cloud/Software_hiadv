@@ -13,3 +13,13 @@ describe('variantes do site', () => {
     expect(embaralhar('a b', 0, () => 0)[1]).toBe(' ')
   })
 })
+
+import { CAPITULOS, trecho } from '../../src/site/balanca'
+describe('modelo 7 · balança', () => {
+  it('tem os capítulos do roteiro na ordem', () => {
+    expect(CAPITULOS.map((c) => c.id)).toEqual(['abertura', 'peso', 'equilibrio', 'processos', 'controladoria', 'gestao', 'time', 'lucros', 'fim'])
+  })
+  it('mede o andamento de cada trecho', () => {
+    expect(trecho(0, 1, 2)).toBe(0); expect(trecho(3, 1, 2)).toBe(1); expect(trecho(1.5, 1, 2)).toBeCloseTo(0.5)
+  })
+})

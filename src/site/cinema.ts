@@ -18,6 +18,7 @@ export const MODELOS = {
   '4': 'Pilha de telas',
   '5': 'Galeria 3D',
   '6': 'Manifesto em movimento',
+  '7': 'A balança',
 } as const
 export type Modelo = keyof typeof MODELOS
 
@@ -50,7 +51,8 @@ export function montarCinema(doc: Document, win: Window & typeof globalThis, mod
     }))
   }
 
-  ;({ '1': abertura, '2': palavraJanela, '3': travessia, '4': pilha, '5': galeria3d, '6': manifesto } as const)[modelo](doc, win, cena, reduzir)
+  ;if (modelo === '7') void import('./balanca').then((b) => { b.montarBalanca(cena, win, reduzir); ScrollTrigger.refresh() })
+  else ({ '1': abertura, '2': palavraJanela, '3': travessia, '4': pilha, '5': galeria3d, '6': manifesto } as const)[modelo](doc, win, cena, reduzir)
 
   // Títulos do resto da página: linhas sobem de dentro de uma máscara
   if (!reduzir) doc.querySelectorAll<HTMLElement>('main > section:not(.cn) h2:not(.sr-only)').forEach((t) => {

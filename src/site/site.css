@@ -728,3 +728,25 @@ html.lenis, html.lenis body { height: auto; }
 .cn6-segue { position: fixed; left: 0; top: 0; width: 320px; aspect-ratio: 16/10; object-fit: cover; border-radius: 12px; pointer-events: none; opacity: 0; transform: scale(.8); z-index: 25; box-shadow: 0 30px 60px rgb(0 0 0 / .5); }
 @media (pointer: coarse) { .cn6-segue { display: none; } }
 .cn2-fundo img { filter: brightness(1.25) saturate(1.1); }
+
+/* 7 · A balança */
+.cn-7 { background: #0b0a0a; overflow: visible; }
+.cn7-palco { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.cn7-canvas { display: block; width: 100%; height: 100%; }
+.cn7-vinheta { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgb(11 10 10 / .85) 100%), linear-gradient(180deg, transparent 75%, #0b0a0a 100%); }
+.cn7-caps { position: relative; margin-top: -100vh; margin-top: -100svh; z-index: 2; }
+.cn7-cap { min-height: 130vh; display: flex; align-items: center; padding: 0 max(5vw, 20px); }
+.cn7-cap:first-child { min-height: 110vh; }
+.cn7-cap[data-lado="dir"] { justify-content: flex-end; }
+.cn7-cap[data-lado="centro"] { justify-content: center; text-align: center; }
+.cn7-cap[data-lado="centro"] .cn-acoes { justify-content: center; }
+.cn7-bloco { max-width: 460px; padding: 28px 30px; border-radius: 18px; background: linear-gradient(160deg, rgb(20 16 17 / .72), rgb(20 16 17 / .38)); backdrop-filter: blur(14px) saturate(1.2);
+  border: 1px solid rgb(179 53 79 / .28); box-shadow: 0 30px 80px rgb(0 0 0 / .45); }
+.cn7-cap[data-lado="centro"] .cn7-bloco { max-width: 760px; background: none; border: 0; box-shadow: none; backdrop-filter: none; }
+.cn7-cap:first-child .cn7-bloco { align-self: flex-start; margin-top: 12vh; }
+.cn7-bloco h1 { margin-inline: auto; text-shadow: 0 8px 40px #000; }
+.cn7-bloco h2 { font-size: clamp(28px, 3.2vw, 46px); line-height: 1.05; margin: 0 0 14px; letter-spacing: -0.025em; }
+.cn7-bloco p { color: #d8d4d4; margin: 0 0 6px; font-size: 17px; }
+.cn7-num { display: inline-block; font-weight: 700; color: #e07a92; letter-spacing: .08em; margin-bottom: 14px; border-bottom: 1px solid #7a1f33; padding-bottom: 4px; }
+.cn-7 .cn-sobre { color: #e07a92; }
+@media (max-width: 760px) { .cn7-cap, .cn7-cap[data-lado="dir"] { justify-content: center; align-items: flex-end; padding-bottom: 12vh; } .cn7-bloco { max-width: none; } .cn7-cap:first-child .cn7-bloco { margin-top: 8vh; } }
