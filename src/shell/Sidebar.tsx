@@ -19,7 +19,7 @@ export function Sidebar() {
 
   return (
     <nav className="lateral" aria-label="Navegação principal">
-      <div className="lateral-topo"><Marca /></div>
+      <div className="lateral-topo"><Link to="/seu-dia" className="lateral-marca" aria-label="HiAdv: ir para Seu dia" title="Ir para Seu dia"><Marca /></Link></div>
       <OfficeSwitcher />
       <div className="lateral-grupo">
         <Link to="/seu-dia" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>

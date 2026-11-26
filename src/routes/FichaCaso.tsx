@@ -20,7 +20,9 @@ function Entrada({ d, valor, erro, aoMudar }: { d: CampoDef; valor: string; erro
   let controle
   if (d.tipo === 'texto_longo') controle = <textarea {...comum} className="hv-input textarea" rows={4} value={valor} onChange={(e) => aoMudar(e.target.value)} />
   else if (d.tipo === 'lista' || d.tipo === 'sim_nao') {
-    const opcoes = d.tipo === 'sim_nao' ? [['true', 'Sim'], ['false', 'Não']] : (d.opcoes ?? []).map((o) => [o, o])
+    const base = d.tipo === 'sim_nao' ? [['true', 'Sim'], ['false', 'Não']] : (d.opcoes ?? []).map((o) => [o, o])
+    // valor antigo digitado à mão continua aparecendo e pode ser mantido
+    const opcoes = valor && !base.some(([v]) => v === valor) ? [[valor, `${valor} (anterior)`], ...base] : base
     controle = (
       <select {...comum} className="hv-input" value={valor} onChange={(e) => aoMudar(e.target.value)}>
         <option value="">–</option>
@@ -61,7 +63,8 @@ function SecaoCampos({ id, titulo, defs, valores, vazio, aoSalvar }: {
   function enviar(e: FormEvent) {
     e.preventDefault()
     const novos: Record<string, string> = {}
-    for (const d of defs) { const m = validarCampo(d, rascunho[d.chave] ?? ''); if (m) novos[d.chave] = m }
+    // só confere o que mudou: um valor antigo fora da lista continua valendo até alguém trocar
+    for (const d of defs) { const v = rascunho[d.chave] ?? ''; if (v === valorParaEdicao(d, valores[d.chave])) continue; const m = validarCampo(d, v); if (m) novos[d.chave] = m }
     setErros(novos)
     if (Object.keys(novos).length) return
     const mudou = diferencas(defs, valores, rascunho)

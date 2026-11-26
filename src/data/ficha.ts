@@ -62,6 +62,9 @@ export function valorParaEdicao(d: CampoDef, v: unknown): string {
 
 export const AREAS_PREVIDENCIARIAS = ['administrativo', 'judicial']
 
+/** Causas mais comuns no auxílio-acidente (lista padrão; "Outra causa" cobre o resto). */
+export const CAUSAS_ACIDENTE = ['Acidente de trabalho típico', 'Acidente de trajeto', 'Acidente de trânsito (moto)', 'Acidente de trânsito (carro)', 'Atropelamento', 'Queda de altura', 'Queda da própria altura', 'Acidente com máquina ou ferramenta', 'Acidente rural ou com animal', 'Acidente doméstico', 'Acidente esportivo', 'Agressão', 'Doença ocupacional (LER/DORT)', 'Outra causa']
+
 /** Campos do benefício (colunas do caso), na ordem em que aparecem na ficha. */
 export const BENEFICIO_DEFS: CampoDef[] = [
   { chave: 'nb', rotulo: 'NB', tipo: 'texto', opcoes: null, ordem: 1, noCartao: false },
@@ -69,9 +72,9 @@ export const BENEFICIO_DEFS: CampoDef[] = [
   { chave: 'dib', rotulo: 'DIB', tipo: 'data', opcoes: null, ordem: 3, noCartao: false },
   { chave: 'dcb', rotulo: 'DCB', tipo: 'data', opcoes: null, ordem: 4, noCartao: false },
   { chave: 'data_acidente', rotulo: 'Data do acidente', tipo: 'data', opcoes: null, ordem: 5, noCartao: false },
-  { chave: 'uf', rotulo: 'UF', tipo: 'texto', opcoes: null, ordem: 6, noCartao: false },
+  { chave: 'uf', rotulo: 'UF', tipo: 'lista', opcoes: ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'], ordem: 6, noCartao: false },
   { chave: 'profissao_epoca', rotulo: 'Profissão na época', tipo: 'texto', opcoes: null, ordem: 7, noCartao: false },
-  { chave: 'causa_acidente', rotulo: 'Causa do acidente', tipo: 'texto', opcoes: null, ordem: 8, noCartao: false },
+  { chave: 'causa_acidente', rotulo: 'Causa do acidente', tipo: 'lista', opcoes: CAUSAS_ACIDENTE, ordem: 8, noCartao: false },
   { chave: 'sequela', rotulo: 'Sequela', tipo: 'texto_longo', opcoes: null, ordem: 9, noCartao: false },
 ]
 

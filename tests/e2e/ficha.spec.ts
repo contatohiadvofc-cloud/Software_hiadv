@@ -87,10 +87,10 @@ test('previdenciário: dados do benefício editáveis e checklist com data do do
   await expect(f.getByRole('heading', { name: 'Dados da área' })).toHaveCount(0)
   await f.getByRole('button', { name: 'Editar dados do benefício' }).click()
   await f.getByLabel('DIB').fill('2024-03-01')
-  await f.getByLabel('UF').fill('sc')
+  await f.getByLabel('UF').selectOption('SC')
   await f.getByRole('button', { name: 'Salvar', exact: true }).click()
   await expect(page.getByText('2 campos salvos.')).toBeVisible()
-  expect(est.beneficios[0]).toEqual({ p_caso: 'k9', p: { dib: '2024-03-01', uf: 'sc' } })
+  expect(est.beneficios[0]).toEqual({ p_caso: 'k9', p: { dib: '2024-03-01', uf: 'SC' } })
 
   await f.getByRole('button', { name: 'Marcar Procuração assinada' }).click()
   await f.getByLabel('Data do documento').fill('2026-11-10')
