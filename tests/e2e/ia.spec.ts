@@ -84,3 +84,17 @@ test('IA aprende com o escritório: a equipe avalia e o gestor aprova a orienta�
   await page.getByRole('button', { name: 'Aprovar e ligar' }).click()
   expect(estado.rpcs.find((x) => x.nome === 'ia_orientacao_salvar')?.corpo).toMatchObject({ p_feedback: 5, p_acao: 'quesitos' })
 })
+
+test('gestor exporta todos os dados do escritório num ZIP', async ({ page }) => {
+  const estado = await simularSupabase(page, { clientes, meusRecursos: { plano: 'supremo', situacao: 'ativo', recursos: TUDO } })
+  await entrar(page)
+  await expect(page).toHaveURL(/\/seu-dia$/)
+  await page.goto('/configuracoes')
+  await page.getByRole('button', { name: /Rotina da equipe/ }).click()
+  const baixou = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Exportar todos os dados' }).click()
+  const d = await baixou
+  expect(d.suggestedFilename()).toMatch(/^\d{4}_\d{2}_\d{2}-hiadv-.+\.zip$/)
+  await expect(page.getByText(/baixado, com 1 linhas em 23 tabelas/)).toBeVisible()
+  expect(estado.rpcs.filter((x) => x.nome === 'hiadv_exportar').length).toBe(23)
+})

@@ -226,6 +226,7 @@ export async function simularSupabase(page: Page, c: Cenario = {}) {
       if (nome === 'hiadv_indicacoes') return json(r, c.indicacoes ?? [])
       if (nome === 'hiadv_adesoes') return json(r, c.adesoes ?? [])
       if (nome === 'hiadv_ia_uso_mes') return json(r, { usados: 2, limite: 300 })
+      if (nome === 'hiadv_exportar') { const b = (req.postDataJSON() ?? {}) as { p_tabela?: string; p_pagina?: number }; estado.rpcs.push({ nome, corpo: b as Record<string, unknown> }); return json(r, { linhas: b.p_tabela === 'clientes' && !b.p_pagina ? [{ id: 'c1', nome: 'Bruno Teixeira' }] : [], tamanho: 2000 }) }
       if (nome === 'ia_avaliar' || nome === 'ia_orientacao_salvar' || nome === 'ia_orientacao_ativa' || nome === 'ia_feedback_recusar') { estado.rpcs.push({ nome, corpo: (req.postDataJSON() ?? {}) as Record<string, unknown> }); return json(r, { ok: true, id: 9 }) }
       if (nome === 'ia_aprendizado') return json(r, { pendentes: [{ id: 5, quem: 'ana@exemplo.com', acao: 'quesitos', pedido: 'Quesitos de joelho', comoQueria: 'Numere os quesitos no formato 1 -, 2 - e use no máximo 15.', em: '2026-11-25T14:00:00Z' }], orientacoes: [], resumo: { uteis: 3, naoUteis: 1 } })
       if (nome === 'hiadv_config_google') return json(r, { client_id: null, api_key: null, app_id: null, drive_ligado: false })

@@ -1,4 +1,5 @@
 import { AprendizadoIA } from './AprendizadoIA'
+import { ExportarDados } from './ExportarDados'
 import { Carregando } from '../design/components/Carregando'
 import { Link } from '@tanstack/react-router'
 import { useEffect, useState, type FormEvent } from 'react'
@@ -429,6 +430,7 @@ export function Configuracoes() {
     ] },
     { id: 'rotina', titulo: 'Rotina da equipe', resumo: 'O que pede atenção e o que falhou', secoes: [
       { id: 'regras', titulo: 'Regras de atenção', dica: 'Quando um caso parado ou um prazo entra em “Precisa de atenção”.', corpo: <RegrasDeAtencao /> },
+      ...(gestor ? [{ id: 'exportar', titulo: 'Exportar dados', dica: 'Baixe tudo o que é do escritório, quando quiser.', corpo: <ExportarDados /> }] : []),
       { id: 'falhas', titulo: 'Falhas das automações', dica: 'O que um agente ou o rodízio não conseguiu concluir.', corpo: <Falhas /> },
     ] },
     { id: 'ia', titulo: 'IA e conexões', resumo: claude?.ativo ? 'IA ligada' : 'IA, agentes e integrações', secoes: [

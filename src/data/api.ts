@@ -219,6 +219,7 @@ export interface Api {
   /** IA do plano Sênior (chave da Claude do escritório, no servidor). Devolve o rascunho. */
   iaGerar(p: PedidoIA): Promise<string>
   iaUsoMes(): Promise<{ usados: number; limite: number | null } | null>
+  exportarTabela(tabela: string, pagina: number): Promise<{ linhas: Record<string, unknown>[]; tamanho: number }>
   iaAvaliar(acao: AcaoIA, pedido: string, util: boolean, comoQueria: string): Promise<void>
   iaAprendizado(): Promise<AprendizadoIA>
   iaOrientacaoSalvar(id: number | null, acao: AcaoIA | null, texto: string, feedbackId?: number | null): Promise<number>

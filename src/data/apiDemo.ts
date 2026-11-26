@@ -846,6 +846,14 @@ export function criarApiDemo(): Api {
       return `Rascunho de demonstração (${p.acao}). Na versão real, este texto é escrito pela IA com a chave da Claude do escritório e chega aqui para você revisar.\n\nO pedido enviado teria ${mensagem.length} caracteres.`
     },
     async iaUsoMes() { return { usados: 3, limite: 300 } },
+    async exportarTabela(tabela, pagina) {
+      const exemplo: Record<string, Record<string, unknown>[]> = {
+        clientes: [{ id: 'c1', nome: 'Rita Moura (fictícia)', telefone: '49999990000', criado_em: '2026-09-10T12:00:00Z' }],
+        processos: [{ id: 'p1', numero_cnj: '50012345620264047212', cliente_id: 'c1' }],
+        tarefas: [{ id: 't1', titulo: 'Manifestar sobre o laudo', prazo: '2026-12-05' }],
+      }
+      return { linhas: pagina === 0 ? exemplo[tabela] ?? [] : [], tamanho: 2000 }
+    },
     async iaAvaliar(acao, pedido, util, comoQueria) {
       if (!util && comoQueria.trim()) demoIA.pendentes.unshift({ id: ++demoIA.seq, quem: 'voce@demo.hiadv', acao, pedido: pedido.slice(0, 600), comoQueria: comoQueria.trim(), em: new Date().toISOString() })
       if (util) demoIA.resumo.uteis++; else demoIA.resumo.naoUteis++

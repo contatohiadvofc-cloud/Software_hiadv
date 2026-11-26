@@ -718,6 +718,10 @@ export function criarApiSupabase(url: string, chave: string): Api {
       if (!d?.ok) throw new Error(d?.erro ?? 'A IA não conseguiu responder agora.')
       return String(d.texto ?? '')
     },
+    async exportarTabela(tabela, pagina) {
+      const d = verificar(await sb.rpc('hiadv_exportar', { p_tabela: tabela, p_pagina: pagina })) as { linhas?: Record<string, unknown>[]; tamanho?: number } | null
+      return { linhas: d?.linhas ?? [], tamanho: Number(d?.tamanho ?? 2000) }
+    },
     async iaAvaliar(acao, pedido, util, comoQueria) {
       okOuErro(verificar(await sb.rpc('ia_avaliar', { p_acao: acao, p_pedido: pedido, p_util: util, p_como: comoQueria })))
     },
