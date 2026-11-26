@@ -15,10 +15,12 @@ export function paraCloudflare(caminho: string): string {
 }
 
 /** Conteúdo do _redirects. Só lista rotas do app: arquivos reais (/assets, /site…) nunca são tocados. */
-export function gerarRedirects(rotas: string[], extras: string[] = []): string {
-  const linhas = [...rotas, ...extras].map((r) => `${paraCloudflare(r)} /app 200`)
-  const estaticas = linhas.filter((l) => !l.includes(':'))
-  const dinamicas = linhas.filter((l) => l.includes(':'))
+export function gerarRedirects(rotas: string[], extras: string[] = [], proprios: [string, string][] = []): string {
+  // rotas com destino próprio (ex.: /mp → app do cliente) vêm primeiro: no Cloudflare vale a primeira regra que bate
+  const linhas = [...proprios.map(([de, para]) => `${de} ${para} 200`), ...[...rotas, ...extras].map((r) => `${paraCloudflare(r)} /app 200`)]
+  const dinamica = (l: string) => l.includes(':') || l.includes('*')
+  const estaticas = linhas.filter((l) => !dinamica(l))
+  const dinamicas = linhas.filter(dinamica)
   return ['# Gerado no build (scripts/cloudflare.ts). Não editar à mão.', ...estaticas, ...dinamicas, ''].join('\n')
 }
 

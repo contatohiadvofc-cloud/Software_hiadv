@@ -20,7 +20,7 @@ function primeiraPintura(): Plugin {
     generateBundle(_o, bundle) {
       // as duas páginas: o site de apresentação (index.html) e o aplicativo (app.html)
       const css = Object.entries(bundle).filter(([nome, item]) => item.type === 'asset' && nome.endsWith('.css'))
-      for (const pagina of ['index.html', 'app.html', ...PAGINAS_SEO.map((p) => `${p}/index.html`)]) {
+      for (const pagina of ['index.html', 'app.html', 'meu-processo.html', ...PAGINAS_SEO.map((p) => `${p}/index.html`)]) {
         const html = bundle[pagina]
         if (!html || html.type !== 'asset') continue
         let fonte = String(html.source)
@@ -44,6 +44,7 @@ function primeiraPintura(): Plugin {
 function rotasDoApp(): Plugin {
   const reescrever = (req: { url?: string }, _res: unknown, next: () => void) => {
     const caminho = (req.url ?? '/').split('?')[0]
+    if (caminho === '/mp' || caminho.startsWith('/mp/')) { req.url = '/meu-processo.html'; return next() }
     if (PAGINAS_SEO.some((p) => caminho === `/${p}` || caminho === `/${p}/`)) { if (!caminho.endsWith('/')) req.url = `${caminho}/`; req.url += 'index.html' } else if (caminho !== '/' && caminho !== '/index.html' && caminho !== '/CNAME' && !/\.[a-z0-9]+$/i.test(caminho) && !caminho.startsWith('/@') && !caminho.startsWith('/src/') && !caminho.startsWith('/node_modules/')) req.url = '/app.html' + (req.url?.slice(caminho.length) ?? '')
     next()
   }
@@ -55,7 +56,7 @@ function rotasDoApp(): Plugin {
       if (app && app.type === 'asset' && opts.dir) writeFileSync(opts.dir + '/404.html', String(app.source))
       // Cloudflare Pages: rotas do app com status 200 e cabeçalhos de segurança
       if (app && opts.dir) {
-        writeFileSync(opts.dir + '/_redirects', gerarRedirects(rotasDoCodigo(readFileSync(new URL('./src/app.tsx', import.meta.url), 'utf8')), ['/experimentar']))
+        writeFileSync(opts.dir + '/_redirects', gerarRedirects(rotasDoCodigo(readFileSync(new URL('./src/app.tsx', import.meta.url), 'utf8')), ['/experimentar'], [['/mp', '/meu-processo'], ['/mp/*', '/meu-processo']]))
         writeFileSync(opts.dir + '/_headers', gerarHeaders())
       }
     },
@@ -82,7 +83,7 @@ export default defineConfig({
   } : undefined,
   base: previa ? './' : '/',
   appType: 'mpa',
-  build: { rollupOptions: { input: previa ? { app: 'app.html' } : { index: 'index.html', app: 'app.html', ...Object.fromEntries(PAGINAS_SEO.map((p) => [p, `${p}/index.html`])) } } },
+  build: { rollupOptions: { input: previa ? { app: 'app.html' } : { index: 'index.html', app: 'app.html', mp: 'meu-processo.html', ...Object.fromEntries(PAGINAS_SEO.map((p) => [p, `${p}/index.html`])) } } },
   plugins: [
     react(),
     rotasDoApp(),
@@ -113,7 +114,7 @@ export default defineConfig({
       workbox: {
         navigateFallback: '/app.html',
         // o site de apresentação e os vídeos não passam pelo aplicativo
-        navigateFallbackDenylist: [/^\/$/, /^\/index\.html$/, /^\/video\//, ...PAGINAS_SEO.map((p) => new RegExp(`^/${p}(/|$)`))],
+        navigateFallbackDenylist: [/^\/$/, /^\/index\.html$/, /^\/video\//, /^\/mp(\/|$)/, /^\/meu-processo/, ...PAGINAS_SEO.map((p) => new RegExp(`^/${p}(/|$)`))],
         // Dados do escritório nunca ficam no cache do aparelho: só os arquivos do aplicativo.
         runtimeCaching: [],
         globPatterns: ['**/*.{js,css,html,woff2,png,svg}'],

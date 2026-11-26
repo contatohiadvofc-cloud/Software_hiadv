@@ -62,10 +62,10 @@ test('atendimentos: virou cliente abre o caso e leva para a página do cliente',
 test('cliente: gera link de acompanhamento, envia pelo WhatsApp e desativa', async ({ page }) => {
   const estado = await simularSupabase(page, { clientes })
   await ir(page, '/clientes/c1')
-  const painel = page.getByRole('region', { name: 'Acompanhamento pelo cliente' })
-  await painel.getByRole('button', { name: 'Gerar link de acompanhamento' }).click()
+  const painel = page.getByRole('region', { name: 'Meu Processo (app do cliente)' })
+  await painel.getByRole('button', { name: 'Gerar link do Meu Processo' }).click()
   const link = painel.getByLabel('Link do cliente')
-  await expect(link).toHaveValue(new RegExp(`/acompanhar/${'f'.repeat(64)}$`))
+  await expect(link).toHaveValue(new RegExp(`/mp/${'f'.repeat(64)}$`))
   const wa = await painel.getByRole('link', { name: 'Enviar pelo WhatsApp' }).getAttribute('href')
   expect(wa).toContain('https://wa.me/5549999110002?text=')
   expect(decodeURIComponent(wa!)).toContain('Olá, Bruno!')

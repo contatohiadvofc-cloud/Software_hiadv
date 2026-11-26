@@ -31,6 +31,7 @@ const LAcompanhar = lazyRouteComponent(() => import('./routes/Acompanhar'), 'Aco
 const LIntegracoes = lazyRouteComponent(() => import('./routes/Integracoes'), 'Integracoes')
 const LConfiguracoes = lazyRouteComponent(() => import('./routes/Configuracoes'), 'Configuracoes')
 const LRecrutamento = lazyRouteComponent(() => import('./routes/Recrutamento'), 'Recrutamento')
+const LSuporte = lazyRouteComponent(() => import('./routes/Suporte'), 'Suporte')
 const LVagaPublica = lazyRouteComponent(() => import('./routes/VagaPublica'), 'VagaPublica')
 const LResposta = lazyRouteComponent(() => import('./routes/RespostaCandidato'), 'RespostaCandidato')
 const LManualCoder = lazyRouteComponent(() => import('./routes/ManualCoder'), 'ManualCoder')
@@ -79,12 +80,13 @@ const central = createRoute({ getParentRoute: () => dentro, path: '/central', co
 const manual = createRoute({ getParentRoute: () => dentro, path: '/manual', component: LManual, head: () => ({ meta: [{ title: 'Manual · HiAdv' }] }) })
 const adesoes = createRoute({ getParentRoute: () => dentro, path: '/adesoes', component: LAdesoes, head: () => ({ meta: [{ title: 'Adesões · HiAdv' }] }) })
 const recrutamento = createRoute({ getParentRoute: () => dentro, path: '/recrutamento', component: LRecrutamento, head: () => ({ meta: [{ title: 'Recrutamento · HiAdv' }] }) })
+const suporte = createRoute({ getParentRoute: () => dentro, path: '/suporte', component: LSuporte, head: () => ({ meta: [{ title: 'Suporte ao cliente · HiAdv' }] }) })
 const manualCoder = createRoute({ getParentRoute: () => dentro, path: '/central/manuais', component: LManualCoder, head: () => ({ meta: [{ title: 'Manuais do Coder · HiAdv' }] }) })
 const vagaPublica = createRoute({ getParentRoute: () => raiz, path: '/vagas/$escritorio/$vaga', component: LVagaPublica, head: () => ({ meta: [{ title: 'Vaga' }, { name: 'referrer', content: 'no-referrer' }] }) })
 const resposta = createRoute({ getParentRoute: () => raiz, path: '/resposta/$token', component: LResposta, head: () => ({ meta: [{ title: 'Resposta' }, { name: 'robots', content: 'noindex' }, { name: 'referrer', content: 'no-referrer' }] }) })
 const naoEncontrada = createRoute({ getParentRoute: () => raiz, path: '$', beforeLoad: () => { throw redirect({ to: '/seu-dia', replace: true }) } })
 
-const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, vagaPublica, resposta, dentro.addChildren([recrutamento, manualCoder, seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, conversas, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, integracoes, configuracoes, manual, area, listaAreas]), naoEncontrada])
+const arvore = raiz.addChildren([inicio, login, catalogo, acompanhar, aderir, vagaPublica, resposta, dentro.addChildren([suporte, recrutamento, manualCoder, seuDia, atendimentos, indicar, adesoes, central, tarefas, agenda, conversas, clientes, cliente, biblioteca, publicacoes, financeiro, relatorios, integracoes, configuracoes, manual, area, listaAreas]), naoEncontrada])
 
 export function criarRouter() {
   // A prévia de demonstração roda dentro de uma página hospedada: usa endereços com # para não depender do servidor.

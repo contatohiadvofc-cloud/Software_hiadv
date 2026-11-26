@@ -15,6 +15,10 @@ describe('configuração do Cloudflare', () => {
     expect(linhas).toEqual(['/seu-dia /app 200', '/experimentar /app 200', '/clientes/:id /app 200'])
     expect(r).not.toMatch(/^\/\*\s/m)
   })
+  it('rotas com destino próprio (Meu Processo) entram antes das do app', () => {
+    const linhas = gerarRedirects(['/seu-dia'], [], [['/mp', '/meu-processo'], ['/mp/*', '/meu-processo']]).split('\n').filter((l) => l && !l.startsWith('#'))
+    expect(linhas).toEqual(['/mp /meu-processo 200', '/seu-dia /app 200', '/mp/* /meu-processo 200'])
+  })
   it('_headers protege contra clickjacking e mantém câmera e microfone para o próprio site', () => {
     const h = gerarHeaders()
     expect(h).toContain("frame-ancestors 'self'")

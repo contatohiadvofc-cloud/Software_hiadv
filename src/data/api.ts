@@ -15,6 +15,7 @@ import type { NovoCaso, NovoCliente, ResultadoImportacao } from './cadastro'
 import type { EtapaLead, Lead, NovoLead } from './atendimentos'
 import type { NovasHoras, RegistroHoras } from './horas'
 import type { Portal, SituacaoPortal } from './portal'
+import type { ConversaCliente, GrupoAtualizacoes, MensagemCliente, StatusAtualizacao } from './suporte'
 import type { Candidatura, DadosVaga, Entrevista, Etapa, FormCandidatura, Proposta, RespostaPublica, StatusVaga, TipoResposta, Vaga, VagaPublica } from './recrutamento'
 import type { Adesao, Cortesia, FormAdesao, Indicacao, PlanoId, Respostas, StatusAdesao } from './adesao'
 import type { PedidoIA } from './iaPrompts'
@@ -284,4 +285,15 @@ export interface Api {
   reuniaoCanal(id: string): CanalChamada | null
   /** Servidores de conexão da chamada; sem TURN configurado, volta aos públicos (STUN). */
   reuniaoIce(): Promise<RTCIceServer[]>
+  /** Mesa do Suporte: gera os rascunhos dos eventos novos (não repete) e devolve quantos surgiram. */
+  suporteGerar(): Promise<number>
+  suporteFila(status: StatusAtualizacao): Promise<GrupoAtualizacoes[]>
+  suporteSalvar(id: string, titulo: string, texto: string): Promise<void>
+  suporteDescartar(ids: string[]): Promise<number>
+  /** Um clique: cada rascunho vai só para o Meu Processo do próprio cliente. */
+  suportePublicar(ids: string[]): Promise<{ publicadas: number; clientes: number }>
+  suporteNova(clienteId: string, titulo: string, texto: string): Promise<string>
+  suporteConversas(): Promise<ConversaCliente[]>
+  suporteMensagens(clienteId: string): Promise<MensagemCliente[]>
+  suporteResponder(clienteId: string, texto: string): Promise<void>
 }

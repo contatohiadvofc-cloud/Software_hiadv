@@ -57,7 +57,7 @@ describe('horas', () => {
 describe('acompanhamento', () => {
   const tok = 'a'.repeat(64)
   it('monta o link e a mensagem', () => {
-    expect(linkPortal('https://hiadv.com.br/', tok)).toBe(`https://hiadv.com.br/acompanhar/${tok}`)
+    expect(linkPortal('https://hiadv.com.br/', tok)).toBe(`https://hiadv.com.br/mp/${tok}`)
     expect(linkPortal('https://x.app', tok, true)).toBe(`https://x.app/#/acompanhar/${tok}`)
     const m = mensagemPortal('Rita Moura', 'Silva & Prado', 'L')
     expect(m).toContain('Olá, Rita!')

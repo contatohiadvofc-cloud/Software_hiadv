@@ -18,6 +18,7 @@ import type { Relatorio } from './relatorios'
 import type { Lead } from './atendimentos'
 import type { RegistroHoras } from './horas'
 import type { Portal } from './portal'
+import type { GrupoAtualizacoes, MensagemCliente } from './suporte'
 import type { Adesao, Indicacao, PlanoId } from './adesao'
 import type { Candidatura, RespostaPublica, Vaga } from './recrutamento'
 import { termoBusca, type ClienteFicha, type ClienteResumo } from './clientes'
@@ -808,6 +809,18 @@ export function criarApiSupabase(url: string, chave: string): Api {
     async grupoRemover(conversa, email) { okOuErro(verificar(await sb.rpc('chat_grupo_remover', { p_conversa: conversa, p_email: email }))) },
     async grupoAdmin(conversa, email, admin) { okOuErro(verificar(await sb.rpc('chat_grupo_admin', { p_conversa: conversa, p_email: email, p_admin: admin }))) },
     async grupoSair(conversa) { okOuErro(verificar(await sb.rpc('chat_grupo_sair', { p_conversa: conversa }))) },
+    async suporteGerar() { const r = okOuErro(verificar(await sb.rpc('suporte_gerar'))); return Number(r.novas ?? 0) },
+    async suporteFila(status) { return (verificar(await sb.rpc('suporte_fila', { p_status: status })) ?? []) as GrupoAtualizacoes[] },
+    async suporteSalvar(id, titulo, texto) { okOuErro(verificar(await sb.rpc('suporte_salvar', { p_id: id, p_titulo: titulo, p_texto: texto }))) },
+    async suporteDescartar(ids) { const r = okOuErro(verificar(await sb.rpc('suporte_descartar', { p_ids: ids }))); return Number(r.descartadas ?? 0) },
+    async suportePublicar(ids) { const r = okOuErro(verificar(await sb.rpc('suporte_publicar', { p_ids: ids }))); return { publicadas: Number(r.publicadas ?? 0), clientes: Number(r.clientes ?? 0) } },
+    async suporteNova(clienteId, titulo, texto) { const r = okOuErro(verificar(await sb.rpc('suporte_nova', { p_cliente: clienteId, p_titulo: titulo, p_texto: texto }))); return String(r.id) },
+    async suporteConversas() {
+      const l = (verificar(await sb.rpc('suporte_conversas')) ?? []) as Record<string, unknown>[]
+      return l.map((x) => ({ clienteId: String(x.cliente_id), nome: String(x.nome ?? ''), ultimaEm: String(x.ultima_em), ultima: String(x.ultima ?? ''), naoLidas: Number(x.nao_lidas ?? 0) }))
+    },
+    async suporteMensagens(clienteId) { return (verificar(await sb.rpc('suporte_mensagens', { p_cliente: clienteId })) ?? []) as MensagemCliente[] },
+    async suporteResponder(clienteId, texto) { okOuErro(verificar(await sb.rpc('suporte_responder', { p_cliente: clienteId, p_texto: texto }))) },
     async chatLido(conversa) { verificar(await sb.rpc('chat_lido', { p_conversa: conversa })) },
     async chatReagir(msg, emoji) { verificar(await sb.rpc('chat_reagir', { p_id: msg, p_emoji: emoji })) },
     async chatApagar(msg) { verificar(await sb.rpc('chat_cancelar_envio', { p_id: msg })) },

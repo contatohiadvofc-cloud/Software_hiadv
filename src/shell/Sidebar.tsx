@@ -75,6 +75,11 @@ export function Sidebar() {
           </Link>
         )}
         {!!perfil && (
+          <Link to="/suporte" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
+            <Icone d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2zM8 9h8M8 13h5" />Suporte ao cliente
+          </Link>
+        )}
+        {!!perfil && (
           <Link to="/recrutamento" className="lateral-item" activeProps={{ 'aria-current': 'page' }}>
             <Icone d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" />Recrutamento
           </Link>

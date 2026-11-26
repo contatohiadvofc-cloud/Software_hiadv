@@ -37,9 +37,9 @@ export function AcompanhamentoCliente({ cliente }: { cliente: { id: string; nome
   }
   const s = sit.data
   return (
-    <Panel title="Acompanhamento pelo cliente" labelId="cli-acomp">
+    <Panel title="Meu Processo (app do cliente)" labelId="cli-acomp">
       <div className="hv-panel-body catalogo-pilha">
-        <p className="muted">O cliente abre um link pessoal (sem senha) e vê a fase do caso em linguagem simples e os próximos compromissos. Não aparece nenhum documento nem anotação interna.</p>
+        <p className="muted">O cliente abre o link pessoal (sem senha) e instala o app Meu Processo: vê a etapa do caso em linguagem simples, os compromissos, os documentos que faltam, as novidades que o Suporte publicar e conversa com a equipe. Nenhuma anotação interna aparece.</p>
         {s?.ativo && !link && <p className="hv-hint">Link ativo até {dataTela(s.expiraEm!.slice(0, 10))}. {s.acessos ? `Aberto ${s.acessos} ${s.acessos === 1 ? 'vez' : 'vezes'}.` : 'Ainda não foi aberto.'} Por segurança, o link só aparece quando é gerado; gere um novo para enviar de novo.</p>}
         {link && <>
           <div className="hv-field">
@@ -54,7 +54,7 @@ export function AcompanhamentoCliente({ cliente }: { cliente: { id: string; nome
           {!wa && <p className="hv-hint">Cadastre o telefone do cliente para enviar direto pelo WhatsApp.</p>}
         </>}
         <div className="catalogo-linha">
-          <Button size="sm" variant={link ? 'ghost' : 'secondary'} loading={gerar.isPending} onClick={() => gerar.mutate()}>{s?.ativo || link ? 'Gerar link novo' : 'Gerar link de acompanhamento'}</Button>
+          <Button size="sm" variant={link ? 'ghost' : 'secondary'} loading={gerar.isPending} onClick={() => gerar.mutate()}>{s?.ativo || link ? 'Gerar link novo' : 'Gerar link do Meu Processo'}</Button>
           {(s?.ativo || link) && <Button size="sm" variant="ghost" loading={revogar.isPending} onClick={() => revogar.mutate()}>Desativar link</Button>}
         </div>
       </div>

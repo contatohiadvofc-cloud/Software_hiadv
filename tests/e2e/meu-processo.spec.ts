@@ -1,0 +1,79 @@
+import { test, expect, type Page } from '@playwright/test'
+
+async function ir(page: Page, rota: string) {
+  await page.evaluate((r) => { history.pushState(null, '', r); dispatchEvent(new PopStateEvent('popstate')) }, rota)
+}
+
+test('Meu Processo (demonstração): etapa, compromisso, novidades e conversa', async ({ page }) => {
+  const erros: string[] = []; page.on('pageerror', (e) => erros.push(e.message))
+  await page.goto('/mp/demo')
+  await expect(page).toHaveURL(/\/mp#demo$/)
+  await expect(page.getByRole('heading', { name: 'Olá, Rita' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Aguardando a perícia' })).toBeVisible()
+  await expect(page.locator('[aria-current="step"]')).toContainText('Perícia ou audiência')
+  await expect(page.getByText(/Perícia em \d+ dias/)).toBeVisible()
+  await expect(page.getByText('Exame de raio-X do joelho')).toBeVisible()
+  await expect(page.getByText('1 nova')).toBeVisible()
+  const larg = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+  expect(larg).toBeLessThanOrEqual(1)
+  await page.getByRole('button', { name: /Conversa/ }).click()
+  await expect(page.getByText('Preciso levar alguma coisa na perícia?')).toBeVisible()
+  await page.getByRole('textbox', { name: 'Escreva sua mensagem' }).fill('Posso levar meu marido junto?')
+  await page.getByRole('button', { name: 'Enviar' }).click()
+  await expect(page.getByText('Posso levar meu marido junto?')).toBeVisible()
+  await page.getByRole('button', { name: /Meu caso/ }).click()
+  await expect(page.getByRole('heading', { name: 'Olá, Rita' })).toBeVisible()
+  expect(erros).toEqual([])
+})
+
+test('Meu Processo sem link: explica como entrar', async ({ page }) => {
+  await page.goto('/mp')
+  await expect(page.getByRole('heading', { name: 'Meu Processo' })).toBeVisible()
+  await expect(page.getByText(/link pessoal que o seu escritório enviou/)).toBeVisible()
+})
+
+test('Mesa do Suporte (prévia): edita, desmarca um, publica e responde o cliente', async ({ page }) => {
+  await page.goto('/experimentar')
+  await page.waitForURL(/seu-dia/)
+  await ir(page, '/suporte')
+  await expect(page.getByRole('heading', { name: 'Suporte ao cliente' })).toBeVisible()
+  await expect(page.getByText('Saiu a sentença do seu processo')).toBeVisible()
+  await expect(page.getByText('Sem link do Meu Processo').first()).toBeVisible()
+  // edita o rascunho da perícia
+  const pericia = page.locator('.sp-item', { hasText: 'Sua perícia foi marcada' })
+  await pericia.getByRole('button', { name: 'Editar' }).click()
+  await page.getByLabel('Título que o cliente vê').fill('Sua perícia está marcada')
+  await page.locator('.sp-editar').getByRole('button', { name: 'Salvar' }).click()
+  await expect(page.getByText('Sua perícia está marcada')).toBeVisible()
+  // desmarca um e publica o resto
+  await page.getByRole('checkbox', { name: /Incluir "O INSS foi chamado/ }).uncheck()
+  await expect(page.getByText(/4 de 5 marcadas/)).toBeVisible()
+  await page.getByRole('button', { name: 'Publicar 4' }).click()
+  await page.getByRole('button', { name: 'Publicar agora' }).click()
+  await expect(page.getByText(/4 atualizações publicadas para 3 clientes/)).toBeVisible()
+  await expect(page.getByText('O INSS foi chamado a responder')).toBeVisible()
+  await page.getByRole('tab', { name: /Publicadas/ }).click()
+  await expect(page.getByText('Sua perícia está marcada')).toBeVisible()
+  // conversa
+  await page.getByRole('tab', { name: /Conversas/ }).click()
+  await page.getByRole('button', { name: /Bruno Teixeira/ }).click()
+  await expect(page.locator('.sp-msg', { hasText: 'O laudo do ortopedista pode ser foto?' })).toBeVisible()
+  await page.getByRole('textbox', { name: 'Responder ao cliente' }).fill('Pode sim, Bruno! Foto legível já serve.')
+  await page.getByRole('button', { name: 'Enviar', exact: true }).click()
+  await expect(page.locator('.sp-msg', { hasText: 'Pode sim, Bruno! Foto legível já serve.' })).toBeVisible()
+})
+
+test('Mesa do Suporte: nova atualização escrita pela equipe vira rascunho', async ({ page }) => {
+  await page.goto('/experimentar')
+  await page.waitForURL(/seu-dia/)
+  await ir(page, '/suporte')
+  await page.getByRole('button', { name: 'Nova atualização' }).click()
+  await page.getByLabel('Cliente', { exact: true }).fill('Jos')
+  await page.getByRole('button', { name: 'José Lima' }).click()
+  await page.getByLabel('Título que o cliente vê').fill('Recebemos os seus documentos')
+  await page.getByLabel(/^Texto/).fill('Vamos garantir que você ganhe')
+  await expect(page.getByText(/Evite promessa de resultado/)).toBeVisible()
+  await page.getByLabel(/^Texto/).fill('Recebemos tudo. Agora a equipe prepara o pedido ao INSS.')
+  await page.getByRole('button', { name: 'Criar rascunho' }).click()
+  await expect(page.locator('.sp-grupo', { hasText: 'José Lima' })).toContainText('Recebemos os seus documentos')
+})

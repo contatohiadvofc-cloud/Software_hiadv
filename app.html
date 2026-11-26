@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="description" content="HiAdv: gestão e fluxo jurídico para advogados. Processos, prazos e peças sob controle." />
     <title>HiAdv</title>
+    <script>
+      // GitHub Pages: /mp/<token> cai neste 404. Leva ao Meu Processo com o token no # (não vai ao servidor).
+      if (/^\/mp(\/|$)/.test(location.pathname)) location.replace('/meu-processo.html#' + location.pathname.replace(/^\/mp\/?/, '') + location.hash.replace(/^#/, ''))
+    </script>
     <meta name="theme-color" content="#0e0e0e" />
         <meta property="og:type" content="website" />
     <meta property="og:site_name" content="HiAdv" />

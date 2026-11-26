@@ -1442,3 +1442,64 @@ h1, h2, .pagina-titulo { font-family:var(--font); font-weight:800; letter-spacin
 .cv-aviso { align-self: center; max-width: 86%; margin: 6px auto; padding: 5px 12px; border-radius: 8px; background: var(--surface-2); color: var(--ink-2); font-size: 12.5px; text-align: center; overflow-wrap: anywhere; }
 .cv-fio-tit-bt { all: unset; cursor: pointer; min-width: 0; flex: 1; border-radius: 8px; }
 .cv-fio-tit-bt:focus-visible { outline: 2px solid var(--focus); }
+
+/* ---------- Mesa do Suporte (atualizações para o Meu Processo) ---------- */
+.sp-conteudo { display: flex; flex-direction: column; gap: var(--s-4); margin-top: var(--s-4); }
+.sp-aba-n { margin-left: 6px; min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font-size: var(--fs-xs); line-height: 20px; display: inline-block; text-align: center; }
+.sp-barra { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: var(--s-3); flex-wrap: wrap;
+  padding: var(--s-3) var(--s-4); border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); box-shadow: var(--shadow-pop); }
+.sp-barra p { margin: 0; color: var(--ink-2); }
+.sp-acoes { display: flex; gap: var(--s-2); flex-wrap: wrap; align-items: center; }
+.sp-grupos { display: flex; flex-direction: column; gap: var(--s-4); }
+.sp-grupo { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); overflow: hidden; }
+.sp-grupo-cab { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line); background: var(--surface-2); }
+.sp-grupo-nome { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.sp-cliente { font-weight: 700; color: var(--ink); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-cliente:hover { color: var(--accent-text); text-decoration: underline; }
+.sp-aviso { margin: 0; padding: var(--s-2) var(--s-4); background: var(--warning-soft); color: var(--warning); font-size: var(--fs-sm); }
+.sp-itens { list-style: none; margin: 0; padding: 0; }
+.sp-item { display: flex; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-top: 1px solid var(--line); }
+.sp-item:first-child { border-top: 0; }
+.sp-item:not([data-marcado]):not(.sp-item-feito) .sp-corpo { opacity: 0.6; }
+.sp-marca { display: flex; align-items: flex-start; padding-top: 2px; }
+.sp-marca input { width: 20px; height: 20px; accent-color: var(--accent); cursor: pointer; }
+.sp-corpo { display: flex; flex-direction: column; gap: var(--s-2); min-width: 0; flex: 1; }
+.sp-meta { display: flex; gap: var(--s-2); align-items: center; flex-wrap: wrap; font-size: var(--fs-sm); }
+.sp-titulo { margin: 0; font-weight: 700; font-size: var(--fs-md); }
+.sp-texto { margin: 0; color: var(--ink-2); line-height: 1.5; white-space: pre-wrap; }
+.sp-interno { margin: 0; font-size: var(--fs-sm); color: var(--ink-3); }
+.sp-interno span { font-weight: 600; }
+.sp-alertas { margin: 0; padding: var(--s-2) var(--s-3); list-style: none; border-radius: var(--r-sm); background: var(--danger-soft); color: var(--danger); font-size: var(--fs-sm); }
+.sp-editar, .sp-nova, .sp-confirma { display: flex; flex-direction: column; gap: var(--s-3); }
+.sp-confirma p { margin: 0; }
+.sp-achados { list-style: none; margin: var(--s-2) 0 0; padding: 0; border: 1px solid var(--line); border-radius: var(--r-sm); }
+.sp-achados button { all: unset; box-sizing: border-box; display: block; width: 100%; padding: var(--s-2) var(--s-3); cursor: pointer; min-height: var(--touch); }
+.sp-achados button:hover, .sp-achados button:focus-visible { background: var(--surface-2); }
+.sp-escolhido { margin: 0; display: flex; align-items: center; gap: var(--s-2); }
+.sp-chat { display: grid; grid-template-columns: 300px 1fr; min-height: 480px; border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); }
+.sp-chat-lista { list-style: none; margin: 0; padding: 0; border-right: 1px solid var(--line); overflow-y: auto; }
+.sp-chat-item { all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; gap: 2px; width: 100%; padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line); min-height: 64px; }
+.sp-chat-item[aria-current] { background: var(--accent-soft); }
+.sp-chat-item:focus-visible { box-shadow: inset var(--focus); }
+.sp-chat-nome { font-weight: 700; display: flex; justify-content: space-between; gap: var(--s-2); }
+.sp-chat-n { min-width: 20px; padding: 0 6px; border-radius: 999px; background: var(--success); color: #fff; font-size: var(--fs-xs); line-height: 20px; text-align: center; }
+.sp-chat-ultima { font-size: var(--fs-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-chat-fio { display: flex; flex-direction: column; min-width: 0; }
+.sp-chat-vazio { margin: auto; }
+.sp-chat-topo { display: flex; align-items: center; gap: var(--s-2); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line); }
+.sp-chat-voltar { display: none; }
+.sp-chat-msgs { flex: 1; overflow-y: auto; padding: var(--s-4); display: flex; flex-direction: column; gap: var(--s-2); max-height: 60vh; }
+.sp-msg { max-width: 78%; padding: var(--s-2) var(--s-3); border-radius: var(--r); background: var(--surface-2); align-self: flex-start; }
+.sp-msg[data-autor='equipe'], .sp-msg[data-autor='sara'] { align-self: flex-end; background: var(--accent-soft); color: var(--accent-soft-ink); }
+.sp-msg p { margin: 0 0 2px; white-space: pre-wrap; }
+.sp-msg span { font-size: var(--fs-xs); }
+.sp-chat-form { display: flex; gap: var(--s-2); padding: var(--s-3); border-top: 1px solid var(--line); align-items: flex-end; }
+.sp-chat-form textarea { flex: 1; resize: none; }
+@media (max-width: 720px) {
+  .sp-chat { grid-template-columns: 1fr; }
+  .sp-chat[data-aberta] .sp-chat-lista { display: none; }
+  .sp-chat:not([data-aberta]) .sp-chat-fio { display: none; }
+  .sp-chat-voltar { display: inline-flex; }
+  .sp-item { padding: var(--s-3); }
+  .sp-msg { max-width: 88%; }
+}
