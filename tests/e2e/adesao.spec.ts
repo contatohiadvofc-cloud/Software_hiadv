@@ -102,3 +102,28 @@ test('colaborador não vê a tela de adesões', async ({ page }) => {
   await page.goto('/adesoes')
   await expect(page.getByText('Esta tela é da administração do HiAdv.')).toBeVisible()
 })
+
+test('aderir: implantação assistida de 6 semanas segue no pedido', async ({ page }) => {
+  const estado = await simularSupabase(page, { vagas: 17 })
+  await page.goto('/aderir')
+  await page.getByRole('button', { name: 'Começar' }).click()
+  await responder(page, [['Sozinho(a)'], ['Até 100'], ['Uma'], ['Previdenciário'], ['Não perder prazos e intimações']])
+  const assistida = page.getByRole('radio', { name: /Implantação assistida/ })
+  await expect(assistida).toContainText('R$ 8.000,00')
+  await expect(page.getByText('Semana 1 · Diagnóstico e base')).toHaveCount(0)
+  await assistida.click()
+  await expect(assistida).toHaveAttribute('aria-checked', 'true')
+  for (let i = 1; i <= 6; i++) await expect(page.getByText(new RegExp(`^Semana ${i} ·`))).toBeVisible()
+  await expect(page.getByText(/até 10x no cartão de crédito ou 3x no boleto/)).toBeVisible()
+  // nada transborda na largura do aparelho
+  const largo = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
+  expect(largo).toBeLessThanOrEqual(1)
+  await page.getByLabel('Nome completo').fill('Carla Souza')
+  await page.getByLabel('E-mail').fill('carla@exemplo.com')
+  await page.getByLabel('WhatsApp').fill('(49) 98888-1111')
+  await page.getByLabel('Concordo que o HiAdv use estes dados', { exact: false }).check()
+  await page.getByRole('button', { name: 'Pedir adesão' }).click()
+  await expect(page.getByRole('heading', { name: 'Pedido recebido.' })).toBeVisible()
+  const corpo = estado.rpcs.find((x) => x.nome === 'hiadv_adesao_enviar')?.corpo.p as { respostas: Record<string, unknown> }
+  expect(corpo.respostas.implantacao).toBe('assistida')
+})

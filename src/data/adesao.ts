@@ -1,6 +1,6 @@
 // Adesão ao HiAdv: questionário curto, plano recomendado e pedido. Também as indicações com cortesia.
 export type PlanoId = 'pro' | 'premium' | 'senior' | 'supremo'
-export type Respostas = { atuacao?: string; processos?: string; oabs?: string; areas?: string[]; prioridades?: string[] }
+export type Respostas = { atuacao?: string; processos?: string; oabs?: string; areas?: string[]; prioridades?: string[]; implantacao?: 'assistida' | 'sozinho' }
 
 export type Pergunta = { id: keyof Respostas; titulo: string; dica?: string; multipla?: boolean; max?: number; opcoes: { valor: string; rotulo: string }[] }
 
@@ -135,3 +135,17 @@ export type Adesao = {
   plano: PlanoId; recomendado: PlanoId | null; respostas: Respostas; indicadorEmail: string | null; indicadorEscritorio: string | null
   status: StatusAdesao; fundador: boolean; cortesia: Cortesia; obs: string | null; criadoEm: string
 }
+
+/** Implantação assistida: 6 semanas com o Deividy aplicando, integrando, ativando e treinando a equipe. Opcional; quem preferir implanta sozinho pelo Manual. */
+export const IMPLANTACAO = {
+  valor: 8000,
+  pagamento: 'Dinheiro, cartão de débito, Pix, até 10x no cartão de crédito ou 3x no boleto',
+  semanas: [
+    { titulo: 'Semana 1 · Diagnóstico e base', itens: ['Reunião de diagnóstico com os gestores: áreas, funções, fluxo atual e metas', 'Dados do escritório, logo, OABs e equipe cadastrados; papéis e acessos de cada pessoa', 'Treino 1: navegação, Seu dia, busca global, atalhos e aplicativo no celular (Android e iPhone)'] },
+    { titulo: 'Semana 2 · Fluxos e áreas', itens: ['Áreas, etapas e modelos de caso montados por tipo de benefício ou ação', 'Campos personalizados, checklists de entrada e saída e responsáveis por área', 'Treino 2: casos, tarefas, passagem de bastão e prazos com feriados'] },
+    { titulo: 'Semana 3 · Migração dos dados', itens: ['Importação de clientes, casos e prazos da planilha ou do sistema anterior, com conferência', 'Publicações pela OAB ligadas e conferidas com o escritório', 'Treino 3: clientes, documentos, agenda e link de acompanhamento do cliente'] },
+    { titulo: 'Semana 4 · Integrações', itens: ['Conexões ativadas conforme o plano: cobrança, assinatura digital, Google Drive, consulta processual', 'Financeiro e honorários configurados com as regras do escritório', 'Treino 4: financeiro, relatórios e conversas e chamadas da equipe'] },
+    { titulo: 'Semana 5 · Automações e Sara', itens: ['Automações do escritório montadas e simuladas antes de ligar', 'Sara configurada com os limites definidos pelos gestores', 'Treino 5: automações, Sara, recrutamento e atendimentos (do contato ao cliente)'] },
+    { titulo: 'Semana 6 · Rodagem assistida e entrega', itens: ['Uma semana usando no dia a dia com acompanhamento e ajustes finos', 'Revisão de acessos, segurança e cópias de segurança', 'Treino 6: dúvidas finais, gestor sênior e entrega do roteiro do escritório'] },
+  ],
+} as const

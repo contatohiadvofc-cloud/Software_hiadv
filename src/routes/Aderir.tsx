@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { useSearch } from '@tanstack/react-router'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useApi } from '../lib/contexto'
-import { PERGUNTAS, PLANOS, WHATSAPP_HIADV, alternar, codigoValido, plano as dadosPlano, preco, recomendar, validarAdesao,
+import { IMPLANTACAO, PERGUNTAS, PLANOS, WHATSAPP_HIADV, alternar, codigoValido, plano as dadosPlano, preco, recomendar, validarAdesao,
   type FormAdesao, type PlanoId, type Respostas } from '../data/adesao'
 import { Field } from '../design/components/Field'
 
@@ -119,6 +119,29 @@ export function Aderir() {
               <ul className="ad-inclui">{p.destaques.map((d) => <li key={d}>{d}</li>)}</ul>
               <p className="ad-dica">{p.limites}. 14 dias grátis.{fundador ? ' Fundadores ganham a implantação assistida.' : ''} Sem cartão para começar.</p>
             </section>
+
+            {!p.emBreve && (
+              <section className="ad-cartao" aria-labelledby="ad-implantacao">
+                <h2 id="ad-implantacao">Como você quer começar?</h2>
+                <div className="ad-planos" role="radiogroup" aria-labelledby="ad-implantacao">
+                  <button type="button" role="radio" aria-checked={r.implantacao !== 'assistida'} className="ad-plano" onClick={() => setR({ ...r, implantacao: 'sozinho' })}>
+                    <span className="ad-plano-topo"><strong>Implantar sozinho</strong></span>
+                    <span className="ad-resumo">Siga o Manual em Configurações, no seu ritmo. Sem custo extra.</span>
+                  </button>
+                  <button type="button" role="radio" aria-checked={r.implantacao === 'assistida'} className="ad-plano" onClick={() => setR({ ...r, implantacao: 'assistida' })}>
+                    <span className="ad-plano-topo"><strong>Implantação assistida</strong><span className="ad-selo">6 semanas</span></span>
+                    <span className="ad-preco">{preco(IMPLANTACAO.valor)}<small> uma vez</small></span>
+                    <span className="ad-resumo">Nossa equipe aplica, integra, ativa e treina o seu time, uma etapa por semana.</span>
+                  </button>
+                </div>
+                {r.implantacao === 'assistida' && (
+                  <>
+                    <ol className="ad-semanas">{IMPLANTACAO.semanas.map((s) => <li key={s.titulo}><strong>{s.titulo}</strong><ul>{s.itens.map((i) => <li key={i}>{i}</li>)}</ul></li>)}</ol>
+                    <p className="ad-dica">Pagamento: {IMPLANTACAO.pagamento}. A mensalidade do plano é à parte.</p>
+                  </>
+                )}
+              </section>
+            )}
 
             <section className="ad-cartao" aria-labelledby="ad-dados">
               <h2 id="ad-dados">{p.emBreve ? `Entrar na lista do ${p.nome}` : 'Pedir adesão'}</h2>
