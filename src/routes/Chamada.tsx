@@ -11,6 +11,8 @@ import { iniciais } from '../data/conversas'
 import { Ic } from './Conversas'
 
 const D = {
+  minimizar: 'M4 14h6v6M20 10h-6V4M14 10l7-7M3 21l7-7',
+  ampliar: 'M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7',
   mic: 'M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3zM19 10v2a7 7 0 0 1-14 0v-2M12 19v3',
   micOff: 'M1 1l22 22M9 9v3a3 3 0 0 0 5.1 2.1M15 9.3V5a3 3 0 0 0-5.9-.6M17 16.9A7 7 0 0 1 5 12v-2m14 0v2c0 .8-.1 1.5-.4 2.2M12 19v3',
   cam: 'M23 7l-7 5 7 5zM14 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2z',
@@ -47,16 +49,21 @@ function Tile({ nome, stream, eu, instavel, mudo, semCamera, somPorFora }: { nom
   const v = useRef<HTMLVideoElement>(null)
   const temVideo = !semCamera && !!stream?.getVideoTracks().some((t) => t.enabled && t.readyState === 'live' && !t.muted)
   const falando = useFalando(stream, !mudo)
-  useEffect(() => { if (v.current && v.current.srcObject !== stream) v.current.srcObject = stream }, [stream])
+  useEffect(() => {
+    const el = v.current; if (!el) return
+    if (el.srcObject !== stream) el.srcObject = stream
+    // alguns navegadores (iPhone) só tocam o vídeo e o som de quem chega com play() explícito
+    if (stream) void el.play().catch(() => {})
+  }, [stream, temVideo])
   return (
-    <div className="ch-tile" data-instavel={instavel || undefined} data-video={temVideo || undefined} data-falando={falando || undefined} data-eu={eu || undefined}>
+    <div className="ch-cel"><div className="ch-tile" data-instavel={instavel || undefined} data-video={temVideo || undefined} data-falando={falando || undefined} data-eu={eu || undefined}>
       <video ref={v} autoPlay playsInline muted={eu || somPorFora} />
       {!temVideo && <span className="ch-av" aria-hidden="true">{iniciais(nome)}</span>}
       <span className="ch-nome">
         {mudo && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-label="microfone desligado" role="img"><path d={D.micOff} /></svg>}
         {eu ? 'Você' : nome}{instavel && ' · reconectando'}
       </span>
-    </div>
+    </div></div>
   )
 }
 
@@ -138,6 +145,7 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
   }, [pronta, meus.isSuccess, limite]) // eslint-disable-line react-hooks/exhaustive-deps
   const chaveSom = pessoas.map((p) => p.id + (p.stream ? p.stream.id : '')).join('|')
   const [alto, setAlto] = useState(false)
+  const [mini, setMini] = useState(false)
   const [fone, setFone] = useState(false)
   const falante = useRef<AltoFalante | null>(null)
   useEffect(() => {
@@ -161,9 +169,10 @@ export function Chamada({ id, video, titulo, eu, aoSair }: { id: string; video: 
   sairRef.current = sair
 
   return (
-    <div className="ch" role="dialog" aria-modal="true" aria-label={`Chamada: ${titulo}`}>
+    <div className="ch" data-mini={mini || undefined} role="dialog" aria-modal={!mini} aria-label={`Chamada: ${titulo}`}>
       <header className="ch-topo">
         <div><b>{titulo}</b><span>{pronta ? `${pessoas.length + 1} na chamada · ${cronometro(agora - inicio)}` : 'Conectando…'}</span></div>
+        <button type="button" className="ch-mini-botao" aria-label={mini ? 'Ampliar a chamada' : 'Reduzir a chamada'} title={mini ? 'Ampliar' : 'Reduzir e continuar usando o HiAdv'} onClick={() => setMini(!mini)}><Ic d={mini ? D.ampliar : D.minimizar} /></button>
         <span className="ch-fone" data-fone={fone || undefined} title={fone ? 'Fone conectado: só a sua voz é captada, sem eco.' : 'Sem fone: o eco e o ruído ao redor são reduzidos. Para captar só a sua voz, use fone com microfone.'}>{fone ? 'Fone conectado' : 'Sem fone · use fone para isolar sua voz'}</span>
         <span className="ch-seguro" title="Áudio e vídeo vão direto entre os aparelhos e não são gravados. O que cada um fala vira texto e fica no histórico da conversa.">Transcrição ligada · só o texto é guardado</span>
       </header>

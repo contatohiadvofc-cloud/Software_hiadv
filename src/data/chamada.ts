@@ -20,12 +20,13 @@ export const ICE: RTCIceServer[] = [
 ]
 
 /** Menos gente na chamada = mais qualidade por pessoa; mais gente = vídeo mais leve para não travar. */
-export function qualidadeVideo(pessoas: number): { maxBitrate: number; escala: number } {
-  if (pessoas <= 1) return { maxBitrate: 1_200_000, escala: 1 }
-  if (pessoas <= 3) return { maxBitrate: 600_000, escala: 1.5 }
-  if (pessoas <= 5) return { maxBitrate: 320_000, escala: 2 }
-  // chamadas grandes (até 13 no Sênior): cada aparelho envia um vídeo para cada pessoa, então o vídeo fica bem leve
-  return { maxBitrate: 160_000, escala: 3 }
+export function qualidadeVideo(pessoas: number): { maxBitrate: number; escala: number; quadros: number } {
+  // a câmera capta em 720p; cada aparelho manda uma cópia para cada colega (malha), então a qualidade divide com o grupo
+  if (pessoas <= 1) return { maxBitrate: 2_500_000, escala: 1, quadros: 30 }
+  if (pessoas <= 3) return { maxBitrate: 1_200_000, escala: 1.25, quadros: 30 }
+  if (pessoas <= 5) return { maxBitrate: 600_000, escala: 1.5, quadros: 24 }
+  if (pessoas <= 8) return { maxBitrate: 300_000, escala: 2, quadros: 20 }
+  return { maxBitrate: 180_000, escala: 3, quadros: 15 }
 }
 
 /** Quem tem o identificador maior liga; o outro só responde (evita as duas pontas ligando juntas). */

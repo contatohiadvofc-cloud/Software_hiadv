@@ -2,7 +2,7 @@
 import { ICE, devoLigar, qualidadeVideo, type CanalChamada, type Estado, type Presenca, type Sinal } from '../data/chamada'
 
 export type Participante = { id: string; email: string; nome: string; stream: MediaStream | null; instavel: boolean; mic: boolean; cam: boolean }
-type Par = { pc: RTCPeerConnection; email: string; nome: string; fazendoOferta: boolean; ignorar: boolean; educado: boolean; stream: MediaStream | null; visto: boolean; estado: Estado; queda?: ReturnType<typeof setTimeout> }
+type Par = { fila: Promise<void>; pendentes: RTCIceCandidateInit[]; pc: RTCPeerConnection; email: string; nome: string; fazendoOferta: boolean; ignorar: boolean; educado: boolean; stream: MediaStream | null; visto: boolean; estado: Estado; queda?: ReturnType<typeof setTimeout> }
 
 export class ChamadaMotor {
   readonly meuId = Math.random().toString(36).slice(2) + Date.now().toString(36)
@@ -17,7 +17,12 @@ export class ChamadaMotor {
 
   constructor(private canal: CanalChamada, private eu: { email: string; nome: string }, aoMudar: () => void) {
     this.aoMudar = aoMudar
-    canal.aoSinal((s) => { void this.aoSinal(s).catch(() => {}) })
+    canal.aoSinal((s) => {
+      // cada aparelho processa os sinais de um colega em ordem: sem isso, um candidato podia chegar
+      // antes da descrição terminar de ser aplicada e era descartado, e a conexão não fechava.
+      const p = this.parDe(s)
+      p.fila = p.fila.then(() => this.aoSinal(s, p)).catch(() => {})
+    })
     canal.aoPresenca((vivos) => this.sincronizar(vivos))
   }
 
@@ -25,8 +30,9 @@ export class ChamadaMotor {
     this.local = await navigator.mediaDevices.getUserMedia({
       // cancelamento de eco e de ruído ligados; isolamento de voz onde o navegador oferece (corta vozes e sons ao redor)
       audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: 48000, voiceIsolation: true } as MediaTrackConstraints,
-      video: video ? { width: { ideal: innerWidth < 700 ? 640 : 960 }, height: { ideal: innerWidth < 700 ? 360 : 540 }, frameRate: { ideal: 24, max: 30 }, facingMode: 'user' } : false,
+      video: video ? { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 30, max: 30 }, facingMode: 'user' } : false,
     })
+    this.local.getVideoTracks().forEach((t) => { t.contentHint = 'motion' })
     await this.canal.entrar({ id: this.meuId, email: this.eu.email, nome: this.eu.nome, video } satisfies Presenca)
     this.aoMudar()
   }
@@ -54,7 +60,7 @@ export class ChamadaMotor {
     const frente = (atual.getSettings().facingMode ?? 'user') === 'user'
     let nova: MediaStreamTrack
     try {
-      nova = (await navigator.mediaDevices.getUserMedia({ video: { facingMode: frente ? 'environment' : 'user', width: { ideal: 640 }, height: { ideal: 360 } } })).getVideoTracks()[0]!
+      nova = (await navigator.mediaDevices.getUserMedia({ video: { facingMode: frente ? 'environment' : 'user', width: { ideal: 1280 }, height: { ideal: 720 } } })).getVideoTracks()[0]!
     } catch { return }
     nova.enabled = atual.enabled
     this.pares.forEach((p) => p.pc.getSenders().filter((x) => x.track === atual).forEach((x) => void x.replaceTrack(nova)))
@@ -132,7 +138,7 @@ export class ChamadaMotor {
 
   private criar(id: string, email: string, nome: string): Par {
     const pc = new RTCPeerConnection({ iceServers: this.iceServers, bundlePolicy: 'max-bundle' })
-    const p: Par = { pc, email, nome, fazendoOferta: false, ignorar: false, educado: this.meuId < id, stream: null, visto: false, estado: { mic: true, cam: true } }
+    const p: Par = { fila: Promise.resolve(), pendentes: [], pc, email, nome, fazendoOferta: false, ignorar: false, educado: this.meuId < id, stream: null, visto: false, estado: { mic: true, cam: true } }
     this.local?.getTracks().forEach((t) => pc.addTrack(t, this.local!))
     if (this.tela) pc.addTrack(this.tela.getVideoTracks()[0]!, this.tela)
     pc.onnegotiationneeded = async () => {
@@ -144,7 +150,7 @@ export class ChamadaMotor {
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed') { try { pc.restartIce() } catch { /* sem suporte */ } }
       clearTimeout(p.queda)
-      if (pc.connectionState === 'connected') this.avisarEstado(id)
+      if (pc.connectionState === 'connected') { this.avisarEstado(id); this.ajustarQualidade() }
       if (pc.connectionState === 'disconnected' || pc.connectionState === 'failed') p.queda = setTimeout(() => { if (this.pares.get(id) === p && pc.connectionState !== 'connected') this.fechar(id) }, 20000)
       this.aoMudar()
     }
@@ -154,10 +160,15 @@ export class ChamadaMotor {
     return p
   }
 
-  private async aoSinal(s: Sinal) {
+  private parDe(s: Sinal): Par {
     const conhecido = this.vivos.get(s.de)
     const p = this.pares.get(s.de) ?? this.criar(s.de, s.email, conhecido?.nome ?? s.email)
     if (conhecido) p.visto = true
+    return p
+  }
+
+  private async aoSinal(s: Sinal, p: Par) {
+    if (this.pares.get(s.de) !== p) return
     const pc = p.pc
     if (s.estado) { p.estado = s.estado; this.aoMudar(); return }
     if (s.descricao) {
@@ -165,8 +176,11 @@ export class ChamadaMotor {
       p.ignorar = !p.educado && colisao
       if (p.ignorar) return
       await pc.setRemoteDescription(s.descricao)
+      // candidatos que chegaram antes da descrição
+      for (const c of p.pendentes.splice(0)) { try { await pc.addIceCandidate(c) } catch { /* candidato velho */ } }
       if (s.descricao.type === 'offer') { await pc.setLocalDescription(); this.enviar(s.de, { descricao: pc.localDescription!.toJSON() }) }
     } else if (s.candidato) {
+      if (!pc.remoteDescription) { p.pendentes.push(s.candidato); return }
       try { await pc.addIceCandidate(s.candidato) } catch (e) { if (!p.ignorar) throw e }
     }
   }
@@ -210,6 +224,8 @@ export class ChamadaMotor {
       if (!par.encodings?.length) par.encodings = [{}]
       par.encodings[0]!.maxBitrate = q.maxBitrate
       par.encodings[0]!.scaleResolutionDownBy = q.escala
+      par.encodings[0]!.maxFramerate = q.quadros
+      ;(par as RTCRtpSendParameters & { degradationPreference?: string }).degradationPreference = 'balanced'
       s.setParameters(par).catch(() => {})
     }))
   }
